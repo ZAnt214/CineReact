@@ -1,0 +1,982 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './components/Header.tsx';
+import RowMovies from './components/RowMovies.tsx';
+import ObraPage from './components/ObraPage.tsx';
+import PlaybackPage from './components/PlaybackPage.tsx';
+import MyList from './components/MyList.tsx';
+import ChannelPage from './components/ChannelPage.tsx';
+import AdminPanel from './components/AdminPanel.tsx';
+import AuthModal from './components/AuthModal.tsx';
+import RowMoviesSkeleton from './components/RowMoviesSkeleton.tsx';
+import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
+import UserSettings from './components/UserSettings.tsx';
+import DonationsPage from './components/DonationsPage.tsx';
+import { Obra, ReactVideo, UserState } from './types.ts';
+import { motion, AnimatePresence } from 'motion/react';
+import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
+
+export default function App() {
+  const [currentTab, setCurrentTab] = useState('inicio');
+  const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
+  const [selectedReactId, setSelectedReactId] = useState<string | null>(null);
+  
+  // Search overlay state
+  const [searchResults, setSearchResults] = useState<Obra[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Global Lists
+  const [obras, setObras] = useState<Obra[]>([]);
+  const [reacts, setReacts] = useState<ReactVideo[]>([]);
+  const [canaisSeguidos, setCanaisSeguidos] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Auth modal trigger
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  // Continue Watching state
+  const [continueWatching, setContinueWatching] = useState<{
+    reactId: string;
+    obraId: string;
+    progress: number;
+    updatedAt: number;
+  }[]>([]);
+
+  // Authenticated User State (Checks localStorage so session is preserved)
+  const [user, setUserState] = useState<UserState>(() => {
+    const saved = localStorage.getItem('cine_react_user');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && 'isLoggedIn' in parsed) {
+          return parsed;
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return {
+      isLoggedIn: false,
+      nome: "",
+      email: "",
+      isAdmin: false
+    };
+  });
+
+  const setUser = (newUser: UserState) => {
+    setUserState(newUser);
+    if (newUser.isLoggedIn) {
+      localStorage.setItem('cine_react_user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('cine_react_user');
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const emailQuery = user.email;
+      
+      const promises: Promise<any>[] = [
+        fetch('/api/obras'),
+        fetch('/api/reacts'),
+        emailQuery
+          ? fetch(`/api/canais/seguidos?email=${encodeURIComponent(emailQuery)}`)
+          : Promise.resolve(null)
+      ];
+
+      if (emailQuery) {
+        promises.push(fetch(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`));
+      }
+
+      const [obrasRes, reactsRes, seguidosRes, userRes] = await Promise.all(promises);
+
+      if (obrasRes.ok) {
+        const data = await obrasRes.json();
+        setObras(data);
+      }
+
+      if (reactsRes.ok) {
+        const data = await reactsRes.json();
+        // Filter out shorts (duracao <= 60 seconds)
+        const isShort = (duracaoStr: string): boolean => {
+          if (!duracaoStr) return false;
+          const parts = duracaoStr.split(':');
+          if (parts.length === 2) {
+            const mins = parseInt(parts[0], 10);
+            const secs = parseInt(parts[1], 10);
+            if (isNaN(mins) || isNaN(secs)) return false;
+            return (mins * 60 + secs) <= 60;
+          }
+          if (parts.length === 1) {
+            const secs = parseInt(parts[0], 10);
+            if (isNaN(secs)) return false;
+            return secs <= 60;
+          }
+          return false;
+        };
+        const filteredReacts = data.filter((r: ReactVideo) => !isShort(r.duracao));
+        setReacts(filteredReacts);
+      }
+
+      if (seguidosRes && seguidosRes.ok) {
+        const data = await seguidosRes.json();
+        setCanaisSeguidos(data);
+      } else {
+        setCanaisSeguidos([]);
+      }
+
+      if (userRes && userRes.ok) {
+        const data = await userRes.json();
+        if (data.success && data.user) {
+          // Sync user state with server
+          setUser(data.user);
+          
+          // Sync continue watching with server
+          if (Array.isArray(data.user.continueWatching)) {
+            setContinueWatching(data.user.continueWatching);
+            localStorage.setItem('cine_react_continue_watching', JSON.stringify(data.user.continueWatching));
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching master data:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleSeguir = async (canalNome: string) => {
+    if (!user.isLoggedIn) return;
+    try {
+      const res = await fetch('/api/canais/seguir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, canalNome })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.seguindo) {
+          setCanaisSeguidos(prev => [...prev, canalNome]);
+        } else {
+          setCanaisSeguidos(prev => prev.filter(name => name !== canalNome));
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao seguir/deixar de seguir canal:", e);
+    }
+  };
+
+  const handlePlayVideo = (reactId: string, obraId: string) => {
+    if (!user.isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+    setSelectedObraId(obraId);
+    setSelectedReactId(reactId);
+    setCurrentTab('reproducao');
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [currentTab, selectedObraId, user.email]);
+
+  // Load continue watching state from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('cine_react_continue_watching');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setContinueWatching(parsed);
+        }
+      } catch (e) {
+        console.error("Error parsing continue watching:", e);
+      }
+    }
+  }, []);
+
+  const handleUpdateWatchProgress = useCallback((reactId: string, obraId: string, progress: number) => {
+    setContinueWatching(prev => {
+      const filtered = prev.filter(item => item.reactId !== reactId);
+      const updatedItem = {
+        reactId,
+        obraId,
+        progress,
+        updatedAt: Date.now()
+      };
+      const newValue = [updatedItem, ...filtered].slice(0, 20); // Limit to 20 items
+      localStorage.setItem('cine_react_continue_watching', JSON.stringify(newValue));
+      return newValue;
+    });
+
+    if (user.email) {
+      fetch('/api/usuario/continue-watching', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          reactId,
+          obraId,
+          progress
+        })
+      }).catch(e => console.error("Error updating watch progress on server:", e));
+    }
+  }, [user.email]);
+
+  const progressMap = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    continueWatching.forEach(item => {
+      map[item.reactId] = item.progress;
+    });
+    return map;
+  }, [continueWatching]);
+
+  const continueWatchingReacts = React.useMemo(() => {
+    return continueWatching
+      .map(item => reacts.find(r => r.id === item.reactId))
+      .filter((r): r is ReactVideo => !!r);
+  }, [continueWatching, reacts]);
+
+  const recomendadosReacts = React.useMemo(() => {
+    const explicit = reacts.filter(r => r.isRecomendado);
+    if (explicit.length > 0) return explicit;
+    return [...reacts]
+      .sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0))
+      .slice(0, 6);
+  }, [reacts]);
+
+  const matchingReacts = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase().trim();
+    return reacts.filter(react => {
+      const titleMatch = react.titulo.toLowerCase().includes(query);
+      const channelMatch = react.canalNome.toLowerCase().includes(query);
+      
+      const obra = obras.find(o => o.id === react.obraId);
+      const obraMatch = obra ? (
+        obra.titulo.toLowerCase().includes(query) ||
+        obra.tipo.toLowerCase().includes(query) ||
+        (obra.generos && obra.generos.some(g => g.toLowerCase().includes(query))) ||
+        (obra.sinopse && obra.sinopse.toLowerCase().includes(query))
+      ) : false;
+      
+      return titleMatch || channelMatch || obraMatch;
+    });
+  }, [searchQuery, reacts, obras]);
+
+  const formatViews = (views: number) => {
+    if (views >= 1000000) {
+      return (views / 1000000).toFixed(1).replace('.', ',') + 'M de views';
+    }
+    if (views >= 1000) {
+      return (views / 1000).toFixed(0) + ' mil views';
+    }
+    return views + ' views';
+  };
+
+  // Helper shuffle function (Fisher-Yates)
+  const shuffleArray = useCallback(<T,>(arr: T[]): T[] => {
+    const list = [...arr];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }, []);
+
+  const homeFeeds = React.useMemo(() => {
+    if (reacts.length === 0) return null;
+
+    // Reacts em Alta: get the top 40 most viewed, and take a randomized selection of 20
+    const topAltaPool = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
+    const emAlta = shuffleArray(topAltaPool).slice(0, 20);
+
+    // Novidades: get the 40 newest, and take a randomized selection of 20
+    const topNovosPool = [...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 40);
+    const novidades = shuffleArray(topNovosPool).slice(0, 20);
+
+    // Mais Assistidos: get the top 60 most viewed, and take a randomized selection of 30
+    const topMaisPool = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 60);
+    const maisAssistidos = shuffleArray(topMaisPool).slice(0, 30);
+
+    // Dynamic type-based carousels (filme, serie, jogo, anime)
+    const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
+      const filtered = reacts.filter(r => {
+        const obra = obras.find(o => o.id === r.obraId);
+        return obra && obra.tipo === tipo;
+      });
+      const pool = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
+      acc[tipo] = shuffleArray(pool).slice(0, 20);
+      return acc;
+    }, {} as Record<string, ReactVideo[]>);
+
+    // Genre-based carousels (Terror, Ação, Comédia)
+    const generoFeeds = ['Terror', 'Ação', 'Comédia'].reduce((acc, genero) => {
+      const filtered = reacts.filter(r => {
+        const obra = obras.find(o => o.id === r.obraId);
+        return obra && obra.generos.some(g => g.toLowerCase() === genero.toLowerCase());
+      });
+      const pool = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
+      acc[genero] = shuffleArray(pool).slice(0, 20);
+      return acc;
+    }, {} as Record<string, ReactVideo[]>);
+
+    // Franquia-based carousels (Marvel, DC, Harry Potter, One Piece, GTA, Resident Evil, The Last of Us)
+    const franquiaFeeds = ['Marvel', 'DC', 'Harry Potter', 'One Piece', 'GTA', 'Resident Evil', 'The Last of Us'].reduce((acc, franquia) => {
+      const filtered = reacts.filter(r => {
+        const obra = obras.find(o => o.id === r.obraId);
+        return obra && (obra.titulo.toLowerCase().includes(franquia.toLowerCase()) || obra.id.toLowerCase().includes(franquia.toLowerCase().replace(/ /g, '-')));
+      });
+      acc[franquia] = shuffleArray(filtered).slice(0, 20);
+      return acc;
+    }, {} as Record<string, ReactVideo[]>);
+
+    // Creator channels carousels
+    const canalFeeds = obras.filter(o => o.tipo === 'canal').reduce((acc, canal) => {
+      const filtered = reacts.filter(r => {
+        if (r.obraId === canal.id || r.canalId === canal.id) return true;
+        const cleanCanalTitle = canal.titulo.replace(/^Canal\s+/i, '').trim().toLowerCase();
+        const cleanReactCanal = r.canalNome.trim().toLowerCase();
+        return cleanReactCanal.includes(cleanCanalTitle) || cleanCanalTitle.includes(cleanReactCanal);
+      });
+      acc[canal.id] = shuffleArray(filtered).slice(0, 20);
+      return acc;
+    }, {} as Record<string, ReactVideo[]>);
+
+    return {
+      emAlta,
+      novidades,
+      maisAssistidos,
+      tipoFeeds,
+      generoFeeds,
+      franquiaFeeds,
+      canalFeeds
+    };
+  }, [reacts, obras, shuffleArray]);
+
+  const handleSearchTriggered = (results: Obra[], query: string) => {
+    setSearchResults(results);
+    setSearchQuery(query);
+    setSelectedObraId(null);
+    setCurrentTab('busca');
+  };
+
+  const handlePlayReact = (videoId: string, obraId: string) => {
+    setSelectedObraId(obraId);
+    setSelectedReactId(videoId);
+    setCurrentTab('obra');
+  };
+
+  const canais = obras.filter(o => o.tipo === 'canal');
+
+  return (
+    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-teal-600 selection:text-white">
+      
+      {/* HEADER & TOP NAVIGATION */}
+      <Header 
+        currentTab={currentTab} 
+        setCurrentTab={(tab) => {
+          setCurrentTab(tab);
+          setSelectedObraId(null);
+          setSelectedReactId(null);
+          setSearchQuery('');
+        }}
+        user={user}
+        setUser={setUser}
+        onSearch={handleSearchTriggered}
+        onSelectObra={(id) => {
+          setSelectedObraId(id);
+          setSelectedReactId(null);
+          setCurrentTab('obra');
+        }}
+        onOpenAuth={() => setShowAuthModal(true)}
+        obras={obras}
+        reacts={reacts}
+      />
+
+      {/* CORE VIEWPORT */}
+      <main className="flex-1 flex flex-col min-h-[calc(100vh-16rem)]">
+        {loading ? (
+          currentTab === 'reproducao' ? (
+            <PlaybackSkeleton />
+          ) : (
+            <RowMoviesSkeleton />
+          )
+        ) : (
+          <AnimatePresence mode="wait">
+            
+            {/* SEARCH RESULTS VIEW */}
+            {currentTab === 'busca' && (
+              <motion.div
+                key="search-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-8 w-full flex-1"
+              >
+                <div>
+                  <h1 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
+                    <Compass className="text-teal-500 w-7 h-7" />
+                    Resultados para: <span className="text-rose-400 font-bold">"{searchQuery}"</span>
+                  </h1>
+                  <p className="text-xs text-zinc-500 mt-1">Busca inteligente de reacts de filmes, séries, animes, jogos e canais</p>
+                </div>
+
+                {matchingReacts.length === 0 && searchResults.length === 0 ? (
+                  <div className="text-center py-24 bg-zinc-900/10 rounded-xl border border-zinc-850">
+                    <p className="text-zinc-400 text-sm">Nenhum resultado encontrado para esta pesquisa.</p>
+                    <p className="text-zinc-600 text-xs mt-1">Tente pesquisar por termos como Marvel, animes, ou nomes de criadores.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                    {/* VIDEO RESULTS (THUMBNAILS) */}
+                    {matchingReacts.length > 0 && (
+                      <div className="space-y-4">
+                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2 flex items-center gap-2 font-sans">
+                          <span className="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block animate-pulse" />
+                          Vídeos Encontrados ({matchingReacts.length})
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          {matchingReacts.map((react) => {
+                            const associatedObra = obras.find(o => o.id === react.obraId);
+                            return (
+                              <motion.div
+                                key={react.id}
+                                whileHover={{ scale: 1.02 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                onClick={() => handlePlayVideo(react.id, react.obraId)}
+                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-teal-500/40 hover:shadow-teal-500/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full"
+                              >
+                                <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
+                                  <img
+                                    src={react.thumbnailUrl}
+                                    alt={react.titulo}
+                                    className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-300"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-teal-600/90 shadow-teal-600/30 text-white">
+                                      <Play className="w-6 h-6 fill-current ml-0.5" />
+                                    </div>
+                                  </div>
+                                  <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs text-[10px] font-mono px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-1 border border-zinc-700/50">
+                                    <Clock className="w-3 h-3 text-teal-400" /> {react.duracao}
+                                  </span>
+                                  {associatedObra && (
+                                    <span className="absolute top-2 left-2 bg-teal-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
+                                      {associatedObra.titulo}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
+                                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-teal-400 transition-colors">
+                                    {react.titulo}
+                                  </h3>
+                                  <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2">
+                                    <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
+                                      {react.canalNome}
+                                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block animate-pulse" />
+                                    </span>
+                                    <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500 shrink-0">
+                                      <Eye className="w-3.5 h-3.5" /> {formatViews(react.visualizacoes)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OBRAS & CANAIS RESULTS */}
+                    {searchResults.length > 0 && (
+                      <div className="space-y-4 pt-4">
+                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2">
+                          Obras & Canais ({searchResults.length})
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                          {searchResults.map(obra => (
+                            <div 
+                              key={obra.id}
+                              onClick={() => {
+                                setSelectedObraId(obra.id);
+                                setSelectedReactId(null);
+                                setCurrentTab('obra');
+                              }}
+                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-teal-500/40 hover:shadow-lg hover:shadow-teal-500/5 transition-all cursor-pointer group"
+                            >
+                              <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
+                                <img src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center shadow-lg">
+                                    <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="p-3 text-center space-y-1">
+                                <span className="text-[9px] uppercase font-mono bg-zinc-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400">{obra.tipo}</span>
+                                <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-teal-400 transition-colors pt-1">{obra.titulo}</h4>
+                                <span className="text-[10px] text-zinc-500">{obra.ano}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* OBRA SCREEN */}
+            {currentTab === 'obra' && selectedObraId && (
+              <motion.div
+                key="obra-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                {(() => {
+                  const uni = obras.find(o => o.id === selectedObraId);
+                  if (!uni) {
+                    return (
+                      <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                        <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-bold text-xs">
+                          Voltar ao Início
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
+                    <ObraPage
+                      obra={uni}
+                      reacts={reacts.filter(r => r.obraId === selectedObraId)}
+                      onPlayVideo={handlePlayVideo}
+                      onBack={() => setCurrentTab('inicio')}
+                    />
+                  );
+                })()}
+              </motion.div>
+            )}
+
+            {/* REPRODUCAO SCREEN */}
+            {currentTab === 'reproducao' && selectedObraId && (
+              <motion.div
+                key="reproducao-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <PlaybackPage
+                  obraId={selectedObraId}
+                  initialReactId={selectedReactId}
+                  reacts={reacts}
+                  obras={obras}
+                  user={user}
+                  canaisSeguidos={canaisSeguidos}
+                  onToggleSeguir={handleToggleSeguir}
+                  onUpdateProgress={handleUpdateWatchProgress}
+                  onGoToObra={(id) => {
+                    setSelectedObraId(id);
+                    setCurrentTab('obra');
+                  }}
+                  onGoToCanal={(id) => {
+                    setSelectedObraId(id);
+                    setCurrentTab('canal');
+                  }}
+                  onOpenAuth={() => setShowAuthModal(true)}
+                />
+              </motion.div>
+            )}
+
+            {/* HOMEPAGE VIEW */}
+            {currentTab === 'inicio' && (
+              <motion.div
+                key="home-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-12 pb-24 pt-24 w-full flex-1"
+              >
+                
+                {/* HORIZONTAL ROWS */}
+                <div className="space-y-10 md:mt-8 relative z-20">
+                  {continueWatchingReacts.length > 0 && (
+                    <RowMovies 
+                      title="Continue Assistindo" 
+                      reacts={continueWatchingReacts} 
+                      obras={obras}
+                      progressMap={progressMap}
+                      onPlayVideo={handlePlayVideo}
+                    />
+                  )}
+
+                  {recomendadosReacts.length > 0 && (
+                    <RowMovies 
+                      title="CineReact Recomenda" 
+                      reacts={recomendadosReacts} 
+                      obras={obras}
+                      progressMap={progressMap}
+                      onPlayVideo={handlePlayVideo}
+                      isEditorial={true}
+                    />
+                  )}
+
+                  {homeFeeds ? (
+                    <>
+                      <RowMovies 
+                        title="Reacts em Alta" 
+                        reacts={homeFeeds.emAlta} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                      <RowMovies 
+                        title="Novidades" 
+                        reacts={homeFeeds.novidades} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                      <RowMovies 
+                        title="Mais Assistidos" 
+                        reacts={homeFeeds.maisAssistidos} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                      
+                      {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
+                        const tipoReacts = homeFeeds.tipoFeeds[tipo] || [];
+                        if (tipoReacts.length === 0) return null;
+                        return (
+                          <RowMovies 
+                            key={tipo}
+                            title={tipo === 'filme' ? 'Filmes' : tipo === 'serie' ? 'Séries' : tipo === 'jogo' ? 'Jogos' : 'Animes'} 
+                            reacts={tipoReacts} 
+                            obras={obras}
+                            progressMap={progressMap}
+                            onPlayVideo={handlePlayVideo}
+                          />
+                        );
+                      })}
+
+                      {['Terror', 'Ação', 'Comédia'].map(genero => {
+                        const generoReacts = homeFeeds.generoFeeds[genero] || [];
+                        if (generoReacts.length === 0) return null;
+                        return (
+                          <RowMovies 
+                            key={genero}
+                            title={genero} 
+                            reacts={generoReacts} 
+                            obras={obras}
+                            progressMap={progressMap}
+                            onPlayVideo={handlePlayVideo}
+                          />
+                        );
+                      })}
+                      
+                      {['Marvel', 'DC', 'Harry Potter', 'One Piece', 'GTA', 'Resident Evil', 'The Last of Us'].map(franquia => {
+                        const uniReacts = homeFeeds.franquiaFeeds[franquia] || [];
+                        if (uniReacts.length === 0) return null;
+                        return (
+                          <RowMovies 
+                            key={franquia}
+                            title={franquia} 
+                            reacts={uniReacts} 
+                            obras={obras}
+                            progressMap={progressMap}
+                            onPlayVideo={handlePlayVideo}
+                          />
+                        );
+                      })}
+                      
+                      {obras.filter(o => o.tipo === 'canal').map(canal => {
+                        const canalReacts = homeFeeds.canalFeeds[canal.id] || [];
+                        if (canalReacts.length === 0) return null;
+                        return (
+                          <RowMovies 
+                            key={canal.id}
+                            title={canal.titulo} 
+                            reacts={canalReacts} 
+                            obras={obras}
+                            progressMap={progressMap}
+                            onPlayVideo={handlePlayVideo}
+                          />
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <>
+                      <RowMovies 
+                        title="Reacts em Alta" 
+                        reacts={[...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 20)} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                      <RowMovies 
+                        title="Novidades" 
+                        reacts={[...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 20)} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                      <RowMovies 
+                        title="Mais Assistidos" 
+                        reacts={[...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 50)} 
+                        obras={obras}
+                        progressMap={progressMap}
+                        onPlayVideo={handlePlayVideo}
+                      />
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* CANAL PAGE */}
+            {currentTab === 'canal' && selectedObraId && (
+              <motion.div
+                key="canal-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                {(() => {
+                  const canal = obras.find(o => o.id === selectedObraId);
+                  if (!canal) {
+                    return (
+                      <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                        <div className="text-white font-bold text-lg">Canal não encontrado</div>
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-bold text-xs">
+                          Voltar ao Início
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
+                    <ChannelPage
+                      canal={canal}
+                      reacts={reacts.filter(r => r.canalId === selectedObraId || r.canalNome === canal.titulo.replace('Canal ', ''))}
+                      obras={obras}
+                      canaisSeguidos={canaisSeguidos}
+                      onToggleSeguir={handleToggleSeguir}
+                      onPlayVideo={handlePlayVideo}
+                      onBack={() => setCurrentTab('inicio')}
+                    />
+                  );
+                })()}
+              </motion.div>
+            )}
+            
+            {/* CANAIS SEGUIDOS */}
+            {currentTab === 'canais' && (
+              <motion.div
+                key="canais-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pt-24 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen w-full flex-1"
+              >
+                <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
+                  <span className="w-2.5 h-6 bg-teal-500 rounded" />
+                  Canais Seguidos
+                </h2>
+                {canaisSeguidos.length === 0 ? (
+                  <div className="text-center py-24 bg-zinc-900/10 rounded-2xl border border-zinc-850 max-w-xl mx-auto">
+                    <p className="text-zinc-500">Você não segue nenhum canal ainda.</p>
+                    <p className="text-zinc-600 text-xs mt-1">Siga canais de criadores nas páginas de reprodução para vê-los listados aqui.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {canaisSeguidos.map(nome => {
+                      const canal = obras.find(o => o.tipo === 'canal' && o.titulo.includes(nome));
+                      if (!canal) return null;
+                      return (
+                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-teal-500/30 shadow-md">
+                           <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-teal-500/20" />
+                           <div>
+                             <h3 className="text-base font-bold text-white hover:text-teal-400 transition-colors">{nome}</h3>
+                             <p className="text-zinc-500 text-xs mt-0.5 font-mono">Visualizar canal do criador</p>
+                           </div>
+                         </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* MINHA LISTA / SAVED */}
+            {currentTab === 'minha-lista' && (
+              <motion.div
+                key="minha-lista-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <MyList 
+                  user={user} 
+                  onSelectObra={(id) => {
+                    setSelectedObraId(id);
+                    setSelectedReactId(null);
+                    setCurrentTab('obra');
+                  }}
+                />
+              </motion.div>
+            )}
+
+            {/* ADMIN DASHBOARD PANEL */}
+            {currentTab === 'admin' && (
+              <motion.div
+                key="admin-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <AdminPanel 
+                  user={user} 
+                  onSelectObra={(id) => {
+                    setSelectedObraId(id);
+                    setSelectedReactId(null);
+                    setCurrentTab('obra');
+                  }}
+                />
+              </motion.div>
+            )}
+
+            {/* USER SETTINGS TAB */}
+            {currentTab === 'configuracoes' && (
+              <motion.div
+                key="configuracoes-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <UserSettings 
+                  user={user} 
+                  onUpdateUser={setUser} 
+                  onNavigateToDonations={() => setCurrentTab('doacoes')} 
+                />
+              </motion.div>
+            )}
+
+            {/* DONATIONS PAGE TAB */}
+            {currentTab === 'doacoes' && (
+              <motion.div
+                key="doacoes-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <DonationsPage 
+                  user={user} 
+                  onUpdateUser={setUser} 
+                  onOpenAuth={() => setShowAuthModal(true)} 
+                />
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        )}
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-3">
+        <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
+        <p className="text-zinc-400 font-sans text-xs flex items-center justify-center gap-1.5 flex-wrap">
+          Dúvidas e suporte: 
+          <a href="mailto:atendimentocinereact@gmail.com" className="text-teal-400 hover:text-teal-300 font-bold transition-colors underline">
+            atendimentocinereact@gmail.com
+          </a>
+        </p>
+        <p className="max-w-md mx-auto text-[10px] text-zinc-600 leading-relaxed font-sans">
+          Aviso legal: O CineReact não hospeda ou reproduz vídeos protegidos por direitos autorais. Todo o conteúdo incorporado é disponibilizado de forma pública através da API oficial do YouTube.
+        </p>
+      </footer>
+
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={(loggedUser, isNewUser) => {
+          setUser(loggedUser);
+          setShowAuthModal(false);
+          if (isNewUser) {
+            setShowWelcomeModal(true);
+          }
+        }}
+      />
+
+      {/* WELCOME / EXPLANATION MODAL */}
+      <AnimatePresence>
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowWelcomeModal(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+            />
+
+            {/* Modal Content */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
+            >
+              {/* Visual element decorator */}
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-teal-500 via-pink-500 to-rose-500" />
+              
+              {/* Top Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center shadow-lg shadow-teal-500/5">
+                  <Film className="w-8 h-8 text-teal-400 stroke-[2]" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-xl md:text-2xl font-black text-white text-center tracking-tight font-sans mb-5">
+                Como funciona o CineReact?
+              </h2>
+
+              {/* Text Body */}
+              <div className="space-y-4 text-xs md:text-sm leading-relaxed text-zinc-300 font-sans">
+                <p>
+                  O CineReact não hospeda, copia, baixa ou redistribui vídeos do YouTube. Nossa plataforma funciona como um organizador inteligente de reacts, reunindo em um só lugar os vídeos publicados pelos criadores para que os fãs encontrem facilmente reações de filmes, séries, animes, jogos e muito mais.
+                </p>
+                <p>
+                  Todos os vídeos são reproduzidos através do player oficial do YouTube, garantindo que 100% das visualizações, tempo de exibição e engajamento sejam contabilizados diretamente no canal do criador. O objetivo do CineReact é facilitar a descoberta de conteúdo, valorizar os criadores e conectar a comunidade de fãs, sempre respeitando os direitos autorais e as políticas do YouTube.
+                </p>
+              </div>
+
+              {/* Footer Button */}
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => setShowWelcomeModal(false)}
+                  className="w-full sm:w-auto min-w-[160px] bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 hover:shadow-teal-600/30 cursor-pointer active:scale-[0.98]"
+                >
+                  Entendi
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}

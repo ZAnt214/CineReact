@@ -1,0 +1,6 @@
+{
+  "name": "Cine React",
+  "description": "A principal plataforma do Brasil para descobrir, organizar e acompanhar reacts de filmes, séries, animes e jogos do YouTube.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
