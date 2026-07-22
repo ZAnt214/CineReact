@@ -281,8 +281,8 @@ export default function Header({
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled 
-            ? 'bg-[#0d0d10]/75 backdrop-blur-md shadow-lg shadow-black/40' 
-            : 'bg-[#0d0d10]/40 backdrop-blur-md'
+            ? 'bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
+            : 'bg-zinc-950/40 backdrop-blur-sm border-b border-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -293,14 +293,20 @@ export default function Header({
               <button 
                 id="logo-button"
                 onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
-                className="flex items-center gap-2 group focus:outline-none"
+                className="flex items-center gap-2 group focus:outline-none cursor-pointer py-1"
               >
-                <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center shadow-md shadow-teal-600/20 group-hover:bg-teal-500 transition-colors">
-                  <Film className="w-4 h-4 text-white stroke-[2.5]" />
+                {/* TEXT-ONLY PLAYFUL LOGO */}
+                <div className="flex items-center select-none font-['Fredoka',sans-serif]">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-wide transition-transform duration-300 group-hover:-translate-y-0.5 drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
+                    Cine
+                  </span>
+                  <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent tracking-wide group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] ml-0.5">
+                    React
+                  </span>
+                  <span className="text-amber-400 font-black text-2xl animate-bounce ml-0.5 inline-block drop-shadow-[0_2px_8px_rgba(245,158,11,0.6)]">
+                    !
+                  </span>
                 </div>
-                <span className="text-white font-extrabold text-lg tracking-tight font-sans">
-                  Cine<span className="text-rose-500 font-medium">React</span>
-                </span>
               </button>
 
               {/* DESKTOP NAV */}
@@ -345,8 +351,8 @@ export default function Header({
                   onClick={() => setCurrentTab('doacoes')} 
                   className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
                     currentTab === 'doacoes' 
-                      ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 shadow-lg shadow-rose-950/10' 
-                      : 'border-zinc-800 bg-zinc-900/40 text-rose-500 hover:bg-rose-500 hover:text-zinc-950 hover:border-rose-500'
+                      ? 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-lg shadow-amber-950/10' 
+                      : 'border-zinc-800 bg-zinc-900/40 text-amber-400 hover:bg-amber-500 hover:text-black hover:border-amber-400'
                   }`}
                 >
                   <Heart className="w-3 h-3 fill-current" />
@@ -358,7 +364,7 @@ export default function Header({
                   <button 
                     id="nav-admin"
                     onClick={() => setCurrentTab('admin')} 
-                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-teal-500/20 text-teal-400 bg-teal-500/5 hover:bg-teal-600 hover:text-white hover:border-teal-600 cursor-pointer`}
+                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-black hover:border-amber-400 cursor-pointer`}
                   >
                     Painel Admin
                   </button>
@@ -379,12 +385,12 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 focus:bg-zinc-900 border border-zinc-800/80 focus:border-teal-500/80 focus:ring-1 focus:ring-teal-500/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
+                  className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 focus:bg-zinc-900 border border-zinc-800/80 focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
                 />
                 {searchQuery && (
                   <button 
                     onClick={() => setSearchQuery('')} 
-                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -402,7 +408,7 @@ export default function Header({
                   >
                     <div className="text-[10px] text-zinc-500 font-mono pb-2 px-2 uppercase tracking-wider flex justify-between items-center">
                       <span>Sugestões</span>
-                      {searching && <span className="w-2.5 h-2.5 border border-teal-500 border-t-transparent rounded-full animate-spin" />}
+                      {searching && <span className="w-2.5 h-2.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />}
                     </div>
                     <div className="py-1 space-y-1">
                       {searchResults.map((obra) => (
@@ -417,7 +423,7 @@ export default function Header({
                         >
                           <img src={obra.poster} alt={obra.titulo} className="w-8 h-11 object-cover rounded-md shadow bg-zinc-900 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors truncate leading-tight">{obra.titulo}</h4>
+                            <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors truncate leading-tight">{obra.titulo}</h4>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <div className="flex items-center gap-2">
                                 <span className="text-[9px] uppercase font-mono px-1 rounded bg-zinc-800 text-zinc-400 font-medium">{obra.tipo}</span>
@@ -429,7 +435,7 @@ export default function Header({
                                   return (
                                     <div className="flex gap-1 overflow-hidden max-w-[120px]">
                                       {matchedTags.slice(0, 2).map((tag, idx) => (
-                                        <span key={idx} className="text-[9px] text-teal-400 font-semibold truncate bg-teal-500/10 px-1 rounded border border-teal-500/10">
+                                        <span key={idx} className="text-[9px] text-amber-400 font-semibold truncate bg-amber-500/10 px-1 rounded border border-amber-500/20">
                                           {tag}
                                         </span>
                                       ))}
@@ -445,7 +451,7 @@ export default function Header({
                     </div>
                     <button 
                       onClick={() => handleSearchSubmit()}
-                      className="w-full text-center py-2 text-xs text-teal-400 font-bold hover:text-teal-300 transition-colors mt-1.5 pt-2 border-t border-zinc-900/60"
+                      className="w-full text-center py-2 text-xs text-amber-400 font-bold hover:text-amber-300 transition-colors mt-1.5 pt-2 border-t border-zinc-900/60"
                     >
                       Ver todos os resultados
                     </button>
@@ -480,7 +486,7 @@ export default function Header({
                 >
                   <Bell className="w-4.5 h-4.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-teal-500 rounded-full ring-2 ring-zinc-950 animate-pulse" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full ring-2 ring-zinc-950 animate-pulse" />
                   )}
                 </button>
 
@@ -497,7 +503,7 @@ export default function Header({
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-[13px] text-zinc-100 uppercase tracking-wider font-sans">Notificações</h3>
                           {unreadCount > 0 && (
-                            <span className="px-2 py-0.5 text-[9px] bg-teal-500/10 border border-teal-500/20 text-teal-400 font-bold rounded-full font-mono">
+                            <span className="px-2 py-0.5 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold rounded-full font-mono">
                               {unreadCount} novas
                             </span>
                           )}
@@ -505,7 +511,7 @@ export default function Header({
                         {notifications.length > 0 && (
                           <button 
                             onClick={clearNotifications} 
-                            className="text-[10px] text-zinc-500 hover:text-teal-400 transition-all font-semibold hover:underline"
+                            className="text-[10px] text-zinc-500 hover:text-amber-400 transition-all font-semibold hover:underline"
                           >
                             Limpar Tudo
                           </button>
@@ -534,22 +540,22 @@ export default function Header({
                                 key={n.id} 
                                 className={`p-3.5 text-xs flex gap-3 transition-all relative ${
                                   isUnread 
-                                    ? 'bg-teal-950/5 hover:bg-teal-950/10' 
+                                    ? 'bg-amber-950/10 hover:bg-amber-950/20' 
                                     : 'bg-transparent hover:bg-zinc-900/30'
                                 }`}
                               >
                                 {isUnread && (
-                                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-teal-500" />
+                                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-amber-500" />
                                 )}
 
                                 <div className="flex-shrink-0 mt-0.5">
                                   {isApoio ? (
-                                    <div className="w-7 h-7 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-                                      <Heart className="w-3.5 h-3.5 text-rose-500 fill-current" />
+                                    <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                                      <Heart className="w-3.5 h-3.5 text-amber-400 fill-current" />
                                     </div>
                                   ) : isNewReact ? (
-                                    <div className="w-7 h-7 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                                      <Play className="w-3.5 h-3.5 text-teal-400 fill-current ml-0.5" />
+                                    <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                                      <Play className="w-3.5 h-3.5 text-amber-400 fill-current ml-0.5" />
                                     </div>
                                   ) : (
                                     <div className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
@@ -576,7 +582,7 @@ export default function Header({
                                   <button 
                                     onClick={() => markAsRead(n.id)} 
                                     title="Marcar como lida"
-                                    className="text-zinc-500 hover:text-teal-400 self-center p-1.5 rounded-lg hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 flex-shrink-0"
+                                    className="text-zinc-500 hover:text-amber-400 self-center p-1.5 rounded-lg hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 flex-shrink-0"
                                   >
                                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                                   </button>
@@ -608,11 +614,11 @@ export default function Header({
                       <img 
                         src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
                         alt={user.nome} 
-                        className="w-7.5 h-7.5 rounded-full object-cover ring-2 ring-teal-500/80 hover:ring-teal-400 transition-all duration-250 shadow-md shadow-black/45" 
+                        className="w-7.5 h-7.5 rounded-full object-cover ring-2 ring-amber-500/80 hover:ring-amber-400 transition-all duration-250 shadow-md shadow-black/45" 
                       />
                       {user.isDonor && (
-                        <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-gradient-to-r from-rose-500 to-teal-600 rounded-full border border-zinc-950 flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-2 h-2 text-white fill-current" />
+                        <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full border border-zinc-950 flex items-center justify-center shadow-lg">
+                          <Sparkles className="w-2 h-2 text-black fill-current" />
                         </span>
                       )}
                     </div>
@@ -648,7 +654,7 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-teal-500"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-amber-500"
                   autoFocus
                 />
                 <button 
@@ -688,8 +694,6 @@ export default function Header({
           )}
         </AnimatePresence>
 
-        {/* Leve gradiente de borda inferior */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-800/70 via-indigo-500/25 to-transparent" />
       </header>
 
       {/* FULL-SCREEN PROFILE PANEL */}
@@ -705,8 +709,8 @@ export default function Header({
             <div className="w-full border-b border-zinc-900 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-10">
               <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-600/10 border border-teal-500/20 flex items-center justify-center">
-                    <Film className="w-5 h-5 text-teal-400" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <Film className="w-5 h-5 text-amber-400" />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-extrabold text-sm tracking-wider text-zinc-100 uppercase">CineReact Club</span>
@@ -728,7 +732,7 @@ export default function Header({
                 
                 {/* Column 1: Left Profile */}
                 <div className="lg:col-span-4 bg-gradient-to-b from-zinc-900/40 to-zinc-900/10 border border-zinc-800/60 rounded-3xl p-8 flex flex-col justify-between items-center text-center relative overflow-hidden shadow-2xl min-h-[460px] w-full">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                   
                   <div className="flex flex-col items-center w-full relative z-10">
                     <div className="relative mb-6">
@@ -737,13 +741,13 @@ export default function Header({
                         alt={user.nome} 
                         className={`w-24 h-24 md:w-30 md:h-30 rounded-full object-cover border-4 ${
                           user.isDonor 
-                            ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.25)]' 
+                            ? 'border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.25)]' 
                             : 'border-zinc-800'
                         }`}
                       />
                       {user.isDonor && (
-                        <span className="absolute -bottom-1 -right-1 w-8 h-8 bg-rose-500 rounded-full border-4 border-zinc-950 flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-4 h-4 text-white fill-current animate-pulse" />
+                        <span className="absolute -bottom-1 -right-1 w-8 h-8 bg-amber-400 rounded-full border-4 border-zinc-950 flex items-center justify-center shadow-lg">
+                          <Sparkles className="w-4 h-4 text-black fill-current animate-pulse" />
                         </span>
                       )}
                     </div>
@@ -758,12 +762,12 @@ export default function Header({
                     
                     <div className="flex flex-wrap justify-center gap-2 w-full">
                       {user.isAdmin && (
-                        <span className="px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-extrabold tracking-widest uppercase">
+                        <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-extrabold tracking-widest uppercase">
                           Administrador
                         </span>
                       )}
                       {user.isDonor ? (
-                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-rose-500/20 to-rose-600/10 text-rose-400 border border-rose-500/35 text-[10px] font-extrabold tracking-widest uppercase shadow-[0_0_15px_rgba(244,63,94,0.1)]">
+                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/10 text-amber-400 border border-amber-500/35 text-[10px] font-extrabold tracking-widest uppercase shadow-[0_0_15px_rgba(245,158,11,0.1)]">
                           Apoiador VIP
                         </span>
                       ) : (
@@ -775,11 +779,21 @@ export default function Header({
                   </div>
 
                   <div className="w-full mt-8 space-y-2 relative z-10">
+                    {user.isAdmin && (
+                      <button 
+                        onClick={() => { setCurrentTab('admin'); setShowProfileMenu(false); }}
+                        className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 hover:border-amber-500/50 text-amber-300 font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-amber-950/20"
+                      >
+                        <ShieldAlert className="w-4 h-4 text-amber-400" />
+                        <span>Painel do Administrador</span>
+                      </button>
+                    )}
+
                     <button 
                       onClick={() => { setCurrentTab('doacoes'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-400 hover:text-rose-300 rounded-2xl transition-all cursor-pointer font-bold text-xs"
+                      className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/35 text-amber-400 hover:text-amber-300 rounded-2xl transition-all cursor-pointer font-bold text-xs"
                     >
-                      <Heart className="w-4 h-4 fill-rose-500/15 text-rose-400" />
+                      <Heart className="w-4 h-4 fill-amber-500/15 text-amber-400" />
                       <span>{user.isDonor ? "Apoiar CineReact Novamente" : "Seja um Apoiador VIP"}</span>
                     </button>
 
@@ -802,18 +816,18 @@ export default function Header({
                         onClick={() => { setCurrentTab('inicio'); setShowProfileMenu(false); }}
                         className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
                           currentTab === 'inicio' 
-                            ? 'bg-teal-500/10 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.05)]' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
                             : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
                         }`}
                       >
                         <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'inicio' ? 'bg-teal-500/20 text-teal-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'inicio' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
                             <Film className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'inicio' ? 'text-teal-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'inicio' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-teal-400 transition-colors">Início / Catálogo</h4>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Início / Catálogo</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Explorar catálogo de obras, lançamentos e animes em destaque.</p>
                         </div>
                       </button>
@@ -822,18 +836,18 @@ export default function Header({
                         onClick={() => { setCurrentTab('canais'); setShowProfileMenu(false); }}
                         className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
                           currentTab === 'canais' 
-                            ? 'bg-teal-500/10 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.05)]' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
                             : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
                         }`}
                       >
                         <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'canais' ? 'bg-teal-500/20 text-teal-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'canais' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
                             <Play className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'canais' ? 'text-teal-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'canais' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-teal-400 transition-colors">Canais Seguidos</h4>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Canais Seguidos</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Veja atualizações e reacts de canais do YouTube que você segue.</p>
                         </div>
                       </button>
@@ -842,18 +856,18 @@ export default function Header({
                         onClick={() => { setCurrentTab('minha-lista'); setShowProfileMenu(false); }}
                         className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
                           currentTab === 'minha-lista' 
-                            ? 'bg-teal-500/10 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.05)]' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
                             : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
                         }`}
                       >
                         <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'minha-lista' ? 'bg-teal-500/20 text-teal-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'minha-lista' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
                             <Bookmark className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'minha-lista' ? 'text-teal-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'minha-lista' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-teal-400 transition-colors">Meus Favoritos</h4>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Meus Favoritos</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Sua coleção de reacts salvos, obras favoritas e histórico.</p>
                         </div>
                       </button>
@@ -862,18 +876,18 @@ export default function Header({
                         onClick={() => { setCurrentTab('configuracoes'); setShowProfileMenu(false); }}
                         className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
                           currentTab === 'configuracoes' 
-                            ? 'bg-teal-500/10 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.05)]' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
                             : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
                         }`}
                       >
                         <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'configuracoes' ? 'bg-teal-500/20 text-teal-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'configuracoes' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
                             <Settings className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'configuracoes' ? 'text-teal-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'configuracoes' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-teal-400 transition-colors">Configurações</h4>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Configurações</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Gerencie seu perfil, apelido de membro e altere sua senha com segurança.</p>
                         </div>
                       </button>
@@ -882,34 +896,56 @@ export default function Header({
                         onClick={() => { setCurrentTab('doacoes'); setShowProfileMenu(false); }}
                         className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
                           currentTab === 'doacoes' 
-                            ? 'bg-rose-500/10 border-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.05)]' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
                             : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
                         }`}
                       >
                         <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'doacoes' ? 'bg-rose-500/20 text-rose-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-rose-400'}`}>
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'doacoes' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-amber-400'}`}>
                             <Heart className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'doacoes' ? 'text-rose-400' : 'text-zinc-600 group-hover:text-rose-400'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'doacoes' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-amber-400'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-rose-400 transition-colors">Apoiar o Canal (Doações)</h4>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Apoiar o Canal (Doações)</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Faça uma doação PIX para apoiar o CineReact e ganhe benefícios exclusivos de VIP.</p>
                         </div>
                       </button>
+
+                      {user.isAdmin && (
+                        <button 
+                          onClick={() => { setCurrentTab('admin'); setShowProfileMenu(false); }}
+                          className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
+                            currentTab === 'admin' 
+                              ? 'bg-amber-500/20 border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
+                              : 'bg-amber-950/20 border-amber-500/30 hover:bg-amber-900/40 hover:border-amber-500/50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start w-full">
+                            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
+                              <ShieldAlert className="w-5 h-5" />
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-amber-400 transition-transform group-hover:translate-x-1" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-amber-300 group-hover:text-amber-200 transition-colors">Painel Admin</h4>
+                            <p className="text-zinc-400 text-[11px] leading-snug mt-1">Gerenciar catálogo de obras, cadastrar canais e sincronizar sistema.</p>
+                          </div>
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Creator Request Box */}
                   <div className="bg-zinc-900/20 border border-zinc-850 p-6 rounded-3xl mt-2 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
                     <div className="space-y-1.5 flex-1 max-w-xl">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-extrabold tracking-wide uppercase"><Youtube className="w-4.5 h-4.5 text-rose-500" /> Seja um Criador de Reacts</div>
+                      <div className="flex items-center gap-1.5 text-xs text-amber-400 font-extrabold tracking-wide uppercase"><Youtube className="w-4.5 h-4.5 text-amber-400" /> Seja um Criador de Reacts</div>
                       <h4 className="text-base font-black text-white">Seu canal não está listado no catálogo?</h4>
                       <p className="text-xs text-zinc-400 leading-relaxed">Envie uma solicitação de inclusão para nossa equipe! Cadastramos e sincronizamos todos os seus reacts com o player oficial do YouTube para gerar mais visualizações.</p>
                     </div>
                     <button 
                       onClick={() => setShowRequestModal(true)}
-                      className="px-5 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-rose-950/20 active:scale-[0.98]"
+                      className="px-5 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-500/20 active:scale-[0.98]"
                     >
                       <Send className="w-3.5 h-3.5" />
                       Solicitar Cadastro
@@ -927,7 +963,7 @@ export default function Header({
                 <p className="text-xs text-zinc-500 leading-relaxed">Faça login para gerenciar seu perfil, conferir notificações, e ter acesso total às suas listas e canais favoritos.</p>
                 <button 
                   onClick={() => { setShowProfileMenu(false); onOpenAuth?.('login'); }}
-                  className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs rounded-xl cursor-pointer"
                 >
                   Entrar na Conta
                 </button>
@@ -955,28 +991,28 @@ export default function Header({
               className="relative w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-2xl p-6.5 shadow-2xl overflow-hidden text-zinc-300 z-10 space-y-5"
             >
               <div className="flex justify-between items-center border-b border-zinc-900 pb-3">
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2"><Youtube className="w-5 h-5 text-rose-500" /> Solicitar Canal</h3>
+                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2"><Youtube className="w-5 h-5 text-amber-400" /> Solicitar Canal</h3>
                 <button onClick={() => setShowRequestModal(false)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
               </div>
 
               <form onSubmit={handleRequestSubmit} className="space-y-4 text-xs">
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Nome do Canal*</label>
-                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-rose-500" />
+                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">URL do Canal (YouTube)*</label>
-                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-rose-500" />
+                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Seu E-mail de Contato*</label>
-                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-rose-500" />
+                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
                 </div>
 
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-rose-600 hover:bg-rose-500 disabled:bg-zinc-800 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-950/15 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>

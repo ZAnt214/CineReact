@@ -573,10 +573,10 @@ app.get("/api/obras/:id", async (req, res) => {
 
     // Get comments
     const comentarios = localDb.getComentarios(obra.id);
-    // Calculate average score
+    // Calculate average score safely
     const avgScore = comentarios.length > 0
-      ? Number((comentarios.reduce((acc, curr) => acc + curr.nota, 0) / comentarios.length).toFixed(1))
-      : 4.5; // Default/good starting rating
+      ? Number((comentarios.reduce((acc, curr) => acc + (curr.nota || 5), 0) / comentarios.length).toFixed(1))
+      : 4.8;
 
     res.json({
       ...obra,
@@ -994,6 +994,16 @@ app.delete("/api/reacts/:id", (req, res) => {
   }
 });
 
+app.post("/api/reacts/:id/like", (req, res) => {
+  try {
+    const { action } = req.body; // 'like' | 'unlike'
+    const newLikes = localDb.likeReact(req.params.id, action === 'unlike' ? 'unlike' : 'like');
+    res.json({ success: true, likes: newLikes });
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao curtir vídeo de react." });
+  }
+});
+
 app.post("/api/reacts/:id/recomendar", (req, res) => {
   try {
     const { id } = req.params;
@@ -1271,7 +1281,7 @@ app.get("/api/comentarios", (req, res) => {
 
 app.post("/api/comentarios", (req, res) => {
   try {
-    const { obraId, usuarioNome, usuarioEmail, texto, nota } = req.body;
+    const { obraId, usuarioNome, usuarioEmail, texto } = req.body;
     if (!obraId || !usuarioNome || !usuarioEmail || !texto) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
     }
@@ -1281,12 +1291,22 @@ app.post("/api/comentarios", (req, res) => {
       usuarioNome,
       usuarioEmail,
       texto,
-      nota: Number(nota) || 5,
+      likes: 0,
       criadoEm: new Date().toISOString()
     });
     res.status(201).json(novo);
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao adicionar comentário." });
+  }
+});
+
+app.post("/api/comentarios/:id/like", (req, res) => {
+  try {
+    const { action } = req.body; // 'like' | 'unlike'
+    const newLikes = localDb.likeComentario(req.params.id, action === 'unlike' ? 'unlike' : 'like');
+    res.json({ success: true, likes: newLikes });
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao atualizar curtida do comentário." });
   }
 });
 
@@ -1551,13 +1571,47 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Master admin credentials check for mateusvini.t10@gmail.com
+    if (cleanEmail === "mateusvini.t10@gmail.com" && (password === "admin" || password === "Zantnoar12")) {
+      let dbAdmin = await localDb.findUsuarioByEmail(cleanEmail);
+      if (!dbAdmin) {
+        dbAdmin = await localDb.addUsuario({
+          username: "Mateus Vinícius",
+          email: "mateusvini.t10@gmail.com",
+          password: password,
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+          isAdmin: true,
+          isDonor: false
+        });
+      } else {
+        if (!dbAdmin.isAdmin || dbAdmin.password !== password) {
+          await localDb.updateUsuario(cleanEmail, { isAdmin: true, password });
+        }
+      }
+      return res.json({
+        success: true,
+        user: {
+          isLoggedIn: true,
+          nome: dbAdmin.username || "Mateus Vinícius",
+          email: "mateusvini.t10@gmail.com",
+          avatar: dbAdmin.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+          isAdmin: true,
+          isDonor: dbAdmin.isDonor || false,
+          continueWatching: dbAdmin.continueWatching || [],
+          descricao: dbAdmin.descricao || ""
+        }
+      });
+    }
+
     const isSupabase = localDb.isSupabaseActive();
 
     if (isSupabase) {
       const supabase = localDb.getSupabaseClient();
       // Login using Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: cleanEmail,
         password
       });
 
@@ -1568,22 +1622,22 @@ app.post("/api/login", async (req, res) => {
           return res.status(401).json({
             error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
             requiresVerification: true,
-            email
+            email: cleanEmail
           });
         }
         return res.status(401).json({ error: errorMsg });
       }
 
       // Fetch user profile from public table
-      let user = await localDb.findUsuarioByEmail(email);
+      let user = await localDb.findUsuarioByEmail(cleanEmail);
       if (!user) {
         // Fallback user profile creation if they exist in auth but not public table
         user = await localDb.addUsuario({
-          username: authData.user?.user_metadata?.username || email.split('@')[0],
-          email: email,
+          username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
+          email: cleanEmail,
           password: password,
           avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
+          isAdmin: cleanEmail === "mateusvini.t10@gmail.com",
           isDonor: false
         }, authData.user?.id);
       }
@@ -1595,36 +1649,14 @@ app.post("/api/login", async (req, res) => {
           nome: user.username,
           email: user.email,
           avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: user.isAdmin || false,
+          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
           isDonor: user.isDonor || false,
           continueWatching: user.continueWatching || [],
           descricao: user.descricao || ""
         }
       });
     } else {
-      // Local fallback checking
-      // Default hardcoded admin fallback check for ease of development & master credentials
-      if (email === "mateusvini.t10@gmail.com" && (password === "admin" || password === "Zantnoar12")) {
-        const dbAdmin = await localDb.findUsuarioByEmail(email);
-        if (dbAdmin && dbAdmin.password !== password) {
-          await localDb.updateUsuario(email, { password });
-        }
-        return res.json({
-          success: true,
-          user: {
-            isLoggedIn: true,
-            nome: "Mateus Vinícius",
-            email: "mateusvini.t10@gmail.com",
-            avatar: dbAdmin?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-            isAdmin: true,
-            isDonor: dbAdmin?.isDonor || false,
-            continueWatching: dbAdmin?.continueWatching || [],
-            descricao: dbAdmin?.descricao || ""
-          }
-        });
-      }
-
-      const user = await localDb.findUsuarioByEmail(email);
+      const user = await localDb.findUsuarioByEmail(cleanEmail);
       if (!user) {
         return res.status(401).json({ error: "E-mail não cadastrado." });
       }
@@ -1640,7 +1672,7 @@ app.post("/api/login", async (req, res) => {
           nome: user.username,
           email: user.email,
           avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: user.isAdmin || false,
+          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
           isDonor: user.isDonor || false,
           continueWatching: user.continueWatching || [],
           descricao: user.descricao || ""

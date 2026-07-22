@@ -12,6 +12,7 @@ import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
 import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
+import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
 
@@ -25,8 +26,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Global Lists
-  const [obras, setObras] = useState<Obra[]>([]);
-  const [reacts, setReacts] = useState<ReactVideo[]>([]);
+  const [obras, setObras] = useState<Obra[]>(() => OBRAS_INICIAIS);
+  const [reacts, setReacts] = useState<ReactVideo[]>(() => VIDEOS_INICIAIS);
   const [canaisSeguidos, setCanaisSeguidos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,32 +73,40 @@ export default function App() {
     }
   };
 
-  const fetchData = async () => {
+  const safeFetchJson = async (url: string | null) => {
+    if (!url) return null;
     try {
-      setLoading(true);
+      const res = await fetch(url);
+      if (!res || !res.ok) return null;
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return await res.json();
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const fetchData = async (showLoading = false) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
       const emailQuery = user.email;
       
-      const promises: Promise<any>[] = [
-        fetch('/api/obras'),
-        fetch('/api/reacts'),
-        emailQuery
-          ? fetch(`/api/canais/seguidos?email=${encodeURIComponent(emailQuery)}`)
-          : Promise.resolve(null)
-      ];
+      const [obrasData, reactsData, seguidosData, userData] = await Promise.all([
+        safeFetchJson('/api/obras'),
+        safeFetchJson('/api/reacts'),
+        emailQuery ? safeFetchJson(`/api/canais/seguidos?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null),
+        emailQuery ? safeFetchJson(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null)
+      ]);
 
-      if (emailQuery) {
-        promises.push(fetch(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`));
+      if (Array.isArray(obrasData) && obrasData.length > 0) {
+        setObras(obrasData);
       }
 
-      const [obrasRes, reactsRes, seguidosRes, userRes] = await Promise.all(promises);
-
-      if (obrasRes.ok) {
-        const data = await obrasRes.json();
-        setObras(data);
-      }
-
-      if (reactsRes.ok) {
-        const data = await reactsRes.json();
+      if (Array.isArray(reactsData) && reactsData.length > 0) {
         // Filter out shorts (duracao <= 60 seconds)
         const isShort = (duracaoStr: string): boolean => {
           if (!duracaoStr) return false;
@@ -115,34 +124,32 @@ export default function App() {
           }
           return false;
         };
-        const filteredReacts = data.filter((r: ReactVideo) => !isShort(r.duracao));
+        const filteredReacts = reactsData.filter((r: ReactVideo) => !isShort(r.duracao));
         setReacts(filteredReacts);
       }
 
-      if (seguidosRes && seguidosRes.ok) {
-        const data = await seguidosRes.json();
-        setCanaisSeguidos(data);
+      if (Array.isArray(seguidosData)) {
+        setCanaisSeguidos(seguidosData);
       } else {
         setCanaisSeguidos([]);
       }
 
-      if (userRes && userRes.ok) {
-        const data = await userRes.json();
-        if (data.success && data.user) {
-          // Sync user state with server
-          setUser(data.user);
-          
-          // Sync continue watching with server
-          if (Array.isArray(data.user.continueWatching)) {
-            setContinueWatching(data.user.continueWatching);
-            localStorage.setItem('cine_react_continue_watching', JSON.stringify(data.user.continueWatching));
-          }
+      if (userData && userData.success && userData.user) {
+        // Sync user state with server
+        setUser(userData.user);
+        
+        // Sync continue watching with server
+        if (Array.isArray(userData.user.continueWatching)) {
+          setContinueWatching(userData.user.continueWatching);
+          localStorage.setItem('cine_react_continue_watching', JSON.stringify(userData.user.continueWatching));
         }
       }
-    } catch (e) {
-      console.error("Error fetching master data:", e);
+    } catch {
+      // Silently handle error
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -172,14 +179,17 @@ export default function App() {
       setShowAuthModal(true);
       return;
     }
+    window.scrollTo(0, 0);
     setSelectedObraId(obraId);
     setSelectedReactId(reactId);
     setCurrentTab('reproducao');
   };
 
   useEffect(() => {
-    fetchData();
-  }, [currentTab, selectedObraId, user.email]);
+    // Initial fetch on mount or when user login state changes
+    const shouldShowSkeleton = obras.length === 0 || reacts.length === 0;
+    fetchData(shouldShowSkeleton);
+  }, [user.email]);
 
   // Load continue watching state from localStorage
   useEffect(() => {
@@ -371,7 +381,7 @@ export default function App() {
   const canais = obras.filter(o => o.tipo === 'canal');
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-teal-600 selection:text-white">
+    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
       
       {/* HEADER & TOP NAVIGATION */}
       <Header 
@@ -417,8 +427,8 @@ export default function App() {
               >
                 <div>
                   <h1 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-                    <Compass className="text-teal-500 w-7 h-7" />
-                    Resultados para: <span className="text-rose-400 font-bold">"{searchQuery}"</span>
+                    <Compass className="text-amber-400 w-7 h-7" />
+                    Resultados para: <span className="text-amber-300 font-bold">"{searchQuery}"</span>
                   </h1>
                   <p className="text-xs text-zinc-500 mt-1">Busca inteligente de reacts de filmes, séries, animes, jogos e canais</p>
                 </div>
@@ -434,7 +444,7 @@ export default function App() {
                     {matchingReacts.length > 0 && (
                       <div className="space-y-4">
                         <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2 flex items-center gap-2 font-sans">
-                          <span className="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block animate-pulse" />
+                          <span className="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block animate-pulse" />
                           Vídeos Encontrados ({matchingReacts.length})
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -446,7 +456,7 @@ export default function App() {
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
-                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-teal-500/40 hover:shadow-teal-500/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full"
+                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-amber-500/40 hover:shadow-amber-500/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full"
                               >
                                 <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
                                   <img
@@ -456,27 +466,27 @@ export default function App() {
                                     referrerPolicy="no-referrer"
                                   />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-teal-600/90 shadow-teal-600/30 text-white">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-amber-500/90 shadow-amber-500/30 text-black font-bold">
                                       <Play className="w-6 h-6 fill-current ml-0.5" />
                                     </div>
                                   </div>
                                   <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs text-[10px] font-mono px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-1 border border-zinc-700/50">
-                                    <Clock className="w-3 h-3 text-teal-400" /> {react.duracao}
+                                    <Clock className="w-3 h-3 text-amber-400" /> {react.duracao}
                                   </span>
                                   {associatedObra && (
-                                    <span className="absolute top-2 left-2 bg-teal-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
+                                    <span className="absolute top-2 left-2 bg-amber-500 text-black font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
                                       {associatedObra.titulo}
                                     </span>
                                   )}
                                 </div>
                                 <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
-                                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-teal-400 transition-colors">
+                                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-amber-400 transition-colors">
                                     {react.titulo}
                                   </h3>
                                   <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2">
                                     <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
                                       {react.canalNome}
-                                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block animate-pulse" />
+                                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full inline-block animate-pulse" />
                                     </span>
                                     <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500 shrink-0">
                                       <Eye className="w-3.5 h-3.5" /> {formatViews(react.visualizacoes)}
@@ -505,19 +515,19 @@ export default function App() {
                                 setSelectedReactId(null);
                                 setCurrentTab('obra');
                               }}
-                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-teal-500/40 hover:shadow-lg hover:shadow-teal-500/5 transition-all cursor-pointer group"
+                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/5 transition-all cursor-pointer group"
                             >
                               <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
                                 <img src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center shadow-lg">
-                                    <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                                  <div className="w-12 h-12 bg-amber-500 text-black rounded-full flex items-center justify-center shadow-lg font-bold">
+                                    <Play className="w-6 h-6 fill-black text-black ml-0.5" />
                                   </div>
                                 </div>
                               </div>
                               <div className="p-3 text-center space-y-1">
                                 <span className="text-[9px] uppercase font-mono bg-zinc-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400">{obra.tipo}</span>
-                                <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-teal-400 transition-colors pt-1">{obra.titulo}</h4>
+                                <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-amber-400 transition-colors pt-1">{obra.titulo}</h4>
                                 <span className="text-[10px] text-zinc-500">{obra.ano}</span>
                               </div>
                             </div>
@@ -545,7 +555,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-bold text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -603,7 +613,6 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="space-y-12 pb-24 pt-24 w-full flex-1"
               >
-                
                 {/* HORIZONTAL ROWS */}
                 <div className="space-y-10 md:mt-8 relative z-20">
                   {continueWatchingReacts.length > 0 && (
@@ -651,8 +660,9 @@ export default function App() {
                         onPlayVideo={handlePlayVideo}
                       />
                       
+                      {/* CATEGORIES - 3 CARDS PER CATEGORY */}
                       {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
-                        const tipoReacts = homeFeeds.tipoFeeds[tipo] || [];
+                        const tipoReacts = (homeFeeds.tipoFeeds[tipo] || []).slice(0, 3);
                         if (tipoReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -667,7 +677,7 @@ export default function App() {
                       })}
 
                       {['Terror', 'Ação', 'Comédia'].map(genero => {
-                        const generoReacts = homeFeeds.generoFeeds[genero] || [];
+                        const generoReacts = (homeFeeds.generoFeeds[genero] || []).slice(0, 3);
                         if (generoReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -682,7 +692,7 @@ export default function App() {
                       })}
                       
                       {['Marvel', 'DC', 'Harry Potter', 'One Piece', 'GTA', 'Resident Evil', 'The Last of Us'].map(franquia => {
-                        const uniReacts = homeFeeds.franquiaFeeds[franquia] || [];
+                        const uniReacts = (homeFeeds.franquiaFeeds[franquia] || []).slice(0, 3);
                         if (uniReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -695,7 +705,7 @@ export default function App() {
                           />
                         );
                       })}
-                      
+
                       {obras.filter(o => o.tipo === 'canal').map(canal => {
                         const canalReacts = homeFeeds.canalFeeds[canal.id] || [];
                         if (canalReacts.length === 0) return null;
@@ -734,6 +744,26 @@ export default function App() {
                         progressMap={progressMap}
                         onPlayVideo={handlePlayVideo}
                       />
+
+                      {/* CATEGORIES - 3 CARDS PER CATEGORY */}
+                      {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
+                        const tipoReacts = reacts.filter(r => {
+                          const obra = obras.find(o => o.id === r.obraId);
+                          return obra && obra.tipo === tipo;
+                        }).slice(0, 3);
+                        
+                        if (tipoReacts.length === 0) return null;
+                        return (
+                          <RowMovies 
+                            key={tipo}
+                            title={tipo === 'filme' ? 'Filmes' : tipo === 'serie' ? 'Séries' : tipo === 'jogo' ? 'Jogos' : 'Animes'} 
+                            reacts={tipoReacts} 
+                            obras={obras}
+                            progressMap={progressMap}
+                            onPlayVideo={handlePlayVideo}
+                          />
+                        );
+                      })}
                     </>
                   )}
                 </div>
@@ -755,7 +785,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Canal não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-bold text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -786,7 +816,7 @@ export default function App() {
                 className="pt-24 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen w-full flex-1"
               >
                 <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
-                  <span className="w-2.5 h-6 bg-teal-500 rounded" />
+                  <span className="w-2.5 h-6 bg-gradient-to-b from-amber-400 to-yellow-500 rounded" />
                   Canais Seguidos
                 </h2>
                 {canaisSeguidos.length === 0 ? (
@@ -800,10 +830,10 @@ export default function App() {
                       const canal = obras.find(o => o.tipo === 'canal' && o.titulo.includes(nome));
                       if (!canal) return null;
                       return (
-                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-teal-500/30 shadow-md">
-                           <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-teal-500/20" />
+                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-amber-500/30 shadow-md">
+                           <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-amber-500/30" />
                            <div>
-                             <h3 className="text-base font-bold text-white hover:text-teal-400 transition-colors">{nome}</h3>
+                             <h3 className="text-base font-bold text-white hover:text-amber-400 transition-colors">{nome}</h3>
                              <p className="text-zinc-500 text-xs mt-0.5 font-mono">Visualizar canal do criador</p>
                            </div>
                          </div>
@@ -897,7 +927,7 @@ export default function App() {
         <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
         <p className="text-zinc-400 font-sans text-xs flex items-center justify-center gap-1.5 flex-wrap">
           Dúvidas e suporte: 
-          <a href="mailto:atendimentocinereact@gmail.com" className="text-teal-400 hover:text-teal-300 font-bold transition-colors underline">
+          <a href="mailto:atendimentocinereact@gmail.com" className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline">
             atendimentocinereact@gmail.com
           </a>
         </p>
@@ -939,12 +969,12 @@ export default function App() {
               className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
             >
               {/* Visual element decorator */}
-              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-teal-500 via-pink-500 to-rose-500" />
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
               
               {/* Top Icon */}
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center shadow-lg shadow-teal-500/5">
-                  <Film className="w-8 h-8 text-teal-400 stroke-[2]" />
+                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shadow-lg shadow-amber-500/5">
+                  <Film className="w-8 h-8 text-amber-400 stroke-[2]" />
                 </div>
               </div>
 
@@ -967,7 +997,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 hover:shadow-teal-600/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>
@@ -976,7 +1006,6 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

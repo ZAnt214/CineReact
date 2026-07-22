@@ -1,7 +1,58 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, Check, Sparkles, ChevronDown, ChevronUp, Copy, ThumbsUp, Film, User, Star, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, Check, Sparkles, ChevronDown, ChevronUp, Copy, ThumbsUp, Film, User, Star, Trash2, Tv, Clock, Layers, Info } from 'lucide-react';
 import { Obra, ReactVideo, UserState, Comentario } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import PlaybackSkeleton from './PlaybackSkeleton.tsx';
+
+// Lazy loading for heavy comment section component
+const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
+
+// Lightweight Skeleton Fallbacks for Lazy Sections
+function CommentSkeleton() {
+  return (
+    <div className="bg-zinc-900/30 backdrop-blur-md rounded-2xl p-6 border border-zinc-900 shadow-xl space-y-4 animate-pulse">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-md bg-zinc-800" />
+        <div className="h-4 w-36 bg-zinc-800 rounded-md" />
+      </div>
+      <div className="h-12 w-full bg-zinc-950/60 rounded-xl border border-zinc-850/50" />
+      <div className="space-y-3 pt-2">
+        <div className="h-16 bg-zinc-950/40 rounded-xl" />
+        <div className="h-16 bg-zinc-950/40 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function ShelfSkeleton() {
+  return (
+    <div className="space-y-4 pt-4 border-t border-zinc-900 animate-pulse">
+      <div className="h-5 w-52 bg-zinc-850 rounded-md" />
+      <div className="flex gap-4 overflow-hidden pt-1">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex-shrink-0 w-[240px] md:w-[290px] h-[190px] bg-zinc-900/30 rounded-xl border border-zinc-850/50" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SidebarSkeleton() {
+  return (
+    <div className="space-y-3 animate-pulse">
+      {[1, 2, 3, 4, 5].map(i => (
+        <div key={i} className="flex gap-3.5 p-2.5 rounded-xl bg-zinc-900/20 border border-zinc-900">
+          <div className="w-28 h-18 sm:w-36 sm:h-22 bg-zinc-850 rounded-lg flex-shrink-0" />
+          <div className="flex-1 space-y-2 py-1">
+            <div className="h-3.5 bg-zinc-800 rounded w-5/6" />
+            <div className="h-3 bg-zinc-850 rounded w-1/2" />
+            <div className="h-2.5 bg-zinc-900 rounded w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 interface PlaybackPageProps {
   obraId: string;
@@ -37,7 +88,7 @@ function PremiumVideoShelf({
     <div className="space-y-4 pt-4 border-t border-zinc-900">
       <div className="flex items-center justify-between">
         <h3 className="text-md md:text-lg font-black text-white tracking-tight flex items-center gap-2">
-          <span className="w-1 h-5 bg-teal-500 rounded-full" />
+          <span className="w-1 h-5 bg-amber-500 rounded-full" />
           {title}
         </h3>
         <span className="text-xs text-zinc-500 font-mono tracking-wider">{videos.length} {videos.length === 1 ? 'VÍDEO' : 'VÍDEOS'}</span>
@@ -50,7 +101,7 @@ function PremiumVideoShelf({
             whileHover={{ y: -4, scale: 1.01 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => onSelect(video.id)}
-            className="flex-shrink-0 w-[240px] md:w-[290px] bg-zinc-900/10 backdrop-blur-md border border-zinc-850 hover:border-teal-500/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
+            className="flex-shrink-0 w-[240px] md:w-[290px] bg-zinc-900/10 backdrop-blur-md border border-zinc-850 hover:border-amber-500/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
           >
             {/* Thumbnail */}
             <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
@@ -65,8 +116,8 @@ function PremiumVideoShelf({
                 {video.duracao}
               </span>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center shadow-lg shadow-teal-600/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                  <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                  <Play className="w-5 h-5 fill-black text-black ml-0.5" />
                 </div>
               </div>
             </div>
@@ -74,7 +125,7 @@ function PremiumVideoShelf({
             {/* Video Meta Info */}
             <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
               <div>
-                <h4 className="text-xs md:text-sm font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-teal-400 transition-colors mb-1">
+                <h4 className="text-xs md:text-sm font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors mb-1">
                   {video.titulo}
                 </h4>
                 <p className="text-[11px] text-zinc-400 font-medium tracking-wide">{video.canalNome}</p>
@@ -109,10 +160,29 @@ export default function PlaybackPage({
   const [shareFeedback, setShareFeedback] = useState(false);
   const [expandedDesc, setExpandedDesc] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
+  const [loadDeferredSections, setLoadDeferredSections] = useState(false);
   
-  // Instantly scroll to top when mounting or changing active video
+  // Instantly scroll to top and defer loading secondary components slightly so YouTube player gets 100% priority
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
+    setIframeLoading(true);
+    setLoadDeferredSections(false);
+
+    // Give YouTube player high priority on main thread
+    const deferredTimer = setTimeout(() => {
+      setLoadDeferredSections(true);
+    }, 120);
+
+    const timer = setTimeout(() => {
+      setIframeLoading(false);
+    }, 4500);
+
+    return () => {
+      clearTimeout(deferredTimer);
+      clearTimeout(timer);
+    };
   }, [activeReactId]);
 
   useEffect(() => {
@@ -199,6 +269,19 @@ export default function PlaybackPage({
     return false;
   });
 
+  // Video Like state & persistence across platform
+  const [videoLiked, setVideoLiked] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('cine_react_liked_video_ids');
+      const ids = stored ? JSON.parse(stored) : [];
+      return Array.isArray(ids) && ids.includes(initialReactId || '');
+    } catch {
+      return false;
+    }
+  });
+
+  const [videoLikesCount, setVideoLikesCount] = useState<number>(0);
+
   useEffect(() => {
     if (activeReactId) {
       const favorites = localStorage.getItem('cine_react_favorites');
@@ -212,97 +295,63 @@ export default function PlaybackPage({
       } else {
         setIsFavorited(false);
       }
+
+      // Check if current video is liked by user
+      try {
+        const stored = localStorage.getItem('cine_react_liked_video_ids');
+        const ids = stored ? JSON.parse(stored) : [];
+        setVideoLiked(Array.isArray(ids) && ids.includes(activeReactId));
+      } catch {
+        setVideoLiked(false);
+      }
     }
   }, [activeReactId]);
 
-  // Comments & Reviews State
-  const [comentarios, setComentarios] = useState<Comentario[]>([]);
-  const [comentariosLoading, setComentariosLoading] = useState(false);
-  const [novoComentarioTexto, setNovoComentarioTexto] = useState('');
-  const [comentarioNota, setComentarioNota] = useState(5);
-  const [comentarioEnviando, setComentarioEnviando] = useState(false);
-  const [comentarioErro, setComentarioErro] = useState('');
-  const [comentarioSucesso, setComentarioSucesso] = useState(false);
-
-  const fetchComentarios = async () => {
-    if (!activeReact?.obraId) return;
-    setComentariosLoading(true);
-    try {
-      const res = await fetch(`/api/comentarios?obraId=${activeReact.obraId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComentarios(data);
-      }
-    } catch (e) {
-      console.error("Erro ao buscar comentarios:", e);
-    } finally {
-      setComentariosLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchComentarios();
-    setNovoComentarioTexto('');
-    setComentarioNota(5);
-    setComentarioErro('');
-    setComentarioSucesso(false);
-  }, [activeReact?.obraId]);
-
-  const handleAddComentario = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user.isLoggedIn) {
-      setComentarioErro('Você precisa estar logado para comentar.');
-      return;
+    if (activeReact) {
+      setVideoLikesCount(activeReact.likes ?? 0);
     }
-    if (!novoComentarioTexto.trim()) {
-      setComentarioErro('Escreva seu comentário primeiro.');
-      return;
-    }
-    if (!activeReact?.obraId) return;
+  }, [activeReact]);
 
-    setComentarioEnviando(true);
-    setComentarioErro('');
-    setComentarioSucesso(false);
+  const handleToggleVideoLike = async () => {
+    if (!activeReactId) return;
+    const nextState = !videoLiked;
+    const action = nextState ? 'like' : 'unlike';
 
+    // Optimistic UI state
+    setVideoLiked(nextState);
+    setVideoLikesCount(prev => (nextState ? prev + 1 : Math.max(0, prev - 1)));
+
+    // Save to localStorage
     try {
-      const res = await fetch('/api/comentarios', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          obraId: activeReact.obraId,
-          usuarioNome: user.nome,
-          usuarioEmail: user.email,
-          texto: novoComentarioTexto,
-          nota: comentarioNota
-        })
-      });
-
-      if (res.ok) {
-        setNovoComentarioTexto('');
-        setComentarioNota(5);
-        setComentarioSucesso(true);
-        await fetchComentarios();
+      const stored = localStorage.getItem('cine_react_liked_video_ids');
+      let arr = stored ? JSON.parse(stored) : [];
+      if (!Array.isArray(arr)) arr = [];
+      if (nextState) {
+        if (!arr.includes(activeReactId)) arr.push(activeReactId);
       } else {
-        const data = await res.json();
-        setComentarioErro(data.error || 'Erro ao enviar comentário.');
+        arr = arr.filter((id: string) => id !== activeReactId);
       }
-    } catch (err) {
-      setComentarioErro('Erro ao se conectar ao servidor.');
-    } finally {
-      setComentarioEnviando(false);
+      localStorage.setItem('cine_react_liked_video_ids', JSON.stringify(arr));
+    } catch (e) {
+      console.error(e);
     }
-  };
 
-  const handleDeleteComentario = async (id: string) => {
+    // Call API
     try {
-      const res = await fetch(`/api/comentarios/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/reacts/${activeReactId}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
       if (res.ok) {
-        await fetchComentarios();
+        const data = await res.json();
+        if (typeof data.likes === 'number') {
+          setVideoLikesCount(data.likes);
+        }
       }
     } catch (e) {
-      console.error("Erro ao deletar comentario:", e);
+      console.error("Erro ao curtir vídeo:", e);
     }
   };
 
@@ -381,9 +430,12 @@ export default function PlaybackPage({
   }, [reacts, activeReactId]);
 
   if (!activeReact) {
+    if (reacts.length === 0) {
+      return <PlaybackSkeleton />;
+    }
     return (
       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <Sparkles className="w-12 h-12 text-teal-500 mb-3 animate-pulse" />
+        <Sparkles className="w-12 h-12 text-amber-500 mb-3 animate-pulse" />
         <div className="text-white font-bold text-lg">Vídeo de React não encontrado</div>
         <p className="text-zinc-500 text-xs mt-1">O link pode estar quebrado ou o conteúdo foi removido.</p>
       </div>
@@ -392,47 +444,64 @@ export default function PlaybackPage({
 
   const isFollowing = canaisSeguidos.includes(activeReact.canalNome);
 
-  // Friendly Date Format Helper
-  const getFriendlyDate = (dateStr: string) => {
+  // Friendly Date Format Helpers
+  const getFriendlyDate = (dateStr?: string) => {
+    if (!dateStr) return "Recente";
     try {
-      const pubDate = new Date(dateStr);
+      const clean = dateStr.split('T')[0];
+      const parts = clean.split('-');
+      let pubDate: Date;
+      if (parts.length === 3 && parts[0].length === 4) {
+        pubDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      } else {
+        pubDate = new Date(dateStr);
+      }
       if (isNaN(pubDate.getTime())) return dateStr;
-      
+
       const now = new Date();
-      const diffTime = now.getTime() - pubDate.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays < 0) return "Em breve";
-      if (diffDays === 0) return "Hoje";
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const targetDay = new Date(pubDate.getFullYear(), pubDate.getMonth(), pubDate.getDate());
+      const diffTime = today.getTime() - targetDay.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 0) return "Hoje";
       if (diffDays === 1) return "Ontem";
-      if (diffDays < 7) return `há ${diffDays} dias`;
+      if (diffDays < 7) return `Há ${diffDays} dias`;
       if (diffDays < 30) {
         const weeks = Math.floor(diffDays / 7);
-        return `há ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`;
+        return `Há ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`;
       }
       if (diffDays < 365) {
         const months = Math.floor(diffDays / 30);
-        return `há ${months} ${months === 1 ? 'mês' : 'meses'}`;
+        return `Há ${months} ${months === 1 ? 'mês' : 'meses'}`;
       }
       const years = Math.floor(diffDays / 365);
-      return `há ${years} ${years === 1 ? 'ano' : 'anos'}`;
+      return `Há ${years} ${years === 1 ? 'ano' : 'anos'}`;
     } catch {
-      return dateStr;
+      return dateStr || "Recente";
     }
   };
 
-  const getFormattedFullDate = (dateStr: string) => {
+  const getFormattedFullDate = (dateStr?: string) => {
+    if (!dateStr) return "Data recente";
     try {
+      const clean = dateStr.split('T')[0];
+      const parts = clean.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const year = parts[0];
+        const monthNum = parseInt(parts[1], 10);
+        const day = parseInt(parts[2], 10);
+        const monthNames = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+        const monthName = monthNames[monthNum - 1] || parts[1];
+        return `${day} de ${monthName} de ${year}`;
+      }
       const pubDate = new Date(dateStr);
-      if (isNaN(pubDate.getTime())) return dateStr;
-      
-      return pubDate.toLocaleDateString('pt-BR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
-    } catch {
+      if (!isNaN(pubDate.getTime())) {
+        return pubDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
       return dateStr;
+    } catch {
+      return dateStr || "Data recente";
     }
   };
 
@@ -449,8 +518,8 @@ export default function PlaybackPage({
   // Avatar Gradient styling based on channel name
   const getAvatarColor = (name: string) => {
     const colors = [
-      'from-teal-600 to-teal-800 shadow-[0_0_12px_rgba(20,184,166,0.2)]',
-      'from-rose-600 to-rose-800 shadow-[0_0_12px_rgba(244,63,94,0.2)]',
+      'from-amber-500 to-yellow-600 shadow-[0_0_12px_rgba(245,158,11,0.2)]',
+      'from-yellow-500 to-amber-700 shadow-[0_0_12px_rgba(234,179,8,0.2)]',
     ];
     let sum = 0;
     for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
@@ -469,31 +538,133 @@ export default function PlaybackPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         
         {/* LEFT COLUMN: Main Stream (Player, Info, Dynamic Shelves) */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+        <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-6 transition-all duration-300`}>
           
-          {/* PLAYER WRAPPER */}
-          <div className="relative w-full bg-black rounded-2xl overflow-hidden aspect-video shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-zinc-800/60 group/player">
-            <iframe 
-              width="100%" 
-              height="100%" 
-              src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&modestbranding=1&rel=0&showinfo=0`}
-              title={activeReact.titulo}
-              frameBorder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              allowFullScreen
-              className="w-full h-full"
-            ></iframe>
+          {/* HIGH-END CINEMATIC GOLDEN BORDER PLAYER FRAME */}
+          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-amber-500/60 via-yellow-400/80 to-amber-600/60 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(245,158,11,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(245,158,11,0.45)] transition-all duration-500">
+            {/* Ambient Backlight Glow behind Player */}
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-amber-500/25 via-yellow-400/20 to-amber-600/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
+
+            <div className="relative w-full bg-black rounded-[22px] overflow-hidden aspect-video">
+              <iframe 
+                key={activeReact.id}
+                width="100%" 
+                height="100%" 
+                src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&modestbranding=1&rel=0&enablejsapi=1`}
+                title={activeReact.titulo}
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+                onLoad={() => setIframeLoading(false)}
+                className="w-full h-full relative z-0"
+              ></iframe>
+
+              {/* ELEGANT ANIMATED LOADING OVERLAY / SKELETON FOR VIDEO PLAYER */}
+              <AnimatePresence>
+                {iframeLoading && (
+                  <motion.div
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="absolute inset-0 z-20 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden pointer-events-none"
+                  >
+                    {/* Background Thumbnail with Blur */}
+                    {activeReact.thumbnailUrl && (
+                      <div className="absolute inset-0 z-0">
+                        <img 
+                          src={activeReact.thumbnailUrl} 
+                          alt="" 
+                          className="w-full h-full object-cover blur-xl opacity-35 scale-110" 
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/60" />
+                      </div>
+                    )}
+
+                    {/* Central Loading Badge & Animated Ring */}
+                    <div className="relative z-10 flex flex-col items-center gap-4 text-center px-4">
+                      <div className="relative flex items-center justify-center">
+                        {/* Outer Pulsing Aura */}
+                        <div className="absolute w-20 h-20 rounded-full bg-amber-500/20 animate-ping" />
+                        
+                        {/* Spinning Amber Border Ring */}
+                        <div className="w-16 h-16 rounded-full border-2 border-amber-500/20 border-t-amber-400 border-r-yellow-400 animate-spin shadow-[0_0_20px_rgba(245,158,11,0.3)]" />
+                        
+                        {/* Central Icon */}
+                        <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-amber-500/40 flex items-center justify-center shadow-lg">
+                          <Play className="w-5 h-5 fill-amber-400 text-amber-400 ml-0.5 animate-pulse" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-widest shadow-md backdrop-blur-md">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                          Carregando React...
+                        </div>
+                        <p className="text-xs text-zinc-300 font-bold max-w-sm line-clamp-1 drop-shadow-md">
+                          {activeReact.titulo}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Loading Bar */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900/80 overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 animate-[pulse_1.5s_infinite] w-full" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* THEATER MODE QUICK TOGGLE OVERLAY */}
+              <button
+                onClick={() => setIsTheaterMode(!isTheaterMode)}
+                className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-amber-400 hover:text-amber-300 border border-amber-500/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg flex items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
+                title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}
+              >
+                <Tv className="w-4 h-4" />
+                <span>{isTheaterMode ? 'Modo Normal' : 'Modo Teatro'}</span>
+              </button>
+
+              {/* MINIMALIST NEUTRAL CINEREACT WATERMARK (BOTTOM-LEFT) */}
+              <div className="absolute bottom-3 left-3.5 z-10 pointer-events-none text-zinc-400/80 font-mono text-[10px] font-bold tracking-widest uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] opacity-70 group-hover/player:opacity-95 transition-opacity duration-300 select-none">
+                cinereact
+              </div>
+            </div>
           </div>
 
           {/* DYNAMIC METADATA & TITLE CARD */}
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              {activeObra && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-sm shadow-teal-500/5">
-                  <Film className="w-3 h-3" />
-                  {activeObra.tipo}
-                </span>
-              )}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {activeObra && (
+                  <>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm shadow-amber-500/5">
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      {activeObra.tipo === 'canal' 
+                        ? 'Reação em Destaque' 
+                        : activeObra.tipo === 'serie' 
+                          ? 'Série' 
+                          : activeObra.tipo === 'jogo' 
+                            ? 'Jogo' 
+                            : activeObra.tipo === 'anime' 
+                              ? 'Anime' 
+                              : 'Filme'}
+                    </span>
+
+                    {activeObra.titulo && activeObra.tipo !== 'canal' && (
+                      <span 
+                        onClick={() => onGoToObra(activeObra.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 transition-colors cursor-pointer"
+                      >
+                        <Film className="w-3 h-3 text-zinc-400" />
+                        {activeObra.titulo}
+                      </span>
+                    )}
+                  </>
+                )}
+
+              </div>
+
               <h1 className="text-xl md:text-3xl font-black text-white leading-tight tracking-tight">
                 {activeReact.titulo}
               </h1>
@@ -536,7 +707,7 @@ export default function PlaybackPage({
                 <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-1.5">
                     <h3 
-                      className="font-black text-white text-sm md:text-base cursor-pointer hover:text-teal-400 transition-colors leading-none"
+                      className="font-black text-white text-sm md:text-base cursor-pointer hover:text-amber-400 transition-colors leading-none"
                       onClick={() => {
                         const cId = channelObra?.id || activeReact.canalId;
                         if (cId) onGoToCanal(cId);
@@ -544,7 +715,7 @@ export default function PlaybackPage({
                     >
                       {activeReact.canalNome}
                     </h3>
-                    <span className="w-3.5 h-3.5 rounded-full bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20" title="Criador verificado">
+                    <span className="w-3.5 h-3.5 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20" title="Criador verificado">
                       <Check className="w-2 h-2 stroke-[3]" />
                     </span>
                   </div>
@@ -559,7 +730,7 @@ export default function PlaybackPage({
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
                       ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-850 hover:text-white border border-zinc-800' 
-                      : 'bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-600/20 hover:shadow-teal-600/30'
+                      : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black hover:from-amber-400 hover:to-yellow-400 shadow-lg shadow-amber-500/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}
@@ -571,14 +742,29 @@ export default function PlaybackPage({
                 <motion.button 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
+                  onClick={handleToggleVideoLike}
+                  className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
+                    videoLiked
+                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-md shadow-amber-500/10'
+                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
+                  }`}
+                  title={videoLiked ? "Remover curtida do vídeo" : "Gostei deste vídeo"}
+                >
+                  <ThumbsUp className={`w-4 h-4 transition-transform duration-300 ${videoLiked ? 'fill-amber-400 text-amber-400 scale-110' : 'text-zinc-400'}`} />
+                  <span>{videoLiked ? 'Gostei' : 'Curtir'} ({formatViews(videoLikesCount)})</span>
+                </motion.button>
+
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={handleToggleFavorite}
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     isFavorited
-                      ? 'bg-teal-600/15 border-teal-500/30 text-teal-400 shadow-md shadow-teal-600/5'
+                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-md shadow-amber-500/10'
                       : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-teal-500 text-teal-500 scale-110' : 'text-zinc-400'}`} />
+                  <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-amber-400 text-amber-400 scale-110' : 'text-zinc-400'}`} />
                   {isFavorited ? 'Favoritado' : 'Favoritar'}
                 </motion.button>
 
@@ -600,9 +786,9 @@ export default function PlaybackPage({
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-950 text-white border border-teal-500/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
+                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-950 text-white border border-amber-500/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
                       >
-                        <Check className="w-3.5 h-3.5 text-teal-400" />
+                        <Check className="w-3.5 h-3.5 text-amber-400" />
                         Link copiado!
                       </motion.div>
                     )}
@@ -613,7 +799,7 @@ export default function PlaybackPage({
                   href={`https://www.youtube.com/watch?v=${activeReact.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border border-teal-500/25 cursor-pointer shadow-md shadow-teal-600/5 hover:text-teal-300"
+                  className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border border-amber-500/25 cursor-pointer shadow-md shadow-amber-500/5 hover:text-amber-300"
                 >
                   <ExternalLink className="w-4 h-4" />
                   YouTube
@@ -622,38 +808,47 @@ export default function PlaybackPage({
             </div>
 
             {/* INFORMATION PANEL */}
-            <div className="bg-zinc-900/25 backdrop-blur-md border border-zinc-850 p-4 md:p-6 rounded-2xl hover:bg-zinc-900/30 transition-all duration-300">
-              <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1 h-3.5 bg-teal-500 rounded-full" />
-                Informações sobre o vídeo
-              </h3>
+            <div className="bg-zinc-900/30 backdrop-blur-md p-5 md:p-6 rounded-2xl space-y-4 shadow-xl">
+              <div className="flex items-center justify-between pb-1">
+                <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                  <Info className="w-4 h-4 text-amber-400" />
+                  Informações sobre o vídeo
+                </h3>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">DETALHES</span>
+              </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm">
-                <div>
-                  <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Visualizações</span>
-                  <span className="text-zinc-200 font-bold font-mono text-xs">{formatViews(activeReact.visualizacoes)} views</span>
-                </div>
-
-                <div>
-                  <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Data de publicação</span>
-                  <span className="text-zinc-200 font-bold text-xs" title={getFormattedFullDate(activeReact.publicadoEm)}>
-                    {getFriendlyDate(activeReact.publicadoEm)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 text-xs">
+                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <ThumbsUp className="w-3.5 h-3.5 text-amber-400" /> Curtidas CineReact
                   </span>
+                  <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(videoLikesCount)} curtidas</span>
                 </div>
 
-                <div>
-                  <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Duração</span>
-                  <span className="text-zinc-200 font-bold font-mono text-xs">{activeReact.duracao}</span>
+                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5 text-amber-400" /> Visualizações
+                  </span>
+                  <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(activeReact.visualizacoes)} views</span>
                 </div>
 
-                <div>
-                  <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Canal / Criador</span>
+                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" /> Duração
+                  </span>
+                  <span className="text-white font-bold font-mono text-xs block pt-0.5">{activeReact.duracao || 'N/A'}</span>
+                </div>
+
+                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-amber-400" /> Criador / Canal
+                  </span>
                   <span 
                     onClick={() => {
                       const cId = channelObra?.id || activeReact.canalId;
                       if (cId) onGoToCanal(cId);
                     }} 
-                    className="text-teal-400 font-bold text-xs hover:underline cursor-pointer"
+                    className="text-amber-400 font-bold text-xs hover:underline cursor-pointer truncate block pt-0.5"
                   >
                     {activeReact.canalNome}
                   </span>
@@ -661,18 +856,22 @@ export default function PlaybackPage({
 
                 {activeObra && (
                   <>
-                    <div>
-                      <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Categoria</span>
-                      <span className="text-zinc-200 font-bold text-xs capitalize">
-                        {activeObra.tipo === 'serie' ? 'Série' : activeObra.tipo === 'jogo' ? 'Jogo' : activeObra.tipo}
+                    <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                      <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Film className="w-3.5 h-3.5 text-amber-400" /> Categoria
+                      </span>
+                      <span className="text-zinc-200 font-bold text-xs capitalize block pt-0.5">
+                        {activeObra.tipo === 'serie' ? 'Série' : activeObra.tipo === 'jogo' ? 'Jogo' : activeObra.tipo === 'canal' ? 'Canal de React' : activeObra.tipo}
                       </span>
                     </div>
 
-                    <div>
-                      <span className="text-zinc-500 text-[10px] font-black uppercase tracking-wider block mb-0.5">Playlist ou Coleção</span>
+                    <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                      <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-amber-400" /> Coleção / Obra
+                      </span>
                       <span 
                         onClick={() => onGoToObra(activeObra.id)} 
-                        className="text-teal-400 font-bold text-xs hover:underline cursor-pointer line-clamp-1"
+                        className="text-amber-400 font-bold text-xs hover:underline cursor-pointer line-clamp-1 block pt-0.5"
                       >
                         {activeObra.titulo}
                       </span>
@@ -682,260 +881,113 @@ export default function PlaybackPage({
               </div>
             </div>
 
-            {/* AVALIAÇÕES E COMENTÁRIOS */}
-            <div className="bg-zinc-900/20 border border-zinc-850 p-4 md:p-6 rounded-2xl hover:bg-zinc-900/25 transition-all duration-300 mt-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-850/60 pb-4">
-                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-teal-400" />
-                  Avaliações e Comentários ({comentarios.length})
-                </h3>
-                <span className="text-[10px] text-zinc-500 font-mono">COMUNIDADE</span>
-              </div>
-
-              {/* FORM DE COMENTÁRIO */}
-              {user.isLoggedIn ? (
-                <form onSubmit={handleAddComentario} className="space-y-4 bg-zinc-900/35 p-4 rounded-xl border border-zinc-850/50">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <img src={user.avatar} alt={user.nome} className="w-7 h-7 rounded-full object-cover ring-1 ring-zinc-800" />
-                      <div>
-                        {user.isDonor ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-extrabold text-xs bg-gradient-to-r from-teal-400 via-pink-400 to-rose-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]">
-                              {user.nome}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-rose-500 to-teal-600 text-[7px] uppercase font-bold text-white tracking-widest flex items-center gap-0.5"><Sparkles className="w-1.5 h-1.5 text-rose-200 fill-current" /> APOIADOR</span>
-                          </div>
-                        ) : (
-                          <span className="font-bold text-xs text-zinc-300">{user.nome}</span>
-                        )}
-                        <span className="text-[9px] text-zinc-500 block">Deixe sua opinião e nota</span>
-                      </div>
-                    </div>
-
-                    {/* SELETOR DE NOTA EM ESTRELAS */}
-                    <div className="flex items-center gap-1 bg-zinc-950 px-2.5 py-1 rounded-full border border-zinc-850">
-                      <span className="text-[10px] text-zinc-400 font-mono mr-1.5">Nota:</span>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setComentarioNota(star)}
-                          className="text-zinc-500 hover:scale-110 transition-transform"
-                        >
-                          <Star 
-                            className={`w-4 h-4 ${star <= comentarioNota ? 'fill-amber-400 text-amber-400' : 'text-zinc-700 hover:text-zinc-500'}`} 
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <textarea
-                      value={novoComentarioTexto}
-                      onChange={(e) => setNovoComentarioTexto(e.target.value)}
-                      placeholder="Compartilhe o que achou desse react... (Seu feedback ajuda o criador e a comunidade)"
-                      rows={3}
-                      className="w-full bg-zinc-950 border border-zinc-850 rounded-xl p-3 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
-                    />
-
-                    {user.isDonor && (
-                      <p className="text-[10px] text-rose-400 flex items-center gap-1 font-sans">
-                        <Sparkles className="w-3 h-3 animate-pulse text-rose-300" />
-                        Como Apoiador VIP, seu nome será exibido com destaque brilhante e tag exclusiva!
-                      </p>
-                    )}
-
-                    {comentarioErro && <p className="text-red-400 text-[10px] font-semibold">{comentarioErro}</p>}
-                    {comentarioSucesso && <p className="text-emerald-400 text-[10px] font-semibold">Avaliação enviada com sucesso!</p>}
-
-                    <div className="flex justify-end pt-1">
-                      <button
-                        type="submit"
-                        disabled={comentarioEnviando}
-                        className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        {comentarioEnviando ? 'Enviando...' : 'Publicar Avaliação'}
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              ) : (
-                <div className="bg-zinc-950 p-5 rounded-xl border border-zinc-850/60 text-center space-y-3">
-                  <p className="text-xs text-zinc-400">Você precisa estar conectado para avaliar este conteúdo.</p>
-                  <button 
-                    type="button"
-                    onClick={() => onOpenAuth?.()}
-                    className="px-4 py-1.5 bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 font-bold text-xs rounded-full border border-teal-500/25 transition-colors cursor-pointer inline-block"
-                  >
-                    Entrar ou Cadastrar
-                  </button>
-                </div>
-              )}
-
-              {/* LISTA DE COMENTÁRIOS */}
-              <div className="space-y-4">
-                {comentariosLoading ? (
-                  <div className="space-y-3 animate-pulse">
-                    <div className="h-12 bg-zinc-900 rounded-lg"></div>
-                    <div className="h-12 bg-zinc-900 rounded-lg"></div>
-                  </div>
-                ) : comentarios.length === 0 ? (
-                  <div className="text-center py-8 text-zinc-500 italic text-xs">
-                    Nenhum comentário ainda. Seja o primeiro a avaliar!
-                  </div>
-                ) : (
-                  <div className="space-y-3.5 lg:max-h-96 lg:overflow-y-auto pr-1">
-                    {comentarios.map((c) => (
-                      <div key={c.id} className="p-3.5 bg-zinc-950/60 border border-zinc-850/50 rounded-xl space-y-2 flex gap-3 relative group">
-                        <div className="flex-shrink-0">
-                          {c.avatar ? (
-                            <img src={c.avatar} className="w-8 h-8 rounded-full object-cover ring-1 ring-zinc-800" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
-                              <User className="w-4 h-4 text-zinc-500" />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between flex-wrap gap-1.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {c.isDonor ? (
-                                <span className="font-extrabold text-xs bg-gradient-to-r from-teal-400 via-pink-400 to-rose-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,63,94,0.4)] flex items-center gap-1.5">
-                                  {c.usuarioNome}
-                                  <span className="px-1 py-0.5 rounded bg-gradient-to-r from-rose-500 to-teal-600 text-[6px] uppercase font-bold text-white tracking-widest flex items-center gap-0.5"><Sparkles className="w-1.5 h-1.5 text-rose-200 fill-current" /> APOIADOR</span>
-                                </span>
-                              ) : (
-                                <span className="font-bold text-xs text-zinc-300">{c.usuarioNome}</span>
-                              )}
-                              
-                              <span className="text-[9px] text-zinc-500">
-                                {new Date(c.criadoEm).toLocaleDateString('pt-BR')}
-                              </span>
-                            </div>
-
-                            {/* ESTRELAS DO COMENTÁRIO */}
-                            <div className="flex items-center gap-0.5 bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-850">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  className={`w-3 h-3 ${star <= (c.nota || 5) ? 'fill-amber-400 text-amber-400' : 'text-zinc-800'}`} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-
-                          <p className="text-xs text-zinc-400 leading-relaxed mt-1">{c.texto}</p>
-                        </div>
-
-                        {/* EXCLUIR COMENTÁRIO SE FOR AUTOR OU ADMIN */}
-                        {(user.isAdmin || user.email === c.usuarioEmail) && (
-                          <button
-                            onClick={() => handleDeleteComentario(c.id)}
-                            className="absolute top-3.5 right-3.5 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-zinc-900 rounded-md"
-                            title="Remover Comentário"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* COMENTÁRIOS E CURTIDAS DO CINEREACT - LAZY LOADED */}
+            <Suspense fallback={<CommentSkeleton />}>
+              <CommentSectionLazy 
+                obraId={activeReact?.obraId || ''} 
+                user={user} 
+                onOpenAuth={onOpenAuth} 
+                getFriendlyDate={getFriendlyDate} 
+              />
+            </Suspense>
 
           </div>
 
-          {/* DYNAMIC REACT CAROUSELS / DEDICATED SECTIONS */}
+          {/* DYNAMIC REACT CAROUSELS / DEDICATED SECTIONS (LAZY DEFERRED) */}
           <div className="space-y-8 pt-4">
-            {/* Section 1: Mais Reacts deste conteúdo */}
-            <PremiumVideoShelf 
-              title={`Mais Reacts de "${activeObra?.titulo || 'este conteúdo'}"`}
-              videos={reactsDestaObra}
-              onSelect={(id) => setActiveReactId(id)}
-              formatViews={formatViews}
-              getFriendlyDate={getFriendlyDate}
-            />
+            {!loadDeferredSections ? (
+              <ShelfSkeleton />
+            ) : (
+              <>
+                {/* Section 1: Mais Reacts deste conteúdo */}
+                <PremiumVideoShelf 
+                  title={`Mais Reacts de "${activeObra?.titulo || 'este conteúdo'}"`}
+                  videos={reactsDestaObra}
+                  onSelect={(id) => setActiveReactId(id)}
+                  formatViews={formatViews}
+                  getFriendlyDate={getFriendlyDate}
+                />
 
-            {/* Section 2: Mais vídeos deste criador */}
-            <PremiumVideoShelf 
-              title={`Mais Vídeos de ${activeReact.canalNome}`}
-              videos={reactsDesteCriador}
-              onSelect={(id) => setActiveReactId(id)}
-              formatViews={formatViews}
-              getFriendlyDate={getFriendlyDate}
-            />
+                {/* Section 2: Mais vídeos deste criador */}
+                <PremiumVideoShelf 
+                  title={`Mais Vídeos de ${activeReact.canalNome}`}
+                  videos={reactsDesteCriador}
+                  onSelect={(id) => setActiveReactId(id)}
+                  formatViews={formatViews}
+                  getFriendlyDate={getFriendlyDate}
+                />
 
-            {/* Section 3: Reacts semelhantes (based on same category type) */}
-            <PremiumVideoShelf 
-              title={`Reacts de outros ${activeObra?.tipo === 'filme' ? 'Filmes' : activeObra?.tipo === 'serie' ? 'Séries' : activeObra?.tipo === 'jogo' ? 'Jogos' : 'Animes'}`}
-              videos={reactsSemelhantes}
-              onSelect={(id) => setActiveReactId(id)}
-              formatViews={formatViews}
-              getFriendlyDate={getFriendlyDate}
-            />
+                {/* Section 3: Reacts semelhantes (based on same category type) */}
+                <PremiumVideoShelf 
+                  title={`Reacts de outros ${activeObra?.tipo === 'filme' ? 'Filmes' : activeObra?.tipo === 'serie' ? 'Séries' : activeObra?.tipo === 'jogo' ? 'Jogos' : 'Animes'}`}
+                  videos={reactsSemelhantes}
+                  onSelect={(id) => setActiveReactId(id)}
+                  formatViews={formatViews}
+                  getFriendlyDate={getFriendlyDate}
+                />
+              </>
+            )}
           </div>
         </div>
 
         {/* RIGHT COLUMN: RECOMMENDATIONS SIDEBAR */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-5">
+        <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'} space-y-5 transition-all duration-300`}>
           <div className="border-b border-zinc-900 pb-3">
             <h3 className="font-black text-white text-md uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-teal-400 animate-pulse" />
+              <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
               Recomendações
             </h3>
             <p className="text-[10px] text-zinc-500 mt-1 tracking-wide">Vídeos semelhantes baseados no seu gosto</p>
           </div>
           
-          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800 hover:scrollbar-thumb-teal-500/20">
-            {sidebarRecommendations.map(react => (
-              <motion.div 
-                key={react.id} 
-                whileHover={{ scale: 1.01, x: 2 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setActiveReactId(react.id)}
-                className="flex gap-3.5 cursor-pointer group hover:bg-zinc-900/30 p-2.5 -ml-2 rounded-xl transition-all duration-300 border border-transparent hover:border-zinc-850/60"
-              >
-                {/* Visual Thumbnail Frame */}
-                <div className="relative w-28 h-18 sm:w-36 sm:h-22 flex-shrink-0 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-850 shadow-md">
-                  <img 
-                    src={react.thumbnailUrl} 
-                    alt={react.titulo} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                  <span className="absolute bottom-1 right-1 bg-black/85 backdrop-blur-md text-[9px] font-mono font-bold px-1 py-0.5 rounded text-zinc-200 border border-zinc-800/40">
-                    {react.duracao}
-                  </span>
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Play className="w-5 h-5 fill-white text-white" />
-                  </div>
-                </div>
-
-                {/* Meta details */}
-                <div className="flex flex-col flex-1 overflow-hidden justify-between py-0.5">
-                  <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-teal-400 transition-colors">
-                    {react.titulo}
-                  </h4>
-                  <div className="space-y-0.5 mt-1">
-                    <p className="text-[11px] text-zinc-400 font-semibold truncate hover:text-teal-300" title={react.canalNome}>
-                      {react.canalNome}
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
-                      <span>{formatViews(react.visualizacoes)} views</span>
-                      <span>•</span>
-                      <span>{getFriendlyDate(react.publicadoEm)}</span>
+          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800 hover:scrollbar-thumb-amber-500/20">
+            {!loadDeferredSections ? (
+              <SidebarSkeleton />
+            ) : (
+              sidebarRecommendations.map(react => (
+                <motion.div 
+                  key={react.id} 
+                  whileHover={{ scale: 1.01, x: 2 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => setActiveReactId(react.id)}
+                  className="flex gap-3.5 cursor-pointer group hover:bg-zinc-900/30 p-2.5 -ml-2 rounded-xl transition-all duration-300 border border-transparent hover:border-zinc-850/60"
+                >
+                  {/* Visual Thumbnail Frame */}
+                  <div className="relative w-28 h-18 sm:w-36 sm:h-22 flex-shrink-0 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-850 shadow-md">
+                    <img 
+                      src={react.thumbnailUrl} 
+                      alt={react.titulo} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="absolute bottom-1 right-1 bg-black/85 backdrop-blur-md text-[9px] font-mono font-bold px-1 py-0.5 rounded text-zinc-200 border border-zinc-800/40">
+                      {react.duracao}
+                    </span>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Play className="w-5 h-5 fill-white text-white" />
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Meta details */}
+                  <div className="flex flex-col flex-1 overflow-hidden justify-between py-0.5">
+                    <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">
+                      {react.titulo}
+                    </h4>
+                    <div className="space-y-0.5 mt-1">
+                      <p className="text-[11px] text-zinc-400 font-semibold truncate hover:text-amber-300" title={react.canalNome}>
+                        {react.canalNome}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+                        <span>{formatViews(react.visualizacoes)} views</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
             
-            {sidebarRecommendations.length === 0 && (
+            {loadDeferredSections && sidebarRecommendations.length === 0 && (
               <div className="text-zinc-500 text-xs italic p-6 bg-zinc-900/10 rounded-2xl text-center border border-zinc-900">
                 Nenhuma outra recomendação disponível no momento.
               </div>

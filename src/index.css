@@ -15,6 +15,18 @@
   --color-purple-500: #7c3aed;
 }
 
+.font-fredoka {
+  font-family: 'Fredoka', 'Inter', system-ui, sans-serif;
+}
+
+.font-righteous {
+  font-family: 'Righteous', cursive, sans-serif;
+}
+
+.font-bungee {
+  font-family: 'Bungee', cursive, sans-serif;
+}
+
 /* Custom scrollbar for a premium look, universally styled to prevent default system glitches */
 ::-webkit-scrollbar {
   width: 6px;

@@ -65,7 +65,7 @@ function initDb(): DbSchema {
         usuarioNome: 'Mateus Vinicius',
         usuarioEmail: 'mateusvini.t10@gmail.com',
         texto: 'Casimiro assistindo Harry Potter é simplesmente épico! Dei muita risada.',
-        nota: 5,
+        likes: 18,
         criadoEm: new Date().toISOString()
       },
       {
@@ -74,7 +74,7 @@ function initDb(): DbSchema {
         usuarioNome: 'Ana Souza',
         usuarioEmail: 'ana@gmail.com',
         texto: 'A gameplay do Alanzoka é maravilhosa, mas o react do Luan é insano demais!',
-        nota: 5,
+        likes: 12,
         criadoEm: new Date().toISOString()
       }
     ],
@@ -381,6 +381,18 @@ export const localDb = {
     return dbCache.reacts;
   },
 
+  likeReact: (id: string, action: 'like' | 'unlike') => {
+    const idx = dbCache.reacts.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      const baseLikes = dbCache.reacts[idx].likes ?? 0;
+      const newLikes = action === 'like' ? baseLikes + 1 : Math.max(0, baseLikes - 1);
+      dbCache.reacts[idx].likes = newLikes;
+      saveDb(dbCache);
+      return newLikes;
+    }
+    return 0;
+  },
+
   saveReact: (react: ReactVideo) => {
     const idx = dbCache.reacts.findIndex(r => r.id === react.id);
     if (idx >= 0) {
@@ -457,6 +469,18 @@ export const localDb = {
         if (error) console.error("[Supabase Async] Erro ao deletar comentario:", error);
       });
     }
+  },
+
+  likeComentario: (id: string, action: 'like' | 'unlike') => {
+    const idx = dbCache.comentarios.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      const currentLikes = dbCache.comentarios[idx].likes || 0;
+      const newLikes = action === 'like' ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+      dbCache.comentarios[idx].likes = newLikes;
+      saveDb(dbCache);
+      return newLikes;
+    }
+    return 0;
   },
 
   getFavoritos: (email: string) => {

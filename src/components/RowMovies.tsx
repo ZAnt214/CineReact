@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Play, Eye, Calendar, Clock, Plus, Sparkles } from 'lucide-react';
+import React, { useRef } from 'react';
+import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles, Award, Star } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import { motion, useInView } from 'motion/react';
 
@@ -11,6 +11,7 @@ interface RowMoviesProps {
   onPlayVideo: (reactId: string, obraId: string) => void;
   progressMap?: Record<string, number>;
   isEditorial?: boolean;
+  limit?: number;
 }
 
 const containerVariants = {
@@ -18,28 +19,34 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
+      staggerChildren: 0.05,
     }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
+    y: 0,
     transition: {
-      duration: 0.2,
+      duration: 0.25,
       ease: 'easeOut'
     }
   }
 };
 
-export default function RowMovies({ title, reacts, obras, onPlayVideo, progressMap, isEditorial }: RowMoviesProps) {
+export default function RowMovies({ 
+  title, 
+  reacts, 
+  obras, 
+  onPlayVideo, 
+  progressMap, 
+  isEditorial 
+}: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState(20);
 
-  // useInView from motion/react is highly optimized and integrates beautifully
   const hasEntered = useInView(containerRef, {
     once: true,
     margin: "0px 0px 200px 0px"
@@ -49,27 +56,18 @@ export default function RowMovies({ title, reacts, obras, onPlayVideo, progressM
     if (rowRef.current) {
       const { scrollLeft, clientWidth } = rowRef.current;
       const scrollTo = direction === 'left' 
-        ? scrollLeft - clientWidth * 0.75 
-        : scrollLeft + clientWidth * 0.75;
+        ? scrollLeft - clientWidth * 0.85 
+        : scrollLeft + clientWidth * 0.85;
       
       rowRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 20);
-    // Give state a moment to update and render new items, then scroll a bit to reveal them
-    setTimeout(() => {
-      handleScroll('right');
-    }, 100);
-  };
-
   if (reacts.length === 0) return null;
 
-  // Helper to format views
   const formatViews = (views: number) => {
     if (views >= 1000000) {
-      return (views / 1000000).toFixed(1).replace('.', ',') + 'M de views';
+      return (views / 1000000).toFixed(1).replace('.', ',') + 'M views';
     }
     if (views >= 1000) {
       return (views / 1000).toFixed(0) + ' mil views';
@@ -77,147 +75,115 @@ export default function RowMovies({ title, reacts, obras, onPlayVideo, progressM
     return views + ' views';
   };
 
-  // Helper to format date
-  const formatDate = (dateStr: string) => {
-    try {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
-  };
-
   if (!hasEntered) {
     return (
-      <div ref={containerRef} className="space-y-2 relative px-4 md:px-8 min-h-[300px]">
-        {/* ROW TITLE */}
-        <h2 className="text-lg md:text-xl font-bold text-zinc-600 inline-flex items-center gap-1.5 uppercase tracking-wider font-sans animate-pulse">
+      <div ref={containerRef} className="space-y-4 relative px-4 md:px-8 min-h-[260px] max-w-7xl mx-auto w-full">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-zinc-600 inline-flex items-center gap-1.5 uppercase tracking-wider font-sans animate-pulse">
           {title}
         </h2>
-        {/* HORIZONTAL CONTAINER SKELETON */}
-        <div className="relative">
-          <div className="flex items-center gap-4 overflow-x-hidden py-4 px-1">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 w-64 md:w-80 bg-zinc-900/10 rounded-lg overflow-hidden border border-zinc-850/40 animate-pulse"
-              >
-                <div className="h-36 md:h-44 w-full bg-zinc-900/30 flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-zinc-800/20" />
-                </div>
-                <div className="p-3.5 space-y-3">
-                  <div className="space-y-2">
-                    <div className="h-3.5 bg-zinc-800/40 rounded w-11/12" />
-                    <div className="h-3.5 bg-zinc-800/30 rounded w-2/3" />
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="h-3 bg-zinc-800/20 rounded w-1/3" />
-                    <div className="h-2.5 bg-zinc-800/20 rounded w-1/4" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex gap-4 md:gap-5 overflow-hidden py-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="w-[260px] sm:w-[300px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/30 rounded-2xl overflow-hidden border border-zinc-800/40 animate-pulse aspect-video"
+            />
+          ))}
         </div>
       </div>
     );
   }
 
-  const visibleReacts = reacts.slice(0, visibleCount);
-
   return (
-    <div ref={containerRef} className="space-y-2 relative group px-4 md:px-8">
-      {/* ROW TITLE */}
-      <div className="flex flex-wrap items-center gap-2.5">
-        <h2 className="text-lg md:text-xl font-bold text-white hover:text-teal-400 transition-colors cursor-pointer inline-flex items-center gap-1.5 uppercase tracking-wider font-sans">
-          {title}
-        </h2>
+    <div ref={containerRef} className="space-y-3.5 relative px-4 md:px-8 max-w-7xl mx-auto w-full group/row">
+      {/* ROW TITLE & ACTIONS */}
+      <div className="flex flex-col gap-1 px-1 mb-1">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-white hover:text-amber-400 transition-colors cursor-pointer uppercase tracking-wider font-sans leading-none">
+            {title}
+          </h2>
+        </div>
         {isEditorial && (
-          <span className="px-2.5 py-1 text-[10px] font-black uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white rounded-full shadow-md tracking-wider flex items-center gap-1.5 animate-pulse select-none">
-            <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
-            Escolhidos pelos editores do CineReact
-          </span>
+          <p className="text-xs sm:text-sm font-extrabold font-fredoka leading-snug bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            Estes reacts foram escolhidos a dedo pela equipe CineReact.
+          </p>
         )}
       </div>
 
-      {/* HORIZONTAL CONTAINER */}
+      {/* HORIZONTAL CAROUSEL CONTAINER */}
       <div className="relative">
-        
         {/* LEFT NAV ARROW */}
-        <button
-          onClick={() => handleScroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 h-[85%] w-10 md:w-12 bg-black/70 hover:bg-black/90 text-white rounded-r flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-r border-zinc-800"
-        >
-          <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
+        {reacts.length > 2 && (
+          <button
+            onClick={() => handleScroll('left')}
+            className="absolute -left-2 sm:left-0 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/80 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            aria-label="Anterior"
+          >
+            <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
+          </button>
+        )}
 
-        {/* FILM ROW */}
+        {/* HORIZONTAL FLEX CAROUSEL (2 CARDS VISIBLE AT ONCE) */}
         <motion.div
           ref={rowRef}
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="flex items-center gap-4 overflow-x-auto overflow-y-hidden py-4 px-1 scrollbar-thin scroll-smooth"
+          viewport={{ once: true, margin: "-50px" }}
+          className="flex items-stretch gap-4 md:gap-5 overflow-x-auto overflow-y-hidden py-2 px-0.5 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory"
         >
-          {visibleReacts.map((react) => {
+          {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
+
             return (
               <motion.div
                 key={react.id}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
                 onClick={() => onPlayVideo(react.id, react.obraId)}
-                className={`flex-shrink-0 w-64 md:w-80 bg-zinc-900/30 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-all cursor-pointer group/card ${
+                className={`w-[260px] sm:w-[300px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full ${
                   isEditorial 
-                    ? 'border-2 border-rose-500 hover:border-pink-400 shadow-[0_0_15px_rgba(244,63,94,0.15)] hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] ring-1 ring-rose-500/30' 
-                    : 'border border-zinc-850 hover:border-teal-500/40 hover:shadow-teal-500/10 shadow-black/50'
+                    ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
+                    : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
                 }`}
               >
-                {/* THUMBNAIL WITH DURATION BADGE */}
-                <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
+                {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
+                <div className="relative aspect-video w-full overflow-hidden bg-zinc-950 shrink-0">
                   <img
                     src={react.thumbnailUrl}
                     alt={react.titulo}
-                    className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
                     referrerPolicy="no-referrer"
                   />
-                  {/* Play Overlay */}
+                  
+                  {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${
-                      isEditorial 
-                        ? 'bg-rose-500/95 shadow-rose-500/40 text-white' 
-                        : 'bg-teal-600/90 shadow-teal-600/30 text-white'
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
+                      isEditorial ? 'bg-amber-500 text-black' : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black'
                     }`}>
-                      <Play className="w-6 h-6 fill-current ml-0.5" />
+                      <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-black" />
                     </div>
                   </div>
+
                   {/* Duration Badge */}
-                  <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs text-[10px] font-mono px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-1 border border-zinc-700/50">
-                    <Clock className="w-3 h-3 text-teal-400" /> {react.duracao}
+                  <span className="absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 bg-black/85 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold text-zinc-200 rounded-lg border border-zinc-700/60 shadow-md leading-none">
+                    <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                    <span>{react.duracao}</span>
                   </span>
-                  {/* Obra Tag Badge */}
-                  {associatedObra && (
-                    <span className="absolute top-2 left-2 bg-teal-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
-                      {associatedObra.titulo}
-                    </span>
-                  )}
-                  {/* Recommended Ribbon Badge */}
+
+                  {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2 right-2 bg-gradient-to-r from-rose-500 via-pink-400 to-rose-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded shadow-lg tracking-wider flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5 fill-white text-white" />
-                      Destaque
+                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(245,158,11,0.45)] border border-yellow-200/90 font-fredoka tracking-wider leading-none">
+                      <Sparkles className="w-3.5 h-3.5 fill-zinc-950 text-zinc-950 shrink-0" />
+                      <span>Recomenda</span>
                     </span>
                   )}
+
                   {/* Progress Bar */}
                   {progressMap && progressMap[react.id] !== undefined && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-zinc-950/60 backdrop-blur-xs">
+                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-zinc-950/60">
                       <div 
-                        className="h-full bg-teal-500 rounded-r-xs shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" 
+                        className="h-full bg-amber-400 rounded-r-xs shadow-[0_0_10px_rgba(251,191,36,0.9)]" 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>
@@ -225,60 +191,41 @@ export default function RowMovies({ title, reacts, obras, onPlayVideo, progressM
                 </div>
 
                 {/* CARD BODY */}
-                <div className="p-3.5 space-y-2">
-                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-teal-400 transition-colors">
+                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 bg-gradient-to-b from-zinc-900/50 to-zinc-900/80">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-white line-clamp-2 leading-snug group-hover/card:text-amber-400 transition-colors min-h-[2.5rem] sm:min-h-[2.75rem]">
                     {react.titulo}
                   </h3>
                   
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    {/* Channel name with red badge */}
-                    <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
+                  <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-zinc-800/60 min-w-0">
+                    <span 
+                      className="font-bold text-amber-400 font-fredoka truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight" 
+                      title={react.canalNome}
+                    >
                       {react.canalNome}
-                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full inline-block animate-pulse" />
                     </span>
-                    
-                    {/* View Count */}
-                    <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500 shrink-0">
-                      <Eye className="w-3.5 h-3.5" /> {formatViews(react.visualizacoes)}
-                    </span>
-                  </div>
-
-                  {/* CineReact Branding Footer */}
-                  <div className="flex items-center text-[10px] text-zinc-500/40 pt-1 border-t border-zinc-800/50 font-mono tracking-wider">
-                    <span>CineReact</span>
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-fredoka font-medium tracking-wide shadow-xs">
+                      <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{formatViews(react.visualizacoes)}</span>
+                    </div>
                   </div>
                 </div>
-
               </motion.div>
             );
           })}
-
-          {visibleCount < reacts.length && (
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
-              onClick={handleLoadMore}
-              className="flex-shrink-0 w-32 md:w-40 h-36 md:h-44 bg-zinc-900/60 rounded-lg flex flex-col items-center justify-center gap-3 cursor-pointer border border-zinc-800/80 hover:border-teal-600/40 hover:bg-zinc-800/80 transition-colors shadow-lg group/more"
-            >
-              <div className="w-10 h-10 rounded-full bg-zinc-800 group-hover/more:bg-teal-600 flex items-center justify-center transition-colors">
-                <Plus className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xs font-bold text-zinc-400 group-hover/more:text-white transition-colors uppercase tracking-wider text-center px-2">
-                Carregar<br/>Mais
-              </span>
-            </motion.div>
-          )}
         </motion.div>
 
         {/* RIGHT NAV ARROW */}
-        <button
-          onClick={() => handleScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 h-[85%] w-10 md:w-12 bg-black/70 hover:bg-black/90 text-white rounded-l flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-l border-zinc-800"
-        >
-          <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-
+        {reacts.length > 2 && (
+          <button
+            onClick={() => handleScroll('right')}
+            className="absolute -right-2 sm:right-0 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/80 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            aria-label="Próximo"
+          >
+            <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
+          </button>
+        )}
       </div>
     </div>
   );
 }
+

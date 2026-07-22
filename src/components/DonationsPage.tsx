@@ -29,8 +29,8 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
       >
         {/* Hero Title */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/25 text-rose-400 text-[10px] font-bold tracking-wider uppercase">
-            <Heart className="w-3 h-3 text-rose-500 fill-rose-500 animate-pulse" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] font-bold tracking-wider uppercase">
+            <Heart className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
             Seja um Apoiador
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider font-sans">
@@ -46,51 +46,51 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
           
           {/* Card 1 */}
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-teal-500/5 blur-2xl rounded-full" />
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
             <div>
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 mb-4 border border-teal-500/20">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
                 <Sparkles className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Nome Personalizado</h3>
               <p className="text-xs text-zinc-500 leading-relaxed">
-                Seu nome de usuário receberá uma estilização única com gradiente brilhante (<span className="text-teal-400 font-bold">Teal</span> para <span className="text-rose-400 font-bold">Rosa</span>) em todos os comentários, chat ao vivo e painéis.
+                Seu nome de usuário receberá uma estilização única com gradiente brilhante (<span className="text-amber-400 font-bold">Dourado</span> e <span className="text-yellow-300 font-bold">Amarelo</span>) em todos os comentários, chat ao vivo e painéis.
               </p>
             </div>
-            <div className="text-[10px] text-teal-400/80 font-mono mt-4 flex items-center gap-1.5">
+            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
               <Check className="w-3 h-3" /> Efeito visual exclusivo
             </div>
           </div>
 
           {/* Card 2 */}
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 blur-2xl rounded-full" />
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
             <div>
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 mb-4 border border-rose-500/20">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
                 <Gift className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Tag Exclusiva</h3>
               <p className="text-xs text-zinc-500 leading-relaxed">
-                Exiba orgulhosamente a tag <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-rose-500 to-teal-600 text-[9px] uppercase font-bold text-white tracking-wider">APOIADOR VIP</span> ao lado do seu nome, diferenciando você nas avaliações e chats.
+                Exiba orgulhosamente a tag <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] uppercase font-black text-black tracking-wider">APOIADOR VIP</span> ao lado do seu nome, diferenciando você nas avaliações e chats.
               </p>
             </div>
-            <div className="text-[10px] text-rose-400/80 font-mono mt-4 flex items-center gap-1.5">
+            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
               <Check className="w-3 h-3" /> Selo dourado de prestígio
             </div>
           </div>
 
           {/* Card 3 */}
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 blur-2xl rounded-full" />
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
             <div>
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 mb-4 border border-rose-500/20">
-                <Heart className="w-5 h-5 fill-rose-400/10" />
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
+                <Heart className="w-5 h-5 fill-amber-400/10" />
               </div>
               <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Qualquer Valor</h3>
               <p className="text-xs text-zinc-500 leading-relaxed">
                 Não exigimos quantias exorbitantes. Doando 1 real ou mais através de nossa chave de e-mail, seu status VIP é ativado de forma permanente!
               </p>
             </div>
-            <div className="text-[10px] text-rose-400/80 font-mono mt-4 flex items-center gap-1.5">
+            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
               <Check className="w-3 h-3" /> Apoio vitalício
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
         {/* Action Panel */}
         <div className="max-w-2xl mx-auto pt-4">
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 text-center flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-400 border border-teal-500/20 mb-1">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 mb-1">
               <Mail className="w-6 h-6" />
             </div>
             
@@ -129,8 +129,8 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             </div>
 
             {/* Instruction Advice */}
-            <div className="flex gap-3 bg-teal-950/20 border border-teal-500/20 rounded-xl p-4 text-xs text-teal-300 max-w-lg text-left">
-              <Gift className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5 animate-bounce" />
+            <div className="flex gap-3 bg-amber-950/20 border border-amber-500/20 rounded-xl p-4 text-xs text-amber-300 max-w-lg text-left">
+              <Gift className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-bounce" />
               <p className="leading-relaxed">
                 <strong>Ativação do Apoiador VIP:</strong> Após realizar sua contribuição, envie-nos o comprovante para o nosso e-mail <span className="font-semibold text-white">{pixEmail}</span> informando seu e-mail cadastrado na plataforma para ativarmos o seu selo exclusivo permanentemente!
               </p>

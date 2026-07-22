@@ -25,6 +25,7 @@ export interface ReactVideo {
   obraId: string;
   episodioNum?: number;
   isRecomendado?: boolean;
+  likes?: number;
 }
 
 export interface Comentario {
@@ -33,7 +34,8 @@ export interface Comentario {
   usuarioNome: string;
   usuarioEmail: string;
   texto: string;
-  nota: number; // 1 a 5
+  nota?: number; // 1 a 5 (legacy)
+  likes?: number; // Contador de curtidas CineReact
   criadoEm: string;
 }
 

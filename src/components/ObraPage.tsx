@@ -57,7 +57,7 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
         
         <div className="absolute bottom-0 left-0 p-8 w-full">
           <div className="flex flex-col gap-2">
-            <span className="text-teal-400 font-black tracking-widest text-xs uppercase bg-teal-600/20 px-3 py-1 rounded-full w-max border border-teal-500/30">
+            <span className="text-amber-400 font-black tracking-widest text-xs uppercase bg-amber-500/10 px-3 py-1 rounded-full w-max border border-amber-500/20">
               {obra.tipo}
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight">
@@ -74,19 +74,19 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
       <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-zinc-800 pb-4">
         <button 
           onClick={() => setFilter('relevantes')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'relevantes' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'relevantes' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
         >
           Mais Relevantes
         </button>
         <button 
           onClick={() => setFilter('recentes')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'recentes' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'recentes' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
         >
           Mais Recentes
         </button>
         <button 
           onClick={() => setFilter('antigos')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'antigos' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'antigos' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
         >
           Mais Antigos
         </button>
@@ -100,7 +100,7 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
             whileHover={{ scale: 1.03, y: -5 }}
             transition={{ duration: 0.2 }}
             onClick={() => onPlayVideo(react.id, react.obraId)}
-            className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-teal-500/40 transition-colors cursor-pointer group/card flex flex-col"
+            className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-amber-500/40 transition-colors cursor-pointer group/card flex flex-col"
           >
             <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
               <img
@@ -110,17 +110,17 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-teal-600/90 flex items-center justify-center shadow-lg shadow-teal-600/30">
-                  <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                <div className="w-12 h-12 rounded-full bg-amber-500/90 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                  <Play className="w-6 h-6 fill-black text-black ml-0.5" />
                 </div>
               </div>
               <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs text-[10px] font-mono px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-1 border border-zinc-700/50">
-                <Clock className="w-3 h-3 text-teal-400" /> {react.duracao}
+                <Clock className="w-3 h-3 text-amber-400" /> {react.duracao}
               </span>
             </div>
             
             <div className="p-4 flex flex-col flex-1">
-              <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-teal-400 transition-colors mb-2">
+              <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-amber-400 transition-colors mb-2">
                 {react.titulo}
               </h3>
               

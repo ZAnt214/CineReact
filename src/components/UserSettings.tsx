@@ -128,7 +128,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
         {/* Header Section */}
         <div>
           <h1 className="text-3xl font-black text-white uppercase tracking-wider flex items-center gap-3">
-            <Shield className="w-8 h-8 text-teal-500" />
+            <Shield className="w-8 h-8 text-amber-400" />
             Configurações de Conta
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
@@ -147,7 +147,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="relative group">
                 {/* Glowing Aura if Donor */}
                 {user.isDonor && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-teal-500 via-pink-500 to-rose-500 blur-md opacity-75 animate-pulse" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-300 blur-md opacity-75 animate-pulse" />
                 )}
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center mx-auto">
                   {avatarUrl ? (
@@ -171,7 +171,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div>
                 <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
                   user.isDonor 
-                    ? "bg-gradient-to-r from-teal-400 via-pink-400 to-rose-400 bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(244,63,94,0.3)] animate-pulse" 
+                    ? "bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(245,158,11,0.3)] animate-pulse" 
                     : "text-white"
                 }`}>
                   {user.nome}
@@ -185,15 +185,15 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
               
               {user.isDonor ? (
-                <div className="bg-gradient-to-r from-teal-950/40 via-rose-950/30 to-pink-950/40 border border-rose-500/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/10 blur-xl rounded-full" />
+                <div className="bg-gradient-to-r from-amber-950/40 via-yellow-950/30 to-amber-950/40 border border-amber-500/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/10 blur-xl rounded-full" />
                   
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-extrabold uppercase tracking-widest">
-                    <Sparkles className="w-3 h-3 text-rose-400 animate-spin-slow" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-extrabold uppercase tracking-widest">
+                    <Sparkles className="w-3 h-3 text-amber-400 animate-spin-slow" />
                     APOIADOR VIP
                   </div>
                   <p className="text-[11px] text-zinc-400 leading-normal">
-                    Seu nome brilha com destaque! Você tem a tag exclusiva de doador além do seu nome estilizado em tons de teal e rosa. Obrigado por apoiar o CineReact!
+                    Seu nome brilha com destaque! Você tem a tag exclusiva de doador além do seu nome estilizado em tons de amarelo e dourado. Obrigado por apoiar o CineReact!
                   </p>
                 </div>
               ) : (
@@ -206,9 +206,9 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   </p>
                   <button
                     onClick={onNavigateToDonations}
-                    className="w-full bg-teal-600/15 hover:bg-teal-600/25 border border-teal-500/20 hover:border-teal-500/40 text-teal-400 text-[11px] font-bold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 text-[11px] font-bold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Heart className="w-3.5 h-3.5 text-teal-400 fill-teal-400/20" /> Seja um Apoiador
+                    <Heart className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" /> Seja um Apoiador
                   </button>
                 </div>
               )}
@@ -219,7 +219,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           {/* Right Panel: Settings Form */}
           <div className="md:col-span-7 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
             <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-              <User className="text-teal-500 w-4 h-4" /> Editar Informações
+              <User className="text-amber-400 w-4 h-4" /> Editar Informações
             </h2>
 
             {errorMsg && (
@@ -251,7 +251,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-xl p-6 text-center transition-all relative ${
                     dragActive 
-                      ? 'border-teal-500 bg-teal-500/5' 
+                      ? 'border-amber-500 bg-amber-500/5' 
                       : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40'
                   }`}
                 >
@@ -268,7 +268,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs font-bold text-zinc-300">
-                        Arraste sua foto aqui ou <span className="text-teal-400 hover:underline">escolha um arquivo</span>
+                        Arraste sua foto aqui ou <span className="text-amber-400 hover:underline">escolha um arquivo</span>
                       </p>
                       <p className="text-[10px] text-zinc-500">
                         Formatos suportados: PNG, JPG, JPEG ou WEBP (Max. 2.5MB)
@@ -278,7 +278,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                 </div>
 
                 {avatarUrl && (
-                  <div className="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-lg border border-zinc-850">
+                  <div className="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-lg border border-zinc-855">
                     <img 
                       src={avatarUrl} 
                       alt="Thumbnail" 
@@ -313,7 +313,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={3}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-teal-500 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
                 />
                 <div className="flex justify-end text-[9px] text-zinc-600 font-mono">
                   {descricao.length}/180 caracteres
@@ -339,7 +339,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Sua nova senha secreta"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-teal-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -356,7 +356,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Repita a nova senha"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-teal-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -365,10 +365,10 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-teal-950/25"
+                className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-amber-500/20"
               >
                 {loading ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 ) : (
                   <>Salvar Alterações</>
                 )}

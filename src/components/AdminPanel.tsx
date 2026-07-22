@@ -433,7 +433,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   if (!user.isAdmin) {
     return (
       <div className="min-h-screen pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center">
-        <AlertCircle className="w-16 h-16 text-teal-500 mb-4 animate-pulse" />
+        <AlertCircle className="w-16 h-16 text-amber-400 mb-4 animate-pulse" />
         <h2 className="text-xl font-bold mb-2">Acesso Negado</h2>
         <p className="text-zinc-500 max-w-md text-xs leading-relaxed">
           Este painel administrativo é restrito para administradores credenciados do CineReact.
@@ -450,7 +450,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-            <Settings className="text-teal-500 w-8 h-8" />
+            <Settings className="text-amber-400 w-8 h-8" />
             Painel do Administrador
           </h1>
           <p className="text-xs text-zinc-500 mt-1">Cadastre, edite e organize o acervo de reacts do CineReact</p>
@@ -468,14 +468,14 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-teal-400">
+            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-amber-400">
               <Database className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-black text-white uppercase tracking-wider">Integração Supabase</h2>
                 {loadingSupabaseStatus ? (
-                  <span className="w-3 h-3 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+                  <span className="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
                 ) : supabaseStatus?.active ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">
                     Conectado
@@ -509,7 +509,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleSyncSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-teal-500/30 text-teal-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-amber-500/30 text-amber-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   {syncingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Server className="w-3.5 h-3.5" />}
                   Importar do Supabase
@@ -518,7 +518,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleMigrateSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-teal-950/25"
+                  className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-amber-500/20"
                 >
                   {migratingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
                   Exportar Local para Supabase
@@ -557,7 +557,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             className="flex items-center justify-between w-full text-zinc-400 hover:text-white transition-colors text-xs font-bold"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-rose-500" />
+              <Sparkles className="w-4 h-4 text-amber-400" />
               Como configurar as tabelas e chaves no Supabase?
             </span>
             {showSqlInstructions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -578,7 +578,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div>SUPABASE_URL = "https://seu-projeto.supabase.co"</div>
                   <div>SUPABASE_ANON_KEY = "sua-anon-key-secreta"</div>
                 </div>
-                <p className="text-[10px] text-rose-400/80">
+                <p className="text-[10px] text-amber-400/80">
                   * Após salvar as chaves, a reinicialização do servidor é automática e a integração com o Supabase ficará ativa imediatamente!
                 </p>
               </div>
@@ -616,8 +616,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         <div className="lg:col-span-2 space-y-8">
           
           {/* GEMINI INTELLIGENT DISCOVERY (EASY CADASTRO!) */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-teal-500/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin-slow" />
               Descoberta e Cadastro Inteligente (Gemini AI)
             </h2>
@@ -632,12 +632,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={importQuery}
                 onChange={(e) => setImportQuery(e.target.value)}
                 placeholder="ex: Inception, Deadpool 3, Elden Ring, Naruto..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-teal-600"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
               />
               <button
                 onClick={handleIntelligentImport}
                 disabled={importing || !importQuery.trim()}
-                className="bg-teal-600 hover:bg-teal-700 disabled:bg-zinc-800 disabled:text-zinc-500 font-bold px-4 py-2.5 rounded transition-all cursor-pointer"
+                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-amber-500/20"
               >
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
@@ -645,13 +645,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* IMPORTAR CANAL DO YOUTUBE */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-teal-500/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
-              <Youtube className="w-4 h-4 text-teal-500" />
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+              <Youtube className="w-4 h-4 text-amber-400" />
               Importar Canal do YouTube (Criar Categoria)
             </h2>
             <p className="text-xs text-zinc-400">
-              Cole o link de um canal do YouTube ou digite o handle (ex: <span className="text-teal-400 font-mono font-bold">@casimiro</span>). O sistema irá obter os dados do canal, cadastrá-lo como uma nova categoria e buscar todos os seus reacts automaticamente!
+              Cole o link de um canal do YouTube ou digite o handle (ex: <span className="text-amber-400 font-mono font-bold">@casimiro</span>). O sistema irá obter os dados do canal, cadastrá-lo como uma nova categoria e buscar todos os seus reacts automaticamente!
             </p>
 
             <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
@@ -660,12 +660,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={canalUrl}
                 onChange={(e) => setCanalUrl(e.target.value)}
                 placeholder="ex: @casimiro, @alanzoka, ou link do canal..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-teal-600"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
               />
               <button
                 type="submit"
                 disabled={importingCanal || !canalUrl.trim()}
-                className="bg-teal-600 hover:bg-teal-700 disabled:bg-zinc-800 disabled:text-zinc-500 font-bold px-4 py-2.5 rounded transition-all cursor-pointer flex items-center gap-1.5"
+                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
               >
                 {importingCanal ? "Importando..." : "Importar Canal"}
               </button>
@@ -675,7 +675,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* MANUAL CADASTRO */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4 shadow-md">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Plus className="text-teal-500 w-5 h-5" />
+              <Plus className="text-amber-400 w-5 h-5" />
               Cadastrar Obra Manualmente
             </h2>
 
@@ -688,7 +688,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={obraId}
                   onChange={(e) => setObraId(e.target.value)}
                   placeholder="interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -700,7 +700,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -709,7 +709,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as any)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 >
                   <option value="filme">Filme</option>
                   <option value="serie">Série</option>
@@ -725,7 +725,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   required
                   value={ano}
                   onChange={(e) => setAno(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -737,7 +737,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={generos}
                   onChange={(e) => setGeneros(e.target.value)}
                   placeholder="Ficção, Ação, Aventura"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -749,7 +749,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={sinopse}
                   onChange={(e) => setSinopse(e.target.value)}
                   placeholder="Escreva a sinopse oficial aqui..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -760,7 +760,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={banner}
                   onChange={(e) => setBanner(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -771,7 +771,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={poster}
                   onChange={(e) => setPoster(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -782,7 +782,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={trailerUrl}
                   onChange={(e) => setTrailerUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-teal-600"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -792,7 +792,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   id="destacado"
                   checked={destacado}
                   onChange={(e) => setDestacado(e.target.checked)}
-                  className="w-4 h-4 rounded text-teal-600 accent-teal-600"
+                  className="w-4 h-4 rounded text-amber-500 accent-amber-500"
                 />
                 <label htmlFor="destacado" className="text-zinc-300 font-semibold cursor-pointer">Destacar obra no Banner principal da Home Page</label>
               </div>
@@ -801,7 +801,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingObra}
-                  className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-zinc-800 text-white font-bold py-2.5 rounded transition-all cursor-pointer"
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-amber-500/10"
                 >
                   {submittingObra ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -813,7 +813,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* OBRAS CATALOG LIST */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Film className="text-teal-500 w-5 h-5" />
+              <Film className="text-amber-400 w-5 h-5" />
               Obras Cadastradas ({obras.length})
             </h2>
 
@@ -825,7 +825,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     <div>
                       <h4 className="font-bold text-white">{o.titulo}</h4>
                       <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-500 font-mono">
-                        <span className="uppercase text-teal-400 font-bold">{o.tipo}</span>
+                        <span className="uppercase text-amber-400 font-bold">{o.tipo}</span>
                         <span>{o.ano}</span>
                       </div>
                     </div>
@@ -841,7 +841,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     </button>
                     <button
                       onClick={() => handleDeleteObra(o.id)}
-                      className="p-1.5 rounded bg-rose-950/20 border border-rose-900/30 text-rose-500 hover:bg-rose-600 hover:text-white transition-colors"
+                      className="p-1.5 rounded bg-red-950/20 border border-red-900/30 text-red-500 hover:bg-red-600 hover:text-white transition-colors"
                       title="Deletar Obra"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -855,7 +855,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* GERENCIAR CINEREACT RECOMENDA */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Sparkles className="text-rose-500 w-5 h-5 animate-pulse" />
+              <Sparkles className="text-amber-400 w-5 h-5 animate-pulse" />
               CineReact Recomenda (Escolha dos Editores)
             </h2>
             <p className="text-xs text-zinc-400">
@@ -863,8 +863,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             </p>
 
             {/* ADD RECOMMENDED VIDEO BY LINK */}
-            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-rose-500/5 rounded-lg border border-rose-500/20">
-              <label className="block text-rose-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-amber-500/5 rounded-lg border border-amber-500/20">
+              <label className="block text-amber-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 Adicionar Destaque por Link do YouTube
               </label>
@@ -874,12 +874,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={recomendadoLink}
                   onChange={(e) => setRecomendadoLink(e.target.value)}
                   placeholder="Cole o link do vídeo (ex: https://www.youtube.com/watch?v=...)"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-rose-500 text-white"
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-amber-500 text-white"
                 />
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-rose-500 text-black font-bold text-xs hover:bg-rose-400 transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-4 rounded bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>
@@ -905,7 +905,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={reactSearch}
                   onChange={(e) => setReactSearch(e.target.value)}
                   placeholder="Digite o título do vídeo..."
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-teal-600 text-white"
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-amber-500 text-white"
                 />
               </div>
 
@@ -929,8 +929,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                         disabled={togglingId === r.id}
                         className={`flex-shrink-0 px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${
                           r.isRecomendado 
-                            ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/40' 
-                            : 'bg-teal-600 text-white hover:bg-teal-700'
+                            ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30 hover:bg-amber-600/40' 
+                            : 'bg-amber-500 text-black hover:bg-amber-400'
                         }`}
                       >
                         {r.isRecomendado ? 'Remover Destaque' : 'Adicionar Destaque'}
@@ -956,7 +956,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     </div>
                     <button
                       onClick={() => handleToggleRecomendado(r.id, true)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-rose-400 hover:text-rose-300 hover:bg-zinc-850"
+                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-red-400 hover:text-red-300 hover:bg-zinc-850 cursor-pointer"
                       title="Remover Recomendação"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -980,7 +980,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* USER MANAGEMENT (VIP STATUS ACTIVATOR) */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Users className="text-teal-500 w-5 h-5" />
+              <Users className="text-amber-400 w-5 h-5" />
               Usuários Registrados ({usuarios.length})
             </h2>
 
@@ -1009,7 +1009,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div key={u.email} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`font-bold ${u.isDonor ? 'bg-gradient-to-r from-teal-400 via-pink-400 to-rose-400 bg-clip-text text-transparent font-extrabold' : 'text-zinc-300'}`}>
+                        <span className={`font-bold ${u.isDonor ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent font-extrabold' : 'text-zinc-300'}`}>
                           {u.username}
                         </span>
                         {u.isAdmin && (
@@ -1023,7 +1023,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       onClick={handleToggleVIP}
                       className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                         u.isDonor 
-                          ? 'bg-rose-500/15 border border-rose-500/20 text-rose-400 hover:bg-rose-500/30' 
+                          ? 'bg-amber-500/15 border border-amber-500/20 text-amber-400 hover:bg-amber-500/30' 
                           : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -1038,7 +1038,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* LATEST COMMENTS */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <MessageSquare className="text-teal-500 w-5 h-5" />
+              <MessageSquare className="text-amber-400 w-5 h-5" />
               Últimos Comentários ({comentarios.length})
             </h2>
 
@@ -1049,7 +1049,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     <span className="font-bold text-white truncate">{c.usuarioNome}</span>
                     <button
                       onClick={() => handleDeleteComment(c.id)}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors"
+                      className="text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                       title="Deletar Comentário"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
