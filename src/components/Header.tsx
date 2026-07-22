@@ -34,7 +34,6 @@ export default function Header({
 
   // PWA App Installation States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -50,13 +49,18 @@ export default function Header({
 
   const handleInstallApp = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice && choice.outcome === 'accepted') {
-        setDeferredPrompt(null);
+      try {
+        await deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          setDeferredPrompt(null);
+        }
+      } catch (err) {
+        console.log('Erro ao disparar prompt de instalação:', err);
       }
     } else {
-      setShowInstallModal(true);
+      // Direct native browser alert fallback for iOS / browsers without beforeinstallprompt event
+      alert('Para instalar o aplicativo no seu dispositivo, acesse as opções do navegador e selecione "Adicionar à Tela Inicial" ou "Instalar Aplicativo".');
     }
   };
 
@@ -1065,97 +1069,6 @@ export default function Header({
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      {/* APP INSTALLATION MODAL */}
-      <AnimatePresence>
-        {showInstallModal && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowInstallModal(false)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 15 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative bg-zinc-950 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 text-white z-10 overflow-hidden"
-            >
-              {/* Top Accent Line */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500" />
-
-              <div className="flex items-start justify-between gap-4 pt-1">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                    <Download className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-extrabold text-white">Instalar CineReact App</h3>
-                    <p className="text-xs text-zinc-400">Instale direto no seu celular ou computador</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowInstallModal(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-3 text-xs text-zinc-300 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4">
-                <div className="space-y-1">
-                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
-                    📱 Android / Chrome:
-                  </span>
-                  <p className="text-zinc-300 leading-relaxed pl-1">
-                    Toque no menu de três pontos <strong className="text-white">⋮</strong> no topo do seu navegador e selecione <strong className="text-amber-300">"Instalar aplicativo"</strong> ou <strong className="text-amber-300">"Adicionar à Tela Inicial"</strong>.
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-zinc-800 space-y-1">
-                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
-                    🍏 iPhone / iPad (Safari):
-                  </span>
-                  <p className="text-zinc-300 leading-relaxed pl-1">
-                    Toque no ícone de <strong className="text-white">Compartilhar</strong> na barra do Safari e selecione <strong className="text-amber-300">"Adicionar à Tela de Início"</strong>.
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-zinc-800 space-y-1">
-                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
-                    💻 Computador (PC / Mac):
-                  </span>
-                  <p className="text-zinc-300 leading-relaxed pl-1">
-                    Clique no ícone de instalação <strong className="text-white">⊕</strong> ou no símbolo de computador na barra de endereço do seu navegador Chrome/Edge.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() => {
-                    if (deferredPrompt) {
-                      deferredPrompt.prompt();
-                    }
-                    setShowInstallModal(false);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-colors shadow-lg shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Instalar Agora</span>
-                </button>
-                <button
-                  onClick={() => setShowInstallModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs transition-colors border border-zinc-800 cursor-pointer"
-                >
-                  Fechar
-                </button>
-              </div>
             </motion.div>
           </div>
         )}
