@@ -67,6 +67,76 @@ function parseISO8601Duration(durationStr: string): string {
   }
 }
 
+function isShortOrInvalidVideo(video: any): boolean {
+  if (!video) return true;
+  const snippet = video.snippet || {};
+  const contentDetails = video.contentDetails || {};
+
+  // 1. Duration check: YouTube Shorts/Reels are <= 120s (2 minutes)
+  const durationSec = getDurationSeconds(contentDetails.duration || '');
+  if (durationSec > 0 && durationSec <= 120) {
+    return true;
+  }
+
+  // 2. Title & description hashtag/keyword check
+  const title = (snippet.title || '').toLowerCase();
+  const description = (snippet.description || '').toLowerCase();
+  const shortsKeywords = [
+    '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
+    '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsforyou', '#reelsinstagram',
+    '#shortsclip', ' #shorts', ' #reels', ' #short'
+  ];
+  if (shortsKeywords.some(kw => title.includes(kw) || description.includes(kw))) {
+    return true;
+  }
+
+  // 3. Thumbnail check
+  const thumbnailUrl = snippet.thumbnails?.high?.url || 
+                       snippet.thumbnails?.medium?.url || 
+                       snippet.thumbnails?.default?.url || 
+                       '';
+  if (!thumbnailUrl || thumbnailUrl.trim() === '' || thumbnailUrl.includes('no_thumbnail')) {
+    return true;
+  }
+
+  return false;
+}
+
+function isShortOrInvalidReact(r: any): boolean {
+  if (!r) return true;
+  if (!r.thumbnailUrl || String(r.thumbnailUrl).trim() === '' || String(r.thumbnailUrl).includes('no_thumbnail')) {
+    return true;
+  }
+  const title = String(r.titulo || '').toLowerCase();
+  const shortsKeywords = [
+    '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
+    '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsforyou', '#reelsinstagram',
+    '#shortsclip', ' #shorts', ' #reels', ' #short'
+  ];
+  if (shortsKeywords.some(kw => title.includes(kw))) {
+    return true;
+  }
+  const dur = r.duracao;
+  if (dur) {
+    const parts = String(dur).split(':');
+    if (parts.length === 3) {
+      return false; // hh:mm:ss -> long video
+    } else if (parts.length === 2) {
+      const mins = parseInt(parts[0], 10);
+      const secs = parseInt(parts[1], 10);
+      if (!isNaN(mins) && !isNaN(secs) && (mins * 60 + secs) <= 120) {
+        return true;
+      }
+    } else if (parts.length === 1) {
+      const secs = parseInt(parts[0], 10);
+      if (!isNaN(secs) && secs <= 120) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean; videoData?: any }> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") {
@@ -91,13 +161,12 @@ async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean
     const isPublic = video.status?.privacyStatus === 'public';
     const isEmbeddable = video.status?.embeddable === true;
     const isProcessed = video.status?.uploadStatus === 'processed';
-          const durationSec = getDurationSeconds(video.contentDetails?.duration || '');
-          const isNotShort = durationSec > 60; // Filter out shorts (< 60s)
+    const isNotShort = !isShortOrInvalidVideo(video);
 
-          if (isPublic && isEmbeddable && isProcessed && isNotShort) {
+    if (isPublic && isEmbeddable && isProcessed && isNotShort) {
       return { isValid: true, videoData: video };
     }
-    console.warn(`[YouTube API] Vídeo ${videoId} falhou na validação de disponibilidade: public=${isPublic}, embeddable=${isEmbeddable}, processed=${isProcessed}`);
+    console.warn(`[YouTube API] Vídeo ${videoId} falhou na validação de disponibilidade (public=${isPublic}, embeddable=${isEmbeddable}, isNotShort=${isNotShort})`);
     return { isValid: false };
   } catch (error) {
     console.error(`[YouTube API] Erro de rede ao validar vídeo ${videoId}:`, error);
@@ -162,7 +231,7 @@ async function syncChannelVideos(channelId: string, obraId: string) {
           const isEmbeddable = video.status?.embeddable === true;
           const isProcessed = video.status?.uploadStatus === 'processed';
 
-          if (isPublic && isEmbeddable && isProcessed) {
+          if (isPublic && isEmbeddable && isProcessed && !isShortOrInvalidVideo(video)) {
             const videoId = video.id;
             const snippet = video.snippet || {};
             const contentDetails = video.contentDetails || {};
@@ -255,7 +324,7 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
         const isEmbeddable = video.status?.embeddable === true;
         const isProcessed = video.status?.uploadStatus === 'processed';
 
-        if (isPublic && isEmbeddable && isProcessed) {
+        if (isPublic && isEmbeddable && isProcessed && !isShortOrInvalidVideo(video)) {
           const videoId = video.id;
           const snippet = video.snippet || {};
           const contentDetails = video.contentDetails || {};
@@ -267,9 +336,6 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
                              snippet.thumbnails?.default?.url || 
                              `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
-          const durationSec = getDurationSeconds(contentDetails.duration || 'PT15M00S');
-          if (durationSec <= 60) continue; // Filter out shorts
-          
           const duracao = parseISO8601Duration(contentDetails.duration || 'PT15M00S');
           const visualizacoes = Number(statistics.viewCount) || 12000;
           const canalNome = snippet.channelTitle || 'Canal do YouTube';
@@ -916,7 +982,7 @@ app.delete("/api/obras/:id", (req, res) => {
 // Reacts routes
 app.get("/api/reacts", (req, res) => {
   try {
-    const allReacts = localDb.getReacts();
+    const allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
     // Sort from newest to oldest
     allReacts.sort((a, b) => new Date(b.publicadoEm || 0).getTime() - new Date(a.publicadoEm || 0).getTime());
     // Limit to 500 to prevent large payloads and timeouts

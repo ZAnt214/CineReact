@@ -107,24 +107,47 @@ export default function App() {
       }
 
       if (Array.isArray(reactsData) && reactsData.length > 0) {
-        // Filter out shorts (duracao <= 60 seconds)
-        const isShort = (duracaoStr: string): boolean => {
+        // Filter out shorts, reels, vertical videos (duracao <= 90s, shorts hashtags, or missing thumbnails)
+        const isShortOrInvalid = (r: ReactVideo): boolean => {
+          if (!r) return true;
+
+          // 1. Thumbnail check
+          if (!r.thumbnailUrl || r.thumbnailUrl.trim() === '' || r.thumbnailUrl.includes('no_thumbnail')) {
+            return true;
+          }
+
+          // 2. Title keywords (hashtags or explicit shorts/reels markers)
+          const lowerTitle = (r.titulo || '').toLowerCase();
+          const shortsKeywords = [
+            '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
+            '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsclip', ' #shorts', ' #reels', ' #short'
+          ];
+          if (shortsKeywords.some(kw => lowerTitle.includes(kw))) {
+            return true;
+          }
+
+          // 3. Duration check (filter <= 120 seconds / 2 minutes)
+          const duracaoStr = r.duracao;
           if (!duracaoStr) return false;
           const parts = duracaoStr.split(':');
+          if (parts.length === 3) {
+            return false; // hh:mm:ss -> long video
+          }
           if (parts.length === 2) {
             const mins = parseInt(parts[0], 10);
             const secs = parseInt(parts[1], 10);
             if (isNaN(mins) || isNaN(secs)) return false;
-            return (mins * 60 + secs) <= 60;
+            return (mins * 60 + secs) <= 120; // Filter out <= 120s (2 min)
           }
           if (parts.length === 1) {
             const secs = parseInt(parts[0], 10);
             if (isNaN(secs)) return false;
-            return secs <= 60;
+            return secs <= 120;
           }
           return false;
         };
-        const filteredReacts = reactsData.filter((r: ReactVideo) => !isShort(r.duracao));
+
+        const filteredReacts = reactsData.filter((r: ReactVideo) => !isShortOrInvalid(r));
         setReacts(filteredReacts);
       }
 
