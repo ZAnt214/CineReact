@@ -12,19 +12,21 @@ export default function RowMoviesSkeleton() {
   const skeletonCards = Array.from({ length: 6 });
 
   return (
-    <div className="space-y-12 pb-24 pt-24 animate-pulse">
+    <div className="space-y-12 pb-24 pt-24 animate-pulse max-w-7xl mx-auto w-full">
       {rows.map((row, rowIndex) => (
-        <div key={rowIndex} className="space-y-4 px-4 md:px-8">
+        <div key={rowIndex} className="space-y-4">
           
           {/* Row Title Skeleton */}
-          <div className={`${row.titleWidth} h-6 bg-zinc-800 rounded-md`} />
+          <div className="px-4 md:px-8">
+            <div className={`${row.titleWidth} h-6 bg-zinc-800 rounded-md`} />
+          </div>
 
           {/* Horizontal Row Skeletons Container */}
-          <div className="flex items-center gap-4 overflow-x-hidden py-4 px-1">
+          <div className="flex items-center gap-3.5 sm:gap-4 md:gap-5 overflow-x-hidden py-2.5 px-4 md:px-8">
             {skeletonCards.map((_, cardIndex) => (
               <div
                 key={cardIndex}
-                className="flex-shrink-0 w-64 md:w-80 bg-zinc-900/30 backdrop-blur-sm rounded-lg overflow-hidden border border-zinc-850/60 shadow-lg shadow-black/50"
+                className="shrink-0 w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] bg-zinc-900/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-zinc-850/60 shadow-lg shadow-black/50"
               >
                 {/* Thumbnail Skeleton */}
                 <div className="relative h-36 md:h-44 w-full bg-zinc-900/50 flex items-center justify-center">

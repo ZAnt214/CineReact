@@ -4,15 +4,6 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* Midnight Charcoal global theme palette & soft electric purple highlights */
-  --color-indigo-300: #c084fc;
-  --color-indigo-400: #a78bfa;
-  --color-indigo-500: #7c3aed;
-  --color-indigo-600: #6d28d9;
-  --color-indigo-700: #5b21b6;
-  --color-indigo-950: #1e1b4b;
-  --color-purple-500: #7c3aed;
 }
 
 .font-fredoka {
@@ -43,7 +34,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+  background: #f59e0b;
 }
 
 /* Hide scrollbar completely for all horizontal-scrolling carousels */
@@ -58,19 +49,16 @@
   scrollbar-width: none !important;  /* Firefox */
 }
 
-body {
+html, body, #root {
   background-color: #0d0d10;
   color: #ffffff;
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   width: 100%;
   max-width: 100vw;
-}
-
-html {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 *, *::before, *::after {

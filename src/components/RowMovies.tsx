@@ -12,6 +12,8 @@ interface RowMoviesProps {
   progressMap?: Record<string, number>;
   isEditorial?: boolean;
   limit?: number;
+  onTitleClick?: () => void;
+  onChannelClick?: (channelNameOrId: string) => void;
 }
 
 const containerVariants = {
@@ -42,7 +44,9 @@ export default function RowMovies({
   obras, 
   onPlayVideo, 
   progressMap, 
-  isEditorial 
+  isEditorial,
+  onTitleClick,
+  onChannelClick
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +55,25 @@ export default function RowMovies({
     once: true,
     margin: "0px 0px 200px 0px"
   });
+
+  // Check if title matches a channel in obras
+  const matchingChannel = obras.find(o => 
+    o.tipo === 'canal' && (
+      o.titulo.toLowerCase() === title.toLowerCase() ||
+      o.titulo.toLowerCase().replace('canal ', '') === title.toLowerCase() ||
+      title.toLowerCase().includes(o.titulo.toLowerCase().replace('canal ', ''))
+    )
+  );
+
+  const handleHeaderTitleClick = () => {
+    if (onTitleClick) {
+      onTitleClick();
+    } else if (matchingChannel && onChannelClick) {
+      onChannelClick(matchingChannel.id);
+    }
+  };
+
+  const isClickableTitle = Boolean(onTitleClick || (matchingChannel && onChannelClick));
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (rowRef.current) {
@@ -75,31 +98,23 @@ export default function RowMovies({
     return views + ' views';
   };
 
-  if (!hasEntered) {
-    return (
-      <div ref={containerRef} className="space-y-4 relative px-4 md:px-8 min-h-[260px] max-w-7xl mx-auto w-full">
-        <h2 className="text-base sm:text-lg md:text-xl font-bold text-zinc-600 inline-flex items-center gap-1.5 uppercase tracking-wider font-sans animate-pulse">
-          {title}
-        </h2>
-        <div className="flex gap-4 md:gap-5 overflow-hidden py-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={index}
-              className="w-[260px] sm:w-[300px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/30 rounded-2xl overflow-hidden border border-zinc-800/40 animate-pulse aspect-video"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className="space-y-3.5 relative px-4 md:px-8 max-w-7xl mx-auto w-full group/row">
+    <div ref={containerRef} className="space-y-3.5 relative max-w-7xl mx-auto w-full group/row">
       {/* ROW TITLE & ACTIONS */}
-      <div className="flex flex-col gap-1 px-1 mb-1">
+      <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-white hover:text-amber-400 transition-colors cursor-pointer uppercase tracking-wider font-sans leading-none">
-            {title}
+          <h2 
+            onClick={isClickableTitle ? handleHeaderTitleClick : undefined}
+            className={`text-base sm:text-lg md:text-xl font-extrabold text-white transition-colors uppercase tracking-wider font-sans leading-none flex items-center gap-2 group/rowtitle ${
+              isClickableTitle ? 'hover:text-amber-400 cursor-pointer' : ''
+            }`}
+          >
+            <span>{title}</span>
+            {isClickableTitle && (
+              <span className="text-[10px] sm:text-xs font-bold text-amber-400/80 group-hover/rowtitle:text-amber-300 normal-case tracking-normal transition-colors bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                Ver perfil
+              </span>
+            )}
           </h2>
         </div>
         {isEditorial && (
@@ -110,26 +125,26 @@ export default function RowMovies({
       </div>
 
       {/* HORIZONTAL CAROUSEL CONTAINER */}
-      <div className="relative">
+      <div className="relative max-w-full">
         {/* LEFT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute -left-2 sm:left-0 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/80 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
         )}
 
-        {/* HORIZONTAL FLEX CAROUSEL (2 CARDS VISIBLE AT ONCE) */}
+        {/* HORIZONTAL FLEX CAROUSEL */}
         <motion.div
           ref={rowRef}
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="flex items-stretch gap-4 md:gap-5 overflow-x-auto overflow-y-hidden py-2 px-0.5 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory"
+          className="flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
@@ -141,7 +156,7 @@ export default function RowMovies({
                 whileHover={{ scale: 1.02, y: -2 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
                 onClick={() => onPlayVideo(react.id, react.obraId)}
-                className={`w-[260px] sm:w-[300px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full ${
+                className={`w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
@@ -198,8 +213,16 @@ export default function RowMovies({
                   
                   <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-zinc-800/60 min-w-0">
                     <span 
-                      className="font-bold text-amber-400 font-fredoka truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight" 
-                      title={react.canalNome}
+                      onClick={(e) => {
+                        if (onChannelClick) {
+                          e.stopPropagation();
+                          onChannelClick(react.canalNome);
+                        }
+                      }}
+                      className={`font-bold text-amber-400 font-fredoka truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
+                        onChannelClick ? 'hover:underline hover:text-amber-300 cursor-pointer' : ''
+                      }`}
+                      title={`Ver canal ${react.canalNome}`}
                     >
                       {react.canalNome}
                     </span>
@@ -212,13 +235,16 @@ export default function RowMovies({
               </motion.div>
             );
           })}
+          
+          {/* ENDING SPACER FOR RIGHT PADDING IN SCROLL CONTAINERS */}
+          <div className="shrink-0 w-2 sm:w-4 lg:w-6" aria-hidden="true" />
         </motion.div>
 
         {/* RIGHT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('right')}
-            className="absolute -right-2 sm:right-0 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/80 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Próximo"
           >
             <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />

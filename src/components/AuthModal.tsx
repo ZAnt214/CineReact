@@ -160,7 +160,7 @@ export default function AuthModal({
             className="relative w-full max-w-md bg-zinc-950 border border-zinc-800/80 rounded-2xl p-7 shadow-2xl overflow-hidden text-zinc-300"
           >
             {/* Visual element decorator */}
-            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-red-500" />
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
             
             {/* Close Button */}
             <button 
@@ -172,18 +172,18 @@ export default function AuthModal({
 
             {/* Title / Description */}
             <div className="text-center mt-3 mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold tracking-wider uppercase mb-3">
-                <Sparkles className="w-3 h-3 animate-pulse text-indigo-400" />
-                Cine React Club
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3 font-fredoka">
+                <Sparkles className="w-3 h-3 animate-pulse text-amber-400" />
+                CineReact
               </div>
               <h2 className="text-xl font-black text-white uppercase tracking-wider font-sans">
                 {mode === 'login' ? 'Acesse sua Conta' : mode === 'register' ? 'Crie sua Conta' : 'Confirme seu E-mail'}
               </h2>
               <p className="text-xs text-zinc-400 mt-1.5 max-w-xs mx-auto">
                 {mode === 'login' 
-                  ? 'Faça login para assistir a todos os reacts, criar suas listas de favoritos e muito mais.' 
+                  ? 'Faça login para assistir a todos os reacts, doar Energia da Plateia e muito mais.' 
                   : mode === 'register'
-                  ? 'Cadastre-se grátis em instantes para assistir sem interrupções e favoritar conteúdos.'
+                  ? 'Cadastre-se grátis em instantes para enviar Energia e apoiar seus criadores.'
                   : `Digite o código de verificação enviado para o e-mail: ${verificationEmail}`}
               </p>
             </div>
@@ -202,7 +202,7 @@ export default function AuthModal({
               <motion.div 
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-indigo-950/30 border border-indigo-500/35 text-indigo-400 p-3 rounded-xl text-xs font-semibold text-center mb-4"
+                className="bg-amber-950/30 border border-amber-500/35 text-amber-400 p-3 rounded-xl text-xs font-semibold text-center mb-4"
               >
                 {infoMsg}
               </motion.div>
@@ -221,7 +221,7 @@ export default function AuthModal({
                       placeholder="Ex: 123456"
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-indigo-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none tracking-widest font-mono text-center text-lg transition-colors"
+                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none tracking-widest font-mono text-center text-lg transition-colors"
                     />
                   </div>
                 </div>
@@ -229,10 +229,10 @@ export default function AuthModal({
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 shadow-lg shadow-indigo-950/25 cursor-pointer"
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-black font-extrabold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
                   {loading ? (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   ) : (
                     <>
                       <LogIn className="w-4 h-4" /> Verificar e Entrar
@@ -245,7 +245,7 @@ export default function AuthModal({
                     type="button"
                     onClick={handleResendOtp}
                     disabled={resending}
-                    className="text-indigo-400 hover:text-indigo-300 font-bold transition-colors disabled:opacity-50 cursor-pointer text-[11px]"
+                    className="text-amber-400 hover:text-amber-300 font-bold transition-colors disabled:opacity-50 cursor-pointer text-[11px]"
                   >
                     {resending ? 'Enviando...' : 'Reenviar Código'}
                   </button>
@@ -275,7 +275,7 @@ export default function AuthModal({
                         placeholder="Ex: mateus_criador"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-indigo-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                        className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function AuthModal({
                       placeholder="Ex: seu-email@dominio.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-indigo-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -306,7 +306,7 @@ export default function AuthModal({
                       placeholder="Sua senha secreta"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-indigo-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                      className="w-full bg-zinc-900/60 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -314,13 +314,13 @@ export default function AuthModal({
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 shadow-lg shadow-indigo-950/25 cursor-pointer"
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-black font-extrabold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
                   {loading ? (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   ) : mode === 'login' ? (
                     <>
-                      <LogIn className="w-4 h-4" /> Entrar no Cine React
+                      <LogIn className="w-4 h-4" /> Entrar no CineReact
                     </>
                   ) : (
                     <>
@@ -342,7 +342,7 @@ export default function AuthModal({
                       setErrorMsg('');
                       setInfoMsg('');
                     }}
-                    className="text-indigo-400 hover:text-indigo-300 font-bold ml-1.5 transition-colors cursor-pointer"
+                    className="text-amber-400 hover:text-amber-300 font-bold ml-1.5 transition-colors cursor-pointer"
                   >
                     {mode === 'login' ? 'Criar Conta' : 'Acessar Conta'}
                   </button>

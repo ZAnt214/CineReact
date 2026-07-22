@@ -11,6 +11,10 @@ import RowMoviesSkeleton from './components/RowMoviesSkeleton.tsx';
 import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
 import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
+import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
+import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
+import BottomNavHub from './components/BottomNavHub.tsx';
+import CategoryPage from './components/CategoryPage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -34,6 +38,8 @@ export default function App() {
   // Auth modal trigger
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
+  const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
 
   // Continue Watching state
   const [continueWatching, setContinueWatching] = useState<{
@@ -70,6 +76,8 @@ export default function App() {
       localStorage.setItem('cine_react_user', JSON.stringify(newUser));
     } else {
       localStorage.removeItem('cine_react_user');
+      localStorage.removeItem('cine_react_continue_watching');
+      setContinueWatching([]);
     }
   };
 
@@ -216,20 +224,27 @@ export default function App() {
 
   // Load continue watching state from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('cine_react_continue_watching');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setContinueWatching(parsed);
+    if (user.isLoggedIn) {
+      const stored = localStorage.getItem('cine_react_continue_watching');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setContinueWatching(parsed);
+          }
+        } catch (e) {
+          console.error("Error parsing continue watching:", e);
         }
-      } catch (e) {
-        console.error("Error parsing continue watching:", e);
       }
+    } else {
+      setContinueWatching([]);
+      localStorage.removeItem('cine_react_continue_watching');
     }
-  }, []);
+  }, [user.isLoggedIn]);
 
   const handleUpdateWatchProgress = useCallback((reactId: string, obraId: string, progress: number) => {
+    if (!user.isLoggedIn) return;
+
     setContinueWatching(prev => {
       const filtered = prev.filter(item => item.reactId !== reactId);
       const updatedItem = {
@@ -255,7 +270,7 @@ export default function App() {
         })
       }).catch(e => console.error("Error updating watch progress on server:", e));
     }
-  }, [user.email]);
+  }, [user.isLoggedIn, user.email]);
 
   const progressMap = React.useMemo(() => {
     const map: Record<string, number> = {};
@@ -321,17 +336,14 @@ export default function App() {
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
 
-    // Reacts em Alta: get the top 40 most viewed, and take a randomized selection of 20
-    const topAltaPool = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
-    const emAlta = shuffleArray(topAltaPool).slice(0, 20);
+    // Reacts em Alta: top 20 most viewed
+    const emAlta = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 20);
 
-    // Novidades: get the 40 newest, and take a randomized selection of 20
-    const topNovosPool = [...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 40);
-    const novidades = shuffleArray(topNovosPool).slice(0, 20);
+    // Novidades: top 20 newest
+    const novidades = [...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 20);
 
-    // Mais Assistidos: get the top 60 most viewed, and take a randomized selection of 30
-    const topMaisPool = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 60);
-    const maisAssistidos = shuffleArray(topMaisPool).slice(0, 30);
+    // Mais Assistidos: top 30 most viewed
+    const maisAssistidos = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 30);
 
     // Dynamic type-based carousels (filme, serie, jogo, anime)
     const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
@@ -339,8 +351,7 @@ export default function App() {
         const obra = obras.find(o => o.id === r.obraId);
         return obra && obra.tipo === tipo;
       });
-      const pool = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
-      acc[tipo] = shuffleArray(pool).slice(0, 20);
+      acc[tipo] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
@@ -350,8 +361,7 @@ export default function App() {
         const obra = obras.find(o => o.id === r.obraId);
         return obra && obra.generos.some(g => g.toLowerCase() === genero.toLowerCase());
       });
-      const pool = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 40);
-      acc[genero] = shuffleArray(pool).slice(0, 20);
+      acc[genero] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
@@ -361,7 +371,7 @@ export default function App() {
         const obra = obras.find(o => o.id === r.obraId);
         return obra && (obra.titulo.toLowerCase().includes(franquia.toLowerCase()) || obra.id.toLowerCase().includes(franquia.toLowerCase().replace(/ /g, '-')));
       });
-      acc[franquia] = shuffleArray(filtered).slice(0, 20);
+      acc[franquia] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
@@ -373,7 +383,7 @@ export default function App() {
         const cleanReactCanal = r.canalNome.trim().toLowerCase();
         return cleanReactCanal.includes(cleanCanalTitle) || cleanCanalTitle.includes(cleanReactCanal);
       });
-      acc[canal.id] = shuffleArray(filtered).slice(0, 20);
+      acc[canal.id] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
@@ -386,7 +396,7 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [reacts, obras, shuffleArray]);
+  }, [reacts, obras]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
@@ -401,10 +411,35 @@ export default function App() {
     setCurrentTab('obra');
   };
 
+  const handleChannelClickByName = (channelNameOrId: string) => {
+    const byId = obras.find(o => o.id === channelNameOrId && o.tipo === 'canal');
+    if (byId) {
+      setSelectedObraId(byId.id);
+      setSelectedReactId(null);
+      setCurrentTab('canal');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const cleanName = channelNameOrId.trim().toLowerCase().replace('canal ', '');
+    const foundCanal = obras.find(o => 
+      o.tipo === 'canal' && (
+        o.titulo.toLowerCase().includes(cleanName) || 
+        cleanName.includes(o.titulo.toLowerCase().replace('canal ', ''))
+      )
+    );
+    if (foundCanal) {
+      setSelectedObraId(foundCanal.id);
+      setSelectedReactId(null);
+      setCurrentTab('canal');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const canais = obras.filter(o => o.tipo === 'canal');
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative">
       
       {/* HEADER & TOP NAVIGATION */}
       <Header 
@@ -623,6 +658,7 @@ export default function App() {
                     setCurrentTab('canal');
                   }}
                   onOpenAuth={() => setShowAuthModal(true)}
+                  onUpdateUser={setUser}
                 />
               </motion.div>
             )}
@@ -638,13 +674,14 @@ export default function App() {
               >
                 {/* HORIZONTAL ROWS */}
                 <div className="space-y-10 md:mt-8 relative z-20">
-                  {continueWatchingReacts.length > 0 && (
+                  {user.isLoggedIn && continueWatchingReacts.length > 0 && (
                     <RowMovies 
                       title="Continue Assistindo" 
                       reacts={continueWatchingReacts} 
                       obras={obras}
                       progressMap={progressMap}
                       onPlayVideo={handlePlayVideo}
+                      onChannelClick={handleChannelClickByName}
                     />
                   )}
 
@@ -656,6 +693,7 @@ export default function App() {
                       progressMap={progressMap}
                       onPlayVideo={handlePlayVideo}
                       isEditorial={true}
+                      onChannelClick={handleChannelClickByName}
                     />
                   )}
 
@@ -667,6 +705,7 @@ export default function App() {
                         obras={obras}
                         progressMap={progressMap}
                         onPlayVideo={handlePlayVideo}
+                        onChannelClick={handleChannelClickByName}
                       />
                       <RowMovies 
                         title="Novidades" 
@@ -674,6 +713,7 @@ export default function App() {
                         obras={obras}
                         progressMap={progressMap}
                         onPlayVideo={handlePlayVideo}
+                        onChannelClick={handleChannelClickByName}
                       />
                       <RowMovies 
                         title="Mais Assistidos" 
@@ -681,11 +721,12 @@ export default function App() {
                         obras={obras}
                         progressMap={progressMap}
                         onPlayVideo={handlePlayVideo}
+                        onChannelClick={handleChannelClickByName}
                       />
                       
-                      {/* CATEGORIES - 3 CARDS PER CATEGORY */}
+                      {/* CATEGORIES */}
                       {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
-                        const tipoReacts = (homeFeeds.tipoFeeds[tipo] || []).slice(0, 3);
+                        const tipoReacts = homeFeeds.tipoFeeds[tipo] || [];
                         if (tipoReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -695,12 +736,13 @@ export default function App() {
                             obras={obras}
                             progressMap={progressMap}
                             onPlayVideo={handlePlayVideo}
+                            onChannelClick={handleChannelClickByName}
                           />
                         );
                       })}
 
                       {['Terror', 'Ação', 'Comédia'].map(genero => {
-                        const generoReacts = (homeFeeds.generoFeeds[genero] || []).slice(0, 3);
+                        const generoReacts = homeFeeds.generoFeeds[genero] || [];
                         if (generoReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -710,12 +752,13 @@ export default function App() {
                             obras={obras}
                             progressMap={progressMap}
                             onPlayVideo={handlePlayVideo}
+                            onChannelClick={handleChannelClickByName}
                           />
                         );
                       })}
                       
                       {['Marvel', 'DC', 'Harry Potter', 'One Piece', 'GTA', 'Resident Evil', 'The Last of Us'].map(franquia => {
-                        const uniReacts = (homeFeeds.franquiaFeeds[franquia] || []).slice(0, 3);
+                        const uniReacts = homeFeeds.franquiaFeeds[franquia] || [];
                         if (uniReacts.length === 0) return null;
                         return (
                           <RowMovies 
@@ -725,6 +768,7 @@ export default function App() {
                             obras={obras}
                             progressMap={progressMap}
                             onPlayVideo={handlePlayVideo}
+                            onChannelClick={handleChannelClickByName}
                           />
                         );
                       })}
@@ -740,6 +784,13 @@ export default function App() {
                             obras={obras}
                             progressMap={progressMap}
                             onPlayVideo={handlePlayVideo}
+                            onTitleClick={() => {
+                              setSelectedObraId(canal.id);
+                              setSelectedReactId(null);
+                              setCurrentTab('canal');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            onChannelClick={handleChannelClickByName}
                           />
                         );
                       })}
@@ -768,12 +819,12 @@ export default function App() {
                         onPlayVideo={handlePlayVideo}
                       />
 
-                      {/* CATEGORIES - 3 CARDS PER CATEGORY */}
+                      {/* CATEGORIES */}
                       {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
                         const tipoReacts = reacts.filter(r => {
                           const obra = obras.find(o => o.id === r.obraId);
                           return obra && obra.tipo === tipo;
-                        }).slice(0, 3);
+                        });
                         
                         if (tipoReacts.length === 0) return null;
                         return (
@@ -836,7 +887,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="pt-24 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen w-full flex-1"
+                className="pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-screen w-full flex-1"
               >
                 <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
                   <span className="w-2.5 h-6 bg-gradient-to-b from-amber-400 to-yellow-500 rounded" />
@@ -941,23 +992,88 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* CATEGORY PAGES (FILME, JOGO, ANIME, SERIE) */}
+            {currentTab.startsWith('categoria-') && (
+              <motion.div
+                key={`category-${currentTab}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <CategoryPage
+                  categoryKey={(currentTab.replace('categoria-', '') as 'filme' | 'jogo' | 'anime' | 'serie')}
+                  obras={obras}
+                  reacts={reacts}
+                  progressMap={progressMap}
+                  onPlayVideo={handlePlayVideo}
+                  onBackToHome={() => {
+                    setCurrentTab('inicio');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onChannelClick={handleChannelClickByName}
+                  onSelectObra={(id) => {
+                    setSelectedObraId(id);
+                    setSelectedReactId(null);
+                    setCurrentTab('obra');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </motion.div>
+            )}
+
           </AnimatePresence>
         )}
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-3">
-        <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
-        <p className="text-zinc-400 font-sans text-xs flex items-center justify-center gap-1.5 flex-wrap">
-          Dúvidas e suporte: 
-          <a href="mailto:atendimentocinereact@gmail.com" className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline">
-            atendimentocinereact@gmail.com
-          </a>
-        </p>
-        <p className="max-w-md mx-auto text-[10px] text-zinc-600 leading-relaxed font-sans">
-          Aviso legal: O CineReact não hospeda ou reproduz vídeos protegidos por direitos autorais. Todo o conteúdo incorporado é disponibilizado de forma pública através da API oficial do YouTube.
-        </p>
+      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-28 md:pb-32">
+        <div className="space-y-3 px-4">
+          <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
+          <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
+            <span>Dúvidas e suporte: 
+              <a href="mailto:atendimentocinereact@gmail.com" className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline ml-1">
+                atendimentocinereact@gmail.com
+              </a>
+            </span>
+            <span>•</span>
+            <button 
+              onClick={() => setShowCreatorPartnerModal(true)}
+              className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline cursor-pointer"
+            >
+              Seja um Criador Parceiro
+            </button>
+          </div>
+          <p className="max-w-md mx-auto text-[10px] text-zinc-600 leading-relaxed font-sans">
+            Aviso legal: O CineReact não hospeda ou reproduz vídeos protegidos por direitos autorais. Todo o conteúdo incorporado é disponibilizado de forma pública através da API oficial do YouTube.
+          </p>
+        </div>
       </footer>
+
+      {/* Floating Bottom Banner for Creators */}
+      <AnimatePresence>
+        {isCreatorBannerVisible && (
+          <CreatorPartnerBanner 
+            onClick={() => setShowCreatorPartnerModal(true)} 
+            onClose={() => setIsCreatorBannerVisible(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Navigation Hub (Appears when creator banner is closed) */}
+      <AnimatePresence>
+        {!isCreatorBannerVisible && (
+          <BottomNavHub 
+            currentTab={currentTab} 
+            setCurrentTab={setCurrentTab} 
+          />
+        )}
+      </AnimatePresence>
+
+      <CreatorPartnerModal 
+        isOpen={showCreatorPartnerModal}
+        onClose={() => setShowCreatorPartnerModal(false)}
+      />
 
       <AuthModal 
         isOpen={showAuthModal}
@@ -1009,7 +1125,10 @@ export default function App() {
               {/* Text Body */}
               <div className="space-y-4 text-xs md:text-sm leading-relaxed text-zinc-300 font-sans">
                 <p>
-                  O CineReact não hospeda, copia, baixa ou redistribui vídeos do YouTube. Nossa plataforma funciona como um organizador inteligente de reacts, reunindo em um só lugar os vídeos publicados pelos criadores para que os fãs encontrem facilmente reações de filmes, séries, animes, jogos e muito mais.
+                  O CineReact é uma plataforma independente de descoberta de vídeos de reação. Não hospedamos, copiamos, baixamos ou redistribuímos vídeos do YouTube.
+                </p>
+                <p>
+                  Nossa plataforma funciona como um organizador inteligente de reacts, reunindo em um só lugar os vídeos publicados pelos criadores para que os fãs encontrem facilmente reações de filmes, séries, animes, jogos e muito mais.
                 </p>
                 <p>
                   Todos os vídeos são reproduzidos através do player oficial do YouTube, garantindo que 100% das visualizações, tempo de exibição e engajamento sejam contabilizados diretamente no canal do criador. O objetivo do CineReact é facilitar a descoberta de conteúdo, valorizar os criadores e conectar a comunidade de fãs, sempre respeitando os direitos autorais e as políticas do YouTube.

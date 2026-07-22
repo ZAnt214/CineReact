@@ -66,6 +66,7 @@ interface PlaybackPageProps {
   onGoToCanal: (canalId: string) => void;
   onUpdateProgress?: (reactId: string, obraId: string, progress: number) => void;
   onOpenAuth?: () => void;
+  onUpdateUser?: (updatedUser: UserState) => void;
 }
 
 // Local Reusable Component for Horizontal React Carousels
@@ -154,7 +155,8 @@ export default function PlaybackPage({
   onGoToObra,
   onGoToCanal,
   onUpdateProgress,
-  onOpenAuth
+  onOpenAuth,
+  onUpdateUser
 }: PlaybackPageProps) {
   const [activeReactId, setActiveReactId] = useState<string | null>(initialReactId);
   const [shareFeedback, setShareFeedback] = useState(false);

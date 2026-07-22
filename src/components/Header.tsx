@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight } from 'lucide-react';
+import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download } from 'lucide-react';
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -31,6 +31,34 @@ export default function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Obra[]>([]);
   const [searching, setSearching] = useState(false);
+
+  // PWA App Installation States
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      setShowInstallModal(true);
+    }
+  };
 
   // Helper to extract hashtags or tags matching the search query from video titles
   const getMatchingHashtagsForObra = (obra: Obra, q: string): string[] => {
@@ -372,9 +400,9 @@ export default function Header({
               </nav>
             </div>
 
-            {/* MIDDLE SECTION: Search Bar */}
-            <div className="flex-1 max-w-sm lg:max-w-md mx-auto hidden sm:block relative">
-              <div className="relative">
+            {/* MIDDLE SECTION: Search Bar & Download App button */}
+            <div className="flex-1 max-w-sm lg:max-w-lg mx-auto hidden sm:flex items-center gap-2 relative">
+              <div className="relative flex-1">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <Search className="h-4 w-4 text-zinc-500" />
                 </div>
@@ -396,6 +424,17 @@ export default function Header({
                   </button>
                 )}
               </div>
+
+              {/* DOWNLOAD / INSTALL APP BUTTON NEXT TO SEARCH */}
+              <button
+                id="install-app-btn-desktop"
+                onClick={handleInstallApp}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black border border-amber-500/30 hover:border-amber-400 text-xs font-extrabold transition-all duration-200 cursor-pointer shadow-sm active:scale-95 shrink-0"
+                title="Instalar CineReact no seu celular ou computador"
+              >
+                <Download className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:inline">Baixar App</span>
+              </button>
 
               {/* FLOATING INSTANT SEARCH RESULTS */}
               <AnimatePresence>
@@ -461,8 +500,18 @@ export default function Header({
             </div>
 
             {/* RIGHT SECTION: Controls */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               
+              {/* MOBILE INSTALL APP BUTTON */}
+              <button
+                id="install-app-btn-mobile"
+                onClick={handleInstallApp}
+                className="p-2 text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg sm:hidden transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                title="Baixar Aplicativo"
+              >
+                <Download className="w-4.5 h-4.5" />
+              </button>
+
               {/* MOBILE SEARCH TRIGGER */}
               <button 
                 id="search-toggle"
@@ -497,7 +546,7 @@ export default function Header({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 12, scale: 0.97 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="fixed md:absolute top-16 md:top-12 left-4 md:left-auto right-4 md:right-0 w-[calc(100vw-32px)] md:w-96 bg-zinc-950/98 backdrop-blur-2xl border border-zinc-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-zinc-900/60"
+                      className="fixed md:absolute top-16 md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-zinc-950/98 backdrop-blur-2xl border border-zinc-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-zinc-900/60"
                     >
                       <div className="px-4 py-3.5 flex justify-between items-center bg-zinc-900/20">
                         <div className="flex items-center gap-2">
@@ -1016,6 +1065,97 @@ export default function Header({
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* APP INSTALLATION MODAL */}
+      <AnimatePresence>
+        {showInstallModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInstallModal(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 15 }}
+              className="relative bg-zinc-950 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 text-white z-10 overflow-hidden"
+            >
+              {/* Top Accent Line */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500" />
+
+              <div className="flex items-start justify-between gap-4 pt-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <Download className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-white">Instalar CineReact App</h3>
+                    <p className="text-xs text-zinc-400">Instale direto no seu celular ou computador</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowInstallModal(false)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs text-zinc-300 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4">
+                <div className="space-y-1">
+                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
+                    📱 Android / Chrome:
+                  </span>
+                  <p className="text-zinc-300 leading-relaxed pl-1">
+                    Toque no menu de três pontos <strong className="text-white">⋮</strong> no topo do seu navegador e selecione <strong className="text-amber-300">"Instalar aplicativo"</strong> ou <strong className="text-amber-300">"Adicionar à Tela Inicial"</strong>.
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-zinc-800 space-y-1">
+                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
+                    🍏 iPhone / iPad (Safari):
+                  </span>
+                  <p className="text-zinc-300 leading-relaxed pl-1">
+                    Toque no ícone de <strong className="text-white">Compartilhar</strong> na barra do Safari e selecione <strong className="text-amber-300">"Adicionar à Tela de Início"</strong>.
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-zinc-800 space-y-1">
+                  <span className="font-extrabold text-amber-400 flex items-center gap-1.5">
+                    💻 Computador (PC / Mac):
+                  </span>
+                  <p className="text-zinc-300 leading-relaxed pl-1">
+                    Clique no ícone de instalação <strong className="text-white">⊕</strong> ou no símbolo de computador na barra de endereço do seu navegador Chrome/Edge.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => {
+                    if (deferredPrompt) {
+                      deferredPrompt.prompt();
+                    }
+                    setShowInstallModal(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-colors shadow-lg shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Instalar Agora</span>
+                </button>
+                <button
+                  onClick={() => setShowInstallModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs transition-colors border border-zinc-800 cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
