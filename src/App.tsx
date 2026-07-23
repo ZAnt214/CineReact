@@ -20,6 +20,30 @@ import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
 
+function selectChannelDiverse(videos: ReactVideo[], limit: number): ReactVideo[] {
+  const videosByChannel = new Map<string, ReactVideo[]>();
+
+  videos.forEach((video) => {
+    const channelKey = video.canalId || video.canalNome || 'outros';
+    const channelVideos = videosByChannel.get(channelKey) || [];
+    channelVideos.push(video);
+    videosByChannel.set(channelKey, channelVideos);
+  });
+
+  const channelQueues = Array.from(videosByChannel.values());
+  const selected: ReactVideo[] = [];
+
+  while (selected.length < limit && channelQueues.some(queue => queue.length > 0)) {
+    channelQueues.forEach((queue) => {
+      if (selected.length < limit && queue.length > 0) {
+        selected.push(queue.shift()!);
+      }
+    });
+  }
+
+  return selected;
+}
+
 export default function App() {
   const [currentTab, setCurrentTab] = useState('inicio');
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
@@ -288,10 +312,11 @@ export default function App() {
 
   const recomendadosReacts = React.useMemo(() => {
     const explicit = reacts.filter(r => r.isRecomendado);
-    if (explicit.length > 0) return explicit;
-    return [...reacts]
-      .sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0))
-      .slice(0, 6);
+    const candidates = explicit.length > 0
+      ? explicit
+      : [...reacts].sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0));
+
+    return selectChannelDiverse(candidates, 12);
   }, [reacts]);
 
   const matchingReacts = React.useMemo(() => {
@@ -336,14 +361,30 @@ export default function App() {
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
 
-    // Reacts em Alta: top 20 most viewed
-    const emAlta = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 20);
+    const usedGlobalIds = new Set(recomendadosReacts.map(react => react.id));
+    const takeUnique = (candidates: ReactVideo[], limit: number): ReactVideo[] => {
+      const selected: ReactVideo[] = [];
 
-    // Novidades: top 20 newest
-    const novidades = [...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 20);
+      for (const candidate of candidates) {
+        if (!usedGlobalIds.has(candidate.id)) {
+          selected.push(candidate);
+          usedGlobalIds.add(candidate.id);
+        }
+        if (selected.length === limit) break;
+      }
 
-    // Mais Assistidos: top 30 most viewed
-    const maisAssistidos = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 30);
+      return selected;
+    };
+
+    const byViews = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes);
+    const byPublishedDate = [...reacts].sort(
+      (a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime(),
+    );
+
+    // Keep the main discovery rows distinct instead of repeating the same ranking.
+    const emAlta = takeUnique(byViews, 20);
+    const novidades = takeUnique(byPublishedDate, 20);
+    const maisAssistidos = takeUnique(byViews, 30);
 
     // Dynamic type-based carousels (filme, serie, jogo, anime)
     const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
@@ -396,7 +437,7 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [reacts, obras]);
+  }, [reacts, obras, recomendadosReacts]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
