@@ -15,13 +15,24 @@ import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
 import BottomNavHub from './components/BottomNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
+import LandingPage from './components/LandingPage.tsx';
+import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState('inicio');
+  const [currentTab, setCurrentTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      if (path === '/landing' || path === '/welcome' || search.includes('landing') || search.includes('page=landing')) {
+        return 'landing';
+      }
+    }
+    return 'inicio';
+  });
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [selectedReactId, setSelectedReactId] = useState<string | null>(null);
   
@@ -288,10 +299,38 @@ export default function App() {
 
   const recomendadosReacts = React.useMemo(() => {
     const explicit = reacts.filter(r => r.isRecomendado);
-    if (explicit.length > 0) return explicit;
-    return [...reacts]
-      .sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0))
-      .slice(0, 6);
+    if (explicit.length >= 8) return explicit;
+
+    // Pick curated editor highlights from distinct channels so CineReact Recomenda stays unique
+    const existingIds = new Set(explicit.map(r => r.id));
+    const channelMap = new Map<string, ReactVideo[]>();
+
+    reacts.forEach(r => {
+      if (!existingIds.has(r.id)) {
+        const key = r.canalNome || r.obraId;
+        if (!channelMap.has(key)) channelMap.set(key, []);
+        channelMap.get(key)!.push(r);
+      }
+    });
+
+    const curatedPicks: ReactVideo[] = [];
+    channelMap.forEach(channelReacts => {
+      // Pick top liked / top rated from each channel
+      const topPick = [...channelReacts].sort((a, b) => {
+        const scoreA = (a.likes || 0) * 50 + (a.visualizacoes || 0) * 0.1;
+        const scoreB = (b.likes || 0) * 50 + (b.visualizacoes || 0) * 0.1;
+        return scoreB - scoreA;
+      })[0];
+      if (topPick) curatedPicks.push(topPick);
+    });
+
+    curatedPicks.sort((a, b) => {
+      const scoreA = (a.likes || 0) * 50 + (a.visualizacoes || 0) * 0.1;
+      const scoreB = (b.likes || 0) * 50 + (b.visualizacoes || 0) * 0.1;
+      return scoreB - scoreA;
+    });
+
+    return [...explicit, ...curatedPicks].slice(0, 15);
   }, [reacts]);
 
   const matchingReacts = React.useMemo(() => {
@@ -336,14 +375,35 @@ export default function App() {
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
 
-    // Reacts em Alta: top 20 most viewed
-    const emAlta = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 20);
+    // Reacts em Alta (Velocity & Trending score)
+    const emAlta = [...reacts].sort((a, b) => {
+      const pubA = new Date(a.publicadoEm || Date.now()).getTime();
+      const pubB = new Date(b.publicadoEm || Date.now()).getTime();
+      const now = Date.now();
+      const daysOldA = Math.max(0.1, (now - pubA) / (1000 * 60 * 60 * 24));
+      const daysOldB = Math.max(0.1, (now - pubB) / (1000 * 60 * 60 * 24));
 
-    // Novidades: top 20 newest
-    const novidades = [...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 20);
+      // Weight recency heavily so "Em Alta" shows recent trending content
+      const scoreA = ((a.visualizacoes || 0) + (a.likes || 0) * 50 + 1000) / Math.pow(daysOldA + 1, 1.5);
+      const scoreB = ((b.visualizacoes || 0) + (b.likes || 0) * 50 + 1000) / Math.pow(daysOldB + 1, 1.5);
+      
+      return scoreB - scoreA || b.id.localeCompare(a.id);
+    }).slice(0, 20);
 
-    // Mais Assistidos: top 30 most viewed
-    const maisAssistidos = [...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 30);
+    // Novidades: top 20 newest by publication date
+    const novidades = [...reacts].sort((a, b) => {
+      const dateA = new Date(a.publicadoEm || 0).getTime();
+      const dateB = new Date(b.publicadoEm || 0).getTime();
+      return dateB - dateA || b.id.localeCompare(a.id);
+    }).slice(0, 20);
+
+    // Mais Assistidos: top 30 highest total view count strictly
+    const maisAssistidos = [...reacts].sort((a, b) => {
+      const viewsA = a.visualizacoes || 0;
+      const viewsB = b.visualizacoes || 0;
+      if (viewsB !== viewsA) return viewsB - viewsA;
+      return (b.likes || 0) - (a.likes || 0) || a.id.localeCompare(b.id);
+    }).slice(0, 30);
 
     // Dynamic type-based carousels (filme, serie, jogo, anime)
     const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
@@ -438,6 +498,20 @@ export default function App() {
 
   const canais = obras.filter(o => o.tipo === 'canal');
 
+  if (currentTab === 'landing') {
+    return (
+      <LandingPage 
+        onExplore={() => {
+          setCurrentTab('inicio');
+          window.scrollTo(0, 0);
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({}, '', '/');
+          }
+        }} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative">
       
@@ -514,14 +588,14 @@ export default function App() {
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
-                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-amber-500/40 hover:shadow-amber-500/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full"
+                                style={{ touchAction: 'pan-y pinch-zoom' }}
+                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-amber-500/40 hover:shadow-amber-500/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
                               >
                                 <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
-                                  <img
+                                  <OptimizedImage
                                     src={react.thumbnailUrl}
                                     alt={react.titulo}
                                     className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-300"
-                                    referrerPolicy="no-referrer"
                                   />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                                     <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-amber-500/90 shadow-amber-500/30 text-black font-bold">
@@ -576,7 +650,7 @@ export default function App() {
                               className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/5 transition-all cursor-pointer group"
                             >
                               <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
-                                <img src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
+                                <OptimizedImage src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                   <div className="w-12 h-12 bg-amber-500 text-black rounded-full flex items-center justify-center shadow-lg font-bold">
                                     <Play className="w-6 h-6 fill-black text-black ml-0.5" />
@@ -799,7 +873,13 @@ export default function App() {
                     <>
                       <RowMovies 
                         title="Reacts em Alta" 
-                        reacts={[...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 20)} 
+                        reacts={[...reacts].sort((a, b) => {
+                          const pubA = new Date(a.publicadoEm || Date.now()).getTime();
+                          const pubB = new Date(b.publicadoEm || Date.now()).getTime();
+                          const daysA = Math.max(0.1, (Date.now() - pubA) / (1000 * 60 * 60 * 24));
+                          const daysB = Math.max(0.1, (Date.now() - pubB) / (1000 * 60 * 60 * 24));
+                          return ((b.visualizacoes || 0) + (b.likes || 0) * 25 + 500) / Math.pow(daysB + 2, 1.25) - ((a.visualizacoes || 0) + (a.likes || 0) * 25 + 500) / Math.pow(daysA + 2, 1.25);
+                        }).slice(0, 20)} 
                         obras={obras}
                         progressMap={progressMap}
                         onPlayVideo={handlePlayVideo}
@@ -1031,6 +1111,16 @@ export default function App() {
         <div className="space-y-3 px-4">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
+            <button 
+              onClick={() => {
+                setCurrentTab('landing');
+                window.scrollTo(0, 0);
+              }}
+              className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline cursor-pointer"
+            >
+              Página Institucional
+            </button>
+            <span>•</span>
             <span>Dúvidas e suporte: 
               <a href="mailto:atendimentocinereact@gmail.com" className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline ml-1">
                 atendimentocinereact@gmail.com

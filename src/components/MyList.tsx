@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bookmark, Heart, FolderHeart, Plus, Trash2, Edit2, Play, AlertCircle, Youtube } from 'lucide-react';
 import { Obra, ListaPersonalizada, UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface MyListProps {
   user: UserState;
@@ -29,31 +30,31 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
     try {
       setLoading(true);
       // Fetch all works first
-      const obrasRes = await fetch('/api/obras');
+      const obrasRes = await fetch('/api/obras').catch(() => null);
       let obras: Obra[] = [];
-      if (obrasRes.ok) {
-        obras = await obrasRes.json();
+      if (obrasRes && obrasRes.ok) {
+        obras = await obrasRes.json().catch(() => []);
         setAllObras(obras);
       }
 
       // Fetch favorites
-      const favsRes = await fetch(`/api/favoritos?email=${encodeURIComponent(user.email)}`);
-      if (favsRes.ok) {
-        const favIds: string[] = await favsRes.json();
+      const favsRes = await fetch(`/api/favoritos?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      if (favsRes && favsRes.ok) {
+        const favIds: string[] = await favsRes.json().catch(() => []);
         setFavoritos(obras.filter(o => favIds.includes(o.id)));
       }
 
       // Fetch lists
-      const listsRes = await fetch(`/api/listas?email=${encodeURIComponent(user.email)}`);
-      if (listsRes.ok) {
-        const data = await listsRes.json();
+      const listsRes = await fetch(`/api/listas?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      if (listsRes && listsRes.ok) {
+        const data = await listsRes.json().catch(() => []);
         setListas(data);
       }
 
       // Fetch followed channels
-      const chanRes = await fetch(`/api/canais/seguidos?email=${encodeURIComponent(user.email)}`);
-      if (chanRes.ok) {
-        const data = await chanRes.json();
+      const chanRes = await fetch(`/api/canais/seguidos?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      if (chanRes && chanRes.ok) {
+        const data = await chanRes.json().catch(() => []);
         setCanaisSeguidos(data);
       }
 
@@ -171,7 +172,7 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
                       className="bg-zinc-900/80 rounded-lg overflow-hidden border border-zinc-800 hover:border-red-600/30 transition-all cursor-pointer group"
                     >
                       <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
-                        <img src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
+                        <OptimizedImage src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Play className="w-8 h-8 text-white fill-white" />
                         </div>

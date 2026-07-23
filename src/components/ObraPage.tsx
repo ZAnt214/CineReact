@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Play, Eye, Clock, ArrowLeft } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface ObraPageProps {
   obra: Obra;
@@ -46,11 +47,10 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
       {/* OBRA HEADER */}
       <div className="relative h-64 md:h-80 w-full rounded-2xl overflow-hidden mb-12 shadow-2xl border border-zinc-800">
         <div className="absolute inset-0 bg-zinc-900">
-          <img 
+          <OptimizedImage 
             src={obra.banner} 
             alt={obra.titulo} 
             className="w-full h-full object-cover opacity-60"
-            referrerPolicy="no-referrer"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
@@ -100,14 +100,14 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
             whileHover={{ scale: 1.03, y: -5 }}
             transition={{ duration: 0.2 }}
             onClick={() => onPlayVideo(react.id, react.obraId)}
-            className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-amber-500/40 transition-colors cursor-pointer group/card flex flex-col"
+            style={{ touchAction: 'pan-y pinch-zoom' }}
+            className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-amber-500/40 transition-colors cursor-pointer group/card flex flex-col select-none"
           >
             <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
-              <img
+              <OptimizedImage
                 src={react.thumbnailUrl}
                 alt={react.titulo}
                 className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
-                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                 <div className="w-12 h-12 rounded-full bg-amber-500/90 flex items-center justify-center shadow-lg shadow-amber-500/30">

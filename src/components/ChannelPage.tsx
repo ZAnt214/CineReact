@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, AlertCircle, ShieldAlert } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface ChannelPageProps {
   canal: Obra;
@@ -92,11 +93,10 @@ export default function ChannelPage({
           <div className="relative group shrink-0">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 blur-sm opacity-70 group-hover:opacity-100 transition duration-500" />
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-zinc-950 bg-zinc-900 overflow-hidden shadow-2xl">
-              <img 
+              <OptimizedImage 
                 src={canal.poster} 
                 alt={canal.titulo} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
               />
             </div>
           </div>
@@ -243,11 +243,10 @@ export default function ChannelPage({
             >
               {/* Thumbnail Container */}
               <div className="relative aspect-video w-full overflow-hidden bg-zinc-900">
-                <img
+                <OptimizedImage
                   src={react.thumbnailUrl}
                   alt={react.titulo}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
                 />
                 
 

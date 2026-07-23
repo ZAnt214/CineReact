@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Film, Gamepad2, Tv, Clapperboard, ArrowLeft, Search, Hash, Play, Eye, Clock, Sparkles, Filter, X } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface CategoryPageProps {
   categoryKey: 'filme' | 'jogo' | 'anime' | 'serie';
@@ -318,11 +319,10 @@ export default function CategoryPage({
               >
                 {/* Thumbnail Container */}
                 <div className="relative aspect-video bg-zinc-950 overflow-hidden shrink-0">
-                  <img
+                  <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
                   />
 
                   {/* Play Overlay Button */}

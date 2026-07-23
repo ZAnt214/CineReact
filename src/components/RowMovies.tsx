@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles, Award, Star } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import { motion, useInView } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface RowMoviesProps {
   key?: React.Key;
@@ -50,6 +51,40 @@ export default function RowMovies({
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMouseDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const isDraggedRef = useRef(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!rowRef.current) return;
+    isMouseDownRef.current = true;
+    startXRef.current = e.pageX - rowRef.current.offsetLeft;
+    scrollLeftRef.current = rowRef.current.scrollLeft;
+    isDraggedRef.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDownRef.current || !rowRef.current) return;
+    const x = e.pageX - rowRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    if (Math.abs(walk) > 5) {
+      isDraggedRef.current = true;
+    }
+    rowRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isMouseDownRef.current = false;
+  };
+
+  const handleCardClick = (reactId: string, obraId: string) => {
+    if (isDraggedRef.current) {
+      isDraggedRef.current = false;
+      return;
+    }
+    onPlayVideo(reactId, obraId);
+  };
 
   const hasEntered = useInView(containerRef, {
     once: true,
@@ -144,7 +179,12 @@ export default function RowMovies({
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
+          className="flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
@@ -155,8 +195,9 @@ export default function RowMovies({
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, y: -2 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
-                onClick={() => onPlayVideo(react.id, react.obraId)}
-                className={`w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full ${
+                onClick={() => handleCardClick(react.id, react.obraId)}
+                style={{ touchAction: 'pan-y pinch-zoom' }}
+                className={`w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
@@ -164,11 +205,10 @@ export default function RowMovies({
               >
                 {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
                 <div className="relative aspect-video w-full overflow-hidden bg-zinc-950 shrink-0">
-                  <img
+                  <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
                     className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
-                    referrerPolicy="no-referrer"
                   />
                   
                   {/* Play Button Overlay */}

@@ -47,6 +47,34 @@
 .overflow-x-auto {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
+  touch-action: pan-x pan-y pinch-zoom !important; /* Allow smooth horizontal swipe & vertical page scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Global touch action and anti-sticking for video cards, thumbnails, and carousel items */
+.group\/card,
+[class*="group/card"],
+.video-card,
+img, 
+svg, 
+a, 
+button, 
+video,
+.select-none {
+  touch-action: pan-y pinch-zoom;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.select-none {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-user-drag: none !important;
 }
 
 html, body, #root {

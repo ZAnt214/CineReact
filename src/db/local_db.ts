@@ -35,7 +35,7 @@ function initDb(): DbSchema {
             isAdmin: true
           }
         ];
-        fs.writeFileSync(DB_PATH, JSON.stringify(parsed, null, 2), 'utf-8');
+        saveDb(parsed);
       }
 
       // Auto-migrate to recommend first 3 videos if none recommended
@@ -45,7 +45,7 @@ function initDb(): DbSchema {
           parsed.reacts.slice(0, 3).forEach((r: any) => {
             r.isRecomendado = true;
           });
-          fs.writeFileSync(DB_PATH, JSON.stringify(parsed, null, 2), 'utf-8');
+          saveDb(parsed);
         }
       }
 
@@ -98,15 +98,65 @@ function initDb(): DbSchema {
   return initialDb;
 }
 
-function saveDb(data: DbSchema) {
+let dbCache: DbSchema = {
+  obras: [],
+  reacts: [],
+  comentarios: [],
+  favoritos: [],
+  canaisSeguidos: [],
+  listas: [],
+  notificacoes: [],
+  usuarios: []
+};
+
+let saveDbTimer: NodeJS.Timeout | null = null;
+let pendingSave = false;
+let isWriting = false;
+
+function saveDb(data?: DbSchema, immediate = false) {
+  if (data) {
+    dbCache = data;
+  }
+  pendingSave = true;
+
+  if (immediate) {
+    if (saveDbTimer) {
+      clearTimeout(saveDbTimer);
+      saveDbTimer = null;
+    }
+    doSaveAsync();
+    return;
+  }
+
+  if (saveDbTimer) return;
+
+  saveDbTimer = setTimeout(() => {
+    saveDbTimer = null;
+    doSaveAsync();
+  }, 300);
+}
+
+async function doSaveAsync() {
+  if (!pendingSave || isWriting) return;
+  isWriting = true;
+  pendingSave = false;
+
   try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
+    const tempPath = `${DB_PATH}.tmp`;
+    const jsonStr = JSON.stringify(dbCache, null, 2);
+    await fs.promises.writeFile(tempPath, jsonStr, 'utf-8');
+    await fs.promises.rename(tempPath, DB_PATH);
   } catch (error) {
     console.error('Erro ao salvar banco de dados local:', error);
+  } finally {
+    isWriting = false;
+    if (pendingSave) {
+      doSaveAsync();
+    }
   }
 }
 
-let dbCache = initDb();
+dbCache = initDb();
 
 // Supabase Client lazy setup
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -358,6 +408,8 @@ export const localDb = {
         destacado: !!obra.destacado
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao salvar obra:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar obra:", err?.message || err);
       });
     }
 
@@ -373,6 +425,8 @@ export const localDb = {
     if (supabaseClient) {
       supabaseClient.from('obras').delete().eq('id', id).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao deletar obra:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar obra:", err?.message || err);
       });
     }
   },
@@ -415,6 +469,8 @@ export const localDb = {
         isRecomendado: !!react.isRecomendado
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao salvar react:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar react:", err?.message || err);
       });
     }
 
@@ -428,6 +484,8 @@ export const localDb = {
     if (supabaseClient) {
       supabaseClient.from('reacts').delete().eq('id', id).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao deletar react:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar react:", err?.message || err);
       });
     }
   },
@@ -454,6 +512,8 @@ export const localDb = {
         criadoEm: comentario.criadoEm
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao salvar comentario:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar comentario:", err?.message || err);
       });
     }
 
@@ -467,6 +527,8 @@ export const localDb = {
     if (supabaseClient) {
       supabaseClient.from('comentarios').delete().eq('id', id).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao deletar comentario:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar comentario:", err?.message || err);
       });
     }
   },
@@ -505,6 +567,8 @@ export const localDb = {
           obraId: obraId
         }).then(({ error }: any) => {
           if (error) console.error("[Supabase Async] Erro ao salvar favorito:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao salvar favorito:", err?.message || err);
         });
       } else {
         supabaseClient.from('favoritos').delete()
@@ -512,6 +576,8 @@ export const localDb = {
           .eq('obraId', obraId)
           .then(({ error }: any) => {
             if (error) console.error("[Supabase Async] Erro ao deletar favorito:", error);
+          }).catch((err: any) => {
+            console.warn("[Supabase Async Network Error] Erro ao deletar favorito:", err?.message || err);
           });
       }
     }
@@ -551,6 +617,8 @@ export const localDb = {
           canalNome: canalNome
         }).then(({ error }: any) => {
           if (error) console.error("[Supabase Async] Erro ao seguir canal:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao seguir canal:", err?.message || err);
         });
         
         // Also sync notification
@@ -565,6 +633,8 @@ export const localDb = {
           usuarioEmail: lastNotif.usuarioEmail
         }).then(({ error }: any) => {
           if (error) console.error("[Supabase Async] Erro ao postar notificacao de canal seguido:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao postar notificacao:", err?.message || err);
         });
       } else {
         supabaseClient.from('canais_seguidos').delete()
@@ -572,6 +642,8 @@ export const localDb = {
           .eq('canalNome', canalNome)
           .then(({ error }: any) => {
             if (error) console.error("[Supabase Async] Erro ao deixar de seguir canal:", error);
+          }).catch((err: any) => {
+            console.warn("[Supabase Async Network Error] Erro ao deixar de seguir canal:", err?.message || err);
           });
       }
     }
@@ -616,6 +688,8 @@ export const localDb = {
         obraIds: novaLista.obraIds || []
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao salvar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar lista:", err?.message || err);
       });
     }
 
@@ -638,6 +712,8 @@ export const localDb = {
         obraIds: lista.obraIds || []
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao atualizar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao atualizar lista:", err?.message || err);
       });
     }
 
@@ -651,6 +727,8 @@ export const localDb = {
     if (supabaseClient) {
       supabaseClient.from('listas').delete().eq('id', id).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao deletar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar lista:", err?.message || err);
       });
     }
   },
@@ -682,6 +760,8 @@ export const localDb = {
     if (supabaseClient) {
       supabaseClient.from('notificacoes').update({ lida: true }).eq('id', id).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao marcar notificacao como lida:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao marcar notificacao:", err?.message || err);
       });
     }
   },
@@ -703,10 +783,14 @@ export const localDb = {
       if (email) {
         supabaseClient.from('notificacoes').delete().eq('usuarioEmail', email).then(({ error }: any) => {
           if (error) console.error("[Supabase Async] Erro ao limpar notificacoes do usuario:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao limpar notificacoes:", err?.message || err);
         });
       } else {
         supabaseClient.from('notificacoes').delete().neq('id', 'dummy').then(({ error }: any) => {
           if (error) console.error("[Supabase Async] Erro ao limpar notificacoes:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao limpar notificacoes:", err?.message || err);
         });
       }
     }
@@ -733,6 +817,8 @@ export const localDb = {
         usuarioEmail: nova.usuarioEmail
       }).then(({ error }: any) => {
         if (error) console.error("[Supabase Async] Erro ao salvar nova notificacao:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar nova notificacao:", err?.message || err);
       });
     }
 

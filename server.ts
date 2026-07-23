@@ -72,9 +72,9 @@ function isShortOrInvalidVideo(video: any): boolean {
   const snippet = video.snippet || {};
   const contentDetails = video.contentDetails || {};
 
-  // 1. Duration check: YouTube Shorts/Reels are <= 120s (2 minutes)
+  // 1. Duration check: YouTube Shorts/Reels are <= 60s (1 minute)
   const durationSec = getDurationSeconds(contentDetails.duration || '');
-  if (durationSec > 0 && durationSec <= 120) {
+  if (durationSec > 0 && durationSec <= 60) {
     return true;
   }
 
@@ -137,6 +137,25 @@ function isShortOrInvalidReact(r: any): boolean {
   return false;
 }
 
+async function safeFetch(url: string, options: any = {}, retries = 0): Promise<Response | null> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err: any) {
+      if (i === retries) {
+        console.warn(`[safeFetch] Conexão indisponível para ${url.substring(0, 60)}...`);
+        return null;
+      }
+      await new Promise(r => setTimeout(r, 200 * (i + 1)));
+    }
+  }
+  return null;
+}
+
 async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean; videoData?: any }> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") {
@@ -146,9 +165,9 @@ async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean
 
   try {
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoId}&key=${apiKey}`;
-    const res = await fetch(videosUrl);
-    if (!res.ok) {
-      console.error(`[YouTube API] Erro ao validar vídeo ${videoId}: status ${res.status}`);
+    const res = await safeFetch(videosUrl);
+    if (!res || !res.ok) {
+      console.error(`[YouTube API] Erro ao validar vídeo ${videoId}: status ${res?.status || 'Network Error'}`);
       return { isValid: false };
     }
     const data: any = await res.json();
@@ -182,32 +201,87 @@ async function syncChannelVideos(channelId: string, obraId: string) {
   }
 
   try {
-    console.log(`[YouTube API] Buscando vídeos recentes do canal ${channelId} para "${obraId}"`);
+    console.log(`[YouTube API] Buscando todos os vídeos do canal ${channelId} para "${obraId}"`);
     let nextPageToken = '';
-    const allVideoIds = [];
+    const allVideoIds: string[] = [];
     let pagesFetched = 0;
     
-    // Instead of using search, use the uploads playlist (UU + channelId without UC)
-    // This costs 1 quota unit instead of 100
-    const uploadsPlaylistId = 'UU' + channelId.substring(2);
-    
-    // Fetch recent video IDs from the channel's upload playlist (limit to 3 pages/150 videos)
-    do {
-      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
-      const searchRes = await fetch(playlistUrl);
-      if (!searchRes.ok) {
-        const errText = await searchRes.text();
-        console.error(`[YouTube API] Erro ao pesquisar no canal ${channelId}: ${searchRes.status} - ${errText}`);
-        break;
+    let realChannelId = channelId;
+    let uploadsPlaylistId = '';
+
+    // If channelId starts with UC, convert directly to UU
+    if (channelId.startsWith('UC')) {
+      realChannelId = channelId;
+      uploadsPlaylistId = 'UU' + channelId.substring(2);
+    } else {
+      // Resolve handle or username to channel ID and uploads playlist
+      try {
+        let resolveUrl = '';
+        if (channelId.startsWith('@')) {
+          resolveUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,id&forHandle=${encodeURIComponent(channelId)}&key=${apiKey}`;
+        } else {
+          resolveUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,id&forUsername=${encodeURIComponent(channelId)}&key=${apiKey}`;
+        }
+        const chRes = await safeFetch(resolveUrl);
+        if (chRes && chRes.ok) {
+          const chData: any = await chRes.json();
+          if (chData.items?.[0]) {
+            realChannelId = chData.items[0].id || channelId;
+            uploadsPlaylistId = chData.items[0].contentDetails?.relatedPlaylists?.uploads || (realChannelId.startsWith('UC') ? 'UU' + realChannelId.substring(2) : '');
+          }
+        }
+      } catch (e) {
+        console.warn(`[YouTube API] Erro ao resolver ID para handle/username ${channelId}:`, e);
       }
-      
-      const searchData: any = await searchRes.json();
-      const ids = searchData.items?.map((item: any) => item.contentDetails?.videoId).filter(Boolean) || [];
-      allVideoIds.push(...ids);
-      
-      nextPageToken = searchData.nextPageToken;
-      pagesFetched++;
-    } while (nextPageToken && pagesFetched < 3);
+    }
+
+    if (!uploadsPlaylistId && realChannelId.startsWith('UC')) {
+      uploadsPlaylistId = 'UU' + realChannelId.substring(2);
+    }
+
+    if (uploadsPlaylistId) {
+      do {
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+        const searchRes = await safeFetch(playlistUrl);
+        if (!searchRes || !searchRes.ok) {
+          const errText = searchRes ? await searchRes.text() : 'Network Error';
+          console.warn(`[YouTube API] Playlist de uploads do canal ${realChannelId} (playlist ${uploadsPlaylistId}) retornou status ${searchRes?.status}: ${errText}`);
+          break;
+        }
+        
+        const searchData: any = await searchRes.json();
+        const ids = searchData.items?.map((item: any) => item.contentDetails?.videoId).filter(Boolean) || [];
+        allVideoIds.push(...ids);
+        
+        nextPageToken = searchData.nextPageToken;
+        pagesFetched++;
+      } while (nextPageToken && pagesFetched < 20);
+    }
+
+    // Fallback: if uploads playlist didn't return any videos, use YouTube Search endpoint by channelId or title
+    if (allVideoIds.length === 0) {
+      console.log(`[YouTube API] Usando busca direta para canal ${realChannelId}...`);
+      let searchPageToken = '';
+      let searchPages = 0;
+      do {
+        let searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=50&type=video&order=date&key=${apiKey}${searchPageToken ? `&pageToken=${searchPageToken}` : ''}`;
+        if (realChannelId.startsWith('UC')) {
+          searchUrl += `&channelId=${realChannelId}`;
+        } else {
+          const obraObj = localDb.getObras().find(o => o.id === obraId);
+          const cleanName = obraObj ? obraObj.titulo.replace(/^Canal\s+/i, '') : channelId;
+          searchUrl += `&q=${encodeURIComponent(cleanName + ' react')}`;
+        }
+
+        const searchRes = await safeFetch(searchUrl);
+        if (!searchRes || !searchRes.ok) break;
+        const searchData: any = await searchRes.json();
+        const ids = searchData.items?.map((item: any) => item.id?.videoId).filter(Boolean) || [];
+        allVideoIds.push(...ids);
+        searchPageToken = searchData.nextPageToken;
+        searchPages++;
+      } while (searchPageToken && searchPages < 10);
+    }
     
     const uniqueIds = Array.from(new Set(allVideoIds));
     console.log(`[YouTube API] Encontrados ${uniqueIds.length} vídeos no canal ${channelId}. Buscando detalhes...`);
@@ -217,9 +291,9 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     for (let i = 0; i < uniqueIds.length; i += 50) {
       const batchIds = uniqueIds.slice(i, i + 50);
       const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${batchIds.join(',')}&key=${apiKey}`;
-      const videosRes = await fetch(videosUrl);
-      if (!videosRes.ok) {
-        console.error(`[YouTube API] Erro ao obter detalhes do lote: ${videosRes.status}`);
+      const videosRes = await safeFetch(videosUrl);
+      if (!videosRes || !videosRes.ok) {
+        console.warn(`[YouTube API] Erro ao obter detalhes do lote: ${videosRes?.status || 'Network Error'}`);
         continue;
       }
       
@@ -261,19 +335,25 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     // Sort from newest to oldest
     validReacts.sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime());
     
-    // Remove existing reacts for this obra and save the new ones
+    // Merge into database preserving custom parameters (isRecomendado, likes, etc.)
     if (validReacts.length > 0) {
-      
-      // manual replace using the exported methods
-      const oldReacts = localDb.getReacts().filter(r => r.obraId === obraId);
-      for (const old of oldReacts) {
-        localDb.deleteReact(old.id);
-      }
+      const existingReacts = localDb.getReacts();
+      const existingMap = new Map(existingReacts.map(r => [r.id, r]));
+
       for (const valid of validReacts) {
-        localDb.saveReact(valid);
+        const existing = existingMap.get(valid.id);
+        if (existing) {
+          localDb.saveReact({
+            ...valid,
+            isRecomendado: existing.isRecomendado || valid.isRecomendado,
+            likes: Math.max(existing.likes || 0, valid.likes || 0)
+          });
+        } else {
+          localDb.saveReact(valid);
+        }
       }
 
-      console.log(`[YouTube API] Salvos ${validReacts.length} vídeos do canal ${channelId} no banco.`);
+      console.log(`[YouTube API] Sincronização concluída: ${validReacts.length} vídeos salvos para o canal ${channelId}.`);
     }
 
   } catch (err) {
@@ -292,10 +372,10 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
     console.log(`[YouTube API] Buscando reacts reais do YouTube para "${obraId}" com query "${query}"`);
     // Buscamos o triplo de resultados para filtrar e escolher os válidos/disponíveis
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${maxResults * 3}&q=${encodeURIComponent(query)}&type=video&key=${apiKey}`;
-    const searchRes = await fetch(searchUrl);
-    if (!searchRes.ok) {
-      const errText = await searchRes.text();
-      console.error(`[YouTube API] Erro ao pesquisar no YouTube: ${searchRes.status} - ${errText}`);
+    const searchRes = await safeFetch(searchUrl);
+    if (!searchRes || !searchRes.ok) {
+      const errText = searchRes ? await searchRes.text() : 'Network Error';
+      console.warn(`[YouTube API] Erro ao pesquisar no YouTube: ${searchRes?.status} - ${errText}`);
       return [];
     }
 
@@ -309,9 +389,9 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
 
     // Validação estrita via endpoint de vídeos
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoIds.join(',')}&key=${apiKey}`;
-    const videosRes = await fetch(videosUrl);
-    if (!videosRes.ok) {
-      console.error(`[YouTube API] Erro ao obter detalhes dos vídeos: ${videosRes.status}`);
+    const videosRes = await safeFetch(videosUrl);
+    if (!videosRes || !videosRes.ok) {
+      console.warn(`[YouTube API] Erro ao obter detalhes dos vídeos: ${videosRes?.status || 'Network Error'}`);
       return [];
     }
 
@@ -389,8 +469,8 @@ async function fetchRealChannelAvatar(channelId: string): Promise<string | null>
   if (apiKey && apiKey !== "MY_YOUTUBE_API_KEY") {
     try {
       const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
-      const res = await fetch(url);
-      if (res.ok) {
+      const res = await safeFetch(url);
+      if (res && res.ok) {
         const data: any = await res.json();
         const avatar = data.items?.[0]?.snippet?.thumbnails?.high?.url ||
                        data.items?.[0]?.snippet?.thumbnails?.medium?.url ||
@@ -405,12 +485,12 @@ async function fetchRealChannelAvatar(channelId: string): Promise<string | null>
   // Fallback: scrape channel page
   try {
     const channelUrl = `https://www.youtube.com/channel/${channelId}`;
-    const res = await fetch(channelUrl, {
+    const res = await safeFetch(channelUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
       }
     });
-    if (res.ok) {
+    if (res && res.ok) {
       const html = await res.text();
       const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i) || 
                            html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
@@ -459,15 +539,12 @@ async function prefillDefaultReacts() {
     return;
   }
 
-  const currentReacts = localDb.getReacts();
-  
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
 
   for (const canal of canais) {
-    const canalReacts = currentReacts.filter(r => r.obraId === canal.id);
-    if (canalReacts.length === 0 && canal.channelId) {
-      console.log(`[YouTube API] Buscando reacts para canal exclusivo ${canal.titulo}...`);
+    if (canal.channelId) {
+      console.log(`[YouTube API] Sincronizando catálogo completo para o canal ${canal.titulo}...`);
       syncChannelVideos(canal.channelId, canal.id).catch(err => {
         console.error(`[YouTube API] Erro ao pré-carregar canal ${canal.titulo}:`, err);
       });
@@ -599,8 +676,8 @@ app.get("/api/obras/:id", async (req, res) => {
         try {
           console.log(`[YouTube Banner Sync] Buscando banner e avatar real para ${obra.titulo} (${obra.channelId})...`);
           const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${obra.channelId}&key=${apiKey}`;
-          const detailRes = await fetch(detailUrl);
-          if (detailRes.ok) {
+          const detailRes = await safeFetch(detailUrl);
+          if (detailRes && detailRes.ok) {
             const detailData: any = await detailRes.json();
             const item = detailData.items?.[0];
             if (item) {
@@ -714,8 +791,8 @@ app.post("/api/canais/importar", async (req, res) => {
           apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(idObj.value)}&key=${apiKey}&maxResults=1`;
         }
 
-        const channelRes = await fetch(apiUrl);
-        if (channelRes.ok) {
+        const channelRes = await safeFetch(apiUrl);
+        if (channelRes && channelRes.ok) {
           const channelData: any = await channelRes.json();
           let item = null;
 
@@ -723,8 +800,8 @@ app.post("/api/canais/importar", async (req, res) => {
             const foundChannelId = channelData.items[0].id?.channelId;
             if (foundChannelId) {
               const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${foundChannelId}&key=${apiKey}`;
-              const detailRes = await fetch(detailUrl);
-              if (detailRes.ok) {
+              const detailRes = await safeFetch(detailUrl);
+              if (detailRes && detailRes.ok) {
                 const detailData: any = await detailRes.json();
                 item = detailData.items?.[0];
               }
@@ -1148,8 +1225,8 @@ app.post("/api/reacts/recomendar-link", async (req, res) => {
           try {
             console.log(`[Recomendar Link] Buscando banner real para o novo canal ${canalNome} (${channelId})...`);
             const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${channelId}&key=${apiKey}`;
-            const detailRes = await fetch(detailUrl);
-            if (detailRes.ok) {
+            const detailRes = await safeFetch(detailUrl);
+            if (detailRes && detailRes.ok) {
               const detailData: any = await detailRes.json();
               const item = detailData.items?.[0];
               if (item) {
@@ -2067,17 +2144,17 @@ async function startServer() {
           }
         })
         .catch(err => {
-          console.error("[Supabase] Erro ao sincronizar dados na inicialização:", err);
+          console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
         });
     }
 
     // Sincroniza fotos de perfil reais dos canais
     syncChannelAvatars().catch(err => {
-      console.error("Erro ao sincronizar avatares dos canais:", err);
+      console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
     });
     // Pré-carrega reacts do YouTube se necessário
     prefillDefaultReacts().catch(err => {
-      console.error("Erro ao executar pré-carregamento inicial:", err);
+      console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
     });
   });
 }

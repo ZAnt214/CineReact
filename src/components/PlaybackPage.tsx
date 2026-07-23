@@ -3,6 +3,7 @@ import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, 
 import { Obra, ReactVideo, UserState, Comentario } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import PlaybackSkeleton from './PlaybackSkeleton.tsx';
+import OptimizedImage from './OptimizedImage.tsx';
 
 // Lazy loading for heavy comment section component
 const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
@@ -956,12 +957,10 @@ export default function PlaybackPage({
                 >
                   {/* Visual Thumbnail Frame */}
                   <div className="relative w-28 h-18 sm:w-36 sm:h-22 flex-shrink-0 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-850 shadow-md">
-                    <img 
+                    <OptimizedImage 
                       src={react.thumbnailUrl} 
                       alt={react.titulo} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
                     />
                     <span className="absolute bottom-1 right-1 bg-black/85 backdrop-blur-md text-[9px] font-mono font-bold px-1 py-0.5 rounded text-zinc-200 border border-zinc-800/40">
                       {react.duracao}

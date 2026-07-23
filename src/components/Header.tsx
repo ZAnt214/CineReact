@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download } from 'lucide-react';
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface HeaderProps {
   currentTab: string;
@@ -166,9 +167,9 @@ export default function Header({
   const fetchNotifications = async () => {
     try {
       const url = user.email ? `/api/notificacoes?email=${encodeURIComponent(user.email)}` : '/api/notificacoes';
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
+      const res = await fetch(url).catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json().catch(() => []);
         setNotifications(data);
       }
     } catch (e) {
@@ -464,7 +465,7 @@ export default function Header({
                           }}
                           className="w-full flex items-center gap-3 p-2 hover:bg-zinc-900/50 rounded-lg transition-colors text-left group"
                         >
-                          <img src={obra.poster} alt={obra.titulo} className="w-8 h-11 object-cover rounded-md shadow bg-zinc-900 flex-shrink-0" />
+                          <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md shadow bg-zinc-900" />
                           <div className="flex-1 min-w-0">
                             <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors truncate leading-tight">{obra.titulo}</h4>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
@@ -734,7 +735,7 @@ export default function Header({
                       }}
                       className="w-full flex items-center gap-3 p-2 hover:bg-zinc-900 rounded-lg text-left"
                     >
-                      <img src={obra.poster} alt={obra.titulo} className="w-8 h-11 object-cover rounded-md" />
+                      <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md" />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-semibold text-white truncate">{obra.titulo}</h4>
                         <span className="text-[10px] text-zinc-500">{obra.ano}</span>

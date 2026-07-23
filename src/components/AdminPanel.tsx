@@ -219,29 +219,29 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     try {
       setLoading(true);
       const [obrasRes, commentsRes, usersRes, reactsRes] = await Promise.all([
-        fetch('/api/obras'),
-        fetch('/api/comentarios'),
-        fetch('/api/usuarios'),
-        fetch('/api/reacts')
+        fetch('/api/obras').catch(() => null),
+        fetch('/api/comentarios').catch(() => null),
+        fetch('/api/usuarios').catch(() => null),
+        fetch('/api/reacts').catch(() => null)
       ]);
 
-      if (obrasRes.ok) {
-        const data = await obrasRes.json();
+      if (obrasRes && obrasRes.ok) {
+        const data = await obrasRes.json().catch(() => []);
         setObras(data);
       }
 
-      if (commentsRes.ok) {
-        const data = await commentsRes.json();
+      if (commentsRes && commentsRes.ok) {
+        const data = await commentsRes.json().catch(() => []);
         setComentarios(data);
       }
 
-      if (usersRes.ok) {
-        const data = await usersRes.json();
+      if (usersRes && usersRes.ok) {
+        const data = await usersRes.json().catch(() => []);
         setUsuarios(data);
       }
 
-      if (reactsRes.ok) {
-        const data = await reactsRes.json();
+      if (reactsRes && reactsRes.ok) {
+        const data = await reactsRes.json().catch(() => []);
         setReacts(data);
       }
     } catch (e) {
