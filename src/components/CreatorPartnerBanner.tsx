@@ -31,15 +31,17 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
 
           <span className="min-w-0">
             <span className="flex items-center gap-2">
-              <span className="truncate text-xs font-black uppercase tracking-[0.12em] text-amber-400 sm:text-sm">
-                Programa de Criadores
+              <span className="truncate text-[11px] font-black uppercase tracking-[0.12em] text-amber-400 sm:text-sm">
+                <span className="sm:hidden">Criadores Parceiros</span>
+                <span className="hidden sm:inline">Programa de Criadores</span>
               </span>
               <span className="hidden rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500 sm:inline">
                 Parceria
               </span>
             </span>
             <span className="mt-0.5 block truncate text-[11px] text-zinc-400 sm:text-xs">
-              Mais descoberta para seus reacts, com seu canal no centro.
+              <span className="sm:hidden">Seu canal, mais alcance.</span>
+              <span className="hidden sm:inline">Mais descoberta para seus reacts, com seu canal no centro.</span>
             </span>
           </span>
         </button>
