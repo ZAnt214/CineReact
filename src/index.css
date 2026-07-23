@@ -80,8 +80,6 @@
   }
 
   .catalog-card {
-    content-visibility: auto;
-    contain-intrinsic-size: 220px 285px;
     contain: layout paint style;
     box-shadow: none !important;
     transition: none !important;
