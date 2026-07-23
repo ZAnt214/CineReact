@@ -71,17 +71,35 @@ export default function AuthModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    const previousOverflow = document.body.style.overflow;
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollPosition = window.scrollY;
+    const previousBodyStyles = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+    };
+    const previousHtmlOverflow = html.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
 
-    document.body.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollPosition}px`;
+    body.style.width = '100%';
+    html.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      body.style.overflow = previousBodyStyles.overflow;
+      body.style.position = previousBodyStyles.position;
+      body.style.top = previousBodyStyles.top;
+      body.style.width = previousBodyStyles.width;
+      html.style.overflow = previousHtmlOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      window.scrollTo(0, scrollPosition);
     };
   }, [isOpen, onClose]);
 
@@ -212,7 +230,7 @@ export default function AuthModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center p-3 sm:p-6">
+        <div className="fixed inset-0 z-[130] flex items-center justify-center overscroll-none p-3 sm:p-6">
           <motion.button
             type="button"
             aria-label="Fechar autenticação"
@@ -288,7 +306,7 @@ export default function AuthModal({
               </div>
             </aside>
 
-            <section className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
+            <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
               <div className="mb-6 flex items-center font-['Fredoka',sans-serif] text-xl font-black md:hidden">
                 <span className="text-white">Cine</span>
                 <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
