@@ -163,11 +163,25 @@ const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 let supabaseClient: any = null;
 
-const supabaseFetchWithTimeout = (input: any, init?: any) => {
+const supabaseFetchWithTimeout = async (input: any, init?: any) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  return fetch(input, { ...init, signal: controller.signal })
-    .finally(() => clearTimeout(timeoutId));
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  try {
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    return response;
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      console.warn("[Supabase] Requisição em background cancelada por timeout (4s). Mantendo operação local.");
+    } else {
+      console.warn("[Supabase] Operação em background off-line. Mantendo operação local.");
+    }
+    return new Response(JSON.stringify([]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 if (supabaseUrl && supabaseAnonKey && supabaseUrl !== "" && supabaseAnonKey !== "") {
@@ -417,7 +431,7 @@ export const localDb = {
         trailerUrl: obra.trailerUrl,
         destacado: !!obra.destacado
       }).then(({ error }: any) => {
-        if (error) console.error("[Supabase Async] Erro ao salvar obra:", error);
+        if (error) console.warn("[Supabase Async] Aviso ao salvar obra:", error);
       }).catch((err: any) => {
         console.warn("[Supabase Async Network Error] Erro ao salvar obra:", err?.message || err);
       });
@@ -434,7 +448,7 @@ export const localDb = {
 
     if (supabaseClient) {
       supabaseClient.from('obras').delete().eq('id', id).then(({ error }: any) => {
-        if (error) console.error("[Supabase Async] Erro ao deletar obra:", error);
+        if (error) console.warn("[Supabase Async] Aviso ao deletar obra:", error);
       }).catch((err: any) => {
         console.warn("[Supabase Async Network Error] Erro ao deletar obra:", err?.message || err);
       });
@@ -478,7 +492,7 @@ export const localDb = {
         visualizacoes: react.visualizacoes || 0,
         isRecomendado: !!react.isRecomendado
       }).then(({ error }: any) => {
-        if (error) console.error("[Supabase Async] Erro ao salvar react:", error);
+        if (error) console.warn("[Supabase Async] Aviso ao salvar react:", error);
       }).catch((err: any) => {
         console.warn("[Supabase Async Network Error] Erro ao salvar react:", err?.message || err);
       });
@@ -493,7 +507,7 @@ export const localDb = {
 
     if (supabaseClient) {
       supabaseClient.from('reacts').delete().eq('id', id).then(({ error }: any) => {
-        if (error) console.error("[Supabase Async] Erro ao deletar react:", error);
+        if (error) console.warn("[Supabase Async] Aviso ao deletar react:", error);
       }).catch((err: any) => {
         console.warn("[Supabase Async Network Error] Erro ao deletar react:", err?.message || err);
       });

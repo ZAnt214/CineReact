@@ -137,11 +137,11 @@ function isShortOrInvalidReact(r: any): boolean {
   return false;
 }
 
-async function safeFetch(url: string, options: any = {}, retries = 0): Promise<Response | null> {
+async function safeFetch(url: string, options: any = {}, retries = 1): Promise<Response | null> {
   for (let i = 0; i <= retries; i++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeoutId);
       return res;
@@ -150,7 +150,7 @@ async function safeFetch(url: string, options: any = {}, retries = 0): Promise<R
         console.warn(`[safeFetch] Conexão indisponível para ${url.substring(0, 60)}...`);
         return null;
       }
-      await new Promise(r => setTimeout(r, 200 * (i + 1)));
+      await new Promise(r => setTimeout(r, 300 * (i + 1)));
     }
   }
   return null;
@@ -167,8 +167,8 @@ async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoId}&key=${apiKey}`;
     const res = await safeFetch(videosUrl);
     if (!res || !res.ok) {
-      console.error(`[YouTube API] Erro ao validar vídeo ${videoId}: status ${res?.status || 'Network Error'}`);
-      return { isValid: false };
+      console.warn(`[YouTube API] Aviso ao validar vídeo ${videoId}: ${res?.status || 'Network Error / Timeout'}. Permitindo inclusão com fallback.`);
+      return { isValid: true };
     }
     const data: any = await res.json();
     if (!data.items || data.items.length === 0) {

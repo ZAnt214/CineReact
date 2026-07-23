@@ -56,26 +56,43 @@ export default function RowMovies({
   const scrollLeftRef = useRef(0);
   const isDraggedRef = useRef(false);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!rowRef.current) return;
+    // Don't drag if clicking buttons
+    if ((e.target as HTMLElement).closest('button')) return;
+
     isMouseDownRef.current = true;
-    startXRef.current = e.pageX - rowRef.current.offsetLeft;
+    startXRef.current = e.clientX;
     scrollLeftRef.current = rowRef.current.scrollLeft;
     isDraggedRef.current = false;
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isMouseDownRef.current || !rowRef.current) return;
-    const x = e.pageX - rowRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1.5;
-    if (Math.abs(walk) > 5) {
+    
+    const deltaX = e.clientX - startXRef.current;
+    if (Math.abs(deltaX) > 6) {
       isDraggedRef.current = true;
     }
-    rowRef.current.scrollLeft = scrollLeftRef.current - walk;
+
+    if (isDraggedRef.current) {
+      rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
+    }
   };
 
-  const handleMouseUpOrLeave = () => {
-    isMouseDownRef.current = false;
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isMouseDownRef.current) {
+      isMouseDownRef.current = false;
+      try {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      } catch (_) {}
+    }
   };
 
   const handleCardClick = (reactId: string, obraId: string) => {
@@ -175,12 +192,13 @@ export default function RowMovies({
         {/* HORIZONTAL FLEX CAROUSEL */}
         <div
           ref={rowRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseLeave={handleMouseUpOrLeave}
-          style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ touchAction: 'pan-x pan-y' }}
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
@@ -189,8 +207,7 @@ export default function RowMovies({
               <div
                 key={react.id}
                 onClick={() => handleCardClick(react.id, react.obraId)}
-                style={{ touchAction: 'pan-y pinch-zoom' }}
-                className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
