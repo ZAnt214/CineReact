@@ -1,0 +1,3 @@
+/api/*  https://cinereactoficial.up.railway.app/api/:splat  200
+/landing  /index.html  200
+/landing/  /index.html  200

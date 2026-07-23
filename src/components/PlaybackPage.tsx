@@ -553,13 +553,13 @@ export default function PlaybackPage({
                 key={activeReact.id}
                 width="100%" 
                 height="100%" 
-                src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&modestbranding=1&rel=0&enablejsapi=1`}
+                src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&controls=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1${typeof window !== 'undefined' ? `&origin=${encodeURIComponent(window.location.origin)}` : ''}`}
                 title={activeReact.titulo}
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen
                 onLoad={() => setIframeLoading(false)}
-                className="w-full h-full relative z-0"
+                className="w-full h-full relative z-0 touch-manipulation"
               ></iframe>
 
               {/* ELEGANT ANIMATED LOADING OVERLAY / SKELETON FOR VIDEO PLAYER */}
@@ -621,7 +621,7 @@ export default function PlaybackPage({
               {/* THEATER MODE QUICK TOGGLE OVERLAY */}
               <button
                 onClick={() => setIsTheaterMode(!isTheaterMode)}
-                className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-amber-400 hover:text-amber-300 border border-amber-500/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg flex items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
+                className="hidden sm:flex absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-amber-400 hover:text-amber-300 border border-amber-500/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
                 title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}
               >
                 <Tv className="w-4 h-4" />

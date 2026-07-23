@@ -165,7 +165,7 @@ export default function RowMovies({
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -173,31 +173,24 @@ export default function RowMovies({
         )}
 
         {/* HORIZONTAL FLEX CAROUSEL */}
-        <motion.div
+        <div
           ref={rowRef}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
-          className="flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
 
             return (
-              <motion.div
+              <div
                 key={react.id}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 style={{ touchAction: 'pan-y pinch-zoom' }}
-                className={`w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
@@ -272,19 +265,19 @@ export default function RowMovies({
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
           
           {/* ENDING SPACER FOR RIGHT PADDING IN SCROLL CONTAINERS */}
           <div className="shrink-0 w-2 sm:w-4 lg:w-6" aria-hidden="true" />
-        </motion.div>
+        </div>
 
         {/* RIGHT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('right')}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Próximo"
           >
             <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />

@@ -7,6 +7,16 @@ interface CreatorPartnerModalProps {
 }
 
 export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerModalProps) {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const emailSubject = encodeURIComponent("Quero ser um Criador Parceiro do CineReact");

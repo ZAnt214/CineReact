@@ -163,10 +163,20 @@ const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 let supabaseClient: any = null;
 
+const supabaseFetchWithTimeout = (input: any, init?: any) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  return fetch(input, { ...init, signal: controller.signal })
+    .finally(() => clearTimeout(timeoutId));
+};
+
 if (supabaseUrl && supabaseAnonKey && supabaseUrl !== "" && supabaseAnonKey !== "") {
   try {
     supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      global: {
+        fetch: supabaseFetchWithTimeout
+      }
     });
     console.log("[Supabase] Cliente inicializado com sucesso.");
   } catch (err) {

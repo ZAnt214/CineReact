@@ -93,3 +93,28 @@ html, body, #root {
   box-sizing: border-box;
 }
 
+/* Catalog Carousel & Card Optimizations */
+.catalog-carousel {
+  touch-action: pan-x pan-y pinch-zoom;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  contain: content;
+}
+
+.catalog-card {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+@media (pointer: coarse) {
+  .catalog-card {
+    will-change: auto;
+  }
+  .catalog-carousel-arrow {
+    display: none !important;
+  }
+}
+
+

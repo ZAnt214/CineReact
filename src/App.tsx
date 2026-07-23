@@ -27,11 +27,24 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
       const search = window.location.search.toLowerCase();
-      if (path === '/landing' || path === '/welcome' || search.includes('landing') || search.includes('page=landing')) {
-        return 'landing';
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // If URL explicitly requests catalog/inicio or another tab
+      if (search.includes('tab=inicio') || search.includes('catalog=true') || path === '/catalog' || path === '/app') {
+        return 'inicio';
+      }
+      if (urlParams.get('tab')) {
+        return urlParams.get('tab') || 'landing';
+      }
+
+      // Check if user already clicked explore in this session
+      const hasExplored = sessionStorage.getItem('cinereact_explored');
+      if (hasExplored === 'true') {
+        return 'inicio';
       }
     }
-    return 'inicio';
+    // Default to institutional landing page for all new visitors
+    return 'landing';
   });
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [selectedReactId, setSelectedReactId] = useState<string | null>(null);
@@ -372,38 +385,68 @@ export default function App() {
     return list;
   }, []);
 
+  const selectChannelDiverse = React.useCallback((items: ReactVideo[], limit: number = 20): ReactVideo[] => {
+    const result: ReactVideo[] = [];
+    const channelCount: Record<string, number> = {};
+    
+    for (const item of items) {
+      if (result.length >= limit) break;
+      const channel = item.canalNome || 'desconhecido';
+      const count = channelCount[channel] || 0;
+      
+      if (count < 3) {
+        result.push(item);
+        channelCount[channel] = count + 1;
+      }
+    }
+
+    if (result.length < limit) {
+      const resultIds = new Set(result.map(r => r.id));
+      for (const item of items) {
+        if (result.length >= limit) break;
+        if (!resultIds.has(item.id)) {
+          result.push(item);
+          resultIds.add(item.id);
+        }
+      }
+    }
+    return result;
+  }, []);
+
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
 
     // Reacts em Alta (Velocity & Trending score)
-    const emAlta = [...reacts].sort((a, b) => {
+    const sortedEmAlta = [...reacts].sort((a, b) => {
       const pubA = new Date(a.publicadoEm || Date.now()).getTime();
       const pubB = new Date(b.publicadoEm || Date.now()).getTime();
       const now = Date.now();
       const daysOldA = Math.max(0.1, (now - pubA) / (1000 * 60 * 60 * 24));
       const daysOldB = Math.max(0.1, (now - pubB) / (1000 * 60 * 60 * 24));
 
-      // Weight recency heavily so "Em Alta" shows recent trending content
       const scoreA = ((a.visualizacoes || 0) + (a.likes || 0) * 50 + 1000) / Math.pow(daysOldA + 1, 1.5);
       const scoreB = ((b.visualizacoes || 0) + (b.likes || 0) * 50 + 1000) / Math.pow(daysOldB + 1, 1.5);
       
       return scoreB - scoreA || b.id.localeCompare(a.id);
-    }).slice(0, 20);
+    });
+    const emAlta = selectChannelDiverse(sortedEmAlta, 20);
 
     // Novidades: top 20 newest by publication date
-    const novidades = [...reacts].sort((a, b) => {
+    const sortedNovidades = [...reacts].sort((a, b) => {
       const dateA = new Date(a.publicadoEm || 0).getTime();
       const dateB = new Date(b.publicadoEm || 0).getTime();
       return dateB - dateA || b.id.localeCompare(a.id);
-    }).slice(0, 20);
+    });
+    const novidades = selectChannelDiverse(sortedNovidades, 20);
 
     // Mais Assistidos: top 30 highest total view count strictly
-    const maisAssistidos = [...reacts].sort((a, b) => {
+    const sortedMaisAssistidos = [...reacts].sort((a, b) => {
       const viewsA = a.visualizacoes || 0;
       const viewsB = b.visualizacoes || 0;
       if (viewsB !== viewsA) return viewsB - viewsA;
       return (b.likes || 0) - (a.likes || 0) || a.id.localeCompare(b.id);
-    }).slice(0, 30);
+    });
+    const maisAssistidos = selectChannelDiverse(sortedMaisAssistidos, 30);
 
     // Dynamic type-based carousels (filme, serie, jogo, anime)
     const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
@@ -502,6 +545,9 @@ export default function App() {
     return (
       <LandingPage 
         onExplore={() => {
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('cinereact_explored', 'true');
+          }
           setCurrentTab('inicio');
           window.scrollTo(0, 0);
           if (typeof window !== 'undefined' && window.history && window.history.pushState) {
