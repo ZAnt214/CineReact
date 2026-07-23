@@ -119,11 +119,7 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute bottom-[-25%] right-[-12%] h-[600px] w-[600px] rounded-full bg-yellow-400/[0.05] blur-[140px]" aria-hidden="true" />
 
           <div className="relative mx-auto grid w-full max-w-7xl items-center gap-14 lg:grid-cols-[1.12fr_0.88fr] lg:gap-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, ease: 'easeOut' }}
-            >
+            <div>
               <div className="mb-8 w-full max-w-[320px] overflow-hidden rounded-2xl border border-amber-400/15 shadow-[0_20px_70px_rgba(0,0,0,0.45)] sm:max-w-[380px]">
                 <img
                   src="/cinereact-logo.svg"
@@ -164,12 +160,9 @@ export default function LandingPage() {
                   <span>Ambiente de descoberta<br />com conteúdo organizado</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.12, ease: 'easeOut' }}
+            <div
               className="relative mx-auto w-full max-w-xl lg:max-w-none"
               aria-label="Visão geral dos temas encontrados no CineReact"
             >
@@ -223,7 +216,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
 
