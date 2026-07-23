@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles, Award, Star } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
-import { motion, useInView } from 'motion/react';
 
 interface RowMoviesProps {
   key?: React.Key;
@@ -16,28 +15,6 @@ interface RowMoviesProps {
   onChannelClick?: (channelNameOrId: string) => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.25,
-      ease: 'easeOut'
-    }
-  }
-};
-
 export default function RowMovies({ 
   title, 
   reacts, 
@@ -49,12 +26,6 @@ export default function RowMovies({
   onChannelClick
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const hasEntered = useInView(containerRef, {
-    once: true,
-    margin: "0px 0px 200px 0px"
-  });
 
   // Check if title matches a channel in obras
   const matchingChannel = obras.find(o => 
@@ -99,7 +70,7 @@ export default function RowMovies({
   };
 
   return (
-    <div ref={containerRef} className="space-y-3.5 relative max-w-7xl mx-auto w-full group/row">
+    <div className="space-y-3.5 relative max-w-7xl mx-auto w-full group/row">
       {/* ROW TITLE & ACTIONS */}
       <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
         <div className="flex items-center justify-between gap-3">
@@ -138,21 +109,16 @@ export default function RowMovies({
         )}
 
         {/* HORIZONTAL FLEX CAROUSEL */}
-        <motion.div
+        <div
           ref={rowRef}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
           className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent snap-x snap-proximity min-w-0 max-w-full"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
 
             return (
-              <motion.div
+              <div
                 key={react.id}
-                variants={itemVariants}
                 onClick={() => onPlayVideo(react.id, react.obraId)}
                 className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
@@ -182,7 +148,7 @@ export default function RowMovies({
                   </div>
 
                   {/* Duration Badge */}
-                  <span className="absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 bg-black/85 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold text-zinc-200 rounded-lg border border-zinc-700/60 shadow-md leading-none">
+                  <span className="catalog-card-badge absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 bg-black/85 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold text-zinc-200 rounded-lg border border-zinc-700/60 shadow-md leading-none">
                     <Clock className="w-3 h-3 text-amber-400 shrink-0" />
                     <span>{react.duracao}</span>
                   </span>
@@ -233,13 +199,13 @@ export default function RowMovies({
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
           
           {/* ENDING SPACER FOR RIGHT PADDING IN SCROLL CONTAINERS */}
           <div className="shrink-0 w-2 sm:w-4 lg:w-6" aria-hidden="true" />
-        </motion.div>
+        </div>
 
         {/* RIGHT NAV ARROW */}
         {reacts.length > 2 && (

@@ -55,6 +55,8 @@
   overscroll-behavior-inline: contain;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -68,13 +70,31 @@
 }
 
 @media (hover: none), (pointer: coarse) {
+  .catalog-carousel {
+    scroll-snap-type: none !important;
+  }
+
   .catalog-card,
   .catalog-card-thumbnail {
     transform: none !important;
   }
 
+  .catalog-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 220px 285px;
+    contain: layout paint style;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+
   .catalog-card-thumbnail {
     transition: none;
+  }
+
+  .catalog-card-badge {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
   }
 
   .catalog-carousel-arrow {
