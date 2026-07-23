@@ -49,6 +49,14 @@
   scrollbar-width: none !important;  /* Firefox */
 }
 
+/* Keep horizontal carousels responsive without trapping vertical touch gestures. */
+.catalog-carousel {
+  touch-action: pan-x pan-y pinch-zoom;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+}
+
 html, body, #root {
   background-color: #0d0d10;
   color: #ffffff;
