@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ArrowRight, Check, Film, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Check, ShieldCheck } from 'lucide-react';
 
 const benefits = [
   'Descubra novos criadores.',
@@ -7,6 +7,45 @@ const benefits = [
   'Organize seus conteúdos favoritos.',
   'Navegue em uma experiência simples e intuitiva.',
 ];
+
+type BrandLogoProps = {
+  size?: 'footer' | 'header' | 'hero';
+};
+
+function BrandLogo({ size = 'header' }: BrandLogoProps) {
+  const textSize = {
+    footer: 'text-xl',
+    header: 'text-2xl sm:text-3xl',
+    hero: 'text-5xl sm:text-6xl',
+  }[size];
+
+  const punctuationSize = {
+    footer: 'text-xl',
+    header: 'text-2xl sm:text-3xl',
+    hero: 'text-4xl sm:text-5xl',
+  }[size];
+
+  return (
+    <span className="group flex items-center select-none font-['Fredoka',sans-serif]" aria-label="CineReact">
+      <span
+        className={`${textSize} inline-block font-extrabold tracking-wide text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)] transition-transform duration-300 group-hover:-translate-y-0.5`}
+      >
+        Cine
+      </span>
+      <span
+        className={`${textSize} ml-0.5 inline-block bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text font-black tracking-wide text-transparent drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] transition-transform duration-300 group-hover:scale-105`}
+      >
+        React
+      </span>
+      <span
+        className={`${punctuationSize} ml-0.5 inline-block animate-bounce font-black text-amber-400 drop-shadow-[0_2px_8px_rgba(245,158,11,0.6)]`}
+        aria-hidden="true"
+      >
+        !
+      </span>
+    </span>
+  );
+}
 
 export default function LandingPage() {
   useEffect(() => {
@@ -31,13 +70,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-400 selection:text-black">
       <header className="border-b border-white/[0.07] bg-[#09090b]">
         <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 sm:px-8">
-          <a href="/landing" className="flex items-center gap-2.5" aria-label="CineReact">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-400/30 bg-amber-400/10">
-              <Film className="h-4.5 w-4.5 text-amber-400" aria-hidden="true" />
-            </span>
-            <span className="font-['Fredoka',sans-serif] text-xl font-extrabold">
-              Cine<span className="text-amber-400">React</span>
-            </span>
+          <a href="/landing" aria-label="CineReact - página de boas-vindas">
+            <BrandLogo />
           </a>
 
           <a
@@ -53,14 +87,8 @@ export default function LandingPage() {
       <main>
         <section className="px-5 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="mx-auto mb-8 w-full max-w-[300px] overflow-hidden rounded-2xl border border-amber-400/15">
-              <img
-                src="/cinereact-logo.svg"
-                alt="CineReact"
-                className="block h-auto w-full"
-                width="500"
-                height="120"
-              />
+            <div className="mb-8 flex justify-center">
+              <BrandLogo size="hero" />
             </div>
 
             <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-400">
@@ -149,9 +177,7 @@ export default function LandingPage() {
       <footer className="border-t border-white/[0.07] bg-[#070708] px-5 py-10 sm:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-            <span className="font-['Fredoka',sans-serif] text-lg font-extrabold">
-              Cine<span className="text-amber-400">React</span>
-            </span>
+            <BrandLogo size="footer" />
             <nav className="flex flex-wrap gap-5 text-xs font-semibold text-zinc-400" aria-label="Links institucionais">
               <a className="hover:text-amber-300" href="#privacidade">Política de Privacidade</a>
               <a className="hover:text-amber-300" href="#termos">Termos de Uso</a>
