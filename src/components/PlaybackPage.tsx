@@ -552,13 +552,13 @@ export default function PlaybackPage({
                 key={activeReact.id}
                 width="100%" 
                 height="100%" 
-                src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&modestbranding=1&rel=0&enablejsapi=1`}
+                src={`https://www.youtube.com/embed/${activeReact.id}?autoplay=1&controls=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                 title={activeReact.titulo}
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen
                 onLoad={() => setIframeLoading(false)}
-                className="w-full h-full relative z-0"
+                className="relative z-0 h-full w-full touch-manipulation pointer-events-auto"
               ></iframe>
 
               {/* ELEGANT ANIMATED LOADING OVERLAY / SKELETON FOR VIDEO PLAYER */}
@@ -620,7 +620,7 @@ export default function PlaybackPage({
               {/* THEATER MODE QUICK TOGGLE OVERLAY */}
               <button
                 onClick={() => setIsTheaterMode(!isTheaterMode)}
-                className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-amber-400 hover:text-amber-300 border border-amber-500/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg flex items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
+                className="pointer-events-none absolute top-3 right-3 z-10 hidden items-center gap-1.5 rounded-xl border border-amber-500/40 bg-black/80 px-3 py-1.5 text-xs font-bold text-amber-400 opacity-0 shadow-lg transition-all hover:bg-black hover:text-amber-300 group-hover/player:pointer-events-auto group-hover/player:opacity-100 lg:flex"
                 title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}
               >
                 <Tv className="w-4 h-4" />
@@ -768,6 +768,20 @@ export default function PlaybackPage({
                 >
                   <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-amber-400 text-amber-400 scale-110' : 'text-zinc-400'}`} />
                   {isFavorited ? 'Favoritado' : 'Favoritar'}
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setIsTheaterMode(!isTheaterMode)}
+                  className={`flex items-center gap-2 rounded-full border px-4.5 py-2.5 text-xs font-bold tracking-wide transition-colors lg:hidden ${
+                    isTheaterMode
+                      ? 'border-amber-500/40 bg-amber-500/20 text-amber-300'
+                      : 'border-zinc-800 bg-zinc-900/60 text-zinc-300'
+                  }`}
+                  title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}
+                >
+                  <Tv className="h-4 w-4" />
+                  {isTheaterMode ? 'Modo Normal' : 'Modo Teatro'}
                 </motion.button>
 
                 <div className="relative">
