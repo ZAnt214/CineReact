@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Check, FileText, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
 
 const benefits = [
   'Descubra novos criadores.',
@@ -184,6 +184,152 @@ export default function LandingPage() {
             </a>
           </div>
         </section>
+
+        <section className="border-t border-white/[0.07] bg-[#0b0b0d] px-5 py-16 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-400">
+                Transparência
+              </p>
+              <h2 className="mt-3 text-2xl font-black sm:text-3xl">Privacidade e termos em linguagem clara.</h2>
+              <p className="mt-4 text-sm leading-6 text-zinc-400">
+                Entenda quais informações podem ser utilizadas e as condições para navegar pelo CineReact.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <article
+                id="privacidade"
+                className="scroll-mt-24 rounded-2xl border border-white/[0.08] bg-zinc-950/70 p-6 sm:p-8"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10">
+                    <LockKeyhole className="h-5 w-5 text-amber-400" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-400">
+                      Seus dados
+                    </p>
+                    <h3 className="mt-1 text-xl font-black">Política de Privacidade</h3>
+                  </div>
+                </div>
+
+                <p className="mt-6 text-sm leading-7 text-zinc-400">
+                  Esta página de apresentação não solicita cadastro nem dados pessoais. Ao acessar e utilizar os
+                  recursos do catálogo, algumas informações podem ser necessárias para oferecer as funcionalidades
+                  escolhidas por você.
+                </p>
+
+                <ul className="mt-6 space-y-4 text-sm leading-6 text-zinc-400">
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Conta e perfil:</strong> nome, e-mail, avatar e descrição
+                      informados pelo usuário podem ser utilizados para identificação e personalização.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Preferências:</strong> favoritos, listas, canais seguidos,
+                      comentários e progresso de reprodução podem ser associados à conta.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Armazenamento no navegador:</strong> sessão, curtidas e
+                      preferências podem ser salvas localmente para manter a experiência entre acessos.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Serviços externos:</strong> ao reproduzir conteúdo incorporado,
+                      o YouTube pode tratar dados conforme as próprias políticas de privacidade.
+                    </span>
+                  </li>
+                </ul>
+              </article>
+
+              <article
+                id="termos"
+                className="scroll-mt-24 rounded-2xl border border-white/[0.08] bg-zinc-950/70 p-6 sm:p-8"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10">
+                    <FileText className="h-5 w-5 text-amber-400" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-400">
+                      Uso da plataforma
+                    </p>
+                    <h3 className="mt-1 text-xl font-black">Termos de Uso</h3>
+                  </div>
+                </div>
+
+                <p className="mt-6 text-sm leading-7 text-zinc-400">
+                  O CineReact é uma plataforma independente de descoberta e organização. Ao utilizar o serviço,
+                  você concorda em navegar de forma responsável e respeitar os direitos dos criadores e das
+                  plataformas de origem.
+                </p>
+
+                <ul className="mt-6 space-y-4 text-sm leading-6 text-zinc-400">
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Finalidade:</strong> organizamos referências a vídeos públicos
+                      para facilitar a descoberta de obras, reações e criadores.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Direitos autorais:</strong> os vídeos pertencem aos respectivos
+                      criadores e são exibidos por meio das ferramentas das plataformas de origem.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Disponibilidade:</strong> links, vídeos e informações podem ser
+                      alterados ou removidos pelos proprietários sem controle do CineReact.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <span>
+                      <strong className="text-zinc-200">Uso responsável:</strong> não é permitido tentar comprometer a
+                      segurança, acessar áreas sem autorização ou utilizar o serviço para fins ilícitos.
+                    </span>
+                  </li>
+                </ul>
+              </article>
+            </div>
+
+            <div className="mt-5 flex flex-col items-start justify-between gap-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.06] p-5 sm:flex-row sm:items-center sm:px-6">
+              <div className="flex items-start gap-3">
+                <Mail className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-bold text-white">Dúvidas ou solicitações sobre seus dados?</p>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    Entre em contato para solicitar informações, correções ou exclusão de dados relacionados à sua conta.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="mailto:atendimentocinereact@gmail.com"
+                className="shrink-0 text-sm font-bold text-amber-300 transition-colors hover:text-amber-200"
+              >
+                atendimentocinereact@gmail.com
+              </a>
+            </div>
+
+            <p className="mt-5 text-center text-[11px] text-zinc-600">
+              Última atualização: julho de 2026.
+            </p>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-white/[0.07] bg-[#070708] px-5 py-10 sm:px-8">
@@ -197,16 +343,7 @@ export default function LandingPage() {
             </nav>
           </div>
 
-          <div className="mt-8 space-y-2 border-t border-white/[0.06] pt-6 text-[11px] leading-5 text-zinc-600">
-            <p id="privacidade">
-              <strong className="text-zinc-500">Privacidade:</strong> esta página institucional não solicita dados pessoais.
-            </p>
-            <p id="termos">
-              <strong className="text-zinc-500">Termos:</strong> o uso de conteúdos externos permanece sujeito às políticas de seus proprietários.
-            </p>
-          </div>
-
-          <p className="mt-6 max-w-4xl text-xs leading-6 text-zinc-600">
+          <p className="mt-8 max-w-4xl border-t border-white/[0.06] pt-6 text-xs leading-6 text-zinc-600">
             O CineReact não hospeda vídeos. Todo o conteúdo exibido é incorporado de plataformas públicas, como o
             YouTube, respeitando os direitos e políticas de seus respectivos proprietários.
           </p>
