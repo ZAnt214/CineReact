@@ -57,6 +57,31 @@
   scroll-behavior: auto;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .catalog-card:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+  }
+
+  .catalog-card:hover .catalog-card-thumbnail {
+    transform: scale(1.05);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .catalog-card,
+  .catalog-card-thumbnail {
+    transform: none !important;
+  }
+
+  .catalog-card-thumbnail {
+    transition: none;
+  }
+
+  .catalog-carousel-arrow {
+    display: none !important;
+  }
+}
+
 html, body, #root {
   background-color: #0d0d10;
   color: #ffffff;

@@ -130,7 +130,7 @@ export default function RowMovies({
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -153,10 +153,8 @@ export default function RowMovies({
               <motion.div
                 key={react.id}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
                 onClick={() => onPlayVideo(react.id, react.obraId)}
-                className={`w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 snap-start bg-zinc-900/80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
@@ -167,7 +165,7 @@ export default function RowMovies({
                   <img
                     src={react.thumbnailUrl}
                     alt={react.titulo}
-                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
+                    className="catalog-card-thumbnail w-full h-full object-cover transition-transform duration-300"
                     referrerPolicy="no-referrer"
                     loading="lazy"
                     decoding="async"
@@ -247,7 +245,7 @@ export default function RowMovies({
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('right')}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Próximo"
           >
             <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
