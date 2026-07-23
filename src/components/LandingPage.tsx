@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Check, ShieldCheck } from 'lucide-react';
 
 const benefits = [
@@ -9,20 +9,18 @@ const benefits = [
 ];
 
 type BrandLogoProps = {
-  size?: 'footer' | 'header' | 'hero';
+  size?: 'footer' | 'header';
 };
 
 function BrandLogo({ size = 'header' }: BrandLogoProps) {
   const textSize = {
     footer: 'text-xl',
     header: 'text-2xl sm:text-3xl',
-    hero: 'text-5xl sm:text-6xl',
   }[size];
 
   const punctuationSize = {
     footer: 'text-xl',
     header: 'text-2xl sm:text-3xl',
-    hero: 'text-4xl sm:text-5xl',
   }[size];
 
   return (
@@ -48,6 +46,8 @@ function BrandLogo({ size = 'header' }: BrandLogoProps) {
 }
 
 export default function LandingPage() {
+  const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
     const previousTitle = document.title;
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
@@ -66,31 +66,43 @@ export default function LandingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-400 selection:text-black">
-      <header className="border-b border-white/[0.07] bg-[#09090b]">
-        <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 sm:px-8">
-          <a href="/landing" aria-label="CineReact - página de boas-vindas">
-            <BrandLogo />
-          </a>
+      <header
+        className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'border-b border-zinc-900/80 bg-zinc-950/90 shadow-lg shadow-black/30 backdrop-blur-md'
+            : 'border-b border-transparent bg-zinc-950/40 backdrop-blur-sm'
+        }`}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <a href="/landing" aria-label="CineReact - página de boas-vindas">
+              <BrandLogo />
+            </a>
 
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 rounded-lg border border-amber-400/30 px-4 py-2 text-xs font-bold text-amber-300 transition-colors hover:bg-amber-400 hover:text-black"
-          >
-            Explorar
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </a>
+            <a
+              href="/"
+              className="inline-flex items-center gap-2 rounded-lg border border-amber-400/30 px-4 py-2 text-xs font-bold text-amber-300 transition-colors hover:bg-amber-400 hover:text-black"
+            >
+              Explorar
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="px-5 py-20 sm:px-8 sm:py-28">
+        <section className="px-5 pt-32 pb-20 sm:px-8 sm:pt-40 sm:pb-28">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-8 flex justify-center">
-              <BrandLogo size="hero" />
-            </div>
-
             <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-400">
               Boas-vindas ao CineReact
             </p>
