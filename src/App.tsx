@@ -673,7 +673,7 @@ export default function App() {
                 className="space-y-12 pb-24 pt-24 w-full flex-1"
               >
                 {/* HORIZONTAL ROWS */}
-                <div className="space-y-10 md:mt-8 relative z-20">
+                <div className="space-y-6 sm:space-y-8 lg:space-y-10 md:mt-8 relative z-20">
                   {user.isLoggedIn && continueWatchingReacts.length > 0 && (
                     <RowMovies 
                       title="Continue Assistindo" 
