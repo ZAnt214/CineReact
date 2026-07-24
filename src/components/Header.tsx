@@ -15,6 +15,7 @@ interface HeaderProps {
   onOpenAuth?: (mode: 'login' | 'register') => void;
   obras?: Obra[];
   reacts?: ReactVideo[];
+  hasSideNav?: boolean;
 }
 
 export default function Header({
@@ -26,7 +27,8 @@ export default function Header({
   onSelectObra,
   onOpenAuth,
   obras = [],
-  reacts = []
+  reacts = [],
+  hasSideNav = false
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -313,7 +315,9 @@ export default function Header({
   return (
     <>
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
+        className={`fixed top-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
+          hasSideNav ? 'left-[4.5rem] md:left-56' : 'left-0'
+        } ${
           scrolled 
             ? 'bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/90 md:backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
             : 'bg-zinc-950/95 max-md:backdrop-blur-none md:bg-zinc-950/40 md:backdrop-blur-sm border-b border-transparent'

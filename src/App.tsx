@@ -13,7 +13,7 @@ import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
-import BottomNavHub from './components/BottomNavHub.tsx';
+import SideNavHub from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
 import LunchTimeBanner from './components/LunchTimeBanner.tsx';
@@ -665,10 +665,24 @@ export default function App() {
       }`}
       aria-hidden={currentTab === 'landing'}
     >
+      {catalogActive && (
+        <SideNavHub
+          currentTab={currentTab}
+          setCurrentTab={(tab) => {
+            setCurrentTab(tab);
+            setSelectedObraId(null);
+            setSelectedReactId(null);
+            setSearchQuery('');
+          }}
+        />
+      )}
+
+      <div className={`flex flex-col flex-1 min-h-screen w-full ${catalogActive ? 'pl-[4.5rem] md:pl-56' : ''}`}>
       
       {/* HEADER & TOP NAVIGATION */}
       <Header 
-        currentTab={currentTab} 
+        currentTab={currentTab}
+        hasSideNav={catalogActive}
         setCurrentTab={(tab) => {
           setCurrentTab(tab);
           setSelectedObraId(null);
@@ -1333,7 +1347,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-28 md:pb-32 w-full">
+      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-12 w-full">
         <div className="cine-container space-y-3">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
@@ -1376,22 +1390,14 @@ export default function App() {
         </div>
       </footer>
 
+      </div>
+
       {/* Floating Bottom Banner for Creators */}
       <AnimatePresence>
         {isCreatorBannerVisible && (
           <CreatorPartnerBanner 
             onClick={() => setShowCreatorPartnerModal(true)} 
             onClose={() => setIsCreatorBannerVisible(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Navigation Hub (Appears when creator banner is closed) */}
-      <AnimatePresence>
-        {!isCreatorBannerVisible && (
-          <BottomNavHub 
-            currentTab={currentTab} 
-            setCurrentTab={setCurrentTab} 
           />
         )}
       </AnimatePresence>
