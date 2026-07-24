@@ -43,8 +43,8 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             onClick={onClick}
             className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.03] cursor-pointer"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 sm:h-11 sm:w-11 group-hover:border-amber-400/30 group-hover:bg-amber-400/10 transition-colors">
-              <Youtube className="h-5 w-5 text-red-400 group-hover:text-amber-400 transition-colors" aria-hidden="true" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 sm:h-11 sm:w-11 group-hover:border-amber-400/40 group-hover:bg-amber-400/15 transition-colors">
+              <Youtube className="h-5 w-5 text-amber-400 transition-colors" aria-hidden="true" />
             </span>
 
             <span className="min-w-0 flex-1">
