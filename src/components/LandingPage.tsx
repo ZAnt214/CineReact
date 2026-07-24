@@ -16,14 +16,16 @@ import {
   X,
   PlayCircle,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 
 interface LandingPageProps {
   onExplore: () => void;
+  isNavigating?: boolean;
 }
 
-export default function LandingPage({ onExplore }: LandingPageProps) {
+export default function LandingPage({ onExplore, isNavigating = false }: LandingPageProps) {
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
@@ -65,10 +67,15 @@ export default function LandingPage({ onExplore }: LandingPageProps) {
           {/* Top CTA */}
           <button
             onClick={onExplore}
-            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold text-xs sm:text-sm hover:from-amber-400 hover:to-yellow-400 transition-all shadow-md shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer active:scale-95 shrink-0"
+            disabled={isNavigating}
+            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold text-xs sm:text-sm hover:from-amber-400 hover:to-yellow-400 transition-all shadow-md shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
           >
-            <span>Acessar Plataforma</span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            <span>{isNavigating ? 'Abrindo...' : 'Acessar Plataforma'}</span>
+            {isNavigating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            )}
           </button>
         </div>
       </header>
@@ -118,10 +125,15 @@ export default function LandingPage({ onExplore }: LandingPageProps) {
         >
           <button
             onClick={onExplore}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 flex items-center justify-center gap-3 cursor-pointer"
+            disabled={isNavigating}
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
           >
-            <span>Explorar o CineReact</span>
-            <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+            <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
+            {isNavigating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+            )}
           </button>
         </motion.div>
 
@@ -276,10 +288,15 @@ export default function LandingPage({ onExplore }: LandingPageProps) {
           <div className="mt-8 relative z-10">
             <button
               onClick={onExplore}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-base hover:brightness-110 transition-all shadow-xl shadow-amber-500/20 cursor-pointer inline-flex items-center gap-3"
+              disabled={isNavigating}
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-base hover:brightness-110 transition-all shadow-xl shadow-amber-500/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
             >
-              <span>Explorar o CineReact</span>
-              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+              <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
+              {isNavigating ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+              )}
             </button>
           </div>
         </div>

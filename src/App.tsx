@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import Header from './components/Header.tsx';
 import RowMovies from './components/RowMovies.tsx';
 import ObraPage from './components/ObraPage.tsx';
@@ -58,6 +58,9 @@ export default function App() {
   const [reacts, setReacts] = useState<ReactVideo[]>(() => VIDEOS_INICIAIS);
   const [canaisSeguidos, setCanaisSeguidos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isExploring, setIsExploring] = useState(false);
+  const [feedsWarm, setFeedsWarm] = useState(false);
+  const [, startTransition] = useTransition();
 
   // Auth modal trigger
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -246,6 +249,31 @@ export default function App() {
     fetchData(shouldShowSkeleton);
   }, [user.email]);
 
+  // Precompute home feeds in idle time while user reads the landing page
+  useEffect(() => {
+    if (currentTab !== 'landing' || reacts.length === 0 || feedsWarm) return;
+    if (typeof window === 'undefined') return;
+
+    let cancelled = false;
+    const warm = () => {
+      if (!cancelled) setFeedsWarm(true);
+    };
+
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(warm, { timeout: 1200 });
+      return () => {
+        cancelled = true;
+        cancelIdleCallback(id);
+      };
+    }
+
+    const timeoutId = setTimeout(warm, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [currentTab, reacts.length, feedsWarm]);
+
   // Load continue watching state from localStorage
   useEffect(() => {
     if (user.isLoggedIn) {
@@ -310,7 +338,10 @@ export default function App() {
       .filter((r): r is ReactVideo => !!r);
   }, [continueWatching, reacts]);
 
+  const catalogActive = currentTab !== 'landing';
+
   const recomendadosReacts = React.useMemo(() => {
+    if (!catalogActive) return [];
     const explicit = reacts.filter(r => r.isRecomendado);
     if (explicit.length >= 8) return explicit;
 
@@ -344,7 +375,7 @@ export default function App() {
     });
 
     return [...explicit, ...curatedPicks].slice(0, 15);
-  }, [reacts]);
+  }, [catalogActive, reacts]);
 
   const matchingReacts = React.useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -415,6 +446,7 @@ export default function App() {
 
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
+    if (currentTab === 'landing' && !feedsWarm) return null;
 
     // Reacts em Alta (Velocity & Trending score)
     const sortedEmAlta = [...reacts].sort((a, b) => {
@@ -499,7 +531,7 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [reacts, obras]);
+  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
@@ -541,25 +573,33 @@ export default function App() {
 
   const canais = obras.filter(o => o.tipo === 'canal');
 
-  if (currentTab === 'landing') {
-    return (
-      <LandingPage 
-        onExplore={() => {
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('cinereact_explored', 'true');
-          }
-          setCurrentTab('inicio');
-          window.scrollTo(0, 0);
-          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
-            window.history.pushState({}, '', '/');
-          }
-        }} 
-      />
-    );
-  }
+  const handleExplore = useCallback(() => {
+    setIsExploring(true);
+    setFeedsWarm(true);
+
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('cinereact_explored', 'true');
+    }
+
+    startTransition(() => {
+      setCurrentTab('inicio');
+      setIsExploring(false);
+    });
+
+    window.scrollTo(0, 0);
+
+    if (typeof window !== 'undefined' && window.history?.pushState) {
+      window.history.pushState({}, '', '/');
+    }
+  }, [startTransition]);
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative">
+    <>
+    <div
+      className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative"
+      style={{ visibility: currentTab === 'landing' ? 'hidden' : 'visible' }}
+      aria-hidden={currentTab === 'landing'}
+    >
       
       {/* HEADER & TOP NAVIGATION */}
       <Header 
@@ -1285,5 +1325,20 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+
+    <AnimatePresence>
+      {currentTab === 'landing' && (
+        <motion.div
+          key="landing-overlay"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[200]"
+        >
+          <LandingPage onExplore={handleExplore} isNavigating={isExploring} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
