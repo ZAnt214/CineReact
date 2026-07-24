@@ -150,7 +150,7 @@ export default function LunchTimePage({
         setTimeout(() => {
           setIsDrawing(false);
           onDone?.(selected);
-        }, 600);
+        }, 400);
       }
     );
 
@@ -200,11 +200,12 @@ export default function LunchTimePage({
     if (isDrawing) return 'Preparando sua sugestão do dia…';
     if (countdown !== null) return `Seu react começa em ${countdown}s — aproveite!`;
     if (picked) return 'Pronto! Bom apetite e boa sessão.';
-    return 'Toque no botão abaixo e deixe a gente escolher por você.';
+    return 'Clique no botão ao lado para escolher um vídeo aleatório.';
   }, [hasVideos, isDrawing, countdown, picked]);
 
   const displayReact = isDrawing ? shufflePreview : picked;
   const showPlayer = isDrawing || displayReact;
+  const sortearButtonLabel = picked ? 'Escolher outro vídeo' : 'Escolher um vídeo';
 
   return (
     <div className="cine-container pt-24 pb-28 w-full min-h-screen flex-1">
@@ -223,10 +224,9 @@ export default function LunchTimePage({
         )}
       </div>
 
-      {/* Hero — mesmo estilo das outras categorias */}
       <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
-        <motion.div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/80" />
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/80" />
+        <motion.div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-3 max-w-xl">
@@ -239,9 +239,7 @@ export default function LunchTimePage({
               Sua pausa, nosso react
             </h1>
 
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              {statusText}
-            </p>
+            <p className="text-zinc-300 text-sm leading-relaxed">{statusText}</p>
           </div>
 
           {!isDrawing && countdown === null && (
@@ -251,13 +249,12 @@ export default function LunchTimePage({
               className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
             >
               <Sparkles className="w-4 h-4" />
-              {picked ? 'Sortear Outro' : 'Sortear React'}
+              {sortearButtonLabel}
             </button>
           )}
         </div>
       </div>
 
-      {/* Área principal */}
       <div className="w-full max-w-3xl mx-auto">
         {!showPlayer && hasVideos && (
           <motion.div
@@ -274,122 +271,102 @@ export default function LunchTimePage({
           </motion.div>
         )}
 
-        <AnimatePresence mode="wait">
-          {showPlayer && (
-            <motion.div
-              key={isDrawing ? 'drawing' : displayReact?.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
-                {displayReact ? (
-                  <AnimatePresence mode="popLayout">
-                    <motion.div
-                      key={displayReact.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: isDrawing ? 0.2 : 0.4 }}
-                      className="absolute inset-0"
-                    >
-                      <OptimizedImage
-                        src={displayReact.thumbnailUrl}
-                        alt={displayReact.titulo}
-                        className={`w-full h-full object-cover ${isDrawing ? 'brightness-[0.45] scale-105' : ''}`}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                ) : (
-                  <div className="absolute inset-0 bg-zinc-900" />
-                )}
+        {showPlayer && displayReact && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
+              <OptimizedImage
+                src={displayReact.thumbnailUrl}
+                alt={displayReact.titulo}
+                loading="eager"
+                className={`w-full h-full object-cover transition-[filter,transform] duration-500 ${
+                  isDrawing ? 'brightness-[0.45] scale-105' : 'brightness-100 scale-100'
+                }`}
+              />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 pointer-events-none" />
 
-                {isDrawing && (
-                  <>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
-                      <motion.div
-                        className="h-full bg-amber-400"
-                        style={{ width: `${shuffleProgress}%` }}
-                      />
-                    </div>
-
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <AnimatePresence mode="wait">
-                        <WarmMessage message={WARM_MESSAGES[warmMessageIndex]} />
-                      </AnimatePresence>
-                    </div>
-                  </>
-                )}
-
-                {!isDrawing && countdown !== null && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50 backdrop-blur-[3px]"
-                  >
-                    <motion.span
-                      key={countdown}
-                      initial={{ scale: 1.3, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="text-7xl sm:text-8xl font-black text-white tabular-nums"
-                    >
-                      {countdown}
-                    </motion.span>
-                    <p className="text-sm text-zinc-300">Bom apetite! Começando em instantes…</p>
-                    <button
-                      onClick={() => picked && startPlayback(picked)}
-                      className="mt-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
-                    >
-                      Assistir agora →
-                    </button>
-                  </motion.div>
-                )}
-              </div>
-
-              {displayReact && !isDrawing && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-wider text-amber-500/80 mb-1">
-                      Escolhido para você
-                    </p>
-                    <h2 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
-                      {displayReact.titulo}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-500">
-                      <span className="flex items-center gap-1.5">
-                        <Eye className="w-4 h-4" />
-                        {displayReact.visualizacoes?.toLocaleString('pt-BR') || 0}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4" />
-                        {displayReact.duracao || '—'}
-                      </span>
-                      <span>{displayReact.canalNome}</span>
-                    </div>
+              {isDrawing && (
+                <>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                    <div
+                      className="h-full bg-amber-400 transition-[width] duration-300 ease-out"
+                      style={{ width: `${shuffleProgress}%` }}
+                    />
                   </div>
 
-                  {countdown === null && (
-                    <button
-                      onClick={() => startPlayback(displayReact)}
-                      className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      Assistir Agora
-                    </button>
-                  )}
-                </motion.div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <AnimatePresence mode="wait">
+                      <WarmMessage message={WARM_MESSAGES[warmMessageIndex]} />
+                    </AnimatePresence>
+                  </div>
+                </>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+              {!isDrawing && countdown !== null && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50 backdrop-blur-[3px]">
+                  <motion.span
+                    key={countdown}
+                    initial={{ scale: 1.3, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-7xl sm:text-8xl font-black text-white tabular-nums"
+                  >
+                    {countdown}
+                  </motion.span>
+                  <p className="text-sm text-zinc-300">Bom apetite! Começando em instantes…</p>
+                  <button
+                    onClick={() => picked && startPlayback(picked)}
+                    className="mt-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                  >
+                    Assistir agora →
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!isDrawing && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-amber-500/80 mb-1">
+                    Escolhido para você
+                  </p>
+                  <h2 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
+                    {displayReact.titulo}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-500">
+                    <span className="flex items-center gap-1.5">
+                      <Eye className="w-4 h-4" />
+                      {displayReact.visualizacoes?.toLocaleString('pt-BR') || 0}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      {displayReact.duracao || '—'}
+                    </span>
+                    <span>{displayReact.canalNome}</span>
+                  </div>
+                </div>
+
+                {countdown === null && (
+                  <button
+                    onClick={() => startPlayback(displayReact)}
+                    className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-white" />
+                    Assistir Agora
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );
