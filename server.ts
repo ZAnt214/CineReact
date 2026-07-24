@@ -5,7 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
-import { ReactVideo, UserAccount } from "./src/types.ts";
+import { ReactVideo, UserAccount, Obra } from "./src/types.ts";
 
 dotenv.config();
 
@@ -1174,6 +1174,303 @@ function extractYouTubeIdentifier(url: string): { type: 'id' | 'handle' | 'usern
 
   return { type: 'search', value: cleanedUrl.replace(/^@/, '').trim() };
 }
+
+function buildCanalSlugFromTitle(titulo: string): string {
+  const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
+  return `canal-${cleanName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+}
+
+interface ResolvedVideoMetadata {
+  videoId: string;
+  titulo: string;
+  canalNome: string;
+  authorUrl: string;
+  thumbnailUrl: string;
+  source: 'oembed' | 'scrape';
+}
+
+async function resolveVideoViaOEmbed(videoUrl: string): Promise<ResolvedVideoMetadata | null> {
+  const videoId = extractVideoIdFromUrl(videoUrl.trim());
+  if (!videoId) return null;
+
+  const normalizedUrl = videoUrl.trim().startsWith('http')
+    ? videoUrl.trim()
+    : `https://www.youtube.com/watch?v=${videoId}`;
+
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(normalizedUrl)}&format=json`;
+    const res = await safeFetch(oembedUrl);
+    if (!res?.ok) return null;
+    const data: any = await res.json();
+    if (!data?.title) return null;
+
+    return {
+      videoId,
+      titulo: data.title,
+      canalNome: data.author_name || 'Canal do YouTube',
+      authorUrl: data.author_url || '',
+      thumbnailUrl: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      source: 'oembed',
+    };
+  } catch (err) {
+    console.warn('[Catálogo] Falha ao resolver vídeo via oEmbed:', err);
+    return null;
+  }
+}
+
+function obraFromResolvedChannel(
+  resolved: ResolvedYouTubeChannel,
+  inputUrl: string,
+  existingId?: string
+) {
+  const titulo = resolved.titulo.startsWith('Canal') ? resolved.titulo : `Canal ${resolved.titulo}`;
+  const canalSlug = existingId || buildCanalSlugFromTitle(titulo);
+  const defaultBanner = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200';
+  const defaultPoster = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300';
+  const idObj = extractYouTubeIdentifier(inputUrl);
+
+  return {
+    id: canalSlug,
+    titulo,
+    tipo: 'canal' as const,
+    sinopse: resolved.sinopse || 'Canal de reacts no YouTube.',
+    ano: new Date().getFullYear(),
+    generos: ['React', 'Entretenimento', 'YouTube'],
+    banner: resolved.bannerUrl || resolved.avatarUrl || defaultBanner,
+    poster: resolved.avatarUrl || defaultPoster,
+    trailerUrl: resolved.channelId.startsWith('UC')
+      ? `https://www.youtube.com/channel/${resolved.channelId}`
+      : buildChannelPageUrl(inputUrl, idObj),
+    channelId: resolved.channelId.startsWith('UC') ? resolved.channelId : undefined,
+  };
+}
+
+async function resolveCanalObraForVideo(
+  canalNome: string,
+  authorUrl: string
+) {
+  const existingObras = localDb.getObras();
+  const cleanName = canalNome.trim().toLowerCase();
+
+  let matchingObra = existingObras.find(o =>
+    o.tipo === 'canal' && (
+      o.titulo.toLowerCase().includes(cleanName) ||
+      cleanName.includes(o.titulo.replace(/^canal\s+/i, '').toLowerCase())
+    )
+  );
+
+  if (matchingObra) return matchingObra;
+
+  if (authorUrl) {
+    const resolved = await resolveYouTubeChannel(authorUrl);
+    if (resolved?.titulo) {
+      const slug = buildCanalSlugFromTitle(resolved.titulo);
+      matchingObra = existingObras.find(o => o.id === slug || o.channelId === resolved.channelId);
+      if (matchingObra) return matchingObra;
+
+      return obraFromResolvedChannel(resolved, authorUrl, slug);
+    }
+  }
+
+  const canalSlug = buildCanalSlugFromTitle(canalNome);
+  matchingObra = existingObras.find(o => o.id === canalSlug);
+  if (matchingObra) return matchingObra;
+
+  return {
+    id: canalSlug,
+    titulo: canalNome.startsWith('Canal') ? canalNome : `Canal ${canalNome}`,
+    tipo: 'canal' as const,
+    sinopse: `Categoria exclusiva para os reacts do canal ${canalNome}.`,
+    ano: new Date().getFullYear(),
+    generos: ['Reacts', 'YouTube'],
+    banner: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1600',
+    poster: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300',
+    trailerUrl: authorUrl || 'https://www.youtube.com',
+  };
+}
+
+async function findOrCreateCanalObraForVideo(
+  canalNome: string,
+  authorUrl: string
+) {
+  const resolved = await resolveCanalObraForVideo(canalNome, authorUrl);
+  const existing = localDb.getObras().find(o => o.id === resolved.id);
+  if (existing) return existing;
+  return localDb.saveObra(resolved as Obra);
+}
+
+// ==========================================
+// CATÁLOGO MANUAL (sem depender da API do YouTube)
+// ==========================================
+
+app.post('/api/catalogo/canal/preview', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do canal do YouTube.' });
+  }
+
+  try {
+    const resolved = await resolveYouTubeChannel(url.trim());
+    if (!resolved?.titulo) {
+      return res.status(404).json({ error: 'Não foi possível obter os dados deste canal. Verifique o link.' });
+    }
+
+    const slug = buildCanalSlugFromTitle(resolved.titulo);
+    const existing = localDb.getObras().find(o => o.id === slug || (resolved.channelId && o.channelId === resolved.channelId));
+
+    res.json({
+      preview: {
+        id: existing?.id || slug,
+        titulo: resolved.titulo.startsWith('Canal') ? resolved.titulo : `Canal ${resolved.titulo}`,
+        sinopse: resolved.sinopse,
+        poster: resolved.avatarUrl,
+        banner: resolved.bannerUrl || resolved.avatarUrl,
+        channelId: resolved.channelId || null,
+        source: resolved.source,
+        alreadyExists: !!existing,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro no preview do canal:', error);
+    res.status(500).json({ error: 'Erro ao carregar preview do canal.' });
+  }
+});
+
+app.post('/api/catalogo/canal', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do canal do YouTube.' });
+  }
+
+  try {
+    const resolved = await resolveYouTubeChannel(url.trim());
+    if (!resolved?.titulo) {
+      return res.status(404).json({ error: 'Não foi possível importar este canal. Verifique o link.' });
+    }
+
+    let avatarUrl = resolved.avatarUrl;
+    if (!avatarUrl && resolved.channelId.startsWith('UC')) {
+      avatarUrl = await fetchRealChannelAvatar(
+        resolved.channelId,
+        buildChannelPageUrl(url.trim(), extractYouTubeIdentifier(url.trim()))
+      );
+    }
+
+    const obraData = obraFromResolvedChannel(
+      { ...resolved, avatarUrl: avatarUrl || resolved.avatarUrl },
+      url.trim()
+    );
+
+    const existing = localDb.getObras().find(o =>
+      o.id === obraData.id || (obraData.channelId && o.channelId === obraData.channelId)
+    );
+
+    const saved = localDb.saveObra(existing ? { ...existing, ...obraData, id: existing.id } : obraData);
+
+    res.json({
+      success: true,
+      obra: saved,
+      mode: resolved.source,
+      savedToSupabase: localDb.isSupabaseActive(),
+      message: existing
+        ? `Canal "${saved.titulo}" atualizado no catálogo.`
+        : `Canal "${saved.titulo}" adicionado ao catálogo.`,
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro ao salvar canal:', error);
+    res.status(500).json({ error: 'Erro ao salvar canal no catálogo.' });
+  }
+});
+
+app.post('/api/catalogo/video/preview', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do vídeo do YouTube.' });
+  }
+
+  try {
+    const meta = await resolveVideoViaOEmbed(url.trim());
+    if (!meta) {
+      return res.status(404).json({ error: 'Não foi possível obter os dados deste vídeo. Verifique o link.' });
+    }
+
+    const existing = localDb.getReacts().find(r => r.id === meta.videoId);
+    const canalObra = await resolveCanalObraForVideo(meta.canalNome, meta.authorUrl);
+
+    res.json({
+      preview: {
+        id: meta.videoId,
+        titulo: meta.titulo,
+        canalNome: meta.canalNome,
+        thumbnailUrl: meta.thumbnailUrl,
+        obraId: canalObra.id,
+        obraTitulo: canalObra.titulo,
+        source: meta.source,
+        alreadyExists: !!existing,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro no preview do vídeo:', error);
+    res.status(500).json({ error: 'Erro ao carregar preview do vídeo.' });
+  }
+});
+
+app.post('/api/catalogo/video', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url, obraId } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do vídeo do YouTube.' });
+  }
+
+  try {
+    const meta = await resolveVideoViaOEmbed(url.trim());
+    if (!meta) {
+      return res.status(404).json({ error: 'Não foi possível importar este vídeo. Verifique o link.' });
+    }
+
+    let targetObra = obraId
+      ? localDb.getObras().find(o => o.id === obraId)
+      : null;
+
+    if (!targetObra) {
+      targetObra = await findOrCreateCanalObraForVideo(meta.canalNome, meta.authorUrl);
+    }
+
+    const existing = localDb.getReacts().find(r => r.id === meta.videoId);
+    const reactPayload: ReactVideo = {
+      id: meta.videoId,
+      titulo: meta.titulo,
+      canalNome: meta.canalNome,
+      canalId: targetObra.channelId || '',
+      publicadoEm: new Date().toISOString().split('T')[0],
+      duracao: existing?.duracao || '--:--',
+      visualizacoes: existing?.visualizacoes || 0,
+      thumbnailUrl: meta.thumbnailUrl,
+      obraId: targetObra.id,
+      isRecomendado: existing?.isRecomendado || false,
+      likes: existing?.likes || 0,
+    };
+
+    const saved = localDb.saveReact(reactPayload);
+
+    res.json({
+      success: true,
+      react: saved,
+      obra: targetObra,
+      mode: meta.source,
+      savedToSupabase: localDb.isSupabaseActive(),
+      message: existing
+        ? `Vídeo "${saved.titulo}" atualizado no catálogo.`
+        : `Vídeo "${saved.titulo}" adicionado ao catálogo de ${targetObra.titulo}.`,
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro ao salvar vídeo:', error);
+    res.status(500).json({ error: 'Erro ao salvar vídeo no catálogo.' });
+  }
+});
 
 app.post("/api/canais/importar", async (req, res) => {
   if (!(await requireAdmin(req, res))) return;

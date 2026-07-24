@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield } from 'lucide-react';
+import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye } from 'lucide-react';
 import { Obra, ReactVideo, Comentario, UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { adminFetch } from '../utils/adminApi.ts';
 
-type AdminTab = 'conteudo' | 'criadores' | 'moderacao' | 'sistema';
+type AdminTab = 'catalogo' | 'conteudo' | 'criadores' | 'moderacao' | 'sistema';
 
 interface AdminPanelProps {
   user: UserState;
@@ -17,7 +17,7 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [reacts, setReacts] = useState<ReactVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<AdminTab>('conteudo');
+  const [activeTab, setActiveTab] = useState<AdminTab>('catalogo');
   const [solicitacoes, setSolicitacoes] = useState<Notificacao[]>([]);
   const [editingObra, setEditingObra] = useState<Obra | null>(null);
   const [savingObra, setSavingObra] = useState(false);
@@ -58,6 +58,18 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
   // YouTube Channel Import state
   const [canalUrl, setCanalUrl] = useState('');
   const [importingCanal, setImportingCanal] = useState(false);
+
+  // Catálogo manual (link → preview → salvar)
+  const [catalogCanalUrl, setCatalogCanalUrl] = useState('');
+  const [catalogCanalPreview, setCatalogCanalPreview] = useState<any>(null);
+  const [loadingCatalogCanalPreview, setLoadingCatalogCanalPreview] = useState(false);
+  const [savingCatalogCanal, setSavingCatalogCanal] = useState(false);
+
+  const [catalogVideoUrl, setCatalogVideoUrl] = useState('');
+  const [catalogVideoObraId, setCatalogVideoObraId] = useState('');
+  const [catalogVideoPreview, setCatalogVideoPreview] = useState<any>(null);
+  const [loadingCatalogVideoPreview, setLoadingCatalogVideoPreview] = useState(false);
+  const [savingCatalogVideo, setSavingCatalogVideo] = useState(false);
 
   const fetchSupabaseStatus = async () => {
     try {
@@ -460,6 +472,107 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     }
   };
 
+  const handleCatalogCanalPreview = async () => {
+    if (!catalogCanalUrl.trim()) return;
+    setLoadingCatalogCanalPreview(true);
+    setCatalogCanalPreview(null);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/canal/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogCanalUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCatalogCanalPreview(data.preview);
+      } else {
+        showMessage('error', data.error || 'Erro ao carregar preview do canal.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao carregar preview do canal.');
+    } finally {
+      setLoadingCatalogCanalPreview(false);
+    }
+  };
+
+  const handleCatalogCanalSave = async () => {
+    if (!catalogCanalUrl.trim()) return;
+    setSavingCatalogCanal(true);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/canal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogCanalUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchAdminData();
+        setCatalogCanalPreview(data.obra);
+        const supa = data.savedToSupabase ? ' Salvo no Supabase.' : ' Salvo localmente (configure o Supabase para nuvem).';
+        showMessage('success', (data.message || 'Canal salvo!') + supa);
+      } else {
+        showMessage('error', data.error || 'Erro ao salvar canal.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao salvar canal.');
+    } finally {
+      setSavingCatalogCanal(false);
+    }
+  };
+
+  const handleCatalogVideoPreview = async () => {
+    if (!catalogVideoUrl.trim()) return;
+    setLoadingCatalogVideoPreview(true);
+    setCatalogVideoPreview(null);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/video/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogVideoUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCatalogVideoPreview(data.preview);
+        if (data.preview?.obraId) setCatalogVideoObraId(data.preview.obraId);
+      } else {
+        showMessage('error', data.error || 'Erro ao carregar preview do vídeo.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao carregar preview do vídeo.');
+    } finally {
+      setLoadingCatalogVideoPreview(false);
+    }
+  };
+
+  const handleCatalogVideoSave = async () => {
+    if (!catalogVideoUrl.trim()) return;
+    setSavingCatalogVideo(true);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: catalogVideoUrl.trim(),
+          obraId: catalogVideoObraId || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchAdminData();
+        setCatalogVideoPreview(data.react);
+        const supa = data.savedToSupabase ? ' Salvo no Supabase.' : ' Salvo localmente (configure o Supabase para nuvem).';
+        showMessage('success', (data.message || 'Vídeo salvo!') + supa);
+        setCatalogVideoUrl('');
+      } else {
+        showMessage('error', data.error || 'Erro ao salvar vídeo.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao salvar vídeo.');
+    } finally {
+      setSavingCatalogVideo(false);
+    }
+  };
+
   const handleToggleRecomendado = async (reactId: string, currentStatus: boolean) => {
     setTogglingId(reactId);
     try {
@@ -562,6 +675,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   };
 
   const tabs: { id: AdminTab; label: string; icon: React.ElementType; badge?: number }[] = [
+    { id: 'catalogo', label: 'Catálogo', icon: Link2 },
     { id: 'conteudo', label: 'Conteúdo', icon: LayoutGrid },
     { id: 'criadores', label: 'Criadores', icon: Inbox, badge: solicitacoes.length },
     { id: 'moderacao', label: 'Moderação', icon: MessageSquare },
@@ -649,6 +763,144 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
           <span className="text-sm">Carregando dados do painel...</span>
         </div>
+      )}
+
+      {!loading && activeTab === 'catalogo' && (
+        <motion.div className="space-y-8">
+          <motion.div className="bg-gradient-to-br from-amber-500/10 via-zinc-900/40 to-zinc-950 p-6 rounded-2xl border border-amber-500/20 space-y-3">
+            <h2 className="text-lg font-black text-white flex items-center gap-2">
+              <Link2 className="w-5 h-5 text-amber-400" />
+              Catálogo por Link
+            </h2>
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
+              Cole o link do canal ou do vídeo do YouTube. O sistema carrega automaticamente nome, foto, descrição e thumbnail
+              <strong className="text-amber-300"> sem depender da API do YouTube</strong>. Tudo é salvo no banco e sincronizado com o Supabase quando configurado.
+            </p>
+            {supabaseStatus?.active ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-950/40 border border-green-500/30 px-2.5 py-1 rounded-full">
+                <Database className="w-3 h-3" /> Supabase ativo
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2.5 py-1 rounded-full">
+                <AlertCircle className="w-3 h-3" /> Supabase não configurado — salvando localmente
+              </span>
+            )}
+          </motion.div>
+
+          {/* CANAL */}
+          <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+              <Youtube className="w-4 h-4" />
+              Adicionar Canal
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={catalogCanalUrl}
+                onChange={(e) => { setCatalogCanalUrl(e.target.value); setCatalogCanalPreview(null); }}
+                placeholder="https://youtube.com/@nome-do-canal"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-amber-500"
+              />
+              <button
+                onClick={handleCatalogCanalPreview}
+                disabled={loadingCatalogCanalPreview || !catalogCanalUrl.trim()}
+                className="px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loadingCatalogCanalPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                Pré-visualizar
+              </button>
+              <button
+                onClick={handleCatalogCanalSave}
+                disabled={savingCatalogCanal || !catalogCanalUrl.trim()}
+                className="px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {savingCatalogCanal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Salvar Canal
+              </button>
+            </div>
+
+            {catalogCanalPreview && (
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                {catalogCanalPreview.poster && (
+                  <img src={catalogCanalPreview.poster} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-amber-500/30 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold text-lg">{catalogCanalPreview.titulo}</p>
+                  <p className="text-xs text-zinc-500 mt-1 line-clamp-3">{catalogCanalPreview.sinopse || 'Sem descrição'}</p>
+                  <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
+                    <span>Fonte: {catalogCanalPreview.source}</span>
+                    {catalogCanalPreview.channelId && <span>ID: {catalogCanalPreview.channelId}</span>}
+                    {catalogCanalPreview.alreadyExists && <span className="text-amber-400">Já existe — será atualizado</span>}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* VÍDEO */}
+          <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+              <Film className="w-4 h-4" />
+              Adicionar Vídeo
+            </h3>
+            <div className="flex flex-col gap-2">
+              <input
+                type="url"
+                value={catalogVideoUrl}
+                onChange={(e) => { setCatalogVideoUrl(e.target.value); setCatalogVideoPreview(null); }}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-amber-500"
+              />
+              <select
+                value={catalogVideoObraId}
+                onChange={(e) => setCatalogVideoObraId(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-amber-500"
+              >
+                <option value="">Detectar canal automaticamente</option>
+                {obras.filter(o => o.tipo === 'canal').map(canal => (
+                  <option key={canal.id} value={canal.id}>{canal.titulo}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={handleCatalogVideoPreview}
+                disabled={loadingCatalogVideoPreview || !catalogVideoUrl.trim()}
+                className="flex-1 px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loadingCatalogVideoPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                Pré-visualizar
+              </button>
+              <button
+                onClick={handleCatalogVideoSave}
+                disabled={savingCatalogVideo || !catalogVideoUrl.trim()}
+                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {savingCatalogVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Adicionar ao Catálogo
+              </button>
+            </div>
+
+            {catalogVideoPreview && (
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                {catalogVideoPreview.thumbnailUrl && (
+                  <img src={catalogVideoPreview.thumbnailUrl} alt="" className="w-full sm:w-48 aspect-video rounded-lg object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold line-clamp-2">{catalogVideoPreview.titulo}</p>
+                  <p className="text-xs text-amber-300 mt-1">{catalogVideoPreview.canalNome}</p>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    Categoria: <strong className="text-zinc-300">{catalogVideoPreview.obraTitulo || 'Será criada automaticamente'}</strong>
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
+                    <span>ID: {catalogVideoPreview.id}</span>
+                    {catalogVideoPreview.alreadyExists && <span className="text-amber-400">Já existe — será atualizado</span>}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
       )}
 
       {!loading && activeTab === 'sistema' && (
