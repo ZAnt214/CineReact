@@ -4,7 +4,6 @@ import {
   Mail,
   Lock,
   User,
-  Sparkles,
   LogIn,
   UserPlus,
   Eye,
@@ -55,6 +54,7 @@ export default function AuthModal({
   const [infoMsg, setInfoMsg] = useState('');
 
   const firstInputRef = useRef<HTMLInputElement>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   const resetForm = useCallback(() => {
     setUsername('');
@@ -96,6 +96,49 @@ export default function AuthModal({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return;
+
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+
+    const preventBackgroundTouchMove = (event: TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (modalContentRef.current?.contains(target)) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventBackgroundTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', preventBackgroundTouchMove);
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
 
   const persistEmail = (value: string) => {
     if (rememberEmail && value.trim()) {
@@ -191,26 +234,30 @@ export default function AuthModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        <motion.div
+          className="fixed inset-0 z-[210] overscroll-none"
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/90"
+            className="absolute inset-0 bg-black"
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
+            ref={modalContentRef}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full sm:max-w-3xl max-h-[96vh] sm:max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800/80 rounded-t-3xl sm:rounded-2xl shadow-2xl text-zinc-300"
+            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
 
@@ -222,7 +269,7 @@ export default function AuthModal({
               <X className="w-5 h-5" />
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 min-h-0">
+            <div className="grid grid-cols-1 md:grid-cols-5 min-h-full">
               {/* Brand panel */}
               <div className="hidden md:flex md:col-span-2 flex-col justify-between p-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-r border-zinc-800/80 relative overflow-hidden">
                 <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -269,7 +316,7 @@ export default function AuthModal({
               </div>
 
               {/* Form panel */}
-              <div className="md:col-span-3 p-6 sm:p-8">
+              <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center">
                 <div className="md:hidden flex items-center justify-center gap-2 mb-5">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px]">
                     <motion.div className="w-full h-full bg-black rounded-[7px] flex items-center justify-center">
@@ -282,8 +329,7 @@ export default function AuthModal({
                 </div>
 
                 <div className="text-center md:text-left mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">
-                    <Sparkles className="w-3 h-3" />
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">
                     Acesso gratuito
                   </div>
                   <h2 id="auth-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -538,7 +584,7 @@ export default function AuthModal({
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
