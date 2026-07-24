@@ -1,11 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, UtensilsCrossed, Sparkles, Play, Clock, Eye } from 'lucide-react';
+import { ArrowLeft, UtensilsCrossed, Sparkles, Play, Clock, Eye, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ReactVideo } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
 
 const COUNTDOWN_SECONDS = 8;
 const SHUFFLE_DURATION_MS = 5500;
+
+const WARM_MESSAGES = [
+  'Respira fundo… sua pausa merece um bom react.',
+  'Enquanto você come, a gente cuida da escolha.',
+  'Relaxe — estamos preparando algo especial pra você.',
+  'Aproveite cada garfada. O react vem aí.',
+  'Hora de desligar a cabeça e curtir um react.',
+  'Boa refeição! Daqui a pouco tem react na mesa.',
+  'Você merece esse momento. Deixa com a gente.',
+  'Um react quentinho chegando na sua tela…',
+];
 
 interface LunchTimePageProps {
   reacts: ReactVideo[];
@@ -79,6 +90,24 @@ function runShuffleAnimation(
   return () => clearTimeout(timeoutId);
 }
 
+function WarmMessage({ message }: { message: string }) {
+  return (
+    <motion.div
+      key={message}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.45 }}
+      className="flex flex-col items-center gap-3 px-6 text-center"
+    >
+      <Heart className="w-5 h-5 text-amber-400 fill-amber-400/30" />
+      <p className="text-base sm:text-lg font-semibold text-white leading-relaxed max-w-sm">
+        {message}
+      </p>
+    </motion.div>
+  );
+}
+
 export default function LunchTimePage({
   reacts,
   onPlayVideo,
@@ -90,6 +119,7 @@ export default function LunchTimePage({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [shufflePreview, setShufflePreview] = useState<ReactVideo | null>(null);
   const [shuffleProgress, setShuffleProgress] = useState(0);
+  const [warmMessageIndex, setWarmMessageIndex] = useState(0);
   const hasAutoPlayed = useRef(false);
   const cancelShuffleRef = useRef<(() => void) | null>(null);
 
@@ -103,6 +133,7 @@ export default function LunchTimePage({
     setCountdown(null);
     setShufflePreview(null);
     setShuffleProgress(0);
+    setWarmMessageIndex(0);
 
     const progressInterval = setInterval(() => {
       setShuffleProgress((p) => Math.min(p + 2, 100));
@@ -156,206 +187,210 @@ export default function LunchTimePage({
 
   useEffect(() => () => cancelShuffleRef.current?.(), []);
 
-  const subtitle = useMemo(() => {
-    if (!hasVideos) return 'Nenhum vídeo disponível no catálogo ainda.';
-    if (isDrawing) return 'Escolhendo o react perfeito para o seu almoço...';
-    if (countdown !== null) return `Seu react começa em ${countdown} segundo${countdown !== 1 ? 's' : ''}`;
-    if (picked) return 'Bom apetite! Aproveite a refeição.';
-    return 'Toque no botão e deixe o CineReact surpreender você.';
+  useEffect(() => {
+    if (!isDrawing) return;
+    const interval = setInterval(() => {
+      setWarmMessageIndex((i) => (i + 1) % WARM_MESSAGES.length);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [isDrawing]);
+
+  const statusText = useMemo(() => {
+    if (!hasVideos) return 'Em breve teremos reacts para acompanhar sua refeição.';
+    if (isDrawing) return 'Preparando sua sugestão do dia…';
+    if (countdown !== null) return `Seu react começa em ${countdown}s — aproveite!`;
+    if (picked) return 'Pronto! Bom apetite e boa sessão.';
+    return 'Toque no botão abaixo e deixe a gente escolher por você.';
   }, [hasVideos, isDrawing, countdown, picked]);
 
   const displayReact = isDrawing ? shufflePreview : picked;
+  const showPlayer = isDrawing || displayReact;
 
   return (
-    <div className="cine-container pt-24 pb-28 min-h-screen w-full flex flex-col">
-      <button
-        onClick={onBackToHome}
-        className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/60 hover:bg-amber-500/15 text-zinc-400 hover:text-amber-400 text-xs font-bold uppercase tracking-wider transition-all mb-10 cursor-pointer"
-      >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        Voltar
-      </button>
+    <div className="cine-container pt-24 pb-28 w-full min-h-screen flex-1">
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <button
+          onClick={onBackToHome}
+          className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-zinc-800 cursor-pointer active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-amber-400" />
+          <span>Voltar ao Início</span>
+        </button>
+        {hasVideos && (
+          <span className="text-xs text-zinc-500 font-mono font-bold">
+            {reacts.length} reacts disponíveis
+          </span>
+        )}
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex-1 flex flex-col items-center w-full max-w-4xl mx-auto"
-      >
-        {/* Header — sem caixa, layout aberto */}
-        <div className="text-center mb-10 w-full">
-          <motion.div
-            animate={isDrawing ? { rotate: [0, -5, 5, 0] } : { y: [0, -4, 0] }}
-            transition={isDrawing ? { duration: 1.2, repeat: Infinity } : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-500/15 mb-5"
-          >
-            <UtensilsCrossed className="w-7 h-7 text-amber-400" />
-          </motion.div>
+      {/* Hero — mesmo estilo das outras categorias */}
+      <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
+        <motion.div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/80" />
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80 mb-2">
-            Categoria Especial
-          </p>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Hora do Almoço
-          </h1>
-          <motion.p
-            key={subtitle}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-sm sm:text-base text-zinc-500 mt-3"
-          >
-            {subtitle}
-          </motion.p>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold uppercase tracking-wider">
+              <UtensilsCrossed className="w-4 h-4" />
+              <span>Hora do Almoço</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Sua pausa, nosso react
+            </h1>
+
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              {statusText}
+            </p>
+          </div>
+
+          {!isDrawing && countdown === null && (
+            <button
+              onClick={handleSortearEAssistir}
+              disabled={!hasVideos}
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
+            >
+              <Sparkles className="w-4 h-4" />
+              {picked ? 'Sortear Outro' : 'Sortear React'}
+            </button>
+          )}
         </div>
+      </div>
 
-        {/* Área do vídeo — sem moldura quadrada */}
-        <div className="w-full">
-          <AnimatePresence mode="wait">
-            {(isDrawing || displayReact) && (
-              <motion.div
-                key={isDrawing ? 'drawing' : displayReact?.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.4 }}
-                className="w-full"
-              >
-                <motion.div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-                  {displayReact ? (
-                    <AnimatePresence mode="popLayout">
-                      <motion.div
-                        key={displayReact.id}
-                        initial={{ opacity: 0, scale: 1.04 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: isDrawing ? 0.15 : 0.35 }}
-                        className="absolute inset-0"
-                      >
-                        <OptimizedImage
-                          src={displayReact.thumbnailUrl}
-                          alt={displayReact.titulo}
-                          className={`w-full h-full object-cover transition-all duration-300 ${isDrawing ? 'blur-[1px] brightness-75' : ''}`}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
-                  ) : (
-                    <div className="absolute inset-0 bg-zinc-900" />
-                  )}
+      {/* Área principal */}
+      <div className="w-full max-w-3xl mx-auto">
+        {!showPlayer && hasVideos && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 px-6"
+          >
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 mb-6">
+              <UtensilsCrossed className="w-9 h-9 text-amber-400" />
+            </div>
+            <p className="text-lg text-zinc-300 font-medium leading-relaxed max-w-md mx-auto">
+              Que tal um react aleatório para acompanhar sua refeição? É só um clique.
+            </p>
+          </motion.div>
+        )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+        <AnimatePresence mode="wait">
+          {showPlayer && (
+            <motion.div
+              key={isDrawing ? 'drawing' : displayReact?.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
+                {displayReact ? (
+                  <AnimatePresence mode="popLayout">
+                    <motion.div
+                      key={displayReact.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: isDrawing ? 0.2 : 0.4 }}
+                      className="absolute inset-0"
+                    >
+                      <OptimizedImage
+                        src={displayReact.thumbnailUrl}
+                        alt={displayReact.titulo}
+                        className={`w-full h-full object-cover ${isDrawing ? 'brightness-[0.45] scale-105' : ''}`}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                ) : (
+                  <div className="absolute inset-0 bg-zinc-900" />
+                )}
 
-                  {/* Barra de progresso do sorteio */}
-                  {isDrawing && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 pointer-events-none" />
+
+                {isDrawing && (
+                  <>
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
                       <motion.div
                         className="h-full bg-amber-400"
                         style={{ width: `${shuffleProgress}%` }}
-                        transition={{ duration: 0.1 }}
                       />
                     </div>
-                  )}
 
-                  {/* Overlay sorteio */}
-                  {isDrawing && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40 backdrop-blur-[2px]"
-                    >
-                      <motion.div
-                        animate={{ scale: [1, 1.08, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                        className="flex flex-col items-center gap-3"
-                      >
-                        <Sparkles className="w-8 h-8 text-amber-400" />
-                        <p className="text-sm sm:text-base font-bold text-white tracking-wide">
-                          Escolhendo seu react...
-                        </p>
-                        {shufflePreview && (
-                          <p className="text-xs text-zinc-400 max-w-xs text-center line-clamp-1 px-6">
-                            {shufflePreview.titulo}
-                          </p>
-                        )}
-                      </motion.div>
-                    </motion.div>
-                  )}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <AnimatePresence mode="wait">
+                        <WarmMessage message={WARM_MESSAGES[warmMessageIndex]} />
+                      </AnimatePresence>
+                    </div>
+                  </>
+                )}
 
-                  {/* Countdown */}
-                  {!isDrawing && countdown !== null && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-black/55 backdrop-blur-sm"
-                    >
-                      <motion.span
-                        key={countdown}
-                        initial={{ scale: 1.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="text-8xl sm:text-9xl font-black text-white tabular-nums"
-                        style={{ textShadow: '0 0 60px rgba(251,191,36,0.5)' }}
-                      >
-                        {countdown}
-                      </motion.span>
-                      <p className="text-sm text-zinc-400">Iniciando em breve</p>
-                      <button
-                        onClick={() => picked && startPlayback(picked)}
-                        className="px-5 py-2 rounded-full text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
-                      >
-                        Assistir agora
-                      </button>
-                    </motion.div>
-                  )}
-                </motion.div>
-
-                {/* Info abaixo do vídeo */}
-                {displayReact && !isDrawing && (
+                {!isDrawing && countdown !== null && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mt-5 px-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50 backdrop-blur-[3px]"
                   >
-                    <p className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
-                      {displayReact.titulo}
+                    <motion.span
+                      key={countdown}
+                      initial={{ scale: 1.3, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-7xl sm:text-8xl font-black text-white tabular-nums"
+                    >
+                      {countdown}
+                    </motion.span>
+                    <p className="text-sm text-zinc-300">Bom apetite! Começando em instantes…</p>
+                    <button
+                      onClick={() => picked && startPlayback(picked)}
+                      className="mt-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                    >
+                      Assistir agora →
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+
+              {displayReact && !isDrawing && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wider text-amber-500/80 mb-1">
+                      Escolhido para você
                     </p>
-                    <motion.div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-500">
+                    <h2 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
+                      {displayReact.titulo}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-500">
                       <span className="flex items-center gap-1.5">
-                        <Eye className="w-4 h-4 text-zinc-600" />
+                        <Eye className="w-4 h-4" />
                         {displayReact.visualizacoes?.toLocaleString('pt-BR') || 0}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4 text-zinc-600" />
+                        <Clock className="w-4 h-4" />
                         {displayReact.duracao || '—'}
                       </span>
                       <span>{displayReact.canalNome}</span>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    </div>
+                  </div>
 
-        {/* Botões */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full mt-10">
-          <button
-            onClick={handleSortearEAssistir}
-            disabled={!hasVideos || isDrawing || countdown !== null}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-black text-sm disabled:opacity-40 transition-all cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4" />
-            {picked ? 'Sortear Outro' : 'Sortear React'}
-          </button>
-          {picked && countdown === null && !isDrawing && (
-            <button
-              onClick={() => startPlayback(picked)}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              Assistir Agora
-            </button>
+                  {countdown === null && (
+                    <button
+                      onClick={() => startPlayback(displayReact)}
+                      className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      Assistir Agora
+                    </button>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
           )}
-        </div>
-      </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
