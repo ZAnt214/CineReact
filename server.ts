@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
 import cors from "cors";
 import { createServer as createViteServer } from "vite";
@@ -553,6 +553,145 @@ async function prefillDefaultReacts() {
 }
 
 // ==========================================
+// ADMIN AUTH HELPERS
+// ==========================================
+
+function getAdminEmailFromRequest(req: ExpressRequest): string | undefined {
+  const header = req.headers["x-admin-email"];
+  if (typeof header === "string" && header.trim()) return header.trim();
+  const query = req.query.adminEmail;
+  if (typeof query === "string" && query.trim()) return query.trim();
+  const body = req.body?.adminEmail;
+  if (typeof body === "string" && body.trim()) return body.trim();
+  return undefined;
+}
+
+function verifyAdminEmailSync(email: string | undefined): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  if (clean === "mateusvini.t10@gmail.com") return true;
+  const user = localDb.findUsuarioByEmailSync(clean);
+  return !!user?.isAdmin;
+}
+
+function sanitizeUsuario(u: UserAccount) {
+  const { password, ...rest } = u;
+  return rest;
+}
+
+async function requireAdmin(req: ExpressRequest, res: ExpressResponse): Promise<string | null> {
+  const email = getAdminEmailFromRequest(req);
+  if (!verifyAdminEmailSync(email)) {
+    res.status(403).json({ error: "Acesso negado. Privilégios de administrador necessários." });
+    return null;
+  }
+  return email!;
+}
+
+async function discoverReactsFromYouTube(query: string, obraId: string, limit = 8): Promise<number> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") return 0;
+
+  try {
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(query + " react")}&maxResults=${limit}&key=${apiKey}`;
+    const searchRes = await safeFetch(searchUrl);
+    if (!searchRes?.ok) return 0;
+
+    const searchData: any = await searchRes.json();
+    const videoIds = (searchData.items || [])
+      .map((item: any) => item.id?.videoId)
+      .filter(Boolean) as string[];
+
+    if (videoIds.length === 0) return 0;
+
+    const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoIds.join(",")}&key=${apiKey}`;
+    const videosRes = await safeFetch(videosUrl);
+    if (!videosRes?.ok) return 0;
+
+    const videosData: any = await videosRes.json();
+    let added = 0;
+
+    for (const video of videosData.items || []) {
+      const isPublic = video.status?.privacyStatus === "public";
+      const isEmbeddable = video.status?.embeddable === true;
+      const isProcessed = video.status?.uploadStatus === "processed";
+      if (!isPublic || !isEmbeddable || !isProcessed || isShortOrInvalidVideo(video)) continue;
+
+      const snippet = video.snippet || {};
+      const statistics = video.statistics || {};
+      const contentDetails = video.contentDetails || {};
+
+      localDb.saveReact({
+        id: video.id,
+        titulo: snippet.title || "React",
+        canalNome: snippet.channelTitle || "YouTube",
+        canalId: snippet.channelId || "",
+        publicadoEm: snippet.publishedAt ? snippet.publishedAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        duracao: parseISO8601Duration(contentDetails.duration || ""),
+        visualizacoes: Number(statistics.viewCount) || 0,
+        thumbnailUrl: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`,
+        obraId,
+      });
+      added++;
+    }
+
+    return added;
+  } catch (err) {
+    console.error("[Discover] Erro ao buscar reacts no YouTube:", err);
+    return 0;
+  }
+}
+
+async function discoverObraWithGemini(query: string) {
+  if (!ai) return null;
+
+  const prompt = `Gere dados realistas em JSON para a obra de entretenimento: "${query}".
+Retorne APENAS JSON válido, sem markdown.
+Formato:
+{
+  "id": "slug-em-minusculo",
+  "titulo": "Título Oficial",
+  "tipo": "filme|serie|anime|jogo",
+  "sinopse": "Sinopse envolvente em português do Brasil",
+  "ano": 2020,
+  "generos": ["Gênero1", "Gênero2"],
+  "banner": "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+  "poster": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+  "trailerUrl": "https://www.youtube.com/watch?v=VyHV0BRZKoI"
+}`;
+
+  const geminiRes = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: { responseMimeType: "application/json" },
+  });
+
+  const text = geminiRes.text?.trim();
+  if (!text) return null;
+
+  let cleanText = text;
+  if (cleanText.startsWith("```")) {
+    cleanText = cleanText.replace(/^```json\s*/, "").replace(/```$/, "").trim();
+  }
+
+  const data = JSON.parse(cleanText);
+  const slug = (data.id || query).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  return localDb.saveObra({
+    id: slug,
+    titulo: data.titulo || query,
+    tipo: ["filme", "serie", "anime", "jogo", "canal"].includes(data.tipo) ? data.tipo : "filme",
+    sinopse: data.sinopse || `Obra ${query} catalogada no CineReact.`,
+    ano: Number(data.ano) || new Date().getFullYear(),
+    generos: Array.isArray(data.generos) ? data.generos : ["Entretenimento"],
+    banner: data.banner || "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+    poster: data.poster || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+    trailerUrl: data.trailerUrl || "https://www.youtube.com/watch?v=VyHV0BRZKoI",
+    destacado: false,
+  });
+}
+
+// ==========================================
 // API ROUTES
 // ==========================================
 
@@ -595,6 +734,7 @@ app.get("/api/supabase/status", async (req, res) => {
 // Force Sync from Supabase to Memory Cache
 app.post("/api/supabase/sync", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     if (!localDb.isSupabaseActive()) {
       return res.status(400).json({ error: "Supabase não está configurado." });
     }
@@ -612,6 +752,7 @@ app.post("/api/supabase/sync", async (req, res) => {
 // Force Upload from Memory Cache to Supabase
 app.post("/api/supabase/migrate", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     if (!localDb.isSupabaseActive()) {
       return res.status(400).json({ error: "Supabase não está configurado." });
     }
@@ -765,6 +906,7 @@ function extractYouTubeIdentifier(url: string): { type: 'id' | 'handle' | 'usern
 }
 
 app.post("/api/canais/importar", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   const { url } = req.body;
   if (!url) {
     return res.status(400).json({ error: "O link ou identificador do canal é obrigatório." });
@@ -1022,8 +1164,9 @@ app.post("/api/canais/importar", async (req, res) => {
   }
 });
 
-app.post("/api/obras", (req, res) => {
+app.post("/api/obras", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     const { id, titulo, tipo, sinopse, ano, generos, banner, poster, trailerUrl, destacado, channelId } = req.body;
     if (!id || !titulo || !tipo) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
@@ -1047,8 +1190,38 @@ app.post("/api/obras", (req, res) => {
   }
 });
 
-app.delete("/api/obras/:id", (req, res) => {
+app.put("/api/obras/:id", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
+    const { id } = req.params;
+    const existing = localDb.getObras().find(o => o.id === id);
+    if (!existing) {
+      return res.status(404).json({ error: "Obra não encontrada." });
+    }
+
+    const { titulo, tipo, sinopse, ano, generos, banner, poster, trailerUrl, destacado, channelId } = req.body;
+    const updated = localDb.saveObra({
+      ...existing,
+      titulo: titulo ?? existing.titulo,
+      tipo: tipo ?? existing.tipo,
+      sinopse: sinopse ?? existing.sinopse,
+      ano: ano !== undefined ? Number(ano) : existing.ano,
+      generos: Array.isArray(generos) ? generos : (typeof generos === "string" ? generos.split(",").map((s: string) => s.trim()) : existing.generos),
+      banner: banner ?? existing.banner,
+      poster: poster ?? existing.poster,
+      trailerUrl: trailerUrl ?? existing.trailerUrl,
+      destacado: destacado !== undefined ? !!destacado : existing.destacado,
+      channelId: channelId ?? existing.channelId,
+    });
+    res.json(updated);
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao atualizar obra." });
+  }
+});
+
+app.delete("/api/obras/:id", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
     localDb.deleteObra(req.params.id);
     res.json({ message: "Obra excluída com sucesso." });
   } catch (error: any) {
@@ -1059,11 +1232,11 @@ app.delete("/api/obras/:id", (req, res) => {
 // Reacts routes
 app.get("/api/reacts", (req, res) => {
   try {
+    const adminEmail = getAdminEmailFromRequest(req);
+    const isAdmin = verifyAdminEmailSync(adminEmail);
     const allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
-    // Sort from newest to oldest
     allReacts.sort((a, b) => new Date(b.publicadoEm || 0).getTime() - new Date(a.publicadoEm || 0).getTime());
-    // Limit to 500 to prevent large payloads and timeouts
-    const limitedReacts = allReacts.slice(0, 500);
+    const limitedReacts = isAdmin ? allReacts : allReacts.slice(0, 500);
     res.json(limitedReacts);
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar reacts." });
@@ -1147,8 +1320,9 @@ app.post("/api/reacts/:id/like", (req, res) => {
   }
 });
 
-app.post("/api/reacts/:id/recomendar", (req, res) => {
+app.post("/api/reacts/:id/recomendar", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     const { id } = req.params;
     const { recomendado } = req.body;
     const reacts = localDb.getReacts();
@@ -1165,6 +1339,7 @@ app.post("/api/reacts/:id/recomendar", (req, res) => {
 });
 
 app.post("/api/reacts/recomendar-link", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   try {
     const { url } = req.body;
     if (!url || typeof url !== 'string' || !url.trim()) {
@@ -1453,8 +1628,22 @@ app.post("/api/comentarios/:id/like", (req, res) => {
   }
 });
 
-app.delete("/api/comentarios/:id", (req, res) => {
+app.delete("/api/comentarios/:id", async (req, res) => {
   try {
+    const adminEmail = getAdminEmailFromRequest(req);
+    const isAdmin = verifyAdminEmailSync(adminEmail);
+    const comentario = localDb.getComentarios().find(c => c.id === req.params.id);
+    if (!comentario) {
+      return res.status(404).json({ error: "Comentário não encontrado." });
+    }
+
+    const requesterEmail = (req.query.email as string) || req.body?.email;
+    const isAuthor = requesterEmail && comentario.usuarioEmail.toLowerCase() === requesterEmail.toLowerCase();
+
+    if (!isAdmin && !isAuthor) {
+      return res.status(403).json({ error: "Sem permissão para remover este comentário." });
+    }
+
     localDb.deleteComentario(req.params.id);
     res.json({ message: "Comentário removido." });
   } catch (error: any) {
@@ -2076,10 +2265,10 @@ app.post("/api/usuario/donate", async (req, res) => {
 });
 
 // Lista todos os usuários cadastrados (apenas para exibição no painel admin)
-app.get("/api/usuarios", (req, res) => {
+app.get("/api/usuarios", async (req, res) => {
   try {
-    const list = localDb.getUsuarios();
-    // Return sanitized users
+    if (!(await requireAdmin(req, res))) return;
+    const list = localDb.getUsuarios().map(sanitizeUsuario);
     res.json(list);
   } catch (error) {
     console.error("Erro ao listar usuários:", error);
@@ -2087,8 +2276,149 @@ app.get("/api/usuarios", (req, res) => {
   }
 });
 
+// Toggle VIP (Apoiador) de usuário — apenas admin
+app.post("/api/usuarios/:email/vip", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const targetEmail = decodeURIComponent(req.params.email);
+    const { isDonor } = req.body;
+
+    const updated = await localDb.updateUsuario(targetEmail, { isDonor: !!isDonor });
+    if (!updated) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({ success: true, user: sanitizeUsuario(updated) });
+  } catch (error: any) {
+    console.error("Erro ao atualizar VIP:", error);
+    res.status(500).json({ error: "Erro ao atualizar status VIP." });
+  }
+});
+
+// Toggle admin de usuário — apenas super admin
+app.post("/api/usuarios/:email/admin", async (req, res) => {
+  try {
+    const adminEmail = await requireAdmin(req, res);
+    if (!adminEmail) return;
+    if (adminEmail.toLowerCase() !== "mateusvini.t10@gmail.com") {
+      return res.status(403).json({ error: "Apenas o super administrador pode alterar privilégios de admin." });
+    }
+
+    const targetEmail = decodeURIComponent(req.params.email);
+    const { isAdmin } = req.body;
+    const updated = await localDb.updateUsuario(targetEmail, { isAdmin: !!isAdmin });
+    if (!updated) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({ success: true, user: sanitizeUsuario(updated) });
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao atualizar privilégios de admin." });
+  }
+});
+
+// Notificações administrativas (solicitações de criadores, etc.)
+app.get("/api/admin/notificacoes", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const tipo = req.query.tipo as string;
+    let list = localDb.getAllNotificacoes();
+    if (tipo === "solicitacoes") {
+      list = list.filter(n => n.titulo.toLowerCase().includes("solicitação"));
+    }
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar notificações administrativas." });
+  }
+});
+
+app.delete("/api/notificacoes/:id", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const deleted = localDb.deleteNotificacao(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Notificação não encontrada." });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao remover notificação." });
+  }
+});
+
+// Descoberta inteligente de obras com Gemini + reacts do YouTube
+app.post("/api/admin/discover", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const { query } = req.body;
+    if (!query?.trim()) {
+      return res.status(400).json({ error: "Informe o nome da obra para descobrir." });
+    }
+
+    const normalizedQuery = query.trim();
+    const existing = localDb.getObras().find(o =>
+      o.id === normalizedQuery.toLowerCase().replace(/[^a-z0-9]+/g, "-") ||
+      o.titulo.toLowerCase() === normalizedQuery.toLowerCase()
+    );
+
+    if (existing) {
+      const reactsAdded = await discoverReactsFromYouTube(existing.titulo, existing.id);
+      return res.json({
+        success: true,
+        mode: "existing",
+        obra: existing,
+        reactsAdded,
+        message: reactsAdded > 0
+          ? `Obra já existia. ${reactsAdded} react(s) adicionado(s) do YouTube.`
+          : "Obra já cadastrada no catálogo.",
+      });
+    }
+
+    let obra;
+    let mode = "fallback";
+
+    if (ai) {
+      try {
+        obra = await discoverObraWithGemini(normalizedQuery);
+        mode = "gemini";
+      } catch (geminiErr) {
+        console.error("[Discover] Erro no Gemini:", geminiErr);
+      }
+    }
+
+    if (!obra) {
+      const slug = normalizedQuery.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      obra = localDb.saveObra({
+        id: slug,
+        titulo: normalizedQuery,
+        tipo: "filme",
+        sinopse: `${normalizedQuery} catalogado no CineReact.`,
+        ano: new Date().getFullYear(),
+        generos: ["Entretenimento"],
+        banner: "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+        poster: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+        trailerUrl: "https://www.youtube.com/watch?v=VyHV0BRZKoI",
+        destacado: false,
+      });
+      mode = "manual";
+    }
+
+    const reactsAdded = await discoverReactsFromYouTube(obra.titulo, obra.id);
+
+    res.json({
+      success: true,
+      mode,
+      obra,
+      reactsAdded,
+      message: `Obra "${obra.titulo}" cadastrada com sucesso${reactsAdded > 0 ? ` e ${reactsAdded} react(s) encontrado(s) no YouTube` : ""}.`,
+    });
+  } catch (error: any) {
+    console.error("Erro na descoberta inteligente:", error);
+    res.status(500).json({ error: error.message || "Erro ao descobrir conteúdo." });
+  }
+});
+
 // ==========================================
-// INTELICENT SEARCH W// This endpoint takes a search query and uses Gemini AI to extract real info, and automatically populates real reacts from YouTube.
+// INTELICENT SEARCH — busca local no catálogo
 app.get("/api/search", (req, res) => {
   const query = req.query.q as string;
   if (!query) {

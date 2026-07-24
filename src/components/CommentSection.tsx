@@ -141,7 +141,7 @@ export default function CommentSection({
 
   const handleDeleteComentario = async (id: string) => {
     try {
-      const res = await fetch(`/api/comentarios/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/comentarios/${id}?email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
       if (res.ok) {
         await fetchComentarios();
       }
