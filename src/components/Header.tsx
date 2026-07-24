@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download, UtensilsCrossed } from 'lucide-react';
+import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download, UtensilsCrossed, Trophy } from 'lucide-react';
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
+import GamificationBar from './GamificationBar.tsx';
+import type { GamificationMeResponse } from '../types/gamification.ts';
 
 interface HeaderProps {
   currentTab: string;
@@ -17,6 +19,8 @@ interface HeaderProps {
   obras?: Obra[];
   reacts?: ReactVideo[];
   hasSideNav?: boolean;
+  gamificationData?: GamificationMeResponse | null;
+  onOpenGamification?: () => void;
 }
 
 export default function Header({
@@ -29,7 +33,9 @@ export default function Header({
   onOpenAuth,
   obras = [],
   reacts = [],
-  hasSideNav = false
+  hasSideNav = false,
+  gamificationData = null,
+  onOpenGamification,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -646,6 +652,17 @@ export default function Header({
                 </AnimatePresence>
               </div>
 
+              {user.isLoggedIn && (
+                <GamificationBar
+                  data={gamificationData}
+                  compact
+                  onClick={() => {
+                    onOpenGamification?.();
+                    setShowProfileMenu(false);
+                  }}
+                />
+              )}
+
               {/* USER PROFILE */}
               <div className="relative">
                 <button 
@@ -878,6 +895,26 @@ export default function Header({
                         <div>
                           <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Início / Catálogo</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Explorar catálogo de obras, lançamentos e animes em destaque.</p>
+                        </div>
+                      </button>
+
+                      <button 
+                        onClick={() => { setCurrentTab('club'); setShowProfileMenu(false); onOpenGamification?.(); }}
+                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
+                          currentTab === 'club' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
+                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start w-full">
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'club' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                            <Trophy className="w-5 h-5" />
+                          </div>
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'club' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">CineReact Club</h4>
+                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">XP, conquistas, missões, selos, rankings e Loja Spotlight.</p>
                         </div>
                       </button>
 

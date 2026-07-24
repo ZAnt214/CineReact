@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Home, Film, Gamepad2, Tv, Clapperboard, UtensilsCrossed, X } from 'lucide-react';
+import { Home, Film, Gamepad2, Tv, Clapperboard, UtensilsCrossed, Trophy, X } from 'lucide-react';
 import { useSideNavStore, sideNavStore } from '../hooks/useSideNavStore.ts';
 
 export const SIDE_NAV_ITEMS = [
@@ -10,6 +10,7 @@ export const SIDE_NAV_ITEMS = [
   { id: 'categoria-anime', label: 'Animes', icon: Tv },
   { id: 'categoria-serie', label: 'Séries', icon: Clapperboard },
   { id: 'categoria-almoco', label: 'Hora do Almoço', icon: UtensilsCrossed },
+  { id: 'club', label: 'CineReact Club', icon: Trophy },
 ] as const;
 
 interface SideNavHubProps {

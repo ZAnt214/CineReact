@@ -3,6 +3,7 @@ import path from "path";
 import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
+import { registerGamificationRoutes, handleGamificationEvent } from "./src/gamification/serverHelpers.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import { ReactVideo, UserAccount, Obra } from "./src/types.ts";
@@ -2159,7 +2160,8 @@ app.post("/api/comentarios", (req, res) => {
       likes: 0,
       criadoEm: new Date().toISOString()
     });
-    res.status(201).json(novo);
+    const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
+    res.status(201).json({ ...novo, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao adicionar comentário." });
   }
@@ -2214,7 +2216,8 @@ app.post("/api/favoritos/toggle", (req, res) => {
     const { email, obraId } = req.body;
     if (!email || !obraId) return res.status(400).json({ error: "Email e ObraId requeridos." });
     const favoritado = localDb.toggleFavorito(email, obraId);
-    res.json({ favoritado });
+    const gamificationReward = favoritado ? handleGamificationEvent(email, 'favorite') : null;
+    res.json({ favoritado, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao alterar favorito." });
   }
@@ -2246,7 +2249,10 @@ app.post("/api/canais/seguir", (req, res) => {
     const { email, canalNome } = req.body;
     if (!email || !canalNome) return res.status(400).json({ error: "Email e canalNome requeridos." });
     const seguindo = localDb.toggleSeguirCanal(email, canalNome);
-    res.json({ seguindo });
+    const gamificationReward = seguindo
+      ? handleGamificationEvent(email, 'follow_creator', { creatorName: canalNome })
+      : null;
+    res.json({ seguindo, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao seguir canal." });
   }
@@ -2273,7 +2279,8 @@ app.post("/api/listas", (req, res) => {
       usuarioEmail,
       obraIds: Array.isArray(obraIds) ? obraIds : []
     });
-    res.status(201).json(nova);
+    const gamificationReward = handleGamificationEvent(usuarioEmail, 'list_create');
+    res.status(201).json({ ...nova, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao criar lista." });
   }
@@ -2730,7 +2737,29 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 
     await localDb.updateUsuario(email, { continueWatching: updatedList });
 
-    res.json({ success: true, continueWatching: updatedList });
+    const react = localDb.getReacts().find((r) => r.id === reactId);
+    const obra = localDb.getObras().find((o) => o.id === obraId);
+    let gamificationReward = handleGamificationEvent(email, 'watch_progress', {
+      reactId,
+      obraId,
+      progress,
+      durationMinutes: 1,
+      category: obra?.tipo,
+      franchiseId: obraId,
+      creatorName: react?.canalNome,
+    });
+    if (progress >= 95) {
+      const completeReward = handleGamificationEvent(email, 'watch_complete', {
+        reactId,
+        obraId,
+        category: obra?.tipo,
+        franchiseId: obraId,
+        creatorName: react?.canalNome,
+      });
+      gamificationReward = completeReward;
+    }
+
+    res.json({ success: true, continueWatching: updatedList, gamificationReward });
   } catch (error) {
     console.error("Erro ao salvar progresso de reprodução:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
@@ -2986,6 +3015,11 @@ app.get("/api/search", (req, res) => {
     res.status(500).json({ error: "Erro interno no servidor ao realizar a pesquisa." });
   }
 });
+
+// ==========================================
+// GAMIFICATION
+// ==========================================
+registerGamificationRoutes(app);
 
 // ==========================================
 // VITE MIDDLEWARE & STATIC ASSET SERVING

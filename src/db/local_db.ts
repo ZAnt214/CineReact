@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { Obra, ReactVideo, Comentario, ListaPersonalizada, Notificacao, UserAccount } from '../types.ts';
+import { GamificationProfile } from '../types/gamification.ts';
+import { createDefaultProfile } from '../gamification/engine.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
 
 const DB_PATH = path.join(process.env.NODE_ENV === 'production' ? '/tmp' : process.cwd(), 'db_cine_react.json');
@@ -15,6 +17,7 @@ interface DbSchema {
   listas: ListaPersonalizada[];
   notificacoes: Notificacao[];
   usuarios: UserAccount[];
+  gamificationProfiles: Record<string, GamificationProfile>;
 }
 
 function initDb(): DbSchema {
@@ -47,6 +50,12 @@ function initDb(): DbSchema {
           });
           saveDb(parsed);
         }
+      }
+
+      // Auto-migrate gamification profiles
+      if (!parsed.gamificationProfiles) {
+        parsed.gamificationProfiles = {};
+        saveDb(parsed);
       }
 
       return parsed;
@@ -82,6 +91,7 @@ function initDb(): DbSchema {
     canaisSeguidos: [],
     listas: [],
     notificacoes: [],
+    gamificationProfiles: {},
     usuarios: [
       {
         id: 'admin',
@@ -106,6 +116,7 @@ let dbCache: DbSchema = {
   canaisSeguidos: [],
   listas: [],
   notificacoes: [],
+  gamificationProfiles: {},
   usuarios: []
 };
 
@@ -985,5 +996,28 @@ export const localDb = {
     }
 
     return current;
-  }
+  },
+
+  getGamificationProfile: (email: string): GamificationProfile => {
+    if (!dbCache.gamificationProfiles) dbCache.gamificationProfiles = {};
+    const key = email.toLowerCase();
+    if (!dbCache.gamificationProfiles[key]) {
+      dbCache.gamificationProfiles[key] = createDefaultProfile(email);
+      saveDb(dbCache);
+    }
+    return dbCache.gamificationProfiles[key];
+  },
+
+  saveGamificationProfile: (profile: GamificationProfile): GamificationProfile => {
+    if (!dbCache.gamificationProfiles) dbCache.gamificationProfiles = {};
+    const key = profile.email.toLowerCase();
+    dbCache.gamificationProfiles[key] = profile;
+    saveDb(dbCache);
+    return profile;
+  },
+
+  getAllGamificationProfiles: (): GamificationProfile[] => {
+    if (!dbCache.gamificationProfiles) dbCache.gamificationProfiles = {};
+    return Object.values(dbCache.gamificationProfiles);
+  },
 };

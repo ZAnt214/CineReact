@@ -22,6 +22,7 @@ interface LunchTimePageProps {
   reacts: ReactVideo[];
   onPlayVideo: (reactId: string, obraId: string) => void;
   onBackToHome: () => void;
+  onLunchPick?: () => void;
   autoPlayOnMount?: boolean;
 }
 
@@ -112,6 +113,7 @@ export default function LunchTimePage({
   reacts,
   onPlayVideo,
   onBackToHome,
+  onLunchPick,
   autoPlayOnMount = true,
 }: LunchTimePageProps) {
   const [picked, setPicked] = useState<ReactVideo | null>(null);
@@ -149,6 +151,7 @@ export default function LunchTimePage({
         setShufflePreview(selected);
         setTimeout(() => {
           setIsDrawing(false);
+          onLunchPick?.();
           onDone?.(selected);
         }, 400);
       }
@@ -158,7 +161,7 @@ export default function LunchTimePage({
       cancel();
       clearInterval(progressInterval);
     };
-  }, [hasVideos, reacts]);
+  }, [hasVideos, reacts, onLunchPick]);
 
   const startPlayback = useCallback((react: ReactVideo) => {
     setCountdown(null);
