@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Home, Film, Gamepad2, Tv, Clapperboard, Heart, UtensilsCrossed, X } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useSideNavStore, sideNavStore } from '../hooks/useSideNavStore.ts';
 
 export const SIDE_NAV_ITEMS = [
@@ -12,8 +12,6 @@ export const SIDE_NAV_ITEMS = [
   { id: 'categoria-almoco', label: 'Hora do Almoço', icon: UtensilsCrossed },
   { id: 'categoria-canal-fanit-lin', label: 'Fanit & Lin', icon: Heart },
 ] as const;
-
-const TRANSITION = { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] as const };
 
 interface SideNavHubProps {
   currentTab: string;
@@ -38,31 +36,22 @@ function SideNavHub({ currentTab, setCurrentTab }: SideNavHubProps) {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  return (
+  if (!isSideNavOpen || typeof document === 'undefined') return null;
+
+  const content = (
     <>
-      <motion.button
+      <button
         type="button"
-        initial={false}
-        animate={{ opacity: isSideNavOpen ? 1 : 0 }}
-        transition={TRANSITION}
         className="fixed inset-0 z-[94] bg-black/60 md:bg-black/40"
-        style={{ pointerEvents: isSideNavOpen ? 'auto' : 'none' }}
         onClick={closeSideNav}
         aria-label="Fechar menu"
-        aria-hidden={!isSideNavOpen}
-        tabIndex={isSideNavOpen ? 0 : -1}
       />
 
-      <motion.aside
-        initial={false}
-        animate={{ x: isSideNavOpen ? 0 : '-100%' }}
-        transition={TRANSITION}
+      <aside
         className="fixed left-0 top-0 bottom-0 z-[95] w-64 bg-zinc-950 border-r border-zinc-800/60 flex flex-col shadow-2xl shadow-black/40"
-        style={{ pointerEvents: isSideNavOpen ? 'auto' : 'none' }}
         aria-label="Menu principal"
-        aria-hidden={!isSideNavOpen}
       >
-        <motion.div className="h-16 shrink-0 border-b border-zinc-800/60 flex items-center justify-between px-4">
+        <div className="h-16 shrink-0 border-b border-zinc-800/60 flex items-center justify-between px-4">
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/80">
             Navegação
           </span>
@@ -71,11 +60,10 @@ function SideNavHub({ currentTab, setCurrentTab }: SideNavHubProps) {
             onClick={closeSideNav}
             className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer"
             aria-label="Fechar menu"
-            tabIndex={isSideNavOpen ? 0 : -1}
           >
             <X className="w-4 h-4" />
           </button>
-        </motion.div>
+        </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
           {SIDE_NAV_ITEMS.map((item) => {
@@ -90,7 +78,6 @@ function SideNavHub({ currentTab, setCurrentTab }: SideNavHubProps) {
                 type="button"
                 onClick={() => handleNavClick(item.id)}
                 title={item.label}
-                tabIndex={isSideNavOpen ? 0 : -1}
                 className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer group ${
                   isActive
                     ? 'bg-amber-500/10 text-amber-400'
@@ -111,9 +98,11 @@ function SideNavHub({ currentTab, setCurrentTab }: SideNavHubProps) {
             );
           })}
         </nav>
-      </motion.aside>
+      </aside>
     </>
   );
+
+  return createPortal(content, document.body);
 }
 
 export default React.memo(SideNavHub);
