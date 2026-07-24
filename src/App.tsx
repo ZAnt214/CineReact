@@ -16,7 +16,6 @@ import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
 import SideNavHub, { resetSideNavOnLeave } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
-import LunchTimeBanner from './components/LunchTimeBanner.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
@@ -918,14 +917,6 @@ export default function App() {
               >
                 {/* HORIZONTAL ROWS */}
                 <motion.div className="space-y-10 md:mt-8 relative z-20">
-                  <LunchTimeBanner
-                    videoCount={reacts.length}
-                    onClick={() => {
-                      setCurrentTab('categoria-almoco');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                  />
-
                   {user.isLoggedIn && continueWatchingReacts.length > 0 && (
                     <RowMovies 
                       title="Continue Assistindo" 

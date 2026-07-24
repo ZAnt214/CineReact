@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download } from 'lucide-react';
+import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download, UtensilsCrossed } from 'lucide-react';
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -898,6 +898,26 @@ export default function Header({
                         <div>
                           <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Canais Seguidos</h4>
                           <p className="text-zinc-500 text-[11px] leading-snug mt-1">Veja atualizações e reacts de canais do YouTube que você segue.</p>
+                        </div>
+                      </button>
+
+                      <button 
+                        onClick={() => { setCurrentTab('categoria-almoco'); setShowProfileMenu(false); }}
+                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
+                          currentTab === 'categoria-almoco' 
+                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
+                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start w-full">
+                          <div className={`p-2.5 rounded-xl ${currentTab === 'categoria-almoco' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
+                            <UtensilsCrossed className="w-5 h-5" />
+                          </div>
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'categoria-almoco' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Hora do Almoço</h4>
+                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Sorteie um react aleatório para acompanhar no seu almoço.</p>
                         </div>
                       </button>
 
