@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
-import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles, Award, Star } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
-import { motion, useInView } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 
 interface RowMoviesProps {
@@ -17,28 +16,6 @@ interface RowMoviesProps {
   onChannelClick?: (channelNameOrId: string) => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.25,
-      ease: 'easeOut'
-    }
-  }
-};
-
 export default function RowMovies({ 
   title, 
   reacts, 
@@ -50,11 +27,22 @@ export default function RowMovies({
   onChannelClick
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const isMouseDownRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const isDraggedRef = useRef(false);
+  const [enableDragScroll, setEnableDragScroll] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setEnableDragScroll(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
+  }, []);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!rowRef.current) return;
@@ -106,11 +94,6 @@ export default function RowMovies({
     onPlayVideo(reactId, obraId);
   };
 
-  const hasEntered = useInView(containerRef, {
-    once: true,
-    margin: "0px 0px 200px 0px"
-  });
-
   // Check if title matches a channel in obras
   const matchingChannel = obras.find(o => 
     o.tipo === 'canal' && (
@@ -154,7 +137,7 @@ export default function RowMovies({
   };
 
   return (
-    <motion.div ref={containerRef} className="space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
+    <div className="space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
       {/* ROW TITLE & ACTIONS */}
       <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
         <div className="flex items-center justify-between gap-3">
@@ -195,13 +178,14 @@ export default function RowMovies({
         {/* HORIZONTAL FLEX CAROUSEL */}
         <div
           ref={rowRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onDragStart={(e) => e.preventDefault()}
-          style={{ touchAction: 'pan-x pan-y' }}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none cursor-grab active:cursor-grabbing"
+          {...(enableDragScroll ? {
+            onPointerDown: handlePointerDown,
+            onPointerMove: handlePointerMove,
+            onPointerUp: handlePointerUp,
+            onPointerCancel: handlePointerUp,
+            onDragStart: (e: React.DragEvent) => e.preventDefault(),
+          } : {})}
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-mandatory"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
@@ -210,7 +194,7 @@ export default function RowMovies({
               <div
                 key={react.id}
                 onClick={() => handleCardClick(react.id, react.obraId)}
-                className={`catalog-card w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/60 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'
@@ -221,7 +205,7 @@ export default function RowMovies({
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
-                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover md:group-hover/card:scale-105 md:transition-transform md:duration-300"
                   />
                   
                   {/* Play Button Overlay */}
@@ -304,7 +288,7 @@ export default function RowMovies({
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 

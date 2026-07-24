@@ -45,6 +45,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onLoad={handleLoad}
         onError={handleError}
         draggable={false}
+        decoding="async"
         onDragStart={(e) => e.preventDefault()}
         referrerPolicy="no-referrer"
         className={`w-full h-full object-cover transition-opacity duration-300 ease-in-out relative z-10 pointer-events-none select-none ${
