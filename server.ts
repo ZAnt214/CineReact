@@ -4,6 +4,7 @@ import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent } from "./src/gamification/serverHelpers.ts";
+import { resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import { ReactVideo, UserAccount, Obra } from "./src/types.ts";
@@ -2250,7 +2251,10 @@ app.post("/api/canais/seguir", (req, res) => {
     if (!email || !canalNome) return res.status(400).json({ error: "Email e canalNome requeridos." });
     const seguindo = localDb.toggleSeguirCanal(email, canalNome);
     const gamificationReward = seguindo
-      ? handleGamificationEvent(email, 'follow_creator', { creatorName: canalNome })
+      ? handleGamificationEvent(email, 'follow_creator', {
+          creatorName: canalNome,
+          creatorId: resolveCreatorId(canalNome) || undefined,
+        })
       : null;
     res.json({ seguindo, gamificationReward });
   } catch (error: any) {
@@ -2739,22 +2743,25 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 
     const react = localDb.getReacts().find((r) => r.id === reactId);
     const obra = localDb.getObras().find((o) => o.id === obraId);
+    const creatorId = obra?.tipo === 'canal' ? obraId : resolveCreatorId(react?.canalNome || '', obraId);
     let gamificationReward = handleGamificationEvent(email, 'watch_progress', {
       reactId,
       obraId,
       progress,
       durationMinutes: 1,
       category: obra?.tipo,
-      franchiseId: obraId,
+      franchiseId: obra?.tipo === 'canal' ? undefined : obraId,
       creatorName: react?.canalNome,
+      creatorId: creatorId || undefined,
     });
     if (progress >= 95) {
       const completeReward = handleGamificationEvent(email, 'watch_complete', {
         reactId,
         obraId,
         category: obra?.tipo,
-        franchiseId: obraId,
+        franchiseId: obra?.tipo === 'canal' ? undefined : obraId,
         creatorName: react?.canalNome,
+        creatorId: creatorId || undefined,
       });
       gamificationReward = completeReward;
     }

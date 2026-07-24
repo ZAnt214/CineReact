@@ -11,7 +11,7 @@ interface GamificationRewardToastProps {
 export default function GamificationRewardToast({ reward, onClose }: GamificationRewardToastProps) {
   return (
     <AnimatePresence>
-      {reward && (reward.xp > 0 || reward.spotlight > 0 || reward.achievements.length > 0 || reward.levelUp) && (
+      {reward && (reward.xp > 0 || reward.spotlight > 0 || reward.achievements.length > 0 || reward.levelUp || (reward.unlockedItems?.length ?? 0) > 0) && (
         <motion.div
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -50,6 +50,16 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
                 </span>
               )}
             </div>
+
+            {reward.unlockedItems?.map((item) => (
+              <div key={item.id} className="flex items-start gap-2 mt-2 p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/20">
+                <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-white">Novo item: {item.name}</p>
+                  <p className="text-[10px] text-zinc-500">{item.description}</p>
+                </div>
+              </div>
+            ))}
 
             {reward.achievements.map((a) => (
               <div key={a.id} className="flex items-start gap-2 mt-2 p-2 rounded-xl bg-zinc-900/60 border border-zinc-800">

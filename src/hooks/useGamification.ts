@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { GamificationMeResponse, GamificationReward, LeaderboardEntry, LeaderboardType } from '../types/gamification.ts';
+import type {
+  GamificationMeResponse,
+  GamificationReward,
+  LeaderboardEntry,
+  LeaderboardType,
+  ProfileLoadout,
+} from '../types/gamification.ts';
 import type { GamificationEventType } from '../types/gamification.ts';
 
 interface UseGamificationOptions {
@@ -18,10 +24,7 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     setLoading(true);
     try {
       const res = await fetch(`/api/gamification/me?email=${encodeURIComponent(email)}`);
-      if (res.ok) {
-        const json = await res.json();
-        setData(json);
-      }
+      if (res.ok) setData(await res.json());
     } catch (e) {
       console.error('Erro ao carregar gamificação:', e);
     } finally {
@@ -44,7 +47,13 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
         });
         if (res.ok) {
           const json = await res.json();
-          if (json.reward && (json.reward.xp > 0 || json.reward.spotlight > 0 || json.reward.achievements?.length)) {
+          if (
+            json.reward &&
+            (json.reward.xp > 0 ||
+              json.reward.spotlight > 0 ||
+              json.reward.achievements?.length ||
+              json.reward.unlockedItems?.length)
+          ) {
             setPendingReward(json.reward);
           }
           setData(json);
@@ -72,26 +81,36 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     return [];
   }, []);
 
-  const purchaseCosmetic = useCallback(
-    async (cosmeticId: string) => {
+  const apiAction = useCallback(
+    async (endpoint: string, body: Record<string, unknown>) => {
       if (!email) return false;
       try {
-        const res = await fetch('/api/gamification/purchase', {
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, cosmeticId }),
+          body: JSON.stringify({ email, ...body }),
         });
         if (res.ok) {
-          await refresh();
+          const json = await res.json();
+          setData(json);
           return true;
         }
       } catch (e) {
-        console.error('Erro na compra:', e);
+        console.error(`Erro ${endpoint}:`, e);
       }
       return false;
     },
-    [email, refresh]
+    [email]
   );
+
+  const purchaseItem = useCallback((itemId: string) => apiAction('/api/gamification/purchase', { itemId }), [apiAction]);
+  const equipItem = useCallback((itemId: string) => apiAction('/api/gamification/equip', { itemId }), [apiAction]);
+  const unequipItem = useCallback((itemId: string) => apiAction('/api/gamification/unequip', { itemId }), [apiAction]);
+  const saveLoadout = useCallback(
+    (loadout: ProfileLoadout) => apiAction('/api/gamification/loadout', { loadout }),
+    [apiAction]
+  );
+  const redeemCode = useCallback((code: string) => apiAction('/api/gamification/redeem', { code }), [apiAction]);
 
   const clearPendingReward = useCallback(() => setPendingReward(null), []);
 
@@ -102,8 +121,13 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     trackEvent,
     loadLeaderboard,
     leaderboards,
-    purchaseCosmetic,
+    purchaseItem,
+    equipItem,
+    unequipItem,
+    saveLoadout,
+    redeemCode,
     pendingReward,
     clearPendingReward,
+    purchaseCosmetic: purchaseItem,
   };
 }

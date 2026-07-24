@@ -1,6 +1,5 @@
 import {
   ACHIEVEMENTS,
-  COSMETIC_SHOP,
   DAILY_MISSION_TEMPLATES,
   FRANCHISE_SEALS,
   LEVELS,
@@ -11,6 +10,15 @@ import {
   getTierFromXp,
   getXpProgress,
 } from '../data/gamification.ts';
+import { REWARDS_CATALOG } from '../data/rewardsCatalog.ts';
+import {
+  buildInventoryView,
+  migrateProfile,
+  purchaseReward,
+  unlockReward,
+  incrementCreatorWatch,
+  checkCreatorFollowReward,
+} from './rewardsEngine.ts';
 import type {
   AchievementDefinition,
   GamificationEventType,
@@ -63,8 +71,9 @@ export function createDefaultProfile(email: string): GamificationProfile {
     lastActiveDate: '',
     unlockedAchievements: [],
     unlockedSeals: [],
-    unlockedCosmetics: ['frame-amber'],
-    equippedCosmetics: {},
+    inventory: [{ itemId: 'frame-amber', unlockedAt: now, unlockMethod: 'default' }],
+    loadout: { tags: [], badges: [] },
+    redeemedCodes: [],
     missionProgress: {},
     completedMissions: {},
     stats: createDefaultStats(),
@@ -153,6 +162,7 @@ function updateStreak(profile: GamificationProfile): GamificationReward {
     reward.spotlight += streakBonus;
     reward.streakBonus = streakBonus;
     reward.message = `Sequência de ${profile.currentStreak} dias! +${streakBonus} Spotlight`;
+    if (profile.currentStreak >= 30) unlockReward(profile, 'badge-streak-30', 'streak');
   }
 
   return reward;
@@ -229,8 +239,9 @@ function checkLevelRewards(profile: GamificationProfile, prevXp: number): Gamifi
     reward.levelUp = newTier;
     reward.spotlight += newTier.rewardSpotlight;
     profile.spotlight += newTier.rewardSpotlight;
-    if (newTier.unlockCosmetic && !profile.unlockedCosmetics.includes(newTier.unlockCosmetic)) {
-      profile.unlockedCosmetics.push(newTier.unlockCosmetic);
+    if (newTier.unlockCosmetic) {
+      const item = unlockReward(profile, newTier.unlockCosmetic, 'level', newTier.tier);
+      if (item) reward.message = `Desbloqueado: ${item.name}`;
     }
     if (['Influenciador', 'Ícone', 'Lenda', 'Elite CineReact'].includes(newTier.tier)) {
       profile.featuredInfluencer = true;
@@ -294,6 +305,7 @@ export interface ProcessEventMeta {
   category?: string;
   franchiseId?: string;
   creatorName?: string;
+  creatorId?: string;
   nota?: number;
 }
 
@@ -365,6 +377,12 @@ export function processGamificationEvent(
         reward.xp += discoverMission.xp;
         reward.spotlight += discoverMission.spotlight;
       }
+      if (meta.creatorId) {
+        const items = incrementCreatorWatch(profile, meta.creatorId);
+        if (items.length) {
+          reward.unlockedItems = [...(reward.unlockedItems || []), ...items];
+        }
+      }
       const missionReward = updateMissions(profile, 'watch_complete');
       reward.xp += missionReward.xp;
       reward.spotlight += missionReward.spotlight;
@@ -428,6 +446,10 @@ export function processGamificationEvent(
     const xp = XP_REWARDS.follow_creator;
     profile.xp += xp;
     reward.xp += xp;
+    if (meta.creatorId) {
+      const tag = checkCreatorFollowReward(profile, meta.creatorId);
+      if (tag) reward.unlockedItems = [...(reward.unlockedItems || []), tag];
+    }
   }
 
   if (eventType === 'discover_creator' && meta.creatorName) {
@@ -469,26 +491,9 @@ export function processGamificationEvent(
 }
 
 export function spendSpotlight(profile: GamificationProfile, cosmeticId: string): { success: boolean; error?: string } {
-  const item = COSMETIC_SHOP.find((c) => c.id === cosmeticId);
-  if (!item) return { success: false, error: 'Item não encontrado.' };
-  if (profile.unlockedCosmetics.includes(cosmeticId)) {
-    profile.equippedCosmetics = {
-      ...profile.equippedCosmetics,
-      [item.type]: cosmeticId,
-    };
-    return { success: true };
-  }
-  if (item.cost > 0 && profile.spotlight < item.cost) {
-    return { success: false, error: 'Spotlight insuficiente.' };
-  }
-  if (item.cost > 0) profile.spotlight -= item.cost;
-  profile.unlockedCosmetics.push(cosmeticId);
-  profile.equippedCosmetics = {
-    ...profile.equippedCosmetics,
-    [item.type]: cosmeticId,
-  };
-  profile.updatedAt = new Date().toISOString();
-  return { success: true };
+  migrateProfile(profile);
+  const result = purchaseReward(profile, cosmeticId);
+  return { success: result.success, error: result.error };
 }
 
 export function buildLeaderboard(
@@ -565,6 +570,7 @@ export function getUserRank(
 }
 
 export function enrichProfileResponse(profile: GamificationProfile) {
+  migrateProfile(profile);
   const tier = getTierFromXp(profile.xp);
   const next = getNextTier(profile.xp);
   const progress = getXpProgress(profile.xp);
@@ -581,7 +587,17 @@ export function enrichProfileResponse(profile: GamificationProfile) {
     weeklyMissions: weekly,
     achievements: ACHIEVEMENTS,
     seals: FRANCHISE_SEALS,
-    cosmetics: COSMETIC_SHOP,
+    rewardsCatalog: REWARDS_CATALOG,
+    inventory: buildInventoryView(profile),
+    cosmetics: REWARDS_CATALOG.filter((r) => r.cost >= 0 && r.unlockMethod === 'shop').map((r) => ({
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      type: r.category as 'frame' | 'title' | 'badge' | 'theme' | 'effect',
+      cost: r.cost,
+      rarity: (['comum', 'raro', 'épico', 'lendário'].includes(r.rarity) ? r.rarity : 'épico') as 'comum' | 'raro' | 'épico' | 'lendário',
+      previewClass: r.previewClass,
+    })),
     rankPositions: {
       xp: getUserRank(allProfiles, profile.email, 'xp'),
       influence: getUserRank(allProfiles, profile.email, 'influence'),
@@ -590,4 +606,4 @@ export function enrichProfileResponse(profile: GamificationProfile) {
   };
 }
 
-export { getTierFromXp, getXpProgress, getNextTier, LEVELS, ACHIEVEMENTS, FRANCHISE_SEALS, COSMETIC_SHOP };
+export { getTierFromXp, getXpProgress, getNextTier, LEVELS, ACHIEVEMENTS, FRANCHISE_SEALS };

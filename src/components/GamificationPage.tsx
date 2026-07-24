@@ -15,14 +15,19 @@ import {
   TrendingUp,
   Medal,
   ShoppingBag,
+  Package,
+  Palette,
   ChevronRight,
   Star,
   Film,
   Users,
 } from 'lucide-react';
-import { RARITY_STYLES, INFLUENCE_TIERS, getXpProgress } from '../data/gamification.ts';
+import { INFLUENCE_TIERS, getXpProgress } from '../data/gamification.ts';
+import { RARITY_STYLES as ACH_RARITY, RARITY_STYLES } from '../data/rewardsCatalog.ts';
 import GamificationBar from './GamificationBar.tsx';
-import type { GamificationMeResponse, LeaderboardType } from '../types/gamification.ts';
+import RewardInventory from './rewards/RewardInventory.tsx';
+import ProfileCustomizer from './rewards/ProfileCustomizer.tsx';
+import type { GamificationMeResponse, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
 import type { UserState } from '../types.ts';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -40,11 +45,15 @@ interface GamificationPageProps {
   loading: boolean;
   onRefresh: () => void;
   onPurchase: (id: string) => Promise<boolean>;
+  onEquip: (id: string) => Promise<boolean>;
+  onUnequip: (id: string) => Promise<boolean>;
+  onSaveLoadout: (loadout: ProfileLoadout) => Promise<boolean>;
+  onRedeemCode: (code: string) => Promise<boolean>;
   onLoadLeaderboard: (type: LeaderboardType) => void;
   leaderboards: Partial<Record<LeaderboardType, import('../types/gamification.ts').LeaderboardEntry[]>>;
 }
 
-type TabId = 'overview' | 'achievements' | 'missions' | 'seals' | 'rankings' | 'shop';
+type TabId = 'overview' | 'inventory' | 'customize' | 'achievements' | 'missions' | 'seals' | 'rankings';
 
 const LEADERBOARD_TABS: { id: LeaderboardType; label: string }[] = [
   { id: 'xp', label: 'XP Geral' },
@@ -62,12 +71,15 @@ export default function GamificationPage({
   loading,
   onRefresh,
   onPurchase,
+  onEquip,
+  onUnequip,
+  onSaveLoadout,
+  onRedeemCode,
   onLoadLeaderboard,
   leaderboards,
 }: GamificationPageProps) {
   const [tab, setTab] = useState<TabId>('overview');
   const [lbTab, setLbTab] = useState<LeaderboardType>('influence');
-  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   useEffect(() => {
     if (tab === 'rankings') onLoadLeaderboard(lbTab);
@@ -88,18 +100,14 @@ export default function GamificationPage({
 
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: 'Visão Geral', icon: TrendingUp },
+    { id: 'inventory', label: 'Inventário', icon: Package },
+    { id: 'customize', label: 'Personalizar', icon: Palette },
     { id: 'achievements', label: 'Conquistas', icon: Trophy },
     { id: 'missions', label: 'Missões', icon: Target },
     { id: 'seals', label: 'Selos', icon: Stamp },
     { id: 'rankings', label: 'Rankings', icon: Crown },
-    { id: 'shop', label: 'Loja Spotlight', icon: ShoppingBag },
   ];
 
-  const handlePurchase = async (id: string) => {
-    setPurchasing(id);
-    await onPurchase(id);
-    setPurchasing(null);
-  };
 
   return (
     <motion.div
@@ -229,11 +237,32 @@ export default function GamificationPage({
             </div>
           )}
 
+          {tab === 'inventory' && data && profile && (
+            <RewardInventory
+              items={data.inventory}
+              spotlight={profile.spotlight}
+              onEquip={onEquip}
+              onUnequip={onUnequip}
+              onPurchase={onPurchase}
+              onRedeemCode={onRedeemCode}
+            />
+          )}
+
+          {tab === 'customize' && data && profile && (
+            <ProfileCustomizer
+              user={user}
+              inventory={data.inventory}
+              loadout={profile.loadout}
+              onSave={onSaveLoadout}
+            />
+          )}
+
           {tab === 'achievements' && data && (
             <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.achievements.map((a) => {
                 const unlocked = profile?.unlockedAchievements.includes(a.id);
-                const style = RARITY_STYLES[a.rarity];
+                const achRarity = a.rarity as keyof typeof ACH_RARITY;
+                const style = ACH_RARITY[achRarity] || RARITY_STYLES.comum;
                 const Icon = ICON_MAP[a.icon] || Trophy;
                 return (
                   <div
@@ -376,44 +405,6 @@ export default function GamificationPage({
             </div>
           )}
 
-          {tab === 'shop' && data && profile && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.cosmetics.map((item) => {
-                const owned = profile.unlockedCosmetics.includes(item.id);
-                const equipped = Object.values(profile.equippedCosmetics).includes(item.id);
-                const style = RARITY_STYLES[item.rarity];
-                return (
-                  <div key={item.id} className={`p-5 rounded-2xl border ${style.border} ${style.bg}`}>
-                    <div className="flex justify-between items-start mb-3">
-                      <span className={`text-[9px] uppercase font-mono ${style.text}`}>{item.rarity}</span>
-                      <span className="text-[10px] text-zinc-500 capitalize">{item.type}</span>
-                    </div>
-                    <h3 className="font-bold text-white text-sm mb-1">{item.name}</h3>
-                    <p className="text-[11px] text-zinc-500 mb-4 leading-snug">{item.description}</p>
-                    <button
-                      type="button"
-                      disabled={purchasing === item.id}
-                      onClick={() => handlePurchase(item.id)}
-                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        equipped
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : owned
-                          ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                          : 'bg-gradient-to-r from-amber-600 to-amber-500 text-black hover:from-amber-500 hover:to-amber-400'
-                      }`}
-                    >
-                      {equipped ? 'Equipado' : owned ? 'Equipar' : item.cost === 0 ? 'Desbloquear' : (
-                        <>
-                          <Sparkles className="w-3.5 h-3.5" />
-                          {item.cost} Spotlight
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </motion.div>
       </AnimatePresence>
     </motion.div>

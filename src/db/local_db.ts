@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Obra, ReactVideo, Comentario, ListaPersonalizada, Notificacao, UserAccount } from '../types.ts';
 import { GamificationProfile } from '../types/gamification.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
+import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
 
 const DB_PATH = path.join(process.env.NODE_ENV === 'production' ? '/tmp' : process.cwd(), 'db_cine_react.json');
@@ -1005,7 +1006,7 @@ export const localDb = {
       dbCache.gamificationProfiles[key] = createDefaultProfile(email);
       saveDb(dbCache);
     }
-    return dbCache.gamificationProfiles[key];
+    return migrateProfile(dbCache.gamificationProfiles[key]);
   },
 
   saveGamificationProfile: (profile: GamificationProfile): GamificationProfile => {

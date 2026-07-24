@@ -10,7 +10,43 @@ export type InfluenceTier =
   | 'Lenda'
   | 'Elite CineReact';
 
+/** @deprecated use RewardRarity */
 export type AchievementRarity = 'comum' | 'raro' | 'épico' | 'lendário';
+
+export type RewardRarity =
+  | 'comum'
+  | 'incomum'
+  | 'raro'
+  | 'épico'
+  | 'lendário'
+  | 'mítico'
+  | 'exclusivo';
+
+export type RewardCategory =
+  | 'frame'
+  | 'tag'
+  | 'title'
+  | 'avatar'
+  | 'badge'
+  | 'theme'
+  | 'effect'
+  | 'background'
+  | 'reaction'
+  | 'emoji'
+  | 'profile_card';
+
+export type UnlockMethod =
+  | 'default'
+  | 'shop'
+  | 'level'
+  | 'achievement'
+  | 'follow_creator'
+  | 'watch_creator'
+  | 'seasonal'
+  | 'promo_code'
+  | 'event'
+  | 'streak'
+  | 'legacy';
 
 export type MissionPeriod = 'daily' | 'weekly';
 
@@ -50,8 +86,31 @@ export interface GamificationStats {
   watchedReacts: Record<string, { progress: number; completed: boolean }>;
   commentLikesReceived: number;
   listEngagement: number;
+  creatorWatchCounts?: Record<string, number>;
 }
 
+export interface UnlockedRewardEntry {
+  itemId: string;
+  unlockedAt: string;
+  unlockMethod: UnlockMethod;
+  unlockSource?: string;
+}
+
+export interface ProfileLoadout {
+  frame?: string;
+  tags: string[];
+  title?: string;
+  avatar?: string;
+  badges: string[];
+  theme?: string;
+  effect?: string;
+  background?: string;
+  reaction?: string;
+  emoji?: string;
+  profileCard?: string;
+}
+
+/** @deprecated use ProfileLoadout */
 export interface EquippedCosmetics {
   frame?: string;
   title?: string;
@@ -69,8 +128,9 @@ export interface GamificationProfile {
   lastActiveDate: string;
   unlockedAchievements: string[];
   unlockedSeals: string[];
-  unlockedCosmetics: string[];
-  equippedCosmetics: EquippedCosmetics;
+  inventory: UnlockedRewardEntry[];
+  loadout: ProfileLoadout;
+  redeemedCodes: string[];
   missionProgress: Record<string, number>;
   completedMissions: Record<string, string>;
   stats: GamificationStats;
@@ -78,6 +138,10 @@ export interface GamificationProfile {
   featuredInfluencer: boolean;
   createdAt: string;
   updatedAt: string;
+  /** @deprecated migrated to inventory */
+  unlockedCosmetics?: string[];
+  /** @deprecated migrated to loadout */
+  equippedCosmetics?: EquippedCosmetics;
 }
 
 export interface LevelDefinition {
@@ -96,6 +160,7 @@ export interface AchievementDefinition {
   rarity: AchievementRarity;
   xpReward: number;
   spotlightReward: number;
+  rewardItemId?: string;
 }
 
 export interface MissionDefinition {
@@ -118,6 +183,30 @@ export interface SealDefinition {
   requiredWatches: number;
 }
 
+export interface RewardItemDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: RewardCategory;
+  rarity: RewardRarity;
+  cost: number;
+  unlockMethod: UnlockMethod;
+  obtainHint: string;
+  previewClass?: string;
+  previewGradient?: string;
+  animated?: boolean;
+  creatorId?: string;
+  creatorName?: string;
+  creatorColors?: { from: string; to: string; text: string };
+  seasonalEvent?: string;
+  limited?: boolean;
+  availableUntil?: string;
+  emojiChar?: string;
+  avatarUrl?: string;
+  icon?: string;
+}
+
+/** @deprecated use RewardItemDefinition */
 export interface CosmeticItem {
   id: string;
   name: string;
@@ -128,10 +217,19 @@ export interface CosmeticItem {
   previewClass?: string;
 }
 
+export interface InventoryItemView extends Omit<RewardItemDefinition, 'unlockMethod'> {
+  owned: boolean;
+  equipped: boolean;
+  unlockedAt?: string;
+  unlockMethod?: UnlockMethod;
+  unlockSource?: string;
+}
+
 export interface GamificationReward {
   xp: number;
   spotlight: number;
   achievements: AchievementDefinition[];
+  unlockedItems?: RewardItemDefinition[];
   levelUp?: LevelDefinition;
   streakBonus?: number;
   message?: string;
@@ -158,6 +256,30 @@ export interface GamificationMeResponse {
   weeklyMissions: MissionDefinition[];
   achievements: AchievementDefinition[];
   seals: SealDefinition[];
-  cosmetics: CosmeticItem[];
+  rewardsCatalog: RewardItemDefinition[];
+  inventory: InventoryItemView[];
   rankPositions: Partial<Record<LeaderboardType, number>>;
+  /** @deprecated */
+  cosmetics?: CosmeticItem[];
 }
+
+export interface PromoCodeDefinition {
+  code: string;
+  rewardItemId: string;
+  maxUses?: number;
+  expiresAt?: string;
+}
+
+export const LOADOUT_SLOTS: Record<RewardCategory, { max: number; loadoutKey: keyof ProfileLoadout }> = {
+  frame: { max: 1, loadoutKey: 'frame' },
+  tag: { max: 3, loadoutKey: 'tags' },
+  title: { max: 1, loadoutKey: 'title' },
+  avatar: { max: 1, loadoutKey: 'avatar' },
+  badge: { max: 2, loadoutKey: 'badges' },
+  theme: { max: 1, loadoutKey: 'theme' },
+  effect: { max: 1, loadoutKey: 'effect' },
+  background: { max: 1, loadoutKey: 'background' },
+  reaction: { max: 1, loadoutKey: 'reaction' },
+  emoji: { max: 1, loadoutKey: 'emoji' },
+  profile_card: { max: 1, loadoutKey: 'profileCard' },
+};
