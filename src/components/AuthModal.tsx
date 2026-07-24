@@ -14,8 +14,7 @@ import {
   Heart,
   ShieldCheck,
   CheckCircle2,
-  ArrowRight,
-  KeyRound
+  ArrowRight
 } from 'lucide-react';
 import { UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -42,7 +41,7 @@ export default function AuthModal({
   onSuccess,
   initialMode = 'login'
 }: AuthModalProps) {
-  const [mode, setMode] = useState<'login' | 'register' | 'verify_otp'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,9 +53,6 @@ export default function AuthModal({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [verificationEmail, setVerificationEmail] = useState('');
-  const [resending, setResending] = useState(false);
 
   const firstInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,8 +60,6 @@ export default function AuthModal({
     setUsername('');
     setPassword('');
     setConfirmPassword('');
-    setVerificationCode('');
-    setVerificationEmail('');
     setErrorMsg('');
     setInfoMsg('');
     setShowPassword(false);
@@ -154,9 +148,8 @@ export default function AuthModal({
 
       if (res.ok) {
         if (data.requiresVerification) {
-          setVerificationEmail(data.email || email.trim());
-          setMode('verify_otp');
-          setInfoMsg('Verifique sua caixa de entrada e insira o código de confirmação.');
+          setInfoMsg(data.message || 'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada para ativar sua conta.');
+          setMode('login');
         } else if (data.success && data.user) {
           persistEmail(email);
           onSuccess(data.user, mode === 'register');
@@ -167,9 +160,8 @@ export default function AuthModal({
         }
       } else {
         if (data.requiresVerification) {
-          setVerificationEmail(data.email || email.trim());
-          setMode('verify_otp');
-          setInfoMsg(data.error || 'Insira o código de confirmação enviado para seu e-mail.');
+          setInfoMsg(data.error || data.message || 'Verifique seu e-mail para confirmar o cadastro antes de entrar.');
+          setMode('login');
         } else {
           setErrorMsg(data.error || 'Falha na autenticação.');
         }
@@ -178,62 +170,6 @@ export default function AuthModal({
       setErrorMsg('Erro de conexão com o servidor. Verifique sua internet.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg('');
-    setInfoMsg('');
-
-    try {
-      const res = await fetch('/api/verificar-codigo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: verificationEmail, token: verificationCode.trim() })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success && data.user) {
-        persistEmail(verificationEmail);
-        onSuccess(data.user, true);
-        resetForm();
-        onClose();
-      } else {
-        setErrorMsg(data.error || 'Código inválido. Verifique e tente novamente.');
-      }
-    } catch {
-      setErrorMsg('Erro de conexão com o servidor. Verifique sua internet.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setResending(true);
-    setErrorMsg('');
-    setInfoMsg('');
-
-    try {
-      const res = await fetch('/api/reenviar-codigo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: verificationEmail })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setInfoMsg(data.message || 'Um novo código foi enviado para seu e-mail.');
-      } else {
-        setErrorMsg(data.error || 'Erro ao reenviar o código.');
-      }
-    } catch {
-      setErrorMsg('Erro de conexão com o servidor.');
-    } finally {
-      setResending(false);
     }
   };
 
@@ -348,23 +284,20 @@ export default function AuthModal({
                 <div className="text-center md:text-left mb-6">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">
                     <Sparkles className="w-3 h-3" />
-                    {mode === 'verify_otp' ? 'Verificação' : 'Acesso gratuito'}
+                    Acesso gratuito
                   </div>
                   <h2 id="auth-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                    {mode === 'login' ? 'Bem-vindo de volta!' : mode === 'register' ? 'Crie sua conta' : 'Confirme seu e-mail'}
+                    {mode === 'login' ? 'Bem-vindo de volta!' : 'Crie sua conta'}
                   </h2>
                   <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
                     {mode === 'login'
                       ? 'Entre para assistir reacts, salvar favoritos e apoiar criadores.'
-                      : mode === 'register'
-                      ? 'Cadastro rápido — leva menos de 1 minuto.'
-                      : `Enviamos um código para ${verificationEmail}`}
+                      : 'Cadastro rápido — leva menos de 1 minuto.'}
                   </p>
                 </div>
 
-                {mode !== 'verify_otp' && (
-                  <div className="flex p-1 mb-6 bg-zinc-900/80 border border-zinc-800 rounded-xl">
-                    <button
+                <motion.div className="flex p-1 mb-6 bg-zinc-900/80 border border-zinc-800 rounded-xl">
+                  <button
                       type="button"
                       onClick={() => switchMode('login')}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -388,8 +321,7 @@ export default function AuthModal({
                       <UserPlus className="w-3.5 h-3.5" />
                       Cadastrar
                     </button>
-                  </div>
-                )}
+                </motion.div>
 
                 <AnimatePresence mode="wait">
                   {errorMsg && (
@@ -418,68 +350,7 @@ export default function AuthModal({
                   )}
                 </AnimatePresence>
 
-                {mode === 'verify_otp' ? (
-                  <form onSubmit={handleVerifyOtp} className="space-y-4">
-                    <div>
-                      <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                        Código de verificação
-                      </label>
-                      <div className="relative">
-                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                        <input
-                          ref={firstInputRef}
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                          required
-                          maxLength={8}
-                          placeholder="000000"
-                          value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-3 py-3 text-base text-white outline-none tracking-[0.35em] font-mono text-center transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading || verificationCode.length < 4}
-                      className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer"
-                    >
-                      {loading ? (
-                        <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          Verificar e entrar
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-
-                    <motion.div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs pt-2 border-t border-zinc-900">
-                      <button
-                        type="button"
-                        onClick={handleResendOtp}
-                        disabled={resending}
-                        className="text-amber-400 hover:text-amber-300 font-bold transition-colors disabled:opacity-50 cursor-pointer"
-                      >
-                        {resending ? 'Enviando...' : 'Reenviar código'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMode('login');
-                          setErrorMsg('');
-                          setInfoMsg('');
-                        }}
-                        className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
-                      >
-                        Voltar ao login
-                      </button>
-                    </motion.div>
-                  </form>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {mode === 'register' && (
                       <div>
                         <label htmlFor="auth-username" className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
@@ -655,8 +526,7 @@ export default function AuthModal({
                         </>
                       )}
                     </button>
-                  </form>
-                )}
+                </form>
 
                 <button
                   type="button"
