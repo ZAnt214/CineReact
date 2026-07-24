@@ -67,6 +67,46 @@ const benefits = [
   { icon: ShieldCheck, text: 'Sincronize seu progresso em qualquer dispositivo' },
 ];
 
+function AuthLogo({ variant = 'mobile' }: { variant?: 'mobile' | 'desktop' }) {
+  const isDesktop = variant === 'desktop';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      className={`select-none ${isDesktop ? 'text-left' : 'text-center'}`}
+      aria-label="CineReact"
+    >
+      <div
+        className={`relative inline-block ${isDesktop ? 'px-1' : 'mx-auto'}`}
+      >
+        <motion.div
+          className="absolute -inset-4 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"
+          animate={{ opacity: [0.45, 0.75, 0.45] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        <h1
+          className={`relative font-bungee leading-[0.9] tracking-tight ${
+            isDesktop
+              ? 'text-6xl xl:text-7xl'
+              : 'text-5xl sm:text-6xl'
+          }`}
+        >
+          <span className="block text-white drop-shadow-[0_6px_28px_rgba(255,255,255,0.18)]">
+            CINE
+          </span>
+          <span className="block mt-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(245,158,11,0.45)] -rotate-1 origin-left">
+            REACT
+            <span className="inline-block text-amber-400 ml-1 animate-bounce">!</span>
+          </span>
+        </h1>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function AuthModal({
   isOpen,
   onClose,
@@ -329,19 +369,8 @@ export default function AuthModal({
                 <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
 
-                <div className="relative z-10 space-y-6">
-                  <motion.div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px] shadow-lg shadow-amber-500/20">
-                      <div className="w-full h-full bg-black rounded-[11px] flex items-center justify-center">
-                        <Film className="w-5 h-5 text-amber-400" />
-                      </div>
-                    </div>
-                    <div className="font-['Fredoka',sans-serif]">
-                      <span className="text-2xl font-extrabold text-white">Cine</span>
-                      <span className="text-2xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">React</span>
-                      <span className="text-amber-400 font-black text-xl">!</span>
-                    </div>
-                  </motion.div>
+                <div className="relative z-10 space-y-8">
+                  <AuthLogo variant="desktop" />
 
                   <div>
                     <h3 className="text-lg font-black text-white leading-snug">
@@ -371,17 +400,9 @@ export default function AuthModal({
 
               {/* Form panel */}
               <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center">
-                <div className="md:hidden flex items-center justify-center gap-2 mb-5">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px]">
-                    <motion.div className="w-full h-full bg-black rounded-[7px] flex items-center justify-center">
-                      <Film className="w-4 h-4 text-amber-400" />
-                    </motion.div>
-                  </div>
-                  <span className="font-['Fredoka',sans-serif] text-xl font-black text-white">
-                    Cine<span className="text-amber-400">React</span>!
-                  </span>
+                <div className="md:hidden mb-8">
+                  <AuthLogo variant="mobile" />
                 </div>
-
                 <div className="text-center md:text-left mb-6">
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">
                     Acesso gratuito
