@@ -4,6 +4,7 @@ import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
+import SideNavToggleButton from './SideNavToggleButton.tsx';
 
 interface HeaderProps {
   currentTab: string;
@@ -16,8 +17,6 @@ interface HeaderProps {
   obras?: Obra[];
   reacts?: ReactVideo[];
   hasSideNav?: boolean;
-  isSideNavOpen?: boolean;
-  onToggleSideNav?: () => void;
 }
 
 export default function Header({
@@ -30,9 +29,7 @@ export default function Header({
   onOpenAuth,
   obras = [],
   reacts = [],
-  hasSideNav = false,
-  isSideNavOpen = false,
-  onToggleSideNav
+  hasSideNav = false
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -329,22 +326,8 @@ export default function Header({
           <div className="flex h-16 items-center justify-between gap-4">
             
             {/* LEFT SECTION: Logo & Desktop Navigation */}
-            <motion.div className="flex items-center gap-3 lg:gap-6 flex-shrink-0">
-              {hasSideNav && onToggleSideNav && (
-                <button
-                  type="button"
-                  onClick={onToggleSideNav}
-                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                    isSideNavOpen
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
-                  }`}
-                  aria-label={isSideNavOpen ? 'Fechar menu' : 'Abrir menu'}
-                  aria-expanded={isSideNavOpen}
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-              )}
+            <div className="flex items-center gap-3 lg:gap-6 flex-shrink-0">
+              <SideNavToggleButton visible={hasSideNav} />
 
               <button 
                 id="logo-button"
@@ -415,7 +398,7 @@ export default function Header({
                   </button>
                 )}
               </nav>
-            </motion.div>
+            </div>
 
             {/* MIDDLE SECTION: Search Bar & Download App button */}
             <div className="flex-1 max-w-sm lg:max-w-lg mx-auto hidden sm:flex items-center gap-2 relative">

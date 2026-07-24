@@ -13,7 +13,7 @@ import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
-import SideNavHub from './components/SideNavHub.tsx';
+import SideNavHub, { resetSideNavOnLeave } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
 import LunchTimeBanner from './components/LunchTimeBanner.tsx';
@@ -75,7 +75,6 @@ export default function App() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
-  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
 
   // Continue Watching state
   const [continueWatching, setContinueWatching] = useState<{
@@ -383,17 +382,8 @@ export default function App() {
   const catalogActive = currentTab !== 'landing';
 
   useEffect(() => {
-    if (!catalogActive) setIsSideNavOpen(false);
+    if (!catalogActive) resetSideNavOnLeave();
   }, [catalogActive]);
-
-  useEffect(() => {
-    if (!isSideNavOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsSideNavOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isSideNavOpen]);
 
   const recomendadosReacts = React.useMemo(() => {
     if (!catalogActive) return [];
@@ -682,8 +672,6 @@ export default function App() {
       {catalogActive && (
         <SideNavHub
           currentTab={currentTab}
-          isOpen={isSideNavOpen}
-          onClose={() => setIsSideNavOpen(false)}
           setCurrentTab={(tab) => {
             setCurrentTab(tab);
             setSelectedObraId(null);
@@ -699,8 +687,6 @@ export default function App() {
       <Header 
         currentTab={currentTab}
         hasSideNav={catalogActive}
-        isSideNavOpen={isSideNavOpen}
-        onToggleSideNav={() => setIsSideNavOpen((open) => !open)}
         setCurrentTab={(tab) => {
           setCurrentTab(tab);
           setSelectedObraId(null);
