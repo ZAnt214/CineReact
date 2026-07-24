@@ -4,10 +4,17 @@ import {
   enrichProfileResponse,
   getUserRank,
   processGamificationEvent,
-  spendSpotlight,
   type ProcessEventMeta,
 } from './engine.ts';
-import type { GamificationEventType, LeaderboardType } from '../types/gamification.ts';
+import {
+  equipReward,
+  migrateProfile,
+  purchaseReward,
+  redeemPromoCode,
+  saveLoadout,
+  unequipReward,
+} from './rewardsEngine.ts';
+import type { GamificationEventType, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
 
 export function handleGamificationEvent(
   email: string,
@@ -16,6 +23,7 @@ export function handleGamificationEvent(
 ) {
   if (!email) return null;
   const profile = localDb.getGamificationProfile(email);
+  migrateProfile(profile);
   const reward = processGamificationEvent(profile, eventType, meta);
   localDb.saveGamificationProfile(profile);
   return reward;
@@ -23,13 +31,10 @@ export function handleGamificationEvent(
 
 export function getGamificationMe(email: string) {
   const profile = localDb.getGamificationProfile(email);
+  migrateProfile(profile);
+  localDb.saveGamificationProfile(profile);
   const allProfiles = localDb.getAllGamificationProfiles();
   const enriched = enrichProfileResponse(profile);
-
-  const usernames: Record<string, { username: string; avatar?: string }> = {};
-  for (const u of localDb.getUsuarios()) {
-    usernames[u.email.toLowerCase()] = { username: u.username, avatar: u.avatar };
-  }
 
   const rankTypes: LeaderboardType[] = ['xp', 'influence', 'streak', 'watch_time', 'comments', 'discoverers', 'curators'];
   const rankPositions: Partial<Record<LeaderboardType, number>> = {};
@@ -41,18 +46,17 @@ export function getGamificationMe(email: string) {
 }
 
 export function getGamificationLeaderboard(type: LeaderboardType, limit = 20) {
-  const profiles = localDb.getAllGamificationProfiles();
+  const profiles = localDb.getAllGamificationProfiles().map((p) => migrateProfile(p));
   const usernames: Record<string, { username: string; avatar?: string }> = {};
   for (const u of localDb.getUsuarios()) {
     usernames[u.email.toLowerCase()] = { username: u.username, avatar: u.avatar };
   }
-
   return buildLeaderboard(profiles, usernames, type, limit);
 }
 
-export function purchaseCosmetic(email: string, cosmeticId: string) {
+export function purchaseCosmetic(email: string, itemId: string) {
   const profile = localDb.getGamificationProfile(email);
-  const result = spendSpotlight(profile, cosmeticId);
+  const result = purchaseReward(profile, itemId);
   if (result.success) localDb.saveGamificationProfile(profile);
   return { ...result, profile };
 }
@@ -95,11 +99,12 @@ export function registerGamificationRoutes(app: import('express').Express) {
 
   app.post('/api/gamification/purchase', (req, res) => {
     try {
-      const { email, cosmeticId } = req.body;
-      if (!email || !cosmeticId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const result = purchaseCosmetic(email, cosmeticId);
+      const { email, itemId, cosmeticId } = req.body;
+      const id = itemId || cosmeticId;
+      if (!email || !id) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const result = purchaseCosmetic(email, id);
       if (!result.success) return res.status(400).json(result);
-      res.json(result);
+      res.json({ ...result, ...getGamificationMe(email) });
     } catch (error) {
       console.error('Erro purchase:', error);
       res.status(500).json({ error: 'Erro na compra.' });
@@ -108,12 +113,55 @@ export function registerGamificationRoutes(app: import('express').Express) {
 
   app.post('/api/gamification/equip', (req, res) => {
     try {
-      const { email, cosmeticId } = req.body;
-      if (!email || !cosmeticId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const result = purchaseCosmetic(email, cosmeticId);
-      res.json(result);
+      const { email, itemId } = req.body;
+      if (!email || !itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(email);
+      const result = equipReward(profile, itemId);
+      if (result.success) localDb.saveGamificationProfile(profile);
+      res.json({ ...result, ...getGamificationMe(email) });
     } catch (error) {
       res.status(500).json({ error: 'Erro ao equipar item.' });
+    }
+  });
+
+  app.post('/api/gamification/unequip', (req, res) => {
+    try {
+      const { email, itemId } = req.body;
+      if (!email || !itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(email);
+      const result = unequipReward(profile, itemId);
+      if (result.success) localDb.saveGamificationProfile(profile);
+      res.json({ ...result, ...getGamificationMe(email) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao desequipar item.' });
+    }
+  });
+
+  app.post('/api/gamification/loadout', (req, res) => {
+    try {
+      const { email, loadout } = req.body as { email: string; loadout: ProfileLoadout };
+      if (!email || !loadout) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(email);
+      const result = saveLoadout(profile, loadout);
+      if (!result.success) return res.status(400).json(result);
+      localDb.saveGamificationProfile(profile);
+      res.json({ ...result, ...getGamificationMe(email) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao salvar personalização.' });
+    }
+  });
+
+  app.post('/api/gamification/redeem', (req, res) => {
+    try {
+      const { email, code } = req.body;
+      if (!email || !code) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(email);
+      const result = redeemPromoCode(profile, code);
+      if (!result.success) return res.status(400).json(result);
+      localDb.saveGamificationProfile(profile);
+      res.json({ ...result, ...getGamificationMe(email) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao resgatar código.' });
     }
   });
 }

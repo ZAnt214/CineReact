@@ -1252,7 +1252,11 @@ export default function App() {
                   data={gamification.data}
                   loading={gamification.loading}
                   onRefresh={gamification.refresh}
-                  onPurchase={gamification.purchaseCosmetic}
+                  onPurchase={gamification.purchaseItem}
+                  onEquip={gamification.equipItem}
+                  onUnequip={gamification.unequipItem}
+                  onSaveLoadout={gamification.saveLoadout}
+                  onRedeemCode={gamification.redeemCode}
                   onLoadLeaderboard={gamification.loadLeaderboard}
                   leaderboards={gamification.leaderboards}
                 />
