@@ -64,6 +64,11 @@ export default function App() {
 
   // Auth modal trigger
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
+  const openAuthModal = useCallback((mode: 'login' | 'register' = 'login') => {
+    setAuthInitialMode(mode);
+    setShowAuthModal(true);
+  }, []);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
@@ -234,7 +239,7 @@ export default function App() {
 
   const handlePlayVideo = (reactId: string, obraId: string) => {
     if (!user.isLoggedIn) {
-      setShowAuthModal(true);
+      openAuthModal('login');
       return;
     }
     window.scrollTo(0, 0);
@@ -635,7 +640,7 @@ export default function App() {
           setSelectedReactId(null);
           setCurrentTab('obra');
         }}
-        onOpenAuth={() => setShowAuthModal(true)}
+        onOpenAuth={openAuthModal}
         obras={obras}
         reacts={reacts}
       />
@@ -834,7 +839,7 @@ export default function App() {
                     setSelectedObraId(id);
                     setCurrentTab('canal');
                   }}
-                  onOpenAuth={() => setShowAuthModal(true)}
+                  onOpenAuth={openAuthModal}
                   onUpdateUser={setUser}
                 />
               </motion.div>
@@ -1170,7 +1175,7 @@ export default function App() {
                 <DonationsPage 
                   user={user} 
                   onUpdateUser={setUser} 
-                  onOpenAuth={() => setShowAuthModal(true)} 
+                  onOpenAuth={openAuthModal} 
                 />
               </motion.div>
             )}
@@ -1280,6 +1285,7 @@ export default function App() {
 
       <AuthModal 
         isOpen={showAuthModal}
+        initialMode={authInitialMode}
         onClose={() => setShowAuthModal(false)}
         onSuccess={(loggedUser, isNewUser) => {
           setUser(loggedUser);
