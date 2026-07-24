@@ -849,6 +849,32 @@ export const localDb = {
     return nova;
   },
 
+  getAllNotificacoes: () => {
+    return dbCache.notificacoes || [];
+  },
+
+  getNotificacaoById: (id: string) => {
+    return (dbCache.notificacoes || []).find(n => n.id === id) || null;
+  },
+
+  deleteNotificacao: (id: string) => {
+    const before = dbCache.notificacoes?.length || 0;
+    dbCache.notificacoes = (dbCache.notificacoes || []).filter(n => n.id !== id);
+    if (dbCache.notificacoes.length !== before) {
+      saveDb(dbCache);
+
+      if (supabaseClient) {
+        supabaseClient.from('notificacoes').delete().eq('id', id).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao deletar notificacao:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao deletar notificacao:", err?.message || err);
+        });
+      }
+      return true;
+    }
+    return false;
+  },
+
   getUsuarios: () => {
     return dbCache.usuarios || [];
   },

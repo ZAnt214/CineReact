@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight } from 'lucide-react';
-import { Obra, ReactVideo, Comentario, UserState } from '../types.ts';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield } from 'lucide-react';
+import { Obra, ReactVideo, Comentario, UserState, Notificacao } from '../types.ts';
+import { motion, AnimatePresence } from 'motion/react';
+import { adminFetch } from '../utils/adminApi.ts';
+
+type AdminTab = 'conteudo' | 'criadores' | 'moderacao' | 'sistema';
 
 interface AdminPanelProps {
   user: UserState;
@@ -14,6 +17,12 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [reacts, setReacts] = useState<ReactVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<AdminTab>('conteudo');
+  const [solicitacoes, setSolicitacoes] = useState<Notificacao[]>([]);
+  const [editingObra, setEditingObra] = useState<Obra | null>(null);
+  const [savingObra, setSavingObra] = useState(false);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [processingSolicitacao, setProcessingSolicitacao] = useState<string | null>(null);
   
   // Supabase states
   const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
@@ -69,7 +78,7 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
     if (syncingSupabase) return;
     setSyncingSupabase(true);
     try {
-      const res = await fetch('/api/supabase/sync', { method: 'POST' });
+      const res = await adminFetch(user.email, '/api/supabase/sync', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         alert(data.message || 'Sincronização concluída com sucesso!');
@@ -93,7 +102,7 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
     }
     setMigratingSupabase(true);
     try {
-      const res = await fetch('/api/supabase/migrate', { method: 'POST' });
+      const res = await adminFetch(user.email, '/api/supabase/migrate', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         alert(data.message || 'Migração concluída com sucesso!');
@@ -215,14 +224,31 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     setTimeout(() => setCopiedSql(false), 2000);
   };
 
-  const fetchAdminData = async () => {
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setActionMessage({ type, text });
+    window.setTimeout(() => setActionMessage(null), 5000);
+  };
+
+  const fetchSolicitacoes = useCallback(async () => {
+    try {
+      const res = await adminFetch(user.email, '/api/admin/notificacoes?tipo=solicitacoes');
+      if (res.ok) {
+        const data = await res.json();
+        setSolicitacoes(data.filter((n: Notificacao) => !n.lida));
+      }
+    } catch (e) {
+      console.error('Erro ao carregar solicitações:', e);
+    }
+  }, [user.email]);
+
+  const fetchAdminData = useCallback(async () => {
     try {
       setLoading(true);
       const [obrasRes, commentsRes, usersRes, reactsRes] = await Promise.all([
         fetch('/api/obras').catch(() => null),
         fetch('/api/comentarios').catch(() => null),
-        fetch('/api/usuarios').catch(() => null),
-        fetch('/api/reacts').catch(() => null)
+        adminFetch(user.email, '/api/usuarios').catch(() => null),
+        adminFetch(user.email, '/api/reacts').catch(() => null),
       ]);
 
       if (obrasRes && obrasRes.ok) {
@@ -249,14 +275,15 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
 
   useEffect(() => {
     if (user.isAdmin) {
       fetchAdminData();
       fetchSupabaseStatus();
+      fetchSolicitacoes();
     }
-  }, [user]);
+  }, [user.isAdmin, fetchAdminData, fetchSolicitacoes]);
 
   const handleCreateObra = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,7 +294,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
     setSubmittingObra(true);
     try {
-      const res = await fetch('/api/obras', {
+      const res = await adminFetch(user.email, '/api/obras', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -292,10 +319,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         setTrailerUrl('');
         setDestacado(false);
         fetchAdminData();
-        alert('Obra cadastrada com sucesso!');
+        showMessage('success', 'Obra cadastrada com sucesso!');
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error}`);
+        showMessage('error', err.error || 'Erro ao cadastrar obra.');
       }
     } catch (e) {
       console.error(e);
@@ -304,12 +331,54 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     }
   };
 
+  const handleUpdateObra = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingObra) return;
+
+    setSavingObra(true);
+    try {
+      const res = await adminFetch(user.email, `/api/obras/${editingObra.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: editingObra.titulo,
+          tipo: editingObra.tipo,
+          sinopse: editingObra.sinopse,
+          ano: editingObra.ano,
+          generos: editingObra.generos,
+          banner: editingObra.banner,
+          poster: editingObra.poster,
+          trailerUrl: editingObra.trailerUrl,
+          destacado: editingObra.destacado,
+        }),
+      });
+
+      if (res.ok) {
+        setEditingObra(null);
+        fetchAdminData();
+        showMessage('success', 'Obra atualizada com sucesso!');
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao atualizar obra.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('error', 'Erro de conexão ao atualizar obra.');
+    } finally {
+      setSavingObra(false);
+    }
+  };
+
   const handleDeleteObra = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta obra? Todos os reacts e comentários associados serão deletados.')) return;
     try {
-      const res = await fetch(`/api/obras/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(user.email, `/api/obras/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchAdminData();
+        showMessage('success', 'Obra excluída.');
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao excluir obra.');
       }
     } catch (e) {
       console.error(e);
@@ -319,9 +388,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   const handleDeleteComment = async (id: string) => {
     if (!confirm('Deseja deletar este comentário?')) return;
     try {
-      const res = await fetch(`/api/comentarios/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(user.email, `/api/comentarios/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchAdminData();
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao deletar comentário.');
       }
     } catch (e) {
       console.error(e);
@@ -332,16 +404,22 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     if (!importQuery.trim()) return;
     setImporting(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(importQuery)}`);
+      const res = await adminFetch(user.email, '/api/admin/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: importQuery.trim() }),
+      });
+      const data = await res.json();
       if (res.ok) {
         fetchAdminData();
         setImportQuery('');
-        alert('Obra e reacts descobertos inteligentemente pelo Gemini AI e adicionados ao catálogo!');
+        showMessage('success', data.message || 'Conteúdo descoberto e adicionado ao catálogo!');
       } else {
-        alert('Erro ao descobrir conteúdo.');
+        showMessage('error', data.error || 'Erro ao descobrir conteúdo.');
       }
     } catch (e) {
       console.error(e);
+      showMessage('error', 'Erro de conexão ao descobrir conteúdo.');
     } finally {
       setImporting(false);
     }
@@ -352,29 +430,29 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     if (!canalUrl.trim()) return;
     setImportingCanal(true);
     try {
-      const res = await fetch('/api/canais/importar', {
+      const res = await adminFetch(user.email, '/api/canais/importar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: canalUrl, email: user.email })
+        body: JSON.stringify({ url: canalUrl, email: user.email }),
       });
       if (res.ok) {
         const data = await res.json();
         setCanalUrl('');
         fetchAdminData();
         if (data.mode === 'real') {
-          alert(`Canal "${data.obra.titulo}" importado e sincronizado com sucesso do YouTube!`);
+          showMessage('success', `Canal "${data.obra.titulo}" importado do YouTube!`);
         } else if (data.mode === 'simulated') {
-          alert(`Canal "${data.obra.titulo}" criado com sucesso usando simulação inteligente do Gemini AI!`);
+          showMessage('success', `Canal "${data.obra.titulo}" criado com simulação Gemini.`);
         } else {
-          alert(`Canal "${data.obra.titulo}" criado com sucesso.`);
+          showMessage('success', `Canal "${data.obra.titulo}" criado.`);
         }
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error}`);
+        showMessage('error', err.error || 'Erro ao importar canal.');
       }
     } catch (err) {
       console.error(err);
-      alert('Erro de conexão ao tentar importar o canal.');
+      showMessage('error', 'Erro de conexão ao importar canal.');
     } finally {
       setImportingCanal(false);
     }
@@ -383,10 +461,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   const handleToggleRecomendado = async (reactId: string, currentStatus: boolean) => {
     setTogglingId(reactId);
     try {
-      const res = await fetch(`/api/reacts/${reactId}/recomendar`, {
+      const res = await adminFetch(user.email, `/api/reacts/${reactId}/recomendar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recomendado: !currentStatus })
+        body: JSON.stringify({ recomendado: !currentStatus }),
       });
       if (res.ok) {
         fetchAdminData();
@@ -407,28 +485,86 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
     setSubmittingRecomendado(true);
     try {
-      const res = await fetch('/api/reacts/recomendar-link', {
+      const res = await adminFetch(user.email, '/api/reacts/recomendar-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: recomendadoLink })
+        body: JSON.stringify({ url: recomendadoLink }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setRecomendadoLink('');
         fetchAdminData();
-        alert(`Sucesso! O vídeo "${data.titulo}" foi adicionado com sucesso e destacado na categoria "CineReact Recomenda".`);
+        showMessage('success', `Vídeo "${data.titulo}" adicionado ao CineReact Recomenda!`);
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error || 'Não foi possível adicionar o vídeo recomendado.'}`);
+        showMessage('error', err.error || 'Não foi possível adicionar o vídeo.');
       }
     } catch (err) {
       console.error(err);
-      alert('Erro de rede ao tentar adicionar a recomendação.');
+      showMessage('error', 'Erro de rede ao adicionar recomendação.');
     } finally {
       setSubmittingRecomendado(false);
     }
   };
+
+  const extractCanalUrl = (mensagem: string) => {
+    const match = mensagem.match(/\((https?:\/\/[^)]+)\)/);
+    return match?.[1] || '';
+  };
+
+  const handleApproveSolicitacao = async (notif: Notificacao) => {
+    const canalUrl = extractCanalUrl(notif.mensagem);
+    if (!canalUrl) {
+      showMessage('error', 'URL do canal não encontrada nesta solicitação.');
+      return;
+    }
+
+    setProcessingSolicitacao(notif.id);
+    try {
+      const res = await adminFetch(user.email, '/api/canais/importar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: canalUrl, email: user.email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await adminFetch(user.email, `/api/notificacoes/${notif.id}`, { method: 'DELETE' });
+        fetchSolicitacoes();
+        fetchAdminData();
+        showMessage('success', `Canal "${data.obra?.titulo || notif.canalNome}" importado com sucesso!`);
+      } else {
+        showMessage('error', data.error || 'Erro ao importar canal da solicitação.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('error', 'Erro ao processar solicitação.');
+    } finally {
+      setProcessingSolicitacao(null);
+    }
+  };
+
+  const handleDismissSolicitacao = async (id: string) => {
+    setProcessingSolicitacao(id);
+    try {
+      const res = await adminFetch(user.email, `/api/notificacoes/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchSolicitacoes();
+        showMessage('success', 'Solicitação dispensada.');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setProcessingSolicitacao(null);
+    }
+  };
+
+  const tabs: { id: AdminTab; label: string; icon: React.ElementType; badge?: number }[] = [
+    { id: 'conteudo', label: 'Conteúdo', icon: LayoutGrid },
+    { id: 'criadores', label: 'Criadores', icon: Inbox, badge: solicitacoes.length },
+    { id: 'moderacao', label: 'Moderação', icon: MessageSquare },
+    { id: 'sistema', label: 'Sistema', icon: Database },
+  ];
 
   if (!user.isAdmin) {
     return (
@@ -444,7 +580,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-12 text-white">
+    <motion.div className="min-h-screen bg-[#0d0d10] pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-8 text-white">
       
       {/* HEADER */}
       <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">
@@ -453,18 +589,67 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             <Settings className="text-amber-400 w-8 h-8" />
             Painel do Administrador
           </h1>
-          <p className="text-xs text-zinc-500 mt-1">Cadastre, edite e organize o acervo de reacts do CineReact</p>
+          <p className="text-xs text-zinc-500 mt-1">Gerencie catálogo, criadores, usuários e integrações</p>
         </div>
-        
-        <button 
-          onClick={fetchAdminData}
-          className="p-2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
+        <button
+          onClick={() => { fetchAdminData(); fetchSolicitacoes(); fetchSupabaseStatus(); }}
+          disabled={loading}
+          className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-50"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* SUPABASE STATUS & CONFIGURATION */}
+      <AnimatePresence>
+        {actionMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-3.5 rounded-xl border text-sm flex items-center gap-2 ${
+              actionMessage.type === 'success'
+                ? 'bg-green-950/40 border-green-500/30 text-green-300'
+                : 'bg-red-950/40 border-red-500/30 text-red-300'
+            }`}
+          >
+            {actionMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {actionMessage.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-wrap gap-2">
+        {tabs.map(({ id, label, icon: Icon, badge }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === id
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+            {badge ? (
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
+                activeTab === id ? 'bg-black/20 text-black' : 'bg-amber-500/20 text-amber-400'
+              }`}>
+                {badge}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center gap-3 py-12 text-zinc-500">
+          <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
+          <span className="text-sm">Carregando dados do painel...</span>
+        </div>
+      )}
+
+      {!loading && activeTab === 'sistema' && (
       <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
@@ -609,11 +794,75 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           )}
         </div>
       </div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* CADASTRO FORM (COL 1 & 2) */}
-        <div className="lg:col-span-2 space-y-8">
+      {!loading && activeTab === 'criadores' && (
+        <div className="space-y-6">
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+              <Inbox className="w-4 h-4" />
+              Solicitações de Criadores ({solicitacoes.length})
+            </h2>
+            {solicitacoes.length === 0 ? (
+              <p className="text-xs text-zinc-500">Nenhuma solicitação pendente no momento.</p>
+            ) : (
+              <motion.div className="space-y-3">
+                {solicitacoes.map((notif) => (
+                  <div key={notif.id} className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800 space-y-3">
+                    <div>
+                      <p className="text-sm font-bold text-white">{notif.canalNome || 'Canal solicitado'}</p>
+                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{notif.mensagem}</p>
+                      <p className="text-[10px] text-zinc-600 mt-1">{new Date(notif.criadoEm).toLocaleString('pt-BR')}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApproveSolicitacao(notif)}
+                        disabled={processingSolicitacao === notif.id}
+                        className="flex-1 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold disabled:opacity-50 cursor-pointer"
+                      >
+                        {processingSolicitacao === notif.id ? 'Importando...' : 'Aprovar e Importar'}
+                      </button>
+                      <button
+                        onClick={() => handleDismissSolicitacao(notif.id)}
+                        disabled={processingSolicitacao === notif.id}
+                        className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
+                      >
+                        Dispensar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+              <Youtube className="w-4 h-4 text-amber-400" />
+              Importar Canal do YouTube
+            </h2>
+            <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
+              <input
+                type="text"
+                value={canalUrl}
+                onChange={(e) => setCanalUrl(e.target.value)}
+                placeholder="ex: @casimiro ou link do canal..."
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
+              />
+              <button
+                type="submit"
+                disabled={importingCanal || !canalUrl.trim()}
+                className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
+              >
+                {importingCanal ? 'Importando...' : 'Importar'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {!loading && activeTab === 'conteudo' && (
+      <div className="space-y-8">
           
           {/* GEMINI INTELLIGENT DISCOVERY (EASY CADASTRO!) */}
           <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
@@ -622,8 +871,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               Descoberta e Cadastro Inteligente (Gemini AI)
             </h2>
             <p className="text-xs text-zinc-400">
-              Digite o nome de qualquer filme, série, anime ou jogo do mundo (ex: "Matrix", "Attack on Titan", "Minecraft"). 
-              O Gemini AI irá buscar as informações reais, sinopse, trailer, gêneros, posters, e catalogará automaticamente o conteúdo com reacts simulados em segundos!
+              Digite o nome de qualquer filme, série, anime ou jogo. O sistema usa Gemini AI para catalogar a obra e busca reacts reais no YouTube automaticamente.
             </p>
 
             <div className="flex gap-2 text-xs">
@@ -642,34 +890,6 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
             </div>
-          </div>
-
-          {/* IMPORTAR CANAL DO YOUTUBE */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-              <Youtube className="w-4 h-4 text-amber-400" />
-              Importar Canal do YouTube (Criar Categoria)
-            </h2>
-            <p className="text-xs text-zinc-400">
-              Cole o link de um canal do YouTube ou digite o handle (ex: <span className="text-amber-400 font-mono font-bold">@casimiro</span>). O sistema irá obter os dados do canal, cadastrá-lo como uma nova categoria e buscar todos os seus reacts automaticamente!
-            </p>
-
-            <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
-              <input
-                type="text"
-                value={canalUrl}
-                onChange={(e) => setCanalUrl(e.target.value)}
-                placeholder="ex: @casimiro, @alanzoka, ou link do canal..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
-              />
-              <button
-                type="submit"
-                disabled={importingCanal || !canalUrl.trim()}
-                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
-              >
-                {importingCanal ? "Importando..." : "Importar Canal"}
-              </button>
-            </form>
           </div>
 
           {/* MANUAL CADASTRO */}
@@ -833,11 +1053,18 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => onSelectObra(o.id)}
+                      onClick={() => setEditingObra({ ...o })}
                       className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
-                      title="Ver Página"
+                      title="Editar Obra"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onSelectObra(o.id)}
+                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-amber-400"
+                      title="Ver Página"
+                    >
+                      <Film className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeleteObra(o.id)}
@@ -973,7 +1200,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
         </div>
+      )}
 
+      {!loading && activeTab === 'moderacao' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* SIDEBAR LOGS & LISTS (COL 3) */}
         <div className="space-y-8">
           
@@ -992,13 +1222,17 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               {usuarios.map(u => {
                 const handleToggleVIP = async () => {
                   try {
-                    const res = await fetch(`/api/usuarios/${u.email}/vip`, {
+                    const res = await adminFetch(user.email, `/api/usuarios/${encodeURIComponent(u.email)}/vip`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ isDonor: !u.isDonor })
+                      body: JSON.stringify({ isDonor: !u.isDonor }),
                     });
                     if (res.ok) {
                       fetchAdminData();
+                      showMessage('success', u.isDonor ? 'VIP removido.' : 'VIP concedido!');
+                    } else {
+                      const err = await res.json();
+                      showMessage('error', err.error || 'Erro ao atualizar VIP.');
                     }
                   } catch (e) {
                     console.error(e);
@@ -1072,8 +1306,76 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
         </div>
-
       </div>
-    </div>
+      )}
+
+      <AnimatePresence>
+        {editingObra && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-white">Editar Obra</h3>
+                <button onClick={() => setEditingObra(null)} className="p-2 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateObra} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-500 mb-1">ID (não editável)</label>
+                  <input value={editingObra.id} disabled className="w-full bg-zinc-900/50 border border-zinc-800 rounded p-2 text-zinc-500" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Título</label>
+                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Tipo</label>
+                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500">
+                    <option value="filme">Filme</option>
+                    <option value="serie">Série</option>
+                    <option value="anime">Anime</option>
+                    <option value="jogo">Jogo</option>
+                    <option value="canal">Canal</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-400 mb-1">Sinopse</label>
+                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Ano</label>
+                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Gêneros (vírgula)</label>
+                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500" />
+                </div>
+                <div className="md:col-span-2 flex items-center gap-2">
+                  <input type="checkbox" id="edit-destacado" checked={!!editingObra.destacado} onChange={(e) => setEditingObra({ ...editingObra, destacado: e.target.checked })} className="accent-amber-500" />
+                  <label htmlFor="edit-destacado" className="text-zinc-300">Destacar na Home</label>
+                </div>
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
+                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-amber-500 text-black font-black disabled:opacity-50 cursor-pointer">
+                    {savingObra ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
