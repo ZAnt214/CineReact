@@ -1,211 +1,437 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import {
+  X,
+  ArrowRight,
+  Mail,
+  Youtube,
+  TrendingUp,
+  BadgeCheck,
+  Crown,
+  Gift,
+  Upload,
+  Star,
+  BarChart3,
+  Sparkles,
+  PlayCircle,
+  Users,
+} from 'lucide-react';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface CreatorPartnerModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const EMAIL = 'atendimentocinereact@gmail.com';
+
+const partnerBenefits = [
+  {
+    icon: PlayCircle,
+    title: 'Views no YouTube',
+    text: 'Cada reprodução no CineReact conta direto nas métricas do seu canal.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Audiência qualificada',
+    text: 'Público que já ama reacts e busca conteúdo como o seu.',
+  },
+  {
+    icon: Users,
+    title: 'Comunidade engajada',
+    text: 'Curtidas, comentários e energia da plateia em um só lugar.',
+  },
+];
+
+const upcomingFeatures = [
+  {
+    icon: Crown,
+    title: 'Clube de Assinaturas',
+    text: 'Ofereça planos mensais com benefícios exclusivos para seus fãs.',
+  },
+  {
+    icon: Gift,
+    title: 'Presentes & Apoio',
+    text: 'Receba mimos e gorjetas direto na página de reprodução.',
+  },
+  {
+    icon: Upload,
+    title: 'Upload Nativo',
+    text: 'Publique reacts exclusivos na plataforma com proteção total.',
+  },
+  {
+    icon: Star,
+    title: 'Destaque Prioritário',
+    text: 'Apareça nos primeiros carrosséis da home e das páginas de obras.',
+  },
+  {
+    icon: BadgeCheck,
+    title: 'Selo Verificado',
+    text: 'Badge oficial de Parceiro CineReact no seu perfil e comentários.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Painel do Criador',
+    text: 'Relatórios de retenção, audiência e engajamento da comunidade.',
+  },
+];
+
+const steps = [
+  {
+    number: '01',
+    title: 'Tenha um canal',
+    text: 'Canal no YouTube com conteúdos de react de filmes, séries ou jogos.',
+  },
+  {
+    number: '02',
+    title: 'Envie seu link',
+    text: 'Mande um e-mail com o link do canal e dados de contato.',
+  },
+  {
+    number: '03',
+    title: 'Seja destacado',
+    text: 'Após aprovação, seu canal ganha visibilidade na plataforma.',
+  },
+];
+
 export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerModalProps) {
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const modalContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return;
 
-  const emailSubject = encodeURIComponent("Quero ser um Criador Parceiro do CineReact");
-  const emailBody = encodeURIComponent("Olá, equipe CineReact!\n\nSou criador de conteúdo e gostaria de cadastrar meu canal como parceiro oficial.\n\nNome do Canal:\nLink do Canal no YouTube:\nE-mail de contato:\n\nAguardo o retorno!");
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+
+    const preventBackgroundTouchMove = (event: TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (modalContentRef.current?.contains(target)) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventBackgroundTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', preventBackgroundTouchMove);
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
+  const emailSubject = encodeURIComponent('Quero ser um Criador Parceiro do CineReact');
+  const emailBody = encodeURIComponent(
+    'Olá, equipe CineReact!\n\nSou criador de conteúdo e gostaria de cadastrar meu canal como parceiro oficial.\n\nNome do Canal:\nLink do Canal no YouTube:\nE-mail de contato:\n\nAguardo o retorno!'
+  );
+  const mailtoHref = `mailto:${EMAIL}?subject=${emailSubject}&body=${emailBody}`;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-        {/* Backdrop */}
+      {isOpen && (
         <motion.div
+          className="fixed inset-0 z-[120] overscroll-none"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="creator-partner-title"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md"
-        />
-
-        {/* Modal Window */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-3xl bg-zinc-950 border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden my-auto text-zinc-200 z-10 max-h-[90vh] flex flex-col box-border"
         >
-          {/* Top Accent Line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/80 pointer-events-none" />
-
-          {/* Close Button */}
-          <button
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute top-5 right-5 w-8 h-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors border border-zinc-800 flex items-center justify-center cursor-pointer text-sm font-bold z-20"
-            title="Fechar"
-            aria-label="Fechar"
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+          />
+
+          <motion.div
+            ref={modalContentRef}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
-            ✕
-          </button>
+            <motion.div
+              className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              style={{ transformOrigin: 'left' }}
+            />
 
-          {/* Modal Header */}
-          <div className="text-center space-y-2.5 pb-6 border-b border-zinc-800/80 shrink-0">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold uppercase tracking-wider">
-              Programa de Criadores Parceiros
-            </span>
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-20 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-zinc-900 transition-colors cursor-pointer"
+              aria-label="Fechar"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
-              Evolua seu Canal no <span className="text-amber-400">CineReact</span>
-            </h2>
+            <motion.div
+              className="absolute top-4 left-4 z-20 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] font-bold uppercase tracking-wider"
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Programa de Parceiros
+            </motion.div>
 
-            <p className="text-zinc-300 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed font-medium">
-              Estamos construindo a maior plataforma para react de filmes, séries e jogos. Direcionamos o público diretamente para o seu player oficial do YouTube!
-            </p>
-          </div>
-
-          {/* Scrollable Modal Content */}
-          <div className="overflow-y-auto space-y-6 py-6 pr-1 custom-scrollbar flex-1">
-            
-            {/* Benefício Atual */}
-            <div className="bg-zinc-900/80 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-2">
-              <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                Por que ser parceiro agora?
-              </span>
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-medium">
-                Toda visualização, curtida e engajamento dentro do CineReact é <strong className="text-white font-bold">100% contabilizado diretamente no seu canal do YouTube</strong>, aumentando suas métricas e audiência sem nenhum custo.
-              </p>
-            </div>
-
-            {/* Funcionalidades em Breve */}
-            <div className="space-y-3.5">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-sm sm:text-base font-extrabold text-white uppercase tracking-wide">
-                  Funcionalidades que Virão Em Breve
-                </h3>
-                <span className="text-[10px] font-bold bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-full border border-amber-500/30 uppercase tracking-wider">
-                  Em Desenvolvimento
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* Feature 1: Assinaturas */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Clube de Assinaturas
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Ofereça assinaturas mensais pagas para seus fãs com benefícios exclusivos dentro do CineReact.
-                  </p>
-                </div>
-
-                {/* Feature 2: Presentes e Gorjetas */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Presentes & Apoio Direto
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Sua plateia poderá enviar presentes e mimos monetizados diretamente na página de reprodução.
-                  </p>
-                </div>
-
-                {/* Feature 3: Upload de Reacts Nativo */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Upload de Reacts Nativo
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Publique conteúdos exclusivos diretamente na plataforma CineReact com proteção e total controle.
-                  </p>
-                </div>
-
-                {/* Feature 4: Destaque de Parceiro */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Destaque Prioritário
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Seus reacts ganham destaque nas primeiras posições dos carrosséis da tela inicial e das páginas de obras.
-                  </p>
-                </div>
-
-                {/* Feature 5: Perfil Verificado */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Selo de Perfil Verificado
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Selo oficial de Parceiro CineReact ao lado do nome do seu canal, comentários e página de criador.
-                  </p>
-                </div>
-
-                {/* Feature 6: Métricas Avançadas */}
-                <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-xl space-y-1.5 hover:border-amber-500/30 transition-colors">
-                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider block">
-                    Painel do Criador
-                  </span>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Acompanhe relatórios detalhados de retenção, audiência e engajamento da sua comunidade.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Como fazer parte */}
-            <div className="bg-zinc-900/80 border border-zinc-800/90 rounded-2xl p-4 sm:p-5 space-y-3">
-              <span className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider block">
-                Como se tornar um parceiro hoje?
-              </span>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80">
-                  <span className="text-amber-400 font-extrabold block mb-1">Passo 1</span>
-                  <span className="text-zinc-300 font-medium">Tenha um canal no YouTube com conteúdos de React.</span>
-                </div>
-                <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80">
-                  <span className="text-amber-400 font-extrabold block mb-1">Passo 2</span>
-                  <span className="text-zinc-300 font-medium">Envie um e-mail informando o link do seu canal.</span>
-                </div>
-                <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80">
-                  <span className="text-amber-400 font-extrabold block mb-1">Passo 3</span>
-                  <span className="text-zinc-300 font-medium">Receba a confirmação e seja destacado na plataforma!</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Modal Footer Call-To-Action */}
-          <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div className="text-xs text-zinc-400 text-center sm:text-left">
-              Fale conosco: <strong className="text-amber-300 font-mono">atendimentocinereact@gmail.com</strong>
-            </div>
-
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-colors border border-zinc-800 cursor-pointer w-full sm:w-auto"
+            <motion.div
+              className="grid grid-cols-1 lg:grid-cols-5 min-h-full"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.08 } },
+              }}
+            >
+              {/* Brand panel */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+                }}
+                className="lg:col-span-2 flex flex-col justify-between p-6 sm:p-8 pt-16 sm:pt-20 lg:pt-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-b lg:border-b-0 lg:border-r border-zinc-800/80 relative overflow-hidden"
               >
-                Fechar
-              </button>
-              
-              <a
-                href={`mailto:atendimentocinereact@gmail.com?subject=${emailSubject}&body=${emailBody}`}
-                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all flex items-center justify-center shadow-md shadow-amber-500/20 active:scale-95 w-full sm:w-auto cursor-pointer whitespace-nowrap"
-              >
-                Quero ser Parceiro
-              </a>
-            </div>
-          </div>
+                <motion.div
+                  className="absolute -top-24 -right-24 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.div
+                  className="absolute bottom-20 -left-16 w-40 h-40 bg-amber-600/5 rounded-full blur-2xl pointer-events-none"
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                />
+                <motion.div
+                  className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                />
 
+                <div className="relative z-10 space-y-8">
+                  <CineReactLogo size="lg" animated heading />
+
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-black text-white leading-snug tracking-tight">
+                      Cresça com a maior comunidade de reacts do Brasil
+                    </h2>
+                    <p className="text-xs sm:text-sm text-zinc-500 mt-2 leading-relaxed">
+                      Direcionamos o público direto para o player oficial do seu YouTube — sem custo, sem complicação.
+                    </p>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {partnerBenefits.map(({ icon: Icon, title, text }) => (
+                      <li key={title} className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
+                          <Icon className="w-4 h-4 text-amber-400" />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-bold text-white">{title}</span>
+                          <span className="block text-xs text-zinc-500 mt-0.5 leading-relaxed">{text}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20">
+                      <Youtube className="w-5 h-5 text-red-400" />
+                    </span>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      <strong className="text-zinc-200 font-bold">100% das views</strong> são contabilizadas no seu canal do YouTube.
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href={mailtoHref}
+                  className="relative z-10 mt-8 hidden lg:flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-amber-500/25 active:scale-[0.98] cursor-pointer"
+                >
+                  Quero ser Parceiro
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </motion.div>
+
+              {/* Content panel */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.45, delay: 0.1 } },
+                }}
+                className="lg:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] space-y-8"
+              >
+                <div className="lg:hidden pt-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-4">
+                    <Sparkles className="w-3 h-3" />
+                    Programa de Parceiros
+                  </div>
+                </div>
+
+                <header>
+                  <h1
+                    id="creator-partner-title"
+                    className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight"
+                  >
+                    Evolua seu canal no{' '}
+                    <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
+                      CineReact
+                    </span>
+                  </h1>
+                  <p className="text-sm text-zinc-500 mt-2 leading-relaxed max-w-2xl">
+                    Estamos construindo a plataforma definitiva para reacts. Seja um dos primeiros parceiros e ganhe destaque enquanto lançamos novas ferramentas.
+                  </p>
+                </header>
+
+                {/* Highlight card */}
+                <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-zinc-900/80 to-zinc-950 p-5 sm:p-6">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                  <motion.div
+                    className="relative flex flex-col sm:flex-row sm:items-center gap-4"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30">
+                      <TrendingUp className="w-6 h-6 text-amber-400" />
+                    </span>
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <p className="text-sm font-bold text-white">Por que ser parceiro agora?</p>
+                      <p className="text-xs sm:text-sm text-zinc-400 mt-1 leading-relaxed">
+                        Toda visualização, curtida e engajamento no CineReact é{' '}
+                        <strong className="text-amber-300 font-bold">contabilizado diretamente no seu YouTube</strong>,
+                        aumentando métricas e audiência sem nenhum custo.
+                      </p>
+                    </motion.div>
+                  </motion.div>
+                </div>
+
+                {/* Upcoming features */}
+                <section>
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+                    <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wide">
+                      Em breve para parceiros
+                    </h3>
+                    <span className="text-[10px] font-bold bg-zinc-900 text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/30 uppercase tracking-wider">
+                      Em desenvolvimento
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {upcomingFeatures.map(({ icon: Icon, title, text }, index) => (
+                      <motion.div
+                        key={title}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 + index * 0.05 }}
+                        className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-amber-500/30 hover:bg-zinc-900/80 transition-all duration-200"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 mb-3 group-hover:bg-amber-500/15 transition-colors">
+                          <Icon className="w-4 h-4 text-amber-400" />
+                        </span>
+                        <p className="text-sm font-bold text-white">{title}</p>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{text}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Steps */}
+                <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6">
+                  <h3 className="text-sm font-black text-white uppercase tracking-wide mb-4">
+                    Como participar
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {steps.map(({ number, title, text }) => (
+                      <div
+                        key={number}
+                        className="relative p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80"
+                      >
+                        <span className="text-2xl font-black text-amber-500/30 leading-none">{number}</span>
+                        <p className="text-sm font-bold text-white mt-2">{title}</p>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Footer CTA */}
+                <footer className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-zinc-800/80">
+                  <div className="flex items-center gap-2.5 text-xs text-zinc-500">
+                    <Mail className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>
+                      Fale conosco:{' '}
+                      <strong className="text-amber-300 font-mono font-bold">{EMAIL}</strong>
+                    </span>
+                  </div>
+
+                  <motion.div
+                    className="flex items-center gap-2.5 w-full sm:w-auto"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 }}
+                  >
+                    <button
+                      onClick={onClose}
+                      className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-colors border border-zinc-800 cursor-pointer w-full sm:w-auto"
+                    >
+                      Fechar
+                    </button>
+                    <a
+                      href={mailtoHref}
+                      className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/25 active:scale-[0.98] w-full sm:w-auto cursor-pointer whitespace-nowrap"
+                    >
+                      Quero ser Parceiro
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </motion.div>
+                </footer>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </motion.div>
-      </div>
+      )}
     </AnimatePresence>
   );
 }
-
