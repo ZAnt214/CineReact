@@ -15,6 +15,7 @@ import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
 import BottomNavHub from './components/BottomNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
+import LunchTimePage from './components/LunchTimePage.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
@@ -1226,6 +1227,27 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* HORA DO ALMOÇO — sorteia react aleatório */}
+            {currentTab === 'categoria-almoco' && (
+              <motion.div
+                key="almoco-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <LunchTimePage
+                  reacts={reacts}
+                  onPlayVideo={handlePlayVideo}
+                  onBackToHome={() => {
+                    setCurrentTab('inicio');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  autoPlayOnMount
+                />
+              </motion.div>
+            )}
+
             {/* CHANNEL CATEGORY PAGES (e.g. categoria-canal-fanit-lin) */}
             {currentTab.startsWith('categoria-canal-') && (
               <motion.div
@@ -1267,7 +1289,7 @@ export default function App() {
             )}
 
             {/* CATEGORY PAGES (FILME, JOGO, ANIME, SERIE) */}
-            {currentTab.startsWith('categoria-') && !currentTab.startsWith('categoria-canal-') && (
+            {currentTab.startsWith('categoria-') && !currentTab.startsWith('categoria-canal-') && currentTab !== 'categoria-almoco' && (
               <motion.div
                 key={`category-${currentTab}`}
                 initial={{ opacity: 0 }}

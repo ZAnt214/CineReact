@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Film, Gamepad2, Tv, Clapperboard, Heart } from 'lucide-react';
+import { Home, Film, Gamepad2, Tv, Clapperboard, Heart, UtensilsCrossed } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface BottomNavHubProps {
@@ -33,6 +33,11 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
       id: 'categoria-serie',
       label: 'Séries',
       icon: Clapperboard
+    },
+    {
+      id: 'categoria-almoco',
+      label: 'Almoço',
+      icon: UtensilsCrossed
     },
     {
       id: 'categoria-canal-fanit-lin',
