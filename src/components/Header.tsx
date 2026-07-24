@@ -312,10 +312,10 @@ export default function Header({
   return (
     <>
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
-            ? 'bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
-            : 'bg-zinc-950/40 backdrop-blur-sm border-b border-transparent'
+            ? 'bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/90 md:backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
+            : 'bg-zinc-950/95 max-md:backdrop-blur-none md:bg-zinc-950/40 md:backdrop-blur-sm border-b border-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

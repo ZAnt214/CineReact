@@ -137,7 +137,7 @@ export default function RowMovies({
   };
 
   return (
-    <div className="space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
+    <div className="catalog-row space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
       {/* ROW TITLE & ACTIONS */}
       <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
         <div className="flex items-center justify-between gap-3">

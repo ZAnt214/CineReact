@@ -29,7 +29,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30 selection:text-amber-200 relative overflow-x-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30 selection:text-amber-200 relative overflow-x-hidden flex flex-col justify-between smooth-scroll-page">
       {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-amber-500/15 via-yellow-500/5 to-transparent rounded-full blur-3xl opacity-70" />
@@ -39,7 +39,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-zinc-900/80 bg-black/80 backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-zinc-900/80 bg-black/95 max-md:backdrop-blur-none md:bg-black/80 md:backdrop-blur-md sticky top-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 

@@ -87,6 +87,47 @@ html, body, #root {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  scroll-behavior: auto;
+}
+
+/* Smooth native vertical scrolling for page-level containers */
+.smooth-scroll-page {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
+  scroll-behavior: auto;
+}
+
+/* Defer off-screen row paint while vertically scrolling */
+@media (pointer: coarse) {
+  .catalog-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 380px;
+  }
+
+  html, body, #root {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .group\/card,
+  [class*="group/card"],
+  .video-card,
+  img,
+  svg,
+  a,
+  button,
+  video,
+  .select-none {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  header.fixed,
+  nav.fixed {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
 *, *::before, *::after {

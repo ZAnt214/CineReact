@@ -38,7 +38,7 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
 
   const handleNavClick = (tabId: string) => {
     setCurrentTab(tabId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   return (
@@ -47,7 +47,7 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 60, opacity: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-      className="fixed bottom-0 left-0 right-0 w-full max-w-full bg-zinc-950/85 backdrop-blur-md border-t border-zinc-800/50 z-[95] pointer-events-auto shadow-2xl box-border overflow-hidden"
+      className="fixed bottom-0 left-0 right-0 w-full max-w-full bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/85 md:backdrop-blur-md border-t border-zinc-800/50 z-[95] pointer-events-auto shadow-2xl box-border overflow-hidden"
     >
       <div className="max-w-4xl mx-auto px-1 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between sm:justify-center gap-0.5 sm:gap-3 md:gap-6 w-full box-border">
         {navItems.map((item) => {

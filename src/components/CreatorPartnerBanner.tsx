@@ -15,7 +15,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-amber-400/25 bg-[#0b0b0d]/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
+        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-amber-400/25 bg-[#0b0b0d] max-md:backdrop-blur-none md:bg-[#0b0b0d]/95 md:backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
