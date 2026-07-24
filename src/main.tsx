@@ -2,6 +2,9 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { initVisualPreferences } from './utils/visualPreferences.ts';
+
+initVisualPreferences();
 
 // Prevent unhandled fetch rejections from breaking runtime
 window.addEventListener('unhandledrejection', (event) => {

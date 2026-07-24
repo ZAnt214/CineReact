@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload } from 'lucide-react';
+import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload, Palette } from 'lucide-react';
 import { UserState } from '../types.ts';
 import { motion } from 'motion/react';
+import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
 
 interface UserSettingsProps {
   user: UserState;
@@ -24,6 +25,13 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [blurEffectsEnabled, setBlurEffectsEnabled] = useState(() => getBlurEffectsEnabled());
+
+  useEffect(() => {
+    const syncBlur = () => setBlurEffectsEnabled(getBlurEffectsEnabled());
+    window.addEventListener('cinereact:blur-effects-changed', syncBlur);
+    return () => window.removeEventListener('cinereact:blur-effects-changed', syncBlur);
+  }, []);
 
   const processFile = (file: File) => {
     // Limit to 2.5MB to ensure safe transmission and storage in JSON database
@@ -129,14 +137,54 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
         <div>
           <h1 className="text-3xl font-black text-white uppercase tracking-wider flex items-center gap-3">
             <Shield className="w-8 h-8 text-amber-400" />
-            Configurações de Conta
+            {user.isLoggedIn ? 'Configurações de Conta' : 'Preferências'}
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
-            Gerencie suas informações de acesso, envie sua foto de perfil diretamente e visualize seus benefícios VIP.
+            {user.isLoggedIn
+              ? 'Gerencie suas informações de acesso, envie sua foto de perfil diretamente e visualize seus benefícios VIP.'
+              : 'Ajuste a aparência do site. Faça login para editar seu perfil e senha.'}
           </p>
         </div>
 
-        {/* Outer Grid */}
+        <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
+          <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+            <Palette className="text-amber-400 w-4 h-4" /> Aparência e Desempenho
+          </h2>
+
+          <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-white">Efeito blur (vidro fosco)</p>
+              <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                Desativado por padrão para rolagem mais suave no celular. Ative se preferir o visual com transparência.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={blurEffectsEnabled}
+              onClick={() => {
+                const next = !blurEffectsEnabled;
+                setBlurEffectsEnabled(next);
+                persistBlurEffects(next);
+              }}
+              className={`relative shrink-0 w-12 h-7 rounded-full transition-colors cursor-pointer ${
+                blurEffectsEnabled ? 'bg-amber-500' : 'bg-zinc-700'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                  blurEffectsEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {!user.isLoggedIn ? (
+          <div className="bg-zinc-900/20 border border-zinc-800/80 rounded-2xl p-6 text-center text-sm text-zinc-400">
+            Entre na sua conta para editar perfil, foto e senha.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
           {/* Left Panel: Profile Preview & Status */}
@@ -378,6 +426,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           </div>
 
         </div>
+        )}
       </motion.div>
     </div>
   );

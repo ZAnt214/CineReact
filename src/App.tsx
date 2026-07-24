@@ -612,7 +612,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative smooth-scroll-page ${
+      className={`min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -641,7 +641,7 @@ export default function App() {
       />
 
       {/* CORE VIEWPORT */}
-      <main className="flex-1 flex flex-col min-h-[calc(100vh-16rem)] smooth-scroll-page">
+      <main className="flex-1 flex flex-col min-h-[calc(100vh-16rem)]">
         {loading ? (
           currentTab === 'reproducao' ? (
             <PlaybackSkeleton />
@@ -847,7 +847,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-12 pb-24 pt-24 w-full flex-1 smooth-scroll-page"
+                className="space-y-12 pb-24 pt-24 w-full flex-1"
               >
                 {/* HORIZONTAL ROWS */}
                 <div className="space-y-10 md:mt-8 relative z-20">
@@ -1216,6 +1216,16 @@ export default function App() {
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
             <button 
               onClick={() => {
+                setCurrentTab('configuracoes');
+                window.scrollTo(0, 0);
+              }}
+              className="text-amber-400 hover:text-amber-300 font-bold transition-colors underline cursor-pointer"
+            >
+              Preferências
+            </button>
+            <span>•</span>
+            <button 
+              onClick={() => {
                 setCurrentTab('landing');
                 window.scrollTo(0, 0);
               }}
@@ -1350,7 +1360,7 @@ export default function App() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[200] overflow-y-auto overscroll-y-contain smooth-scroll-page touch-pan-y"
+          className="fixed inset-0 z-[200] overflow-y-auto overscroll-y-contain"
         >
           <LandingPage onExplore={handleExplore} isNavigating={isExploring} />
         </motion.div>
