@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Film, Gamepad2, Tv, Clapperboard } from 'lucide-react';
+import { Home, Film, Gamepad2, Tv, Clapperboard, Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface BottomNavHubProps {
@@ -33,6 +33,11 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
       id: 'categoria-serie',
       label: 'Séries',
       icon: Clapperboard
+    },
+    {
+      id: 'categoria-canal-fanit-lin',
+      label: 'Fanit & Lin',
+      icon: Heart
     }
   ];
 
@@ -52,7 +57,7 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
       <div className="max-w-4xl mx-auto px-1 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between sm:justify-center gap-0.5 sm:gap-3 md:gap-6 w-full box-border">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentTab === item.id;
+          const isActive = currentTab === item.id || (item.id === 'categoria-canal-fanit-lin' && currentTab === 'canal');
 
           return (
             <button

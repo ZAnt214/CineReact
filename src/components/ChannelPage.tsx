@@ -24,11 +24,43 @@ export default function ChannelPage({
   onBack 
 }: ChannelPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [channelReacts, setChannelReacts] = useState<ReactVideo[]>(reacts);
+  const [loadingReacts, setLoadingReacts] = useState(reacts.length === 0);
   const [seguidores, setSeguidores] = useState<{ username: string; email: string; avatar?: string; isDonor?: boolean }[]>([]);
   const [loadingSeguidores, setLoadingSeguidores] = useState(true);
 
-  const canalNome = canal.titulo.replace('Canal ', '');
+  const canalNome = canal.titulo.replace(/^Canal\s+/i, '').trim();
   const isFollowing = canaisSeguidos.includes(canalNome);
+
+  useEffect(() => {
+    if (reacts.length > 0) {
+      setChannelReacts(reacts);
+      setLoadingReacts(false);
+    }
+  }, [reacts]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (reacts.length > 0) {
+      return () => { cancelled = true; };
+    }
+
+    setLoadingReacts(true);
+
+    fetch(`/api/obras/${encodeURIComponent(canal.id)}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (!cancelled && Array.isArray(data?.reacts)) {
+          setChannelReacts(data.reacts);
+        }
+      })
+      .catch(err => console.error('Erro ao carregar vídeos do canal:', err))
+      .finally(() => {
+        if (!cancelled) setLoadingReacts(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [canal.id, reacts.length]);
 
   const fetchSeguidores = async () => {
     try {
@@ -48,7 +80,7 @@ export default function ChannelPage({
     fetchSeguidores();
   }, [canalNome, canaisSeguidos]);
 
-  const filteredReacts = reacts
+  const filteredReacts = channelReacts
     .filter(react => {
       if (searchTerm && !react.titulo.toLowerCase().includes(searchTerm.toLowerCase())) {
         return false;
@@ -228,6 +260,11 @@ export default function ChannelPage({
       </div>
 
       {/* VITRINE CARDS GRID */}
+      {loadingReacts ? (
+        <motion.div className="py-16 text-center text-zinc-500 text-sm">
+          Carregando vídeos do canal...
+        </motion.div>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {filteredReacts.map((react, idx) => {
           const associatedObra = obras.find(o => o.id === react.obraId);
@@ -296,6 +333,7 @@ export default function ChannelPage({
           </div>
         )}
       </div>
+      )}
     </motion.div>
   );
 }

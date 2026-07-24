@@ -1470,12 +1470,24 @@ app.delete("/api/obras/:id", async (req, res) => {
 // Reacts routes
 app.get("/api/reacts", (req, res) => {
   try {
+    const obraId = req.query.obraId as string | undefined;
+    const canalId = req.query.canalId as string | undefined;
     const adminEmail = getAdminEmailFromRequest(req);
     const isAdmin = verifyAdminEmailSync(adminEmail);
-    const allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
+
+    let allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
+
+    if (obraId) {
+      allReacts = allReacts.filter(r => r.obraId === obraId);
+    } else if (canalId) {
+      allReacts = allReacts.filter(r => r.canalId === canalId);
+    }
+
     allReacts.sort((a, b) => new Date(b.publicadoEm || 0).getTime() - new Date(a.publicadoEm || 0).getTime());
-    const limitedReacts = isAdmin ? allReacts : allReacts.slice(0, 500);
-    res.json(limitedReacts);
+
+    const shouldLimit = !obraId && !canalId && !isAdmin;
+    const result = shouldLimit ? allReacts.slice(0, 500) : allReacts;
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar reacts." });
   }

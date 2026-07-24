@@ -60,6 +60,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isExploring, setIsExploring] = useState(false);
   const [feedsWarm, setFeedsWarm] = useState(false);
+  const [channelReactsMap, setChannelReactsMap] = useState<Record<string, ReactVideo[]>>({});
   const [, startTransition] = useTransition();
 
   // Auth modal trigger
@@ -142,53 +143,86 @@ export default function App() {
         emailQuery ? safeFetchJson(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null)
       ]);
 
+      let channelMap: Record<string, ReactVideo[]> = {};
+      let channelReactsMerged: ReactVideo[] = [];
+
       if (Array.isArray(obrasData) && obrasData.length > 0) {
         setObras(obrasData);
+
+        const canais = obrasData.filter((o: Obra) => o.tipo === 'canal');
+        if (canais.length > 0) {
+          const channelPayloads = await Promise.all(
+            canais.map((canal: Obra) =>
+              safeFetchJson(`/api/obras/${encodeURIComponent(canal.id)}`).then((data) => ({
+                id: canal.id,
+                reacts: Array.isArray(data?.reacts) ? data.reacts as ReactVideo[] : [],
+              }))
+            )
+          );
+
+          const seenIds = new Set<string>();
+          for (const payload of channelPayloads) {
+            channelMap[payload.id] = payload.reacts;
+            for (const react of payload.reacts) {
+              if (!seenIds.has(react.id)) {
+                seenIds.add(react.id);
+                channelReactsMerged.push(react);
+              }
+            }
+          }
+
+          setChannelReactsMap(channelMap);
+        }
       }
 
-      if (Array.isArray(reactsData) && reactsData.length > 0) {
-        // Filter out shorts, reels, vertical videos (duracao <= 90s, shorts hashtags, or missing thumbnails)
-        const isShortOrInvalid = (r: ReactVideo): boolean => {
-          if (!r) return true;
+      const isShortOrInvalid = (r: ReactVideo): boolean => {
+        if (!r) return true;
 
-          // 1. Thumbnail check
-          if (!r.thumbnailUrl || r.thumbnailUrl.trim() === '' || r.thumbnailUrl.includes('no_thumbnail')) {
-            return true;
-          }
+        if (!r.thumbnailUrl || r.thumbnailUrl.trim() === '' || r.thumbnailUrl.includes('no_thumbnail')) {
+          return true;
+        }
 
-          // 2. Title keywords (hashtags or explicit shorts/reels markers)
-          const lowerTitle = (r.titulo || '').toLowerCase();
-          const shortsKeywords = [
-            '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
-            '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsclip', ' #shorts', ' #reels', ' #short'
-          ];
-          if (shortsKeywords.some(kw => lowerTitle.includes(kw))) {
-            return true;
-          }
+        const lowerTitle = (r.titulo || '').toLowerCase();
+        const shortsKeywords = [
+          '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
+          '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsclip', ' #shorts', ' #reels', ' #short'
+        ];
+        if (shortsKeywords.some(kw => lowerTitle.includes(kw))) {
+          return true;
+        }
 
-          // 3. Duration check (filter <= 120 seconds / 2 minutes)
-          const duracaoStr = r.duracao;
-          if (!duracaoStr) return false;
-          const parts = duracaoStr.split(':');
-          if (parts.length === 3) {
-            return false; // hh:mm:ss -> long video
-          }
-          if (parts.length === 2) {
-            const mins = parseInt(parts[0], 10);
-            const secs = parseInt(parts[1], 10);
-            if (isNaN(mins) || isNaN(secs)) return false;
-            return (mins * 60 + secs) <= 120; // Filter out <= 120s (2 min)
-          }
-          if (parts.length === 1) {
-            const secs = parseInt(parts[0], 10);
-            if (isNaN(secs)) return false;
-            return secs <= 120;
-          }
+        const duracaoStr = r.duracao;
+        if (!duracaoStr) return false;
+        const parts = duracaoStr.split(':');
+        if (parts.length === 3) {
           return false;
-        };
+        }
+        if (parts.length === 2) {
+          const mins = parseInt(parts[0], 10);
+          const secs = parseInt(parts[1], 10);
+          if (isNaN(mins) || isNaN(secs)) return false;
+          return (mins * 60 + secs) <= 120;
+        }
+        if (parts.length === 1) {
+          const secs = parseInt(parts[0], 10);
+          if (isNaN(secs)) return false;
+          return secs <= 120;
+        }
+        return false;
+      };
 
+      if (Array.isArray(reactsData) && reactsData.length > 0) {
         const filteredReacts = reactsData.filter((r: ReactVideo) => !isShortOrInvalid(r));
-        setReacts(filteredReacts);
+        const existingIds = new Set(filteredReacts.map((r) => r.id));
+        const mergedReacts = [...filteredReacts];
+        for (const react of channelReactsMerged) {
+          if (!existingIds.has(react.id) && !isShortOrInvalid(react)) {
+            mergedReacts.push(react);
+          }
+        }
+        setReacts(mergedReacts);
+      } else if (channelReactsMerged.length > 0) {
+        setReacts(channelReactsMerged.filter((r) => !isShortOrInvalid(r)));
       }
 
       if (Array.isArray(seguidosData)) {
@@ -517,8 +551,15 @@ export default function App() {
 
     // Creator channels carousels
     const canalFeeds = obras.filter(o => o.tipo === 'canal').reduce((acc, canal) => {
+      const fromChannelMap = channelReactsMap[canal.id];
+      if (fromChannelMap && fromChannelMap.length > 0) {
+        acc[canal.id] = [...fromChannelMap].sort((a, b) => b.visualizacoes - a.visualizacoes);
+        return acc;
+      }
+
       const filtered = reacts.filter(r => {
-        if (r.obraId === canal.id || r.canalId === canal.id) return true;
+        if (r.obraId === canal.id) return true;
+        if (canal.channelId && r.canalId === canal.channelId) return true;
         const cleanCanalTitle = canal.titulo.replace(/^Canal\s+/i, '').trim().toLowerCase();
         const cleanReactCanal = r.canalNome.trim().toLowerCase();
         return cleanReactCanal.includes(cleanCanalTitle) || cleanCanalTitle.includes(cleanReactCanal);
@@ -536,7 +577,7 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse]);
+  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse, channelReactsMap]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
@@ -638,7 +679,8 @@ export default function App() {
         onSelectObra={(id) => {
           setSelectedObraId(id);
           setSelectedReactId(null);
-          setCurrentTab('obra');
+          const obra = obras.find(o => o.id === id);
+          setCurrentTab(obra?.tipo === 'canal' ? 'canal' : 'obra');
         }}
         onOpenAuth={openAuthModal}
         obras={obras}
@@ -955,7 +997,11 @@ export default function App() {
                         );
                       })}
 
-                      {obras.filter(o => o.tipo === 'canal').map(canal => {
+                      {obras.filter(o => o.tipo === 'canal').sort((a, b) => {
+                        if (a.destacado && !b.destacado) return -1;
+                        if (!a.destacado && b.destacado) return 1;
+                        return a.titulo.localeCompare(b.titulo);
+                      }).map(canal => {
                         const canalReacts = homeFeeds.canalFeeds[canal.id] || [];
                         if (canalReacts.length === 0) return null;
                         return (
@@ -1056,7 +1102,7 @@ export default function App() {
                   return (
                     <ChannelPage
                       canal={canal}
-                      reacts={reacts.filter(r => r.canalId === selectedObraId || r.canalNome === canal.titulo.replace('Canal ', ''))}
+                      reacts={channelReactsMap[selectedObraId] || reacts.filter(r => r.obraId === selectedObraId || (canal.channelId && r.canalId === canal.channelId))}
                       obras={obras}
                       canaisSeguidos={canaisSeguidos}
                       onToggleSeguir={handleToggleSeguir}
@@ -1180,8 +1226,48 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* CHANNEL CATEGORY PAGES (e.g. categoria-canal-fanit-lin) */}
+            {currentTab.startsWith('categoria-canal-') && (
+              <motion.div
+                key={currentTab}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                {(() => {
+                  const channelObraId = currentTab.replace('categoria-canal-', '');
+                  const canal = obras.find(o => o.id === channelObraId && o.tipo === 'canal');
+                  if (!canal) {
+                    return (
+                      <motion.div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                        <div className="text-white font-bold text-lg">Categoria do canal não encontrada</div>
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                          Voltar ao Início
+                        </button>
+                      </motion.div>
+                    );
+                  }
+                  return (
+                    <ChannelPage
+                      canal={canal}
+                      reacts={channelReactsMap[canal.id] || reacts.filter(r => r.obraId === canal.id || (canal.channelId && r.canalId === canal.channelId))}
+                      obras={obras}
+                      canaisSeguidos={canaisSeguidos}
+                      onToggleSeguir={handleToggleSeguir}
+                      onPlayVideo={handlePlayVideo}
+                      onBack={() => {
+                        setCurrentTab('inicio');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                    />
+                  );
+                })()}
+              </motion.div>
+            )}
+
             {/* CATEGORY PAGES (FILME, JOGO, ANIME, SERIE) */}
-            {currentTab.startsWith('categoria-') && (
+            {currentTab.startsWith('categoria-') && !currentTab.startsWith('categoria-canal-') && (
               <motion.div
                 key={`category-${currentTab}`}
                 initial={{ opacity: 0 }}
@@ -1203,7 +1289,8 @@ export default function App() {
                   onSelectObra={(id) => {
                     setSelectedObraId(id);
                     setSelectedReactId(null);
-                    setCurrentTab('obra');
+                    const obra = obras.find(o => o.id === id);
+                    setCurrentTab(obra?.tipo === 'canal' ? 'canal' : 'obra');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 />
