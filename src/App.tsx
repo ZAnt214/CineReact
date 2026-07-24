@@ -593,11 +593,28 @@ export default function App() {
     }
   }, [startTransition]);
 
+  useEffect(() => {
+    if (currentTab !== 'landing' || typeof document === 'undefined') return;
+
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+
+    return () => {
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [currentTab]);
+
   return (
     <>
     <div
-      className="min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative"
-      style={{ visibility: currentTab === 'landing' ? 'hidden' : 'visible' }}
+      className={`min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative ${
+        currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
+      }`}
       aria-hidden={currentTab === 'landing'}
     >
       
@@ -1333,7 +1350,7 @@ export default function App() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[200]"
+          className="fixed inset-0 z-[200] overflow-y-auto overscroll-y-contain touch-pan-y"
         >
           <LandingPage onExplore={handleExplore} isNavigating={isExploring} />
         </motion.div>
