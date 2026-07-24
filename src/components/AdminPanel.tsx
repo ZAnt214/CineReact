@@ -440,7 +440,9 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         setCanalUrl('');
         fetchAdminData();
         if (data.mode === 'real') {
-          showMessage('success', `Canal "${data.obra.titulo}" importado do YouTube!`);
+          showMessage('success', `Canal "${data.obra.titulo}" importado do YouTube com dados oficiais!`);
+        } else if (data.mode === 'scrape' || data.mode === 'oembed') {
+          showMessage('success', `Canal "${data.obra.titulo}" importado com nome e imagens reais do YouTube!`);
         } else if (data.mode === 'simulated') {
           showMessage('success', `Canal "${data.obra.titulo}" criado com simulação Gemini.`);
         } else {
