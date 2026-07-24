@@ -173,7 +173,7 @@ export default function CategoryPage({
   }, [categoryReacts, selectedHashtag, searchQuery, obras]);
 
   return (
-    <div className="pt-24 pb-28 px-4 md:px-8 max-w-7xl mx-auto min-h-screen w-full flex-1">
+    <div className="cine-container pt-24 pb-28 w-full min-h-screen w-full flex-1">
       {/* Back Button & Top Navigation */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <button
@@ -304,7 +304,7 @@ export default function CategoryPage({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 xl:gap-6">
           {filteredReacts.map((react) => {
             const associatedObra = obras.find((o) => o.id === react.obraId);
             const progress = progressMap[react.id] || 0;

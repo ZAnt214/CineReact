@@ -658,7 +658,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-full overflow-x-hidden relative ${
+      className={`min-h-screen bg-[#0d0d10] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black w-full max-w-none overflow-x-hidden relative ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -688,7 +688,7 @@ export default function App() {
       />
 
       {/* CORE VIEWPORT */}
-      <main className="flex-1 flex flex-col min-h-[calc(100vh-16rem)]">
+      <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none">
         {loading ? (
           currentTab === 'reproducao' ? (
             <PlaybackSkeleton />
@@ -705,7 +705,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-8 w-full flex-1"
+                className="cine-container pt-24 pb-20 w-full space-y-8 w-full flex-1"
               >
                 <div>
                   <h1 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
@@ -729,7 +729,7 @@ export default function App() {
                           <span className="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block animate-pulse" />
                           Vídeos Encontrados ({matchingReacts.length})
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                           {matchingReacts.map((react) => {
                             const associatedObra = obras.find(o => o.id === react.obraId);
                             return (
@@ -1121,7 +1121,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-screen w-full flex-1"
+                className="cine-container pt-24 pb-20 w-full min-h-screen w-full flex-1"
               >
                 <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
                   <span className="w-2.5 h-6 bg-gradient-to-b from-amber-400 to-yellow-500 rounded" />
@@ -1302,8 +1302,8 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-28 md:pb-32">
-        <div className="space-y-3 px-4">
+      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-28 md:pb-32 w-full">
+        <div className="cine-container space-y-3">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
             <button 

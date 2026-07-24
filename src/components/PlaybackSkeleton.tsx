@@ -8,7 +8,7 @@ export default function PlaybackSkeleton() {
   const carouselItems = Array.from({ length: 4 });
 
   return (
-    <div className="pt-24 pb-20 px-4 md:px-8 max-w-[1700px] mx-auto min-h-screen bg-[#0d0d10] animate-pulse">
+    <div className="cine-container pt-24 pb-20 min-h-screen bg-[#0d0d10] w-full animate-pulse">
       {/* GRID LAYOUT: 12 Columns matching PlaybackPage */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         

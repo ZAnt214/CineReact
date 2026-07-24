@@ -35,7 +35,7 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pt-24 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen"
+      className="cine-container pt-24 pb-20 min-h-screen w-full"
     >
       <button 
         onClick={onBack}

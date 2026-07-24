@@ -570,7 +570,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
   if (!user.isAdmin) {
     return (
-      <div className="min-h-screen pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center">
+      <div className="min-h-screen cine-container pt-24 pb-20 w-full text-center flex flex-col items-center justify-center">
         <AlertCircle className="w-16 h-16 text-amber-400 mb-4 animate-pulse" />
         <h2 className="text-xl font-bold mb-2">Acesso Negado</h2>
         <p className="text-zinc-500 max-w-md text-xs leading-relaxed">
@@ -582,7 +582,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <motion.div className="min-h-screen bg-[#0d0d10] pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-8 text-white">
+    <motion.div className="min-h-screen bg-[#0d0d10] cine-container pt-24 pb-20 w-full space-y-8 text-white">
       
       {/* HEADER */}
       <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">

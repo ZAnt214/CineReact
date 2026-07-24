@@ -124,7 +124,7 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#141414] pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-12">
+    <div className="min-h-screen bg-[#141414] cine-container pt-24 pb-20 w-full space-y-12">
       
       {/* HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">

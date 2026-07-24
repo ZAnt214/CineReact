@@ -319,7 +319,7 @@ export default function Header({
             : 'bg-zinc-950/95 max-md:backdrop-blur-none md:bg-zinc-950/40 md:backdrop-blur-sm border-b border-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="cine-container w-full">
           <div className="flex h-16 items-center justify-between gap-4">
             
             {/* LEFT SECTION: Logo & Desktop Navigation */}
@@ -751,7 +751,7 @@ export default function Header({
             className="fixed inset-0 bg-zinc-950/98 backdrop-blur-3xl z-[100] overflow-y-auto flex flex-col justify-start"
           >
             <div className="w-full border-b border-zinc-900 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-10">
-              <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+              <div className="cine-container w-full h-20 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                     <Film className="w-5 h-5 text-amber-400" />
@@ -772,7 +772,7 @@ export default function Header({
             </div>
 
             {user.isLoggedIn ? (
-              <div className="max-w-7xl w-full mx-auto px-6 py-12 md:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+              <div className="cine-container w-full py-12 md:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
                 
                 {/* Column 1: Left Profile */}
                 <div className="lg:col-span-4 bg-gradient-to-b from-zinc-900/40 to-zinc-900/10 border border-zinc-800/60 rounded-3xl p-8 flex flex-col justify-between items-center text-center relative overflow-hidden shadow-2xl min-h-[460px] w-full">

@@ -12,17 +12,17 @@ export default function RowMoviesSkeleton() {
   const skeletonCards = Array.from({ length: 6 });
 
   return (
-    <div className="space-y-12 pb-24 pt-24 animate-pulse max-w-7xl mx-auto w-full">
+    <div className="cine-container space-y-12 pb-24 pt-24 animate-pulse w-full">
       {rows.map((row, rowIndex) => (
         <div key={rowIndex} className="space-y-4">
           
           {/* Row Title Skeleton */}
-          <div className="px-4 md:px-8">
+          <div className="cine-container">
             <div className={`${row.titleWidth} h-6 bg-zinc-800 rounded-md`} />
           </div>
 
           {/* Horizontal Row Skeletons Container */}
-          <div className="flex items-center gap-3.5 sm:gap-4 md:gap-5 overflow-x-hidden py-2.5 px-4 md:px-8">
+          <div className="flex items-center gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-hidden py-2.5 cine-container">
             {skeletonCards.map((_, cardIndex) => (
               <div
                 key={cardIndex}

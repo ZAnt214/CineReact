@@ -137,9 +137,9 @@ export default function RowMovies({
   };
 
   return (
-    <div className="catalog-row space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
+    <div className="catalog-row space-y-3.5 relative w-full min-w-0 group/row">
       {/* ROW TITLE & ACTIONS */}
-      <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
+      <div className="flex flex-col gap-1 cine-container mb-1">
         <div className="flex items-center justify-between gap-3">
           <h2 
             onClick={isClickableTitle ? handleHeaderTitleClick : undefined}
@@ -185,7 +185,7 @@ export default function RowMovies({
             onPointerCancel: handlePointerUp,
             onDragStart: (e: React.DragEvent) => e.preventDefault(),
           } : {})}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto py-2.5 px-4 md:px-8 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-mandatory"
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-mandatory"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
@@ -194,7 +194,7 @@ export default function RowMovies({
               <div
                 key={react.id}
                 onClick={() => handleCardClick(react.id, react.obraId)}
-                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30' 
                     : 'border border-zinc-800/80 hover:border-amber-500/60 hover:shadow-amber-500/10'

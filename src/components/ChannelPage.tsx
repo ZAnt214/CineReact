@@ -101,7 +101,7 @@ export default function ChannelPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="pt-24 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen"
+      className="cine-container pt-24 pb-20 min-h-screen w-full"
     >
       {/* HEADER NAVIGATION CONTROLS */}
       <button 
@@ -265,7 +265,7 @@ export default function ChannelPage({
           Carregando vídeos do canal...
         </motion.div>
       ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5 xl:gap-6">
         {filteredReacts.map((react, idx) => {
           const associatedObra = obras.find(o => o.id === react.obraId);
           return (

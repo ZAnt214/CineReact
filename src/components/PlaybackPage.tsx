@@ -535,7 +535,7 @@ export default function PlaybackPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="pt-24 pb-20 px-4 md:px-8 max-w-[1700px] mx-auto min-h-screen bg-[#0d0d10]"
+      className="cine-container pt-24 pb-20 min-h-screen bg-[#0d0d10] w-full"
     >
       {/* GRID LAYOUT: 12 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
