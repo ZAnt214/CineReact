@@ -16,6 +16,8 @@ interface HeaderProps {
   obras?: Obra[];
   reacts?: ReactVideo[];
   hasSideNav?: boolean;
+  isSideNavOpen?: boolean;
+  onToggleSideNav?: () => void;
 }
 
 export default function Header({
@@ -28,7 +30,9 @@ export default function Header({
   onOpenAuth,
   obras = [],
   reacts = [],
-  hasSideNav = false
+  hasSideNav = false,
+  isSideNavOpen = false,
+  onToggleSideNav
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -315,9 +319,7 @@ export default function Header({
   return (
     <>
       <header 
-        className={`fixed top-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
-          hasSideNav ? 'left-[4.5rem] md:left-56' : 'left-0'
-        } ${
+        className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
             ? 'bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/90 md:backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
             : 'bg-zinc-950/95 max-md:backdrop-blur-none md:bg-zinc-950/40 md:backdrop-blur-sm border-b border-transparent'
@@ -327,7 +329,23 @@ export default function Header({
           <div className="flex h-16 items-center justify-between gap-4">
             
             {/* LEFT SECTION: Logo & Desktop Navigation */}
-            <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
+            <motion.div className="flex items-center gap-3 lg:gap-6 flex-shrink-0">
+              {hasSideNav && onToggleSideNav && (
+                <button
+                  type="button"
+                  onClick={onToggleSideNav}
+                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                    isSideNavOpen
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                  }`}
+                  aria-label={isSideNavOpen ? 'Fechar menu' : 'Abrir menu'}
+                  aria-expanded={isSideNavOpen}
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              )}
+
               <button 
                 id="logo-button"
                 onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
@@ -397,7 +415,7 @@ export default function Header({
                   </button>
                 )}
               </nav>
-            </div>
+            </motion.div>
 
             {/* MIDDLE SECTION: Search Bar & Download App button */}
             <div className="flex-1 max-w-sm lg:max-w-lg mx-auto hidden sm:flex items-center gap-2 relative">

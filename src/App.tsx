@@ -75,6 +75,7 @@ export default function App() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
 
   // Continue Watching state
   const [continueWatching, setContinueWatching] = useState<{
@@ -381,6 +382,19 @@ export default function App() {
 
   const catalogActive = currentTab !== 'landing';
 
+  useEffect(() => {
+    if (!catalogActive) setIsSideNavOpen(false);
+  }, [catalogActive]);
+
+  useEffect(() => {
+    if (!isSideNavOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsSideNavOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSideNavOpen]);
+
   const recomendadosReacts = React.useMemo(() => {
     if (!catalogActive) return [];
     const explicit = reacts.filter(r => r.isRecomendado);
@@ -668,6 +682,8 @@ export default function App() {
       {catalogActive && (
         <SideNavHub
           currentTab={currentTab}
+          isOpen={isSideNavOpen}
+          onClose={() => setIsSideNavOpen(false)}
           setCurrentTab={(tab) => {
             setCurrentTab(tab);
             setSelectedObraId(null);
@@ -677,12 +693,14 @@ export default function App() {
         />
       )}
 
-      <div className={`flex flex-col flex-1 min-h-screen w-full ${catalogActive ? 'pl-[4.5rem] md:pl-56' : ''}`}>
+      <div className="flex flex-col flex-1 min-h-screen w-full">
       
       {/* HEADER & TOP NAVIGATION */}
       <Header 
         currentTab={currentTab}
         hasSideNav={catalogActive}
+        isSideNavOpen={isSideNavOpen}
+        onToggleSideNav={() => setIsSideNavOpen((open) => !open)}
         setCurrentTab={(tab) => {
           setCurrentTab(tab);
           setSelectedObraId(null);
