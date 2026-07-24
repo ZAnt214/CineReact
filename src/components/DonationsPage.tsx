@@ -21,7 +21,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
   };
 
   return (
-    <div className="pt-24 pb-20 px-4 md:px-8 max-w-5xl mx-auto min-h-screen text-zinc-300">
+    <div className="cine-container pt-24 pb-20 min-h-screen w-full text-zinc-300">
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}

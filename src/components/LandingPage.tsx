@@ -40,7 +40,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
       {/* HEADER / BRAND BAR */}
       <header className="relative z-10 border-b border-zinc-900/80 bg-black/95 max-md:backdrop-blur-none md:bg-black/80 md:backdrop-blur-md sticky top-0">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+        <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
             onClick={onExplore}
@@ -66,7 +66,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </header>
 
       {/* HERO SECTION */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-16 sm:pt-20 sm:pb-24 text-center">
+      <section className="relative z-10 cine-container w-full pt-12 pb-16 sm:pt-20 sm:pb-24 text-center">
         {/* Badge */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
@@ -83,7 +83,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl mx-auto font-sans"
+          className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto font-sans"
         >
           A plataforma para quem ama vídeos de reação a{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500">
@@ -145,7 +145,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* KEY BENEFITS SECTION */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-16 border-t border-zinc-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-zinc-900/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Por que usar o CineReact?
@@ -219,7 +219,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-16 border-t border-zinc-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-zinc-900/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Como Funciona
@@ -260,7 +260,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* SECONDARY CTA BANNER */}
-      <section className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-12 my-8">
+      <section className="relative z-10 cine-container w-full py-12 my-8">
         <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900 border border-amber-500/30 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
           
@@ -289,7 +289,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-zinc-900 bg-zinc-950 py-12 mt-12 text-zinc-400">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
+        <div className="cine-container w-full space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <CineReactLogo size="xs" />
@@ -318,7 +318,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Legal Disclaimer / Notice */}
-          <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/60 text-center max-w-4xl mx-auto">
+          <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/60 text-center w-full max-w-5xl mx-auto">
             <p className="text-xs text-zinc-400 leading-relaxed font-sans">
               <strong>Aviso Legal:</strong> O CineReact não hospeda vídeos. Todo o conteúdo exibido é incorporado de plataformas públicas, como o YouTube, respeitando os direitos e políticas de seus respectivos proprietários.
             </p>

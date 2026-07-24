@@ -54,7 +54,7 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
       transition={{ type: 'spring', damping: 25, stiffness: 280 }}
       className="fixed bottom-0 left-0 right-0 w-full max-w-full bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/85 md:backdrop-blur-md border-t border-zinc-800/50 z-[95] pointer-events-auto shadow-2xl box-border overflow-hidden"
     >
-      <div className="max-w-4xl mx-auto px-1 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between sm:justify-center gap-0.5 sm:gap-3 md:gap-6 w-full box-border">
+      <div className="cine-container py-1.5 sm:py-2.5 flex items-center justify-between sm:justify-evenly gap-0.5 sm:gap-3 md:gap-6 w-full box-border">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id || (item.id === 'categoria-canal-fanit-lin' && currentTab === 'canal');
@@ -63,7 +63,7 @@ export default function BottomNavHub({ currentTab, setCurrentTab }: BottomNavHub
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}
-              className={`relative flex-1 min-w-0 max-w-[110px] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-1 sm:px-3 py-1 sm:py-2 rounded-xl text-[11px] sm:text-xs font-extrabold transition-all duration-200 cursor-pointer select-none group ${
+              className={`relative flex-1 min-w-0 max-w-[110px] xl:max-w-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-1 sm:px-3 py-1 sm:py-2 rounded-xl text-[11px] sm:text-xs font-extrabold transition-all duration-200 cursor-pointer select-none group ${
                 isActive
                   ? 'text-amber-400 font-black'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-900/40 active:scale-95'
