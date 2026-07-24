@@ -17,6 +17,9 @@ import SideNavHub, { resetSideNavOnLeave } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
 import LandingPage from './components/LandingPage.tsx';
+import GamificationPage from './components/GamificationPage.tsx';
+import GamificationRewardToast from './components/GamificationRewardToast.tsx';
+import { useGamification } from './hooks/useGamification.ts';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
@@ -114,6 +117,19 @@ export default function App() {
       setContinueWatching([]);
     }
   };
+
+  const gamification = useGamification({
+    email: user.email,
+    enabled: user.isLoggedIn,
+  });
+
+  useEffect(() => {
+    if (!user.isLoggedIn || !user.email) return;
+    const dayKey = `cinereact_daily_${new Date().toISOString().slice(0, 10)}`;
+    if (sessionStorage.getItem(dayKey)) return;
+    sessionStorage.setItem(dayKey, '1');
+    gamification.trackEvent('daily_login');
+  }, [user.isLoggedIn, user.email]);
 
   const safeFetchJson = async (url: string | null) => {
     if (!url) return null;
@@ -360,9 +376,14 @@ export default function App() {
           obraId,
           progress
         })
-      }).catch(e => console.error("Error updating watch progress on server:", e));
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.gamificationReward) gamification.refresh();
+        })
+        .catch(e => console.error("Error updating watch progress on server:", e));
     }
-  }, [user.isLoggedIn, user.email]);
+  }, [user.isLoggedIn, user.email, gamification]);
 
   const progressMap = React.useMemo(() => {
     const map: Record<string, number> = {};
@@ -704,6 +725,12 @@ export default function App() {
         onOpenAuth={openAuthModal}
         obras={obras}
         reacts={reacts}
+        gamificationData={gamification.data}
+        onOpenGamification={() => {
+          setCurrentTab('club');
+          setSelectedObraId(null);
+          setSelectedReactId(null);
+        }}
       />
 
       {/* CORE VIEWPORT */}
@@ -1211,6 +1238,27 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* CINEREACT CLUB — Gamificação */}
+            {currentTab === 'club' && (
+              <motion.div
+                key="club-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <GamificationPage
+                  user={user}
+                  data={gamification.data}
+                  loading={gamification.loading}
+                  onRefresh={gamification.refresh}
+                  onPurchase={gamification.purchaseCosmetic}
+                  onLoadLeaderboard={gamification.loadLeaderboard}
+                  leaderboards={gamification.leaderboards}
+                />
+              </motion.div>
+            )}
+
             {/* USER SETTINGS TAB */}
             {currentTab === 'configuracoes' && (
               <motion.div
@@ -1261,6 +1309,7 @@ export default function App() {
                     setCurrentTab('inicio');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  onLunchPick={() => user.isLoggedIn && gamification.trackEvent('lunch_pick')}
                   autoPlayOnMount
                 />
               </motion.div>
@@ -1400,6 +1449,11 @@ export default function App() {
       <CreatorPartnerModal 
         isOpen={showCreatorPartnerModal}
         onClose={() => setShowCreatorPartnerModal(false)}
+      />
+
+      <GamificationRewardToast
+        reward={gamification.pendingReward}
+        onClose={gamification.clearPendingReward}
       />
 
       <AuthModal 
