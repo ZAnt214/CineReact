@@ -518,7 +518,8 @@ export default function App() {
     // Creator channels carousels
     const canalFeeds = obras.filter(o => o.tipo === 'canal').reduce((acc, canal) => {
       const filtered = reacts.filter(r => {
-        if (r.obraId === canal.id || r.canalId === canal.id) return true;
+        if (r.obraId === canal.id) return true;
+        if (canal.channelId && r.canalId === canal.channelId) return true;
         const cleanCanalTitle = canal.titulo.replace(/^Canal\s+/i, '').trim().toLowerCase();
         const cleanReactCanal = r.canalNome.trim().toLowerCase();
         return cleanReactCanal.includes(cleanCanalTitle) || cleanCanalTitle.includes(cleanReactCanal);
@@ -638,7 +639,8 @@ export default function App() {
         onSelectObra={(id) => {
           setSelectedObraId(id);
           setSelectedReactId(null);
-          setCurrentTab('obra');
+          const obra = obras.find(o => o.id === id);
+          setCurrentTab(obra?.tipo === 'canal' ? 'canal' : 'obra');
         }}
         onOpenAuth={openAuthModal}
         obras={obras}
@@ -1056,7 +1058,7 @@ export default function App() {
                   return (
                     <ChannelPage
                       canal={canal}
-                      reacts={reacts.filter(r => r.canalId === selectedObraId || r.canalNome === canal.titulo.replace('Canal ', ''))}
+                      reacts={reacts.filter(r => r.obraId === selectedObraId || (canal.channelId && r.canalId === canal.channelId))}
                       obras={obras}
                       canaisSeguidos={canaisSeguidos}
                       onToggleSeguir={handleToggleSeguir}
