@@ -25,7 +25,7 @@ export default function ChannelPage({
 }: ChannelPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [channelReacts, setChannelReacts] = useState<ReactVideo[]>(reacts);
-  const [loadingReacts, setLoadingReacts] = useState(true);
+  const [loadingReacts, setLoadingReacts] = useState(reacts.length === 0);
   const [seguidores, setSeguidores] = useState<{ username: string; email: string; avatar?: string; isDonor?: boolean }[]>([]);
   const [loadingSeguidores, setLoadingSeguidores] = useState(true);
 
@@ -33,7 +33,18 @@ export default function ChannelPage({
   const isFollowing = canaisSeguidos.includes(canalNome);
 
   useEffect(() => {
+    if (reacts.length > 0) {
+      setChannelReacts(reacts);
+      setLoadingReacts(false);
+    }
+  }, [reacts]);
+
+  useEffect(() => {
     let cancelled = false;
+    if (reacts.length > 0) {
+      return () => { cancelled = true; };
+    }
+
     setLoadingReacts(true);
 
     fetch(`/api/obras/${encodeURIComponent(canal.id)}`)
@@ -49,7 +60,7 @@ export default function ChannelPage({
       });
 
     return () => { cancelled = true; };
-  }, [canal.id]);
+  }, [canal.id, reacts.length]);
 
   const fetchSeguidores = async () => {
     try {
