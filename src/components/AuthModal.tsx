@@ -13,7 +13,8 @@ import {
   Heart,
   ShieldCheck,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
 import { UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -26,6 +27,38 @@ interface AuthModalProps {
 }
 
 const REMEMBERED_EMAIL_KEY = 'cine_react_remembered_email';
+
+function formatAuthError(raw?: string): string {
+  if (!raw?.trim()) {
+    return 'Não foi possível entrar. Verifique seus dados e tente novamente.';
+  }
+
+  const lower = raw.toLowerCase();
+
+  if (
+    lower.includes('credenciais inválidas') ||
+    lower.includes('invalid login credentials') ||
+    lower.includes('invalid credentials') ||
+    lower.includes('wrong password') ||
+    lower.includes('incorrect password')
+  ) {
+    return 'E-mail ou senha incorretos. Verifique e tente novamente.';
+  }
+
+  if (lower.includes('user not found') || lower.includes('usuário não encontrado')) {
+    return 'Não encontramos uma conta com este e-mail.';
+  }
+
+  if (lower.includes('too many requests') || lower.includes('rate limit')) {
+    return 'Muitas tentativas seguidas. Aguarde um momento e tente novamente.';
+  }
+
+  if (raw.startsWith('Credenciais inválidas:')) {
+    return 'E-mail ou senha incorretos. Verifique e tente novamente.';
+  }
+
+  return raw;
+}
 
 const benefits = [
   { icon: Film, text: 'Assista a todos os reacts do catálogo' },
@@ -148,6 +181,22 @@ export default function AuthModal({
     }
   };
 
+  const validateLogin = () => {
+    if (!email.trim()) {
+      setErrorMsg('Informe seu e-mail.');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMsg('Informe um e-mail válido.');
+      return false;
+    }
+    if (!password) {
+      setErrorMsg('Informe sua senha.');
+      return false;
+    }
+    return true;
+  };
+
   const validateRegister = () => {
     if (username.trim().length < 3) {
       setErrorMsg('O nome de usuário deve ter pelo menos 3 caracteres.');
@@ -169,6 +218,11 @@ export default function AuthModal({
     setLoading(true);
     setErrorMsg('');
     setInfoMsg('');
+
+    if (mode === 'login' && !validateLogin()) {
+      setLoading(false);
+      return;
+    }
 
     if (mode === 'register' && !validateRegister()) {
       setLoading(false);
@@ -206,7 +260,7 @@ export default function AuthModal({
           setInfoMsg(data.error || data.message || 'Verifique seu e-mail para confirmar o cadastro antes de entrar.');
           setMode('login');
         } else {
-          setErrorMsg(data.error || 'Falha na autenticação.');
+          setErrorMsg(formatAuthError(data.error));
         }
       }
     } catch {
@@ -376,9 +430,9 @@ export default function AuthModal({
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
-                      className="bg-red-950/40 border border-red-500/30 text-red-400 p-3 rounded-xl text-xs font-medium mb-4 flex items-start gap-2"
+                      className="bg-zinc-900/95 border border-amber-500/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5 shadow-lg shadow-black/30"
                     >
-                      <span className="shrink-0 mt-0.5">⚠</span>
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
                       <span>{errorMsg}</span>
                     </motion.div>
                   )}
@@ -396,7 +450,7 @@ export default function AuthModal({
                   )}
                 </AnimatePresence>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     {mode === 'register' && (
                       <div>
                         <label htmlFor="auth-username" className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
@@ -408,9 +462,7 @@ export default function AuthModal({
                             ref={firstInputRef}
                             id="auth-username"
                             type="text"
-                            required
                             autoComplete="username"
-                            minLength={3}
                             placeholder="Como quer ser chamado?"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
@@ -430,7 +482,6 @@ export default function AuthModal({
                           ref={mode === 'login' ? firstInputRef : undefined}
                           id="auth-email"
                           type="email"
-                          required
                           autoComplete="email"
                           placeholder="seu@email.com"
                           value={email}
@@ -460,10 +511,8 @@ export default function AuthModal({
                         <input
                           id="auth-password"
                           type={showPassword ? 'text' : 'password'}
-                          required
-                          minLength={6}
                           autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                          placeholder="Mínimo 6 caracteres"
+                          placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : 'Sua senha'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
@@ -501,7 +550,6 @@ export default function AuthModal({
                           <input
                             id="auth-confirm-password"
                             type={showConfirmPassword ? 'text' : 'password'}
-                            required
                             autoComplete="new-password"
                             placeholder="Repita a senha"
                             value={confirmPassword}

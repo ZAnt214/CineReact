@@ -1760,7 +1760,7 @@ app.post("/api/login", async (req, res) => {
 
       if (authError) {
         console.error("Erro ao autenticar no Supabase Auth:", authError);
-        let errorMsg = `Credenciais inválidas: ${authError.message}`;
+        let errorMsg = 'E-mail ou senha incorretos. Verifique e tente novamente.';
         if (authError.message.toLowerCase().includes("confirm")) {
           return res.status(401).json({
             error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
