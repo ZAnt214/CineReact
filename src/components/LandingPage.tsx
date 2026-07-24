@@ -29,7 +29,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30 selection:text-amber-200 relative overflow-x-hidden flex flex-col justify-between smooth-scroll-page">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30 selection:text-amber-200 relative overflow-x-hidden flex flex-col justify-between">
       {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-amber-500/15 via-yellow-500/5 to-transparent rounded-full blur-3xl opacity-70" />

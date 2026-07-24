@@ -18,5 +18,6 @@ export function setBlurEffectsEnabled(enabled: boolean): void {
 }
 
 export function initVisualPreferences(): void {
-  applyBlurEffects(getBlurEffectsEnabled());
+  const enabled = getBlurEffectsEnabled();
+  applyBlurEffects(enabled);
 }
