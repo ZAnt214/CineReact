@@ -60,6 +60,8 @@ export default function RowMovies({
     if (!rowRef.current) return;
     // Don't drag if clicking buttons
     if ((e.target as HTMLElement).closest('button')) return;
+    // Touch/pen: rely on native overflow-x scroll (pointer capture blocks swipe)
+    if (e.pointerType !== 'mouse') return;
 
     isMouseDownRef.current = true;
     startXRef.current = e.clientX;
@@ -80,6 +82,7 @@ export default function RowMovies({
     }
 
     if (isDraggedRef.current) {
+      e.preventDefault();
       rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
     }
   };
@@ -151,7 +154,7 @@ export default function RowMovies({
   };
 
   return (
-    <div ref={containerRef} className="space-y-3.5 relative max-w-7xl mx-auto w-full group/row">
+    <motion.div ref={containerRef} className="space-y-3.5 relative max-w-7xl mx-auto w-full min-w-0 group/row">
       {/* ROW TITLE & ACTIONS */}
       <div className="flex flex-col gap-1 px-4 md:px-8 mb-1">
         <div className="flex items-center justify-between gap-3">
@@ -177,12 +180,12 @@ export default function RowMovies({
       </div>
 
       {/* HORIZONTAL CAROUSEL CONTAINER */}
-      <div className="relative max-w-full">
+      <div className="relative max-w-full min-w-0">
         {/* LEFT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('left')}
-            className="catalog-carousel-arrow absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-r-xl flex items-center justify-center opacity-0 pointer-events-none group-hover/row:opacity-100 group-hover/row:pointer-events-auto transition-opacity border-r border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -294,14 +297,14 @@ export default function RowMovies({
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('right')}
-            className="catalog-carousel-arrow absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
+            className="catalog-carousel-arrow absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-10 sm:w-12 bg-black/85 hover:bg-black/95 text-white rounded-l-xl flex items-center justify-center opacity-0 pointer-events-none group-hover/row:opacity-100 group-hover/row:pointer-events-auto transition-opacity border-l border-y border-zinc-700/60 shadow-2xl cursor-pointer"
             aria-label="Próximo"
           >
             <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

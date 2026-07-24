@@ -96,7 +96,7 @@ function PremiumVideoShelf({
         <span className="text-xs text-zinc-500 font-mono tracking-wider">{videos.length} {videos.length === 1 ? 'VÍDEO' : 'VÍDEOS'}</span>
       </div>
       
-      <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory">
+      <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory min-w-0">
         {videos.map(video => (
           <motion.div
             key={video.id}

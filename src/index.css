@@ -61,7 +61,7 @@ a,
 button, 
 video,
 .select-none {
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
   -webkit-user-drag: none;
   -khtml-user-drag: none;
   -moz-user-drag: none;
@@ -95,7 +95,7 @@ html, body, #root {
 
 /* Catalog Carousel & Card Optimizations */
 .catalog-carousel {
-  touch-action: pan-x pan-y;
+  touch-action: pan-x pan-y pinch-zoom;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   user-select: none;
@@ -103,9 +103,22 @@ html, body, #root {
 }
 
 .catalog-card {
+  touch-action: pan-x pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
+}
+
+/* Allow horizontal swipe inside any overflow-x-auto container (overrides global pan-y on children) */
+.overflow-x-auto > *,
+.overflow-x-auto img,
+.overflow-x-auto svg,
+.overflow-x-auto a,
+.overflow-x-auto button,
+.overflow-x-auto video,
+.overflow-x-auto .select-none,
+.overflow-x-auto [class*="group/card"] {
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 @media (pointer: coarse) {
