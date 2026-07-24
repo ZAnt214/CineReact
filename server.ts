@@ -156,6 +156,12 @@ async function safeFetch(url: string, options: any = {}, retries = 1): Promise<R
   return null;
 }
 
+function getYoutubeApiKey(): string | null {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (!key || key === "MY_YOUTUBE_API_KEY") return null;
+  return key;
+}
+
 async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean; videoData?: any }> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") {
@@ -464,9 +470,9 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
   }
 }
 
-async function fetchRealChannelAvatar(channelId: string): Promise<string | null> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (apiKey && apiKey !== "MY_YOUTUBE_API_KEY") {
+async function fetchRealChannelAvatar(channelId: string, pageUrl?: string): Promise<string | null> {
+  const apiKey = getYoutubeApiKey();
+  if (apiKey && channelId.startsWith('UC')) {
     try {
       const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
       const res = await safeFetch(url);
@@ -482,27 +488,34 @@ async function fetchRealChannelAvatar(channelId: string): Promise<string | null>
     }
   }
 
-  // Fallback: scrape channel page
-  try {
-    const channelUrl = `https://www.youtube.com/channel/${channelId}`;
-    const res = await safeFetch(channelUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-      }
-    });
-    if (res && res.ok) {
-      const html = await res.text();
-      const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i) || 
-                           html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
-      if (ogImageMatch && ogImageMatch[1]) {
-        const url = ogImageMatch[1];
-        if (url && !url.includes('youtube_logo') && !url.includes('yt_logo')) {
-          return url;
+  const scrapeTargets = [
+    pageUrl,
+    channelId.startsWith('UC') ? `https://www.youtube.com/channel/${channelId}` : null,
+    channelId.startsWith('@') ? `https://www.youtube.com/${channelId}` : null,
+  ].filter(Boolean) as string[];
+
+  for (const target of scrapeTargets) {
+    try {
+      const res = await safeFetch(target, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        }
+      });
+      if (res && res.ok) {
+        const html = await res.text();
+        const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i) ||
+                             html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
+        if (ogImageMatch?.[1]) {
+          const imageUrl = ogImageMatch[1];
+          if (imageUrl && !imageUrl.includes('youtube_logo') && !imageUrl.includes('yt_logo')) {
+            return imageUrl;
+          }
         }
       }
+    } catch (e) {
+      console.error(`[Avatar Sync] Erro de rede scraping para ${target}:`, e);
     }
-  } catch (e) {
-    console.error(`[Avatar Sync] Erro de rede scraping para canal ${channelId}:`, e);
   }
   return null;
 }
@@ -874,35 +887,292 @@ app.get("/api/obras/:id", async (req, res) => {
   }
 });
 
+interface ResolvedYouTubeChannel {
+  channelId: string;
+  titulo: string;
+  sinopse: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  source: 'api' | 'scrape' | 'oembed';
+}
+
+const YOUTUBE_BROWSER_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+};
+
+function extractVideoIdFromUrl(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.+&v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+async function resolveChannelViaOEmbed(videoUrl: string): Promise<{ authorUrl: string; authorName: string; thumbnailUrl?: string } | null> {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
+    const res = await safeFetch(oembedUrl);
+    if (!res?.ok) return null;
+    const data: any = await res.json();
+    if (!data?.author_url || !data?.author_name) return null;
+    return {
+      authorUrl: data.author_url,
+      authorName: data.author_name,
+      thumbnailUrl: data.thumbnail_url,
+    };
+  } catch (err) {
+    console.warn('[YouTube oEmbed] Falha ao resolver vídeo:', err);
+    return null;
+  }
+}
+
+async function scrapeYouTubeChannelPage(pageUrl: string): Promise<ResolvedYouTubeChannel | null> {
+  try {
+    const normalizedUrl = pageUrl.startsWith('http')
+      ? pageUrl.split('?')[0]
+      : `https://www.youtube.com/@${pageUrl.replace(/^@/, '')}`;
+
+    const res = await safeFetch(normalizedUrl, { headers: YOUTUBE_BROWSER_HEADERS });
+    if (!res?.ok) {
+      console.warn(`[YouTube Scrape] HTTP ${res?.status || 'erro'} para ${normalizedUrl}`);
+      return null;
+    }
+
+    const html = await res.text();
+    const channelId =
+      html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/)?.[1] ||
+      html.match(/"externalId":"(UC[a-zA-Z0-9_-]{22})"/)?.[1] ||
+      html.match(/youtube\.com\/channel\/(UC[a-zA-Z0-9_-]{22})/)?.[1] ||
+      null;
+
+    const ogTitle =
+      html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:title"/i)?.[1];
+    const titulo = decodeHtmlEntities(ogTitle || '').replace(/\s*-\s*YouTube\s*$/i, '').trim();
+
+    const ogImage =
+      html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i)?.[1];
+    const avatarUrl = ogImage && !ogImage.includes('youtube_logo') && !ogImage.includes('yt_logo')
+      ? decodeHtmlEntities(ogImage)
+      : null;
+
+    const bannerMatch =
+      html.match(/"bannerExternalUrl":"(https:\\\/\\\/[^"]+)"/)?.[1] ||
+      html.match(/"bannerExternalUrl":"(https:\/\/[^"]+)"/)?.[1];
+    const bannerUrl = bannerMatch ? decodeHtmlEntities(bannerMatch.replace(/\\\//g, '/')) : null;
+
+    const ogDesc =
+      html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:description"/i)?.[1];
+    const sinopse = decodeHtmlEntities(ogDesc || '').trim();
+
+    if (!channelId && !titulo) return null;
+
+    return {
+      channelId: channelId || '',
+      titulo: titulo || 'Canal do YouTube',
+      sinopse: sinopse || 'Canal de reacts no YouTube.',
+      avatarUrl,
+      bannerUrl,
+      source: 'scrape',
+    };
+  } catch (err) {
+    console.error('[YouTube Scrape] Erro ao extrair metadados:', err);
+    return null;
+  }
+}
+
+async function fetchChannelViaYouTubeApi(
+  idObj: { type: 'id' | 'handle' | 'username' | 'search'; value: string },
+  apiKey: string
+): Promise<ResolvedYouTubeChannel | null> {
+  try {
+    let apiUrl = '';
+    if (idObj.type === 'id') {
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${idObj.value}&key=${apiKey}`;
+    } else if (idObj.type === 'handle') {
+      const handle = idObj.value.startsWith('@') ? idObj.value : `@${idObj.value}`;
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(handle)}&key=${apiKey}`;
+    } else if (idObj.type === 'username') {
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forUsername=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
+    } else {
+      apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(idObj.value)}&key=${apiKey}&maxResults=1`;
+    }
+
+    let channelRes = await safeFetch(apiUrl);
+    if (!channelRes?.ok && idObj.type === 'handle') {
+      const handleWithoutAt = idObj.value.replace(/^@/, '');
+      const retryUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(handleWithoutAt)}&key=${apiKey}`;
+      channelRes = await safeFetch(retryUrl);
+    }
+
+    if (!channelRes?.ok) {
+      const errText = channelRes ? await channelRes.text().catch(() => '') : 'network error';
+      console.warn(`[YouTube API] Falha ao buscar canal (${idObj.type}):`, errText.slice(0, 200));
+      return null;
+    }
+
+    const channelData: any = await channelRes.json();
+    let item = null;
+
+    if (idObj.type === 'search' && channelData.items?.[0]) {
+      const foundChannelId = channelData.items[0].id?.channelId || channelData.items[0].snippet?.channelId;
+      if (foundChannelId) {
+        return fetchChannelViaYouTubeApi({ type: 'id', value: foundChannelId }, apiKey);
+      }
+    } else if (channelData.items?.[0]) {
+      item = channelData.items[0];
+    }
+
+    if (!item) return null;
+
+    const snippet = item.snippet || {};
+    const branding = item.brandingSettings || {};
+
+    return {
+      channelId: item.id,
+      titulo: snippet.title || 'Canal do YouTube',
+      sinopse: snippet.description || 'Canal de reacts no YouTube.',
+      avatarUrl: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || null,
+      bannerUrl: branding.image?.bannerExternalUrl || null,
+      source: 'api',
+    };
+  } catch (err) {
+    console.error('[YouTube API] Erro ao buscar canal:', err);
+    return null;
+  }
+}
+
+function buildChannelPageUrl(
+  input: string,
+  idObj: { type: 'id' | 'handle' | 'username' | 'search'; value: string }
+): string {
+  const trimmed = input.trim();
+  if (trimmed.startsWith('http')) return trimmed.split('?')[0];
+
+  if (idObj.type === 'handle') {
+    const handle = idObj.value.startsWith('@') ? idObj.value : `@${idObj.value}`;
+    return `https://www.youtube.com/${handle}`;
+  }
+  if (idObj.type === 'id') return `https://www.youtube.com/channel/${idObj.value}`;
+  if (idObj.type === 'username') return `https://www.youtube.com/user/${idObj.value}`;
+  if (idObj.type === 'search' && trimmed.includes('youtube.com/c/')) {
+    return trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/c/${idObj.value}`;
+  }
+  return `https://www.youtube.com/@${trimmed.replace(/^@/, '')}`;
+}
+
+async function resolveYouTubeChannel(inputUrl: string): Promise<ResolvedYouTubeChannel | null> {
+  const trimmed = inputUrl.trim();
+  const apiKey = getYoutubeApiKey();
+
+  const videoId = extractVideoIdFromUrl(trimmed);
+  if (videoId) {
+    const videoUrl = trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/watch?v=${videoId}`;
+    const oembed = await resolveChannelViaOEmbed(videoUrl);
+    if (oembed) {
+      const fromAuthorPage = await scrapeYouTubeChannelPage(oembed.authorUrl);
+      if (fromAuthorPage) {
+        return {
+          ...fromAuthorPage,
+          titulo: fromAuthorPage.titulo !== 'Canal do YouTube' ? fromAuthorPage.titulo : oembed.authorName,
+          avatarUrl: fromAuthorPage.avatarUrl || oembed.thumbnailUrl || null,
+          source: fromAuthorPage.source,
+        };
+      }
+
+      const authorIdObj = extractYouTubeIdentifier(oembed.authorUrl);
+      if (apiKey) {
+        const fromApi = await fetchChannelViaYouTubeApi(authorIdObj, apiKey);
+        if (fromApi) {
+          return { ...fromApi, titulo: fromApi.titulo || oembed.authorName };
+        }
+      }
+
+      const authorChannelId = authorIdObj.type === 'id'
+        ? authorIdObj.value
+        : (oembed.authorUrl.match(/channel\/(UC[a-zA-Z0-9_-]{22})/)?.[1] || '');
+
+      return {
+        channelId: authorChannelId,
+        titulo: oembed.authorName,
+        sinopse: 'Canal de reacts no YouTube.',
+        avatarUrl: oembed.thumbnailUrl || null,
+        bannerUrl: null,
+        source: 'oembed',
+      };
+    }
+  }
+
+  const idObj = extractYouTubeIdentifier(trimmed);
+
+  if (apiKey) {
+    const fromApi = await fetchChannelViaYouTubeApi(idObj, apiKey);
+    if (fromApi) return fromApi;
+  }
+
+  const pageUrl = buildChannelPageUrl(trimmed, idObj);
+  const scraped = await scrapeYouTubeChannelPage(pageUrl);
+  if (!scraped) return null;
+
+  if (apiKey && scraped.channelId.startsWith('UC')) {
+    const enriched = await fetchChannelViaYouTubeApi({ type: 'id', value: scraped.channelId }, apiKey);
+    if (enriched) {
+      return {
+        ...enriched,
+        titulo: enriched.titulo || scraped.titulo,
+        sinopse: enriched.sinopse || scraped.sinopse,
+        avatarUrl: enriched.avatarUrl || scraped.avatarUrl,
+        bannerUrl: enriched.bannerUrl || scraped.bannerUrl,
+      };
+    }
+  }
+
+  return scraped;
+}
+
 function extractYouTubeIdentifier(url: string): { type: 'id' | 'handle' | 'username' | 'search'; value: string } {
-  const cleanedUrl = url.trim();
-  
-  // E.g. https://www.youtube.com/channel/UC5f7MdfgNf6Z-jXb1Gqy8vA
+  const cleanedUrl = url.trim().split('?')[0].replace(/\/+$/, '');
+
   const channelIdMatch = cleanedUrl.match(/(?:youtube\.com\/channel\/|youtube\.com\/channels\/)(UC[a-zA-Z0-9_-]{22})/);
   if (channelIdMatch) {
     return { type: 'id', value: channelIdMatch[1] };
   }
-  
-  // E.g. https://www.youtube.com/@casimiro or @casimiro
-  const handleMatch = cleanedUrl.match(/(?:youtube\.com\/@|@)([a-zA-Z0-9_.-]+)/);
+
+  const handleMatch = cleanedUrl.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/@([a-zA-Z0-9_.-]+)/i);
   if (handleMatch) {
     return { type: 'handle', value: '@' + handleMatch[1] };
   }
 
-  // E.g. https://www.youtube.com/user/casimiro
-  const userMatch = cleanedUrl.match(/youtube\.com\/user\/([a-zA-Z0-9_.-]+)/);
+  if (cleanedUrl.startsWith('@')) {
+    return { type: 'handle', value: cleanedUrl };
+  }
+
+  const userMatch = cleanedUrl.match(/youtube\.com\/user\/([a-zA-Z0-9_.-]+)/i);
   if (userMatch) {
     return { type: 'username', value: userMatch[1] };
   }
 
-  // E.g. https://www.youtube.com/c/SomeChannelName
-  const customMatch = cleanedUrl.match(/youtube\.com\/c\/([a-zA-Z0-9_.-]+)/);
+  const customMatch = cleanedUrl.match(/youtube\.com\/c\/([a-zA-Z0-9_.-]+)/i);
   if (customMatch) {
     return { type: 'search', value: customMatch[1] };
   }
 
-  // Fallback to searching if it's just a general name or anything else
-  return { type: 'search', value: cleanedUrl };
+  return { type: 'search', value: cleanedUrl.replace(/^@/, '').trim() };
 }
 
 app.post("/api/canais/importar", async (req, res) => {
@@ -912,94 +1182,62 @@ app.post("/api/canais/importar", async (req, res) => {
     return res.status(400).json({ error: "O link ou identificador do canal é obrigatório." });
   }
 
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  const hasYoutubeKey = apiKey && apiKey !== "MY_YOUTUBE_API_KEY";
-
   try {
-    // 1. Tentar obter dados reais se a chave do YouTube estiver configurada
-    if (hasYoutubeKey) {
-      try {
-        const idObj = extractYouTubeIdentifier(url);
-        console.log(`[Importar Canal] Identificador extraído:`, idObj);
+    console.log(`[Importar Canal] Resolvendo metadados para: ${url}`);
+    const resolved = await resolveYouTubeChannel(url);
 
-        let apiUrl = "";
-        if (idObj.type === 'id') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${idObj.value}&key=${apiKey}`;
-        } else if (idObj.type === 'handle') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
-        } else if (idObj.type === 'username') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forUsername=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
-        } else {
-          apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(idObj.value)}&key=${apiKey}&maxResults=1`;
-        }
+    if (resolved && resolved.titulo) {
+      let avatarUrl = resolved.avatarUrl;
+      let bannerUrl = resolved.bannerUrl;
 
-        const channelRes = await safeFetch(apiUrl);
-        if (channelRes && channelRes.ok) {
-          const channelData: any = await channelRes.json();
-          let item = null;
-
-          if (idObj.type === 'search' && channelData.items?.[0]) {
-            const foundChannelId = channelData.items[0].id?.channelId;
-            if (foundChannelId) {
-              const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${foundChannelId}&key=${apiKey}`;
-              const detailRes = await safeFetch(detailUrl);
-              if (detailRes && detailRes.ok) {
-                const detailData: any = await detailRes.json();
-                item = detailData.items?.[0];
-              }
-            }
-          } else if (channelData.items?.[0]) {
-            item = channelData.items[0];
-          }
-
-          if (item) {
-            const channelId = item.id;
-            const snippet = item.snippet || {};
-            const branding = item.brandingSettings || {};
-
-            const titulo = snippet.title || "Canal do YouTube";
-            const sinopse = snippet.description || `Canal focado em reacts super legais de filmes, séries e jogos.`;
-            const avatarUrl = snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300";
-            const bannerUrl = branding.image?.bannerExternalUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
-
-            // Nome sem "Canal " no início para o slug
-            const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
-            const canalSlug = `canal-${cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-
-            // Criar Obra
-            const novaObra = localDb.saveObra({
-              id: canalSlug,
-              titulo: titulo.startsWith("Canal") ? titulo : `Canal ${titulo}`,
-              tipo: 'canal',
-              sinopse: sinopse,
-              ano: snippet.publishedAt ? new Date(snippet.publishedAt).getFullYear() : new Date().getFullYear(),
-              generos: ["React", "Entretenimento", "YouTube"],
-              banner: bannerUrl,
-              poster: avatarUrl,
-              trailerUrl: `https://www.youtube.com/channel/${channelId}`,
-              channelId: channelId
-            });
-
-            // Sincronizar vídeos
-            await syncChannelVideos(channelId, canalSlug);
-
-            localDb.addNotificacao({
-              titulo: `Novo Canal Importado: ${titulo}`,
-              mensagem: `O canal ${titulo} foi importado com sucesso diretamente do YouTube!`,
-              canalNome: titulo,
-              usuarioEmail: req.body.email
-            });
-
-            return res.status(200).json({ success: true, obra: novaObra, mode: 'real' });
-          }
-        }
-      } catch (ytError) {
-        console.error("Erro ao importar dados reais do YouTube:", ytError);
-        // Continue para o fallback se a API der erro
+      if (!avatarUrl && resolved.channelId.startsWith('UC')) {
+        avatarUrl = await fetchRealChannelAvatar(resolved.channelId, buildChannelPageUrl(url, extractYouTubeIdentifier(url)));
       }
+
+      const titulo = resolved.titulo;
+      const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
+      const canalSlug = `canal-${cleanName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+
+      const defaultBanner = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
+      const defaultPoster = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300";
+
+      const novaObra = localDb.saveObra({
+        id: canalSlug,
+        titulo: titulo.startsWith("Canal") ? titulo : `Canal ${titulo}`,
+        tipo: 'canal',
+        sinopse: resolved.sinopse || `Canal focado em reacts no YouTube.`,
+        ano: new Date().getFullYear(),
+        generos: ["React", "Entretenimento", "YouTube"],
+        banner: bannerUrl || avatarUrl || defaultBanner,
+        poster: avatarUrl || defaultPoster,
+        trailerUrl: resolved.channelId.startsWith('UC')
+          ? `https://www.youtube.com/channel/${resolved.channelId}`
+          : buildChannelPageUrl(url, extractYouTubeIdentifier(url)),
+        channelId: resolved.channelId.startsWith('UC') ? resolved.channelId : undefined,
+      });
+
+      if (resolved.channelId.startsWith('UC')) {
+        await syncChannelVideos(resolved.channelId, canalSlug);
+      } else {
+        const reactsAdded = await discoverReactsFromYouTube(titulo, canalSlug, 12);
+        console.log(`[Importar Canal] ${reactsAdded} reacts encontrados via busca para ${titulo}`);
+      }
+
+      localDb.addNotificacao({
+        titulo: `Novo Canal Importado: ${titulo}`,
+        mensagem: `O canal ${titulo} foi importado com dados reais do YouTube (${resolved.source}).`,
+        canalNome: titulo,
+        usuarioEmail: req.body.email
+      });
+
+      return res.status(200).json({
+        success: true,
+        obra: novaObra,
+        mode: resolved.source === 'api' ? 'real' : resolved.source,
+      });
     }
 
-    // 2. Fallback para simulação do Gemini se houver chave do Gemini configurada
+    // Fallback para simulação do Gemini se houver chave do Gemini configurada
     if (ai) {
       try {
         console.log(`[Importar Canal] Simulando canal com Gemini para "${url}"...`);
