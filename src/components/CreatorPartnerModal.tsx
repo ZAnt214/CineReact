@@ -272,8 +272,8 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   </ul>
 
                   <div className="hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20">
-                      <Youtube className="w-5 h-5 text-red-400" />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
+                      <Youtube className="w-5 h-5 text-amber-400" />
                     </span>
                     <p className="text-xs text-zinc-400 leading-relaxed">
                       <strong className="text-zinc-200 font-bold">100% das views</strong> são contabilizadas no seu canal do YouTube.
