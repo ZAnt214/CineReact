@@ -30,11 +30,11 @@ export default function LunchTimeBanner({ onClick, videoCount }: LunchTimeBanner
             Hora do Almoço
           </p>
           <h2 className="text-base sm:text-lg font-extrabold text-white">
-            Pausa na refeição? Deixa com a gente.
+            Sorteie um react para o seu almoço
           </h2>
           <p className="mt-0.5 text-xs text-zinc-500 line-clamp-1">
             {videoCount > 0
-              ? 'Sorteamos um react aleatório para acompanhar você.'
+              ? 'O CineReact escolhe um vídeo aleatório do catálogo para você assistir.'
               : 'Em breve por aqui.'}
           </p>
         </div>
