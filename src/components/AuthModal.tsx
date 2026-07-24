@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -66,46 +67,6 @@ const benefits = [
   { icon: Heart, text: 'Envie Energia da Plateia aos criadores' },
   { icon: ShieldCheck, text: 'Sincronize seu progresso em qualquer dispositivo' },
 ];
-
-function AuthLogo({ variant = 'mobile' }: { variant?: 'mobile' | 'desktop' }) {
-  const isDesktop = variant === 'desktop';
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      className={`select-none ${isDesktop ? 'text-left' : 'text-center'}`}
-      aria-label="CineReact"
-    >
-      <div
-        className={`relative inline-block ${isDesktop ? 'px-1' : 'mx-auto'}`}
-      >
-        <motion.div
-          className="absolute -inset-4 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"
-          animate={{ opacity: [0.45, 0.75, 0.45] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        <h1
-          className={`relative font-bungee leading-[0.9] tracking-tight ${
-            isDesktop
-              ? 'text-6xl xl:text-7xl'
-              : 'text-5xl sm:text-6xl'
-          }`}
-        >
-          <span className="block text-white drop-shadow-[0_6px_28px_rgba(255,255,255,0.18)]">
-            CINE
-          </span>
-          <span className="block mt-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_8px_30px_rgba(245,158,11,0.45)] -rotate-1 origin-left">
-            REACT
-            <span className="inline-block text-amber-400 ml-1 animate-bounce">!</span>
-          </span>
-        </h1>
-      </div>
-    </motion.div>
-  );
-}
 
 export default function AuthModal({
   isOpen,
@@ -370,7 +331,7 @@ export default function AuthModal({
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
 
                 <div className="relative z-10 space-y-8">
-                  <AuthLogo variant="desktop" />
+                  <CineReactLogo size="xl" animated heading />
 
                   <div>
                     <h3 className="text-lg font-black text-white leading-snug">
@@ -401,7 +362,7 @@ export default function AuthModal({
               {/* Form panel */}
               <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center">
                 <div className="md:hidden mb-8">
-                  <AuthLogo variant="mobile" />
+                  <CineReactLogo size="lg" align="center" animated />
                 </div>
                 <div className="text-center md:text-left mb-6">
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">

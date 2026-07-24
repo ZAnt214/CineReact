@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import CineReactLogo from './CineReactLogo.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Film, 
   Sparkles, 
   Compass, 
   Users, 
@@ -44,24 +44,9 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           {/* Logo */}
           <button 
             onClick={onExplore}
-            className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none cursor-pointer py-1"
+            className="group focus:outline-none cursor-pointer py-1"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px] shadow-lg shadow-amber-500/20 shrink-0">
-              <div className="w-full h-full bg-black rounded-[11px] flex items-center justify-center">
-                <Film className="w-5 h-5 text-amber-400" />
-              </div>
-            </div>
-            <div className="flex items-center select-none font-['Fredoka',sans-serif]">
-              <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-wide transition-transform duration-300 group-hover:-translate-y-0.5 drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
-                Cine
-              </span>
-              <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent tracking-wide group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] ml-0.5">
-                React
-              </span>
-              <span className="text-amber-400 font-black text-2xl animate-bounce ml-0.5 inline-block drop-shadow-[0_2px_8px_rgba(245,158,11,0.6)]">
-                !
-              </span>
-            </div>
+            <CineReactLogo size="md" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
           </button>
 
           {/* Top CTA */}
@@ -307,16 +292,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px]">
-                <div className="w-full h-full bg-black rounded-[7px] flex items-center justify-center">
-                  <Film className="w-4 h-4 text-amber-400" />
-                </div>
-              </div>
-              <span className="text-xl font-extrabold text-white font-['Fredoka',sans-serif]">
-                Cine<span className="text-amber-400">React</span>!
-              </span>
-            </div>
+            <CineReactLogo size="xs" />
 
             {/* Links */}
             <div className="flex items-center gap-6 text-xs sm:text-sm font-medium flex-wrap justify-center">

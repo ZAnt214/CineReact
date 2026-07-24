@@ -3,6 +3,7 @@ import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, 
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface HeaderProps {
   currentTab: string;
@@ -326,25 +327,9 @@ export default function Header({
               <button 
                 id="logo-button"
                 onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
-                className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none cursor-pointer py-1"
+                className="group focus:outline-none cursor-pointer py-1"
               >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1px] shadow-lg shadow-amber-500/20 shrink-0">
-                  <div className="w-full h-full bg-black rounded-[11px] flex items-center justify-center">
-                    <Film className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
-                  </div>
-                </div>
-                {/* TEXT PLAYFUL LOGO */}
-                <div className="flex items-center select-none font-['Fredoka',sans-serif]">
-                  <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-wide transition-transform duration-300 group-hover:-translate-y-0.5 drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
-                    Cine
-                  </span>
-                  <span className="text-xl sm:text-2xl md:text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent tracking-wide group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] ml-0.5">
-                    React
-                  </span>
-                  <span className="text-amber-400 font-black text-xl sm:text-2xl animate-bounce ml-0.5 inline-block drop-shadow-[0_2px_8px_rgba(245,158,11,0.6)]">
-                    !
-                  </span>
-                </div>
+                <CineReactLogo size="sm" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
               </button>
 
               {/* DESKTOP NAV */}
