@@ -997,7 +997,11 @@ export default function App() {
                         );
                       })}
 
-                      {obras.filter(o => o.tipo === 'canal').map(canal => {
+                      {obras.filter(o => o.tipo === 'canal').sort((a, b) => {
+                        if (a.destacado && !b.destacado) return -1;
+                        if (!a.destacado && b.destacado) return 1;
+                        return a.titulo.localeCompare(b.titulo);
+                      }).map(canal => {
                         const canalReacts = homeFeeds.canalFeeds[canal.id] || [];
                         if (canalReacts.length === 0) return null;
                         return (
