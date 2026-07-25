@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Sparkles, User, Heart, Trash2 } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface CommentSectionProps {
@@ -178,20 +179,13 @@ export default function CommentSection({
                 loadout={userLoadout}
                 donorBadge={!!user.isDonor}
               />
-              <div>
-                {user.isDonor ? (
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-extrabold text-xs bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
-                      {user.nome}
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-[7px] uppercase font-black text-black tracking-widest flex items-center gap-0.5">
-                      <Sparkles className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
-                    </span>
-                  </div>
-                ) : (
-                  <span className="font-bold text-xs text-zinc-200">{user.nome}</span>
-                )}
-                <span className="text-[10px] text-zinc-500 block">Deixe seu comentário e opinião para a comunidade</span>
+              <div className="min-w-0 flex-1">
+                <ProfileNameRow
+                  name={user.nome}
+                  isDonor={!!user.isDonor}
+                  loadout={userLoadout}
+                />
+                <span className="text-[10px] text-zinc-500 block mt-0.5">Deixe seu comentário e opinião para a comunidade</span>
               </div>
             </div>
           </div>
@@ -272,24 +266,15 @@ export default function CommentSection({
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {c.isDonor ? (
-                          <span className="font-extrabold text-xs bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] flex items-center gap-1.5">
-                            {c.usuarioNome}
-                            <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-[6px] uppercase font-black text-black tracking-widest flex items-center gap-0.5">
-                              <Sparkles className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="font-bold text-xs text-zinc-200">{c.usuarioNome}</span>
-                        )}
-                        
-                        <span className="text-[10px] text-zinc-500 font-mono">
-                          {getFriendlyDate(c.criadoEm)}
-                        </span>
-                      </div>
-                    </div>
+                    <ProfileNameRow
+                      name={c.usuarioNome}
+                      isDonor={!!c.isDonor}
+                      profileDisplay={c.profileDisplay}
+                      loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
+                      timestamp={getFriendlyDate(c.criadoEm)}
+                      donorBadgeSize="md"
+                    />
+
 
                     <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">{c.texto}</p>
 
