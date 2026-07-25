@@ -20,6 +20,8 @@ import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
 import { PremiumFrameRing, PremiumFullPreview, PremiumRewardSurface } from './PremiumRewardSurface.tsx';
 import RewardObtainInfo from './RewardObtainInfo.tsx';
+import TitleRewardVisual from './TitleRewardVisual.tsx';
+import CreatorTagVisual from './CreatorTagVisual.tsx';
 import type { InventoryItemView, RewardItemDefinition } from '../../types/gamification.ts';
 
 type RewardLike = Pick<
@@ -200,32 +202,23 @@ export function RewardPreviewThumb({
 
     case 'tag':
       return (
-        <span
-          className={`${s.box} rounded-full flex items-center justify-center px-2 text-center font-bold leading-tight ${s.text} shadow-lg`}
-          style={
-            item.creatorColors
-              ? {
-                  background: `linear-gradient(135deg, ${item.creatorColors.from}, ${item.creatorColors.to})`,
-                  color: item.creatorColors.text,
-                  boxShadow: `0 0 16px ${item.creatorColors.from}55`,
-                }
-              : { background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fffbeb' }
-          }
-        >
-          {item.creatorName?.split(' ')[0] || item.name.split(' ')[0]}
-        </span>
+        <CreatorTagVisual
+          id={item.id}
+          name={item.name}
+          creatorName={item.creatorName}
+          creatorColors={item.creatorColors}
+          size={size}
+        />
       );
 
     case 'title':
       return (
-        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
-          <div className="flex flex-col items-center">
-            <Award className="w-4 h-4 mb-0.5" />
-            <span className="text-[8px] font-black uppercase tracking-wider text-center leading-none">
-              {item.name.slice(0, 8)}
-            </span>
-          </div>
-        </PremiumRewardSurface>
+        <TitleRewardVisual
+          name={item.name}
+          rarity={item.rarity}
+          item={item}
+          size={size}
+        />
       );
 
     case 'badge': {
@@ -310,38 +303,36 @@ export function RewardProfileContextPreview({
 
       case 'title':
         return (
-          <motion.div className="text-center space-y-2">
-            <p className="text-lg font-black text-white">{userName}</p>
-            <motion.p
-              className="text-sm font-bold text-amber-400 uppercase tracking-[0.2em]"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {item.name}
-            </motion.p>
-            <p className="text-[10px] text-zinc-500">Título exibido abaixo do nome</p>
+          <motion.div className="flex flex-col items-center gap-4 w-full">
+            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 w-full max-w-[280px]">
+              <p className="text-center text-lg font-black text-white mb-3">{userName}</p>
+              <div className="flex justify-center">
+                <TitleRewardVisual name={item.name} rarity={item.rarity} item={item} size="lg" />
+              </div>
+            </div>
+            <p className="text-[10px] text-zinc-500 text-center max-w-[220px]">
+              O título aparece em destaque logo abaixo do seu nome no perfil público
+            </p>
           </motion.div>
         );
 
       case 'tag':
         return (
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm font-bold text-white">{userName}</p>
-            <span
-              className="text-xs font-bold px-4 py-1.5 rounded-full"
-              style={
-                item.creatorColors
-                  ? {
-                      background: `linear-gradient(90deg, ${item.creatorColors.from}, ${item.creatorColors.to})`,
-                      color: item.creatorColors.text,
-                    }
-                  : undefined
-              }
-            >
-              {item.name}
-            </span>
-            <p className="text-[10px] text-zinc-500">Tag visível no perfil público</p>
-          </div>
+          <motion.div className="flex flex-col items-center gap-4 w-full">
+            <motion.div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 w-full max-w-[280px] flex flex-col items-center gap-3">
+              <p className="text-sm font-bold text-white">{userName}</p>
+              <CreatorTagVisual
+                id={item.id}
+                name={item.name}
+                creatorName={item.creatorName}
+                creatorColors={item.creatorColors}
+                size="lg"
+              />
+            </motion.div>
+            <p className="text-[10px] text-zinc-500 text-center max-w-[240px]">
+              Tags de criador ficam visíveis no seu perfil para mostrar sua comunidade favorita
+            </p>
+          </motion.div>
         );
 
       case 'badge': {
