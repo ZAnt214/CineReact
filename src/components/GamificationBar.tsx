@@ -53,7 +53,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900/80 via-zinc-950/90 to-amber-950/20 p-4 backdrop-blur-sm"
+      className="rounded-2xl border border-zinc-800/70 bg-zinc-900/30 p-4"
     >
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>

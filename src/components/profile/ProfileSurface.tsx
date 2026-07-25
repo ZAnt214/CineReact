@@ -23,11 +23,11 @@ export default function ProfileSurface({
   innerClassName = '',
   children,
 }: ProfileSurfaceProps) {
-  const pad = variant === 'hero' ? 'p-6 md:p-10' : variant === 'panel' ? 'p-8' : 'p-8';
+  const pad = variant === 'hero' ? 'p-6 md:p-10' : variant === 'panel' ? 'p-6' : 'p-6 md:p-8';
 
   const card = (
     <div
-      className={`profile-surface-root relative overflow-hidden border border-white/10 bg-zinc-950/30 ${rounded} ${pad} min-h-0 ${className}`}
+      className={`profile-surface-root relative overflow-hidden border border-zinc-800/60 bg-zinc-950/40 ${rounded} ${pad} min-h-0 ${className}`}
     >
       <div className={`relative z-10 ${innerClassName}`}>{children}</div>
     </div>

@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Film, Play, User, LogOut, Check, Menu, X, Youtube, Send, Heart, Sparkles, Settings, Bookmark, ShieldAlert, CreditCard, ChevronRight, Download, UtensilsCrossed, Trophy } from 'lucide-react';
+import { Search, Bell, Play, User, Check, Menu, X, Youtube, Send, Heart, Sparkles, CreditCard, Download } from 'lucide-react';
 import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
+import ProfilePanel from './profile/ProfilePanel.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
-import ProfileSurface from './profile/ProfileSurface.tsx';
-import ProfileThemeScope from './profile/ProfileThemeScope.tsx';
-import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import type { GamificationMeResponse } from '../types/gamification.ts';
 
 interface HeaderProps {
@@ -764,319 +762,24 @@ export default function Header({
       {/* FULL-SCREEN PROFILE PANEL */}
       <AnimatePresence>
         {showProfileMenu && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col justify-start"
+            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col"
           >
-            <ProfileThemeScope loadout={gamificationData?.profile.loadout} className="flex-1 flex flex-col min-h-full bg-zinc-950/98 backdrop-blur-3xl">
-            <div className="w-full border-b border-white/10 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-10">
-              <div className="cine-container w-full h-20 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                    <Film className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-extrabold text-sm tracking-wider profile-text uppercase">CineReact Club</span>
-                    <span className="text-[10px] profile-text-muted font-mono tracking-wider">Painel do Membro</span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2.5 px-4.5 py-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 hover:shadow-lg transition-all cursor-pointer group"
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-wider font-mono">Fechar Painel</span>
-                  <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
-                </button>
-              </div>
-            </div>
-
-            {user.isLoggedIn ? (
-              <div className="cine-container w-full py-12 md:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
-                
-                {/* Column 1: Left Profile */}
-                <ProfileSurface
-                  loadout={gamificationData?.profile.loadout}
-                  variant="panel"
-                  themed={false}
-                  className="lg:col-span-4 flex flex-col justify-between items-center text-center shadow-2xl min-h-[460px] w-full"
-                >
-                  <div className="flex flex-col items-center w-full relative z-10">
-                    <div className="relative mb-6">
-                      <ProfileAvatar
-                        photoUrl={user.avatar}
-                        alt={user.nome}
-                        size="xl"
-                        loadout={gamificationData?.profile.loadout}
-                        donorBadge={!!user.isDonor}
-                      />
-                    </div>
-
-                    <ProfileNameRow
-                      name={user.nome}
-                      isDonor={!!user.isDonor}
-                      loadout={gamificationData?.profile.loadout}
-                      nameSize="lg"
-                      className="flex flex-col items-center"
-                    />
-                    <p className="profile-text-muted text-xs mt-1 mb-4 font-mono">{user.email}</p>
-                    {/* Descrição / Biografia do Usuário */}
-                    <p className="profile-text-subtle text-xs text-center max-w-xs px-2 line-clamp-3 mb-5 italic leading-relaxed">
-                      {user.descricao ? `"${user.descricao}"` : "Escreva uma biografia nas configurações de conta!"}
-                    </p>
-                    
-                    <div className="flex flex-wrap justify-center gap-2 w-full">
-                      {user.isAdmin && (
-                        <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-extrabold tracking-widest uppercase">
-                          Administrador
-                        </span>
-                      )}
-                      {user.isDonor ? (
-                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/10 text-amber-400 border border-amber-500/35 text-[10px] font-extrabold tracking-widest uppercase shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-                          Apoiador VIP
-                        </span>
-                      ) : (
-                        <span className="px-3 py-1 rounded-full bg-zinc-900/80 text-zinc-500 border border-zinc-800 text-[10px] font-extrabold tracking-widest uppercase">
-                          Conta Gratuita
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="w-full mt-8 space-y-2 relative z-10">
-                    {user.isAdmin && (
-                      <button 
-                        onClick={() => { setCurrentTab('admin'); setShowProfileMenu(false); }}
-                        className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 hover:border-amber-500/50 text-amber-300 font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-amber-950/20"
-                      >
-                        <ShieldAlert className="w-4 h-4 text-amber-400" />
-                        <span>Painel do Administrador</span>
-                      </button>
-                    )}
-
-                    <button 
-                      onClick={() => { setCurrentTab('doacoes'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/35 text-amber-400 hover:text-amber-300 rounded-2xl transition-all cursor-pointer font-bold text-xs"
-                    >
-                      <Heart className="w-4 h-4 fill-amber-500/15 text-amber-400" />
-                      <span>{user.isDonor ? "Apoiar CineReact Novamente" : "Seja um Apoiador VIP"}</span>
-                    </button>
-
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 hover:border-red-500/20 text-red-400 hover:text-red-300 rounded-2xl transition-all cursor-pointer font-bold text-xs"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sair da Conta</span>
-                    </button>
-                  </div>
-                </ProfileSurface>
-
-                {/* Column 2 & 3: Bento Grid */}
-                <div className="lg:col-span-8 flex flex-col gap-8 w-full">
-                  <div>
-                    <h3 className="text-[11px] uppercase font-mono tracking-widest profile-text-muted mb-4 px-2 font-bold">Menu de Navegação</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <button 
-                        onClick={() => { setCurrentTab('inicio'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'inicio' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'inicio' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <Film className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'inicio' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Início / Catálogo</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Explorar catálogo de obras, lançamentos e animes em destaque.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('club'); setShowProfileMenu(false); onOpenGamification?.(); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'club' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'club' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <Trophy className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'club' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">CineReact Club</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">XP, conquistas, missões, selos, rankings e Loja Spotlight.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('canais'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'canais' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'canais' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <Play className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'canais' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Canais Seguidos</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Veja atualizações e reacts de canais do YouTube que você segue.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('categoria-almoco'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'categoria-almoco' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'categoria-almoco' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <UtensilsCrossed className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'categoria-almoco' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Hora do Almoço</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Sorteie um react aleatório para acompanhar no seu almoço.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('minha-lista'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'minha-lista' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'minha-lista' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <Bookmark className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'minha-lista' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Meus Favoritos</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Sua coleção de reacts salvos, obras favoritas e histórico.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('configuracoes'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'configuracoes' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'configuracoes' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'}`}>
-                            <Settings className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'configuracoes' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Configurações</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Gerencie seu perfil, apelido de membro e altere sua senha com segurança.</p>
-                        </div>
-                      </button>
-
-                      <button 
-                        onClick={() => { setCurrentTab('doacoes'); setShowProfileMenu(false); }}
-                        className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                          currentTab === 'doacoes' 
-                            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' 
-                            : 'bg-zinc-900/30 border-zinc-900 hover:bg-zinc-900/60 hover:border-zinc-800/80'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <div className={`p-2.5 rounded-xl ${currentTab === 'doacoes' ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-900 text-zinc-400 group-hover:text-amber-400'}`}>
-                            <Heart className="w-5 h-5" />
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${currentTab === 'doacoes' ? 'text-amber-400' : 'text-zinc-600 group-hover:text-amber-400'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-zinc-100 group-hover:text-amber-400 transition-colors">Apoiar o Canal (Doações)</h4>
-                          <p className="text-zinc-500 text-[11px] leading-snug mt-1">Faça uma doação PIX para apoiar o CineReact e ganhe benefícios exclusivos de VIP.</p>
-                        </div>
-                      </button>
-
-                      {user.isAdmin && (
-                        <button 
-                          onClick={() => { setCurrentTab('admin'); setShowProfileMenu(false); }}
-                          className={`text-left p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between h-36 ${
-                            currentTab === 'admin' 
-                              ? 'bg-amber-500/20 border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
-                              : 'bg-amber-950/20 border-amber-500/30 hover:bg-amber-900/40 hover:border-amber-500/50'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start w-full">
-                            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
-                              <ShieldAlert className="w-5 h-5" />
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-amber-400 transition-transform group-hover:translate-x-1" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-sm text-amber-300 group-hover:text-amber-200 transition-colors">Painel Admin</h4>
-                            <p className="text-zinc-400 text-[11px] leading-snug mt-1">Gerenciar catálogo de obras, cadastrar canais e sincronizar sistema.</p>
-                          </div>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Creator Request Box */}
-                  <div className="bg-zinc-900/20 border border-zinc-850 p-6 rounded-3xl mt-2 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
-                    <div className="space-y-1.5 flex-1 max-w-xl">
-                      <div className="flex items-center gap-1.5 text-xs text-amber-400 font-extrabold tracking-wide uppercase"><Youtube className="w-4.5 h-4.5 text-amber-400" /> Seja um Criador de Reacts</div>
-                      <h4 className="text-base font-black text-white">Seu canal não está listado no catálogo?</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed">Envie uma solicitação de inclusão para nossa equipe! Cadastramos e sincronizamos todos os seus reacts com o player oficial do YouTube para gerar mais visualizações.</p>
-                    </div>
-                    <button 
-                      onClick={() => setShowRequestModal(true)}
-                      className="px-5 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-500/20 active:scale-[0.98]"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      Solicitar Cadastro
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            ) : (
-              <div className="max-w-md w-full mx-auto px-6 py-24 text-center space-y-6">
-                <div className="w-16 h-16 rounded-3xl bg-zinc-900 border border-zinc-850 flex items-center justify-center mx-auto text-zinc-500">
-                  <User className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-bold text-white">Acesse sua conta para ver o Painel</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">Faça login para gerenciar seu perfil, conferir notificações, e ter acesso total às suas listas e canais favoritos.</p>
-                <button 
-                  onClick={() => { setShowProfileMenu(false); onOpenAuth?.('login'); }}
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs rounded-xl cursor-pointer"
-                >
-                  Entrar na Conta
-                </button>
-              </div>
-            )}
-            </ProfileThemeScope>
+            <ProfilePanel
+              user={user}
+              currentTab={currentTab}
+              gamificationData={gamificationData}
+              onClose={() => setShowProfileMenu(false)}
+              onNavigate={setCurrentTab}
+              onOpenGamification={onOpenGamification}
+              onLogout={handleLogout}
+              onOpenAuth={onOpenAuth}
+              onRequestCreator={() => setShowRequestModal(true)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
