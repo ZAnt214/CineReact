@@ -71,7 +71,8 @@ export default function GamificationPage({
   loading,
   onRefresh,
   onPurchase,
-  onSaveLoadout,
+  onEquip,
+  onUnequip,
   onRedeemCode,
   onLoadLeaderboard,
   leaderboards,
@@ -236,7 +237,8 @@ export default function GamificationPage({
               inventory={data.inventory}
               loadout={profile.loadout}
               spotlight={profile.spotlight}
-              onSave={onSaveLoadout}
+              onEquip={onEquip}
+              onUnequip={onUnequip}
               onPurchase={onPurchase}
               onRedeemCode={onRedeemCode}
             />

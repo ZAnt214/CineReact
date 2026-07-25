@@ -262,7 +262,7 @@ const SEASONAL: RewardItemDefinition[] = [
   {
     id: 'title-aniversario-cinereact',
     name: 'Título: Pioneiro',
-    description: 'Celebre o aniversário da plataforma.',
+    description: 'Pioneiro que marcou presença no aniversário da plataforma.',
     category: 'title',
     rarity: 'exclusivo',
     cost: 0,
@@ -297,11 +297,11 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   { id: 'frame-rainbow', name: 'Moldura Rainbow', description: 'Borda arco-íris em movimento perpétuo.', category: 'frame', rarity: 'lendário', cost: 450, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 450 Spotlight', previewClass: 'ring-2 ring-white/30', animated: true, visualStyle: 'rainbow' },
 
   // Títulos
-  { id: 'title-entusiasta', name: 'Entusiasta', description: 'Exiba abaixo do seu nome.', category: 'title', rarity: 'comum', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Entusiasta' },
-  { id: 'title-especialista', name: 'Especialista', description: 'Domínio de conteúdo.', category: 'title', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Especialista' },
-  { id: 'title-curador', name: 'Curador', description: 'Mestre das listas.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
-  { id: 'title-lenda', name: 'Lenda', description: 'Título lendário.', category: 'title', rarity: 'lendário', cost: 500, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
-  { id: 'title-oraculo', name: 'Oráculo', description: 'Para os maiores comentaristas.', category: 'title', rarity: 'épico', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Oráculo da Comunidade' },
+  { id: 'title-entusiasta', name: 'Entusiasta', description: 'Quem vive o cinema reagindo a cada cena.', category: 'title', rarity: 'comum', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Entusiasta' },
+  { id: 'title-especialista', name: 'Especialista', description: 'Referência em análises e curadoria.', category: 'title', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Especialista' },
+  { id: 'title-curador', name: 'Curador', description: 'Monta listas que inspiram a comunidade.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-lenda', name: 'Lenda', description: 'Presença lendária no CineReact Club.', category: 'title', rarity: 'lendário', cost: 500, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-oraculo', name: 'Oráculo', description: 'Voz respeitada nos comentários da comunidade.', category: 'title', rarity: 'épico', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Oráculo da Comunidade' },
 
   // Avatares
   { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema com balde dourado.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'popcorn', previewGradient: 'from-amber-600 via-orange-500 to-yellow-400' },

@@ -273,7 +273,7 @@ export interface PublicProfileDisplay {
   avatarVisual?: RewardItemDefinition['avatarVisual'];
   themeVisualStyle?: RewardVisualStyle;
   themeTone?: 'dark' | 'light';
-  title?: { id: string; name: string; rarity: RewardRarity };
+  title?: { id: string; name: string; rarity: RewardRarity; description?: string };
   tags: PublicProfileTag[];
   badgeIds: string[];
 }

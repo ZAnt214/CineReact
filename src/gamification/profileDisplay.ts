@@ -65,7 +65,7 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
     themeVisualStyle,
     themeTone,
     title: titleItem
-      ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity }
+      ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity, description: titleItem.description }
       : undefined,
     tags,
     badgeIds: [...normalized.badges],

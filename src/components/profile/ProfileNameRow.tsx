@@ -65,25 +65,36 @@ export default function ProfileNameRow({
       </div>
 
       {(display.title || display.tags.length > 0) && (
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col items-center gap-1.5 w-full">
           {display.title && (
-            <TitleRewardVisual
-              name={display.title.name}
-              rarity={display.title.rarity}
-              item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
-              size="sm"
-            />
+            <div className="flex flex-col items-center gap-1">
+              <TitleRewardVisual
+                name={display.title.name}
+                rarity={display.title.rarity}
+                item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
+                size="sm"
+              />
+              {display.title.description && (
+                <p className="text-[10px] profile-text-muted italic text-center max-w-[220px] leading-snug">
+                  {display.title.description}
+                </p>
+              )}
+            </div>
           )}
-          {display.tags.map((tag) => (
-            <CreatorTagVisual
-              key={tag.id}
-              id={tag.id}
-              name={tag.name}
-              creatorName={tag.creatorName}
-              creatorColors={tag.creatorColors}
-              size="sm"
-            />
-          ))}
+          {display.tags.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
+              {display.tags.map((tag) => (
+                <CreatorTagVisual
+                  key={tag.id}
+                  id={tag.id}
+                  name={tag.name}
+                  creatorName={tag.creatorName}
+                  creatorColors={tag.creatorColors}
+                  size="sm"
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
