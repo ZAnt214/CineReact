@@ -18,6 +18,9 @@ const DEFAULT_LOADOUT = (): ProfileLoadout => ({
   badges: [],
 });
 
+/** Conta do dono da plataforma — recebe desbloqueio total do catálogo */
+export const FULL_UNLOCK_OWNER_EMAIL = 'mateusvini.t10@gmail.com';
+
 export function migrateProfile(profile: GamificationProfile): GamificationProfile {
   if (!profile.inventory) {
     const legacy = profile.unlockedCosmetics || ['frame-amber'];
@@ -47,6 +50,39 @@ export function migrateProfile(profile: GamificationProfile): GamificationProfil
 
 export function hasReward(profile: GamificationProfile, itemId: string): boolean {
   return profile.inventory.some((e) => e.itemId === itemId);
+}
+
+export function unlockAllCatalogRewards(profile: GamificationProfile): number {
+  migrateProfile(profile);
+  const now = new Date().toISOString();
+  let added = 0;
+
+  for (const item of REWARDS_CATALOG) {
+    if (!hasReward(profile, item.id)) {
+      profile.inventory.push({
+        itemId: item.id,
+        unlockedAt: now,
+        unlockMethod: 'legacy',
+        unlockSource: 'owner_full_unlock',
+      });
+      added++;
+    }
+  }
+
+  for (const promo of PROMO_CODES) {
+    if (!profile.redeemedCodes.includes(promo.code)) {
+      unlockReward(profile, promo.rewardItemId, 'promo_code', promo.code);
+      profile.redeemedCodes.push(promo.code);
+    }
+  }
+
+  if (added > 0) profile.updatedAt = now;
+  return added;
+}
+
+export function ensureOwnerFullUnlock(profile: GamificationProfile): void {
+  if (profile.email.toLowerCase() !== FULL_UNLOCK_OWNER_EMAIL) return;
+  unlockAllCatalogRewards(profile);
 }
 
 export function unlockReward(
