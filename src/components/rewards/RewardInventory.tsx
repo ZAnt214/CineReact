@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, Sparkles, Lock, Check, Package, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_ORDER, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
+import RewardObtainInfo from './RewardObtainInfo.tsx';
+import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
 import type { InventoryItemView, RewardCategory, RewardRarity } from '../../types/gamification.ts';
 
 interface RewardInventoryProps {
@@ -176,6 +178,8 @@ function RewardCard({
   onPreview: () => void;
 }) {
   const style = RARITY_STYLES[item.rarity];
+  const visualLabel = resolveVisualStyle(item);
+  const visualCfg = getVisualStyle(visualLabel);
 
   return (
     <motion.div
@@ -202,17 +206,16 @@ function RewardCard({
             </span>
           </motion.div>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5">
-            {CATEGORY_LABELS[item.category]}
+            {CATEGORY_LABELS[item.category]} · <span className={visualCfg.accent}>{visualCfg.label}</span>
           </p>
         </div>
       </div>
 
-      <p className="text-[11px] text-zinc-400 leading-snug mb-2">{item.description}</p>
-      <p className="text-[10px] text-zinc-600 font-mono mb-3">
-        {item.owned
-          ? `Desbloqueado ${item.unlockedAt ? new Date(item.unlockedAt).toLocaleDateString('pt-BR') : ''}`
-          : item.obtainHint}
-      </p>
+      <p className="text-[11px] text-zinc-400 leading-snug mb-3">{item.description}</p>
+
+      <div className="mb-3">
+        <RewardObtainInfo item={item} variant="card" />
+      </div>
 
       {item.creatorColors && (
         <span
