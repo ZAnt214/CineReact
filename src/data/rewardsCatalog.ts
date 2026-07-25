@@ -349,6 +349,101 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
   },
 ];
 
+/** Coleção completa concedida a criadores que produziram arte do Programa de Criadores */
+export const CREATOR_PROGRAM_ART_BUNDLE_ID = 'creator-program-art';
+
+export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
+  {
+    id: 'theme-atelie-visionario',
+    name: 'Ateliê Visionário',
+    description: 'Tema cinematográfico com holofote âmbar, reflexos teal e acabamento de estúdio profissional.',
+    category: 'theme',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    previewGradient: 'from-amber-950 via-zinc-950 to-teal-950',
+    animated: true,
+    visualStyle: 'atelier',
+  },
+  {
+    id: 'frame-atelie-visionario',
+    name: 'Moldura Ateliê',
+    description: 'Anel duplo com brilho âmbar e pulso teal — assinatura visual dos artistas oficiais.',
+    category: 'frame',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    previewClass: 'ring-[2.5px] ring-amber-400/75 shadow-[0_0_36px_rgba(251,191,36,0.5)] profile-avatar-ring',
+    animated: true,
+    visualStyle: 'atelier',
+  },
+  {
+    id: 'title-artista-oficial',
+    name: 'Artista Oficial',
+    description: 'Título reservado a quem assina a identidade visual do Programa de Criadores.',
+    category: 'title',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    visualStyle: 'atelier',
+  },
+  {
+    id: 'badge-atelie-visionario',
+    name: 'Selo Ateliê',
+    description: 'Emblema de artista credenciado com acabamento premium.',
+    category: 'badge',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    visualStyle: 'atelier',
+  },
+  {
+    id: 'avatar-atelie-visionario',
+    name: 'Avatar Ateliê',
+    description: 'Paleta criativa com gradiente de estúdio e brilho cinematográfico.',
+    category: 'avatar',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    avatarVisual: 'atelier',
+    previewGradient: 'from-amber-600 via-teal-600 to-violet-700',
+    animated: true,
+    visualStyle: 'atelier',
+  },
+  {
+    id: 'tag-arte-programa-criadores',
+    name: 'Arte Oficial',
+    description: 'Tag exclusiva de quem criou arte para o Programa de Criadores CineReact.',
+    category: 'tag',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'creator_program_art',
+    obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
+    bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
+    limited: true,
+    creatorName: 'Programa de Criadores',
+    creatorColors: { from: '#d97706', to: '#14b8a6', text: '#fef3c7' },
+    visualStyle: 'atelier',
+  },
+];
+
+export const CREATOR_PROGRAM_ART_ITEM_IDS = CREATOR_PROGRAM_ART_ITEMS.map((i) => i.id);
+
 const SEASONAL: RewardItemDefinition[] = [
   {
     id: 'frame-halloween-2026',
@@ -549,6 +644,7 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   { id: 'card-holographic', name: 'Cartão Holográfico', description: 'Efeito holográfico exclusivo.', category: 'profile_card', rarity: 'mítico', cost: 0, unlockMethod: 'promo_code', obtainHint: 'Resgate com código promocional CINEREACT2026', previewGradient: 'from-cyan-900/40 via-purple-900/40 to-pink-900/40', animated: true, visualStyle: 'holographic' },
 
   ...CREATOR_TAGS,
+  ...CREATOR_PROGRAM_ART_ITEMS,
   ...SEASONAL,
 ];
 
@@ -557,6 +653,7 @@ export const PROMO_CODES: PromoCodeDefinition[] = [
   { code: 'ESTREIACINEREACT', rewardItemId: 'title-primeira-fileira', maxUses: 5000 },
   { code: 'SPOTLIGHTVIP', rewardItemId: 'title-lenda', expiresAt: '2027-12-31' },
   { code: 'FANITLIN', rewardItemId: 'tag-squad-fanit-lin' },
+  { code: 'ATELIEVISION', bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID, maxUses: 500 },
 ];
 
 export const CREATOR_WATCH_REQUIREMENTS: Record<string, { itemId: string; watches: number }[]> = {

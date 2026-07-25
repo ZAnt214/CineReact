@@ -13,6 +13,7 @@ import {
   Gift,
   Lock,
   CheckCircle2,
+  Palette,
 } from 'lucide-react';
 import { UNLOCK_METHOD_INFO, formatObtainText } from '../../data/rewardVisualStyles.ts';
 import type { InventoryItemView, UnlockMethod } from '../../types/gamification.ts';
@@ -29,6 +30,7 @@ const METHOD_ICONS: Record<UnlockMethod, React.ElementType> = {
   event: Zap,
   streak: Flame,
   legacy: Gift,
+  creator_program_art: Palette,
 };
 
 interface RewardObtainInfoProps {

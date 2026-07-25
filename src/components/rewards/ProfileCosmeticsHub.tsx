@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import {
   CATEGORY_LABELS, CATEGORY_INFO, RARITY_ORDER, RARITY_STYLES,
+  CREATOR_PROGRAM_ART_BUNDLE_ID,
 } from '../../data/rewardsCatalog.ts';
 import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import RewardObtainInfo from './RewardObtainInfo.tsx';
@@ -253,6 +254,11 @@ export default function ProfileCosmeticsHub({
 
               <div className="flex flex-col flex-1 p-2.5 bg-zinc-950/80 gap-1">
                 <span className="text-[8px] uppercase font-mono text-zinc-500 truncate">{CATEGORY_LABELS[item.category]}</span>
+                {item.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID && (
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-amber-400/90 truncate">
+                    Coleção Ateliê Visionário
+                  </span>
+                )}
                 <h3 className="font-bold text-[11px] text-white truncate">{item.name}</h3>
 
                 {isCollectible && item.owned ? (
@@ -338,7 +344,9 @@ export default function ProfileCosmeticsHub({
               <p className="text-sm text-zinc-300 mb-4">
                 {pendingEquipped
                   ? `Deseja remover "${pendingItem.name}" do seu perfil?`
-                  : `Deseja equipar "${pendingItem.name}" no seu perfil?`}
+                  : pendingItem.id === 'theme-atelie-visionario'
+                    ? `Deseja equipar a Coleção Ateliê Visionário completa no seu perfil?`
+                    : `Deseja equipar "${pendingItem.name}" no seu perfil?`}
               </p>
 
               <div className="flex gap-2">

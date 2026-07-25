@@ -216,6 +216,18 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
     accent: 'text-pink-100',
     shimmer: true,
   },
+  atelier: {
+    label: 'Ateliê Visionário',
+    gradient: 'from-zinc-950 via-amber-950 to-teal-950',
+    gradientCss:
+      'radial-gradient(ellipse 130% 90% at 50% -15%, rgba(251,191,36,0.42) 0%, transparent 58%), radial-gradient(ellipse 85% 65% at 88% 72%, rgba(20,184,166,0.28) 0%, transparent 52%), radial-gradient(ellipse 75% 55% at 8% 78%, rgba(168,85,247,0.22) 0%, transparent 48%), linear-gradient(168deg, #09090b 0%, #1c1917 32%, #0f172a 68%, #042f2e 100%)',
+    ring: 'ring-[2.5px] ring-amber-400/75 shadow-[0_0_36px_rgba(251,191,36,0.5)]',
+    glow: 'shadow-[0_0_40px_rgba(20,184,166,0.32)]',
+    accent: 'text-amber-100',
+    animated: true,
+    shimmer: true,
+    particles: 'sparkles',
+  },
 };
 
 export const UNLOCK_METHOD_INFO: Record<
@@ -233,6 +245,7 @@ export const UNLOCK_METHOD_INFO: Record<
   event: { label: 'Evento especial', shortLabel: 'Evento' },
   streak: { label: 'Sequência diária', shortLabel: 'Sequência' },
   legacy: { label: 'Legado', shortLabel: 'Legado' },
+  creator_program_art: { label: 'Programa de Criadores — Arte', shortLabel: 'Arte oficial' },
 };
 
 export function getVisualStyle(style?: RewardVisualStyle): VisualStyleConfig {
@@ -281,6 +294,9 @@ const ITEM_VISUAL_MAP: Record<string, RewardVisualStyle> = {
   'theme-rainbow': 'rainbow', 'theme-galaxy': 'galaxy', 'theme-candy': 'candy',
   'bg-rainbow': 'rainbow', 'bg-candy-clouds': 'candy',
   'effect-rainbow-aura': 'rainbow', 'frame-rainbow': 'rainbow',
+  'theme-atelie-visionario': 'atelier', 'frame-atelie-visionario': 'atelier',
+  'title-artista-oficial': 'atelier', 'badge-atelie-visionario': 'atelier',
+  'avatar-atelie-visionario': 'atelier', 'tag-arte-programa-criadores': 'atelier',
 };
 
 export function formatObtainText(
