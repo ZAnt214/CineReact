@@ -12,6 +12,7 @@ export interface ProfileNameRowProps {
   loadout?: ProfileLoadout | null;
   timestamp?: string;
   donorBadgeSize?: 'sm' | 'md';
+  nameSize?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export default function ProfileNameRow({
   loadout,
   timestamp,
   donorBadgeSize = 'sm',
+  nameSize = 'sm',
   className = '',
 }: ProfileNameRowProps) {
   const display = useMemo(
@@ -35,11 +37,18 @@ export default function ProfileNameRow({
       ? 'text-[6px] px-1.5 py-0.5'
       : 'text-[7px] px-1.5 py-0.5';
 
+  const nameClass =
+    nameSize === 'lg'
+      ? 'text-2xl md:text-3xl font-black text-white'
+      : nameSize === 'md'
+        ? 'text-sm font-bold text-zinc-100'
+        : 'text-xs font-bold text-zinc-200';
+
   return (
     <div className={`min-w-0 space-y-1 ${className}`}>
       <div className="flex items-center gap-2 flex-wrap">
         {isDonor ? (
-          <span className="font-extrabold text-xs bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] flex items-center gap-1.5">
+          <span className={`${nameClass} bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] flex items-center gap-1.5`}>
             {name}
             <span
               className={`rounded bg-gradient-to-r from-amber-500 to-yellow-400 uppercase font-black text-black tracking-widest flex items-center gap-0.5 ${donorClass}`}
@@ -48,7 +57,7 @@ export default function ProfileNameRow({
             </span>
           </span>
         ) : (
-          <span className="font-bold text-xs text-zinc-200">{name}</span>
+          <span className={nameClass}>{name}</span>
         )}
 
         {timestamp && (

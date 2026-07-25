@@ -135,22 +135,19 @@ export function PremiumFrameRing({
   visualStyle,
   size = 'md',
   children,
-  showOrnaments = true,
 }: {
   visualStyle?: RewardVisualStyle;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   children: React.ReactNode;
-  showOrnaments?: boolean;
 }) {
   const style = getVisualStyle(visualStyle);
   const pad = size === 'sm' ? 'p-[3px]' : size === 'lg' ? 'p-[5px]' : size === 'xl' ? 'p-[6px]' : 'p-1';
-  const gemSize = size === 'sm' ? 'w-1.5 h-1.5' : size === 'lg' || size === 'xl' ? 'w-2.5 h-2.5' : 'w-2 h-2';
   const useRotatingBorder = style.animated && !!style.gradientCss;
 
   const borderStyle: React.CSSProperties | undefined = useRotatingBorder
     ? {
         background: style.gradientCss,
-        backgroundSize: style.animated ? '200% 200%' : undefined,
+        backgroundSize: style.animated ? '220% 220%' : undefined,
       }
     : undefined;
 
@@ -161,35 +158,35 @@ export function PremiumFrameRing({
       animate={
         style.animated
           ? useRotatingBorder
-            ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'], boxShadow: ['0 0 12px rgba(255,255,255,0.08)', '0 0 28px rgba(168,85,247,0.35)', '0 0 12px rgba(255,255,255,0.08)'] }
-            : { boxShadow: ['0 0 12px rgba(255,255,255,0.1)', '0 0 28px rgba(168,85,247,0.35)', '0 0 12px rgba(255,255,255,0.1)'] }
+            ? {
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                boxShadow: [
+                  '0 0 16px rgba(255,255,255,0.12)',
+                  '0 0 36px rgba(168,85,247,0.55)',
+                  '0 0 16px rgba(255,255,255,0.12)',
+                ],
+              }
+            : {
+                boxShadow: [
+                  '0 0 14px rgba(255,255,255,0.15)',
+                  '0 0 36px rgba(168,85,247,0.5)',
+                  '0 0 14px rgba(255,255,255,0.15)',
+                ],
+              }
           : undefined
       }
-      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
     >
-      {showOrnaments && (style.animated || visualStyle === 'gold' || visualStyle === 'holographic') && (
-        <>
-          <span className={`absolute -top-0.5 left-1/2 -translate-x-1/2 rounded-full ${gemSize} bg-white/90 shadow-[0_0_8px_rgba(255,255,255,0.6)] z-20`} />
-          <span className={`absolute -bottom-0.5 left-1/2 -translate-x-1/2 rounded-full ${gemSize} bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.7)] z-20`} />
-          <span className={`absolute top-1/2 -left-0.5 -translate-y-1/2 rounded-full ${gemSize} bg-fuchsia-300/90 shadow-[0_0_8px_rgba(232,121,249,0.6)] z-20`} />
-          <span className={`absolute top-1/2 -right-0.5 -translate-y-1/2 rounded-full ${gemSize} bg-cyan-300/90 shadow-[0_0_8px_rgba(34,211,238,0.6)] z-20`} />
-        </>
-      )}
-
-      <div className="relative rounded-full bg-zinc-950 p-[2px] shadow-inner shadow-black/50">
+      <div className="relative rounded-full bg-zinc-950 p-[2px] shadow-inner shadow-black/60">
         {style.shimmer && (
           <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/15 to-white/0 pointer-events-none z-10"
+            className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/25 to-white/0 pointer-events-none z-10"
             animate={{ rotate: [0, 360] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
           />
         )}
         {children}
       </div>
-
-      {style.particles === 'sparkles' && size !== 'sm' && (
-        <SparkleField count={size === 'xl' ? 6 : 4} />
-      )}
     </motion.div>
   );
 }

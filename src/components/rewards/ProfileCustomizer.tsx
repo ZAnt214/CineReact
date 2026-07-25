@@ -1,12 +1,11 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Save, RotateCcw, Sparkles, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
-import { getLoadoutPreviewStyles } from '../../gamification/rewardsEngine.ts';
-import { AvatarRewardVisual, RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
+import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import ProfileAvatar from '../profile/ProfileAvatar.tsx';
-import TitleRewardVisual from './TitleRewardVisual.tsx';
-import CreatorTagVisual from './CreatorTagVisual.tsx';
+import ProfileSurface from '../profile/ProfileSurface.tsx';
+import ProfileNameRow from '../profile/ProfileNameRow.tsx';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -28,10 +27,6 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
   }, [loadout]);
 
   const owned = inventory.filter((i) => i.owned);
-  const styles = useMemo(() => getLoadoutPreviewStyles(draft), [draft]);
-
-  const titleItem = draft.title ? inventory.find((i) => i.id === draft.title) : null;
-  const tagItems = draft.tags.map((id) => inventory.find((i) => i.id === id)).filter(Boolean) as InventoryItemView[];
 
   const toggleSlot = (category: keyof ProfileLoadout, itemId: string, max: number) => {
     setDraft((prev) => {
@@ -78,62 +73,31 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
       {/* Preview */}
       <div className="space-y-4">
         <h2 className="text-lg font-black text-white">Pré-visualização ao vivo</h2>
-        <motion.div
-          layout
-          className={`relative overflow-hidden rounded-3xl border border-zinc-800 p-8 min-h-[420px] ${styles.backgroundClass} ${styles.themeClass}`}
-        >
-          {styles.effectClass && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 via-transparent to-purple-500/10 pointer-events-none"
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 4, repeat: Infinity }}
+        <ProfileSurface loadout={draft} variant="preview" className="min-h-[420px]">
+          <div className="flex flex-col items-center text-center">
+            <ProfileAvatar
+              photoUrl={user.avatar}
+              alt={user.nome}
+              size="lg"
+              loadout={draft}
+              showEffect
+              className="mb-4"
             />
-          )}
 
-          <div className={`relative rounded-2xl border border-zinc-800/60 p-6 ${styles.cardClass}`}>
-            <div className="flex flex-col items-center text-center">
-              <ProfileAvatar
-                photoUrl={user.avatar}
-                alt={user.nome}
-                size="lg"
-                loadout={draft}
-                showEffect
-                className="mb-4"
-              />
+            <ProfileNameRow name={user.nome} loadout={draft} className="w-full flex flex-col items-center" />
 
-              <h3 className="text-xl font-black text-white">{user.nome}</h3>
-              {titleItem && (
-                <div className="mt-2">
-                  <TitleRewardVisual name={titleItem.name} rarity={titleItem.rarity} item={titleItem} size="md" />
-                </div>
-              )}
-
-              <div className="flex flex-wrap justify-center gap-2 mt-3">
-                {tagItems.map((tag) => (
-                  <CreatorTagVisual
-                    key={tag.id}
-                    id={tag.id}
-                    name={tag.name}
-                    creatorName={tag.creatorName}
-                    creatorColors={tag.creatorColors}
-                    size="sm"
-                  />
-                ))}
-              </div>
-
-              <div className="flex gap-2 mt-4">
-                {draft.badges.map((id) => {
-                  const b = inventory.find((i) => i.id === id);
-                  return b ? (
-                    <span key={id} title={b.name}>
-                      <RewardPreviewThumb item={b} size="sm" />
-                    </span>
-                  ) : null;
-                })}
-              </div>
+            <div className="flex gap-2 mt-4">
+              {draft.badges.map((id) => {
+                const b = inventory.find((i) => i.id === id);
+                return b ? (
+                  <span key={id} title={b.name}>
+                    <RewardPreviewThumb item={b} size="sm" />
+                  </span>
+                ) : null;
+              })}
             </div>
           </div>
-        </motion.div>
+        </ProfileSurface>
 
         <div className="flex gap-3">
           <button

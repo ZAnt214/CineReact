@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { Heart, Users, Crown, Radio } from 'lucide-react';
 
 type TagTier = 'fan' | 'squad' | 'vip' | 'community';
@@ -12,10 +11,10 @@ function getTagTier(id?: string, name?: string): TagTier {
 }
 
 const TIER_CONFIG: Record<TagTier, { label: string; Icon: React.ElementType }> = {
-  fan: { label: 'FÃ', Icon: Heart },
-  squad: { label: 'SQUAD', Icon: Users },
+  fan: { label: 'Fã', Icon: Heart },
+  squad: { label: 'Squad', Icon: Users },
   vip: { label: 'VIP', Icon: Crown },
-  community: { label: 'COMUNIDADE', Icon: Radio },
+  community: { label: 'Comunidade', Icon: Radio },
 };
 
 interface CreatorTagVisualProps {
@@ -41,52 +40,28 @@ export default function CreatorTagVisual({
   const displayName = creatorName || name.replace(/^(Fã|Comunidade|Squad|VIP)\s*/i, '');
 
   const sizes = {
-    sm: { box: 'min-w-[3rem] max-w-[4.5rem]', pad: 'px-1.5 py-1', title: 'text-[6px]', sub: 'text-[5px]', icon: 'w-2.5 h-2.5' },
-    md: { box: 'min-w-[5rem] max-w-[7rem]', pad: 'px-2.5 py-1.5', title: 'text-[8px]', sub: 'text-[6px]', icon: 'w-3 h-3' },
-    lg: { box: 'min-w-[8rem] max-w-[12rem]', pad: 'px-4 py-2.5', title: 'text-xs', sub: 'text-[9px]', icon: 'w-4 h-4' },
+    sm: { pad: 'px-2 py-0.5', tier: 'text-[7px]', name: 'text-[8px]', icon: 'w-2.5 h-2.5' },
+    md: { pad: 'px-2.5 py-1', tier: 'text-[8px]', name: 'text-[9px]', icon: 'w-3 h-3' },
+    lg: { pad: 'px-3 py-1.5', tier: 'text-[9px]', name: 'text-[11px]', icon: 'w-3.5 h-3.5' },
   };
   const s = sizes[size];
 
-  const from = creatorColors?.from || '#f59e0b';
-  const to = creatorColors?.to || '#d97706';
-  const text = creatorColors?.text || '#fffbeb';
+  const from = creatorColors?.from || '#d97706';
+  const to = creatorColors?.to || '#f59e0b';
 
   return (
-    <motion.div
-      className={`relative ${className}`}
-      whileHover={{ scale: 1.04, y: -1 }}
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-zinc-900/60 backdrop-blur-sm ${s.pad} ${className}`}
+      title={name}
     >
-      {/* Shield shape via clip or rounded design */}
-      <div
-        className={`relative ${s.box} ${s.pad} rounded-xl border border-white/25 overflow-hidden`}
-        style={{
-          background: `linear-gradient(145deg, ${from}, ${to})`,
-          boxShadow: `0 4px 20px ${from}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
-          color: text,
-        }}
+      <span
+        className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-white/90"
+        style={{ background: `linear-gradient(135deg, ${from}cc, ${to}cc)` }}
       >
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent"
-          animate={{ opacity: [0.2, 0.45, 0.2] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-        <div className="relative flex flex-col items-center text-center gap-0.5">
-          <motion.div
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/20 border border-white/20"
-            animate={tier === 'vip' ? { boxShadow: ['0 0 0 rgba(255,255,255,0)', '0 0 12px rgba(255,255,255,0.4)', '0 0 0 rgba(255,255,255,0)'] } : undefined}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <TierIcon className={s.icon} strokeWidth={2.5} />
-            <span className={`font-black tracking-widest ${s.sub}`}>{tierCfg.label}</span>
-          </motion.div>
-          <span className={`font-black leading-tight ${s.title}`}>{displayName}</span>
-        </div>
-      </div>
-      {/* Pin accent */}
-      <div
-        className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 border border-white/30"
-        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-      />
-    </motion.div>
+        <TierIcon className={s.icon} strokeWidth={2.5} />
+        <span className={`font-bold uppercase tracking-wide ${s.tier}`}>{tierCfg.label}</span>
+      </span>
+      <span className={`font-medium text-zinc-300 truncate max-w-[5.5rem] ${s.name}`}>{displayName}</span>
+    </span>
   );
 }

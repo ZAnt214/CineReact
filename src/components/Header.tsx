@@ -7,6 +7,8 @@ import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import ProfileSurface from './profile/ProfileSurface.tsx';
+import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import type { GamificationMeResponse } from '../types/gamification.ts';
 
 interface HeaderProps {
@@ -683,6 +685,7 @@ export default function Header({
                       size="sm"
                       loadout={gamificationData?.profile.loadout}
                       donorBadge={!!user.isDonor}
+                      showEffect
                     />
                   ) : (
                     <div className="w-7.5 h-7.5 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-all shadow-inner">
@@ -793,9 +796,11 @@ export default function Header({
               <div className="cine-container w-full py-12 md:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
                 
                 {/* Column 1: Left Profile */}
-                <div className="lg:col-span-4 bg-gradient-to-b from-zinc-900/40 to-zinc-900/10 border border-zinc-800/60 rounded-3xl p-8 flex flex-col justify-between items-center text-center relative overflow-hidden shadow-2xl min-h-[460px] w-full">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-                  
+                <ProfileSurface
+                  loadout={gamificationData?.profile.loadout}
+                  variant="panel"
+                  className="lg:col-span-4 flex flex-col justify-between items-center text-center shadow-2xl min-h-[460px] w-full"
+                >
                   <div className="flex flex-col items-center w-full relative z-10">
                     <div className="relative mb-6">
                       <ProfileAvatar
@@ -804,12 +809,18 @@ export default function Header({
                         size="xl"
                         loadout={gamificationData?.profile.loadout}
                         donorBadge={!!user.isDonor}
+                        showEffect
                       />
                     </div>
-                    
-                    <h2 className="text-xl md:text-2xl font-black text-zinc-100 tracking-tight leading-tight">{user.nome}</h2>
-                    <p className="text-zinc-500 text-xs mt-1 mb-4 font-mono">{user.email}</p>
 
+                    <ProfileNameRow
+                      name={user.nome}
+                      isDonor={!!user.isDonor}
+                      loadout={gamificationData?.profile.loadout}
+                      nameSize="lg"
+                      className="flex flex-col items-center"
+                    />
+                    <p className="text-zinc-500 text-xs mt-1 mb-4 font-mono">{user.email}</p>
                     {/* Descrição / Biografia do Usuário */}
                     <p className="text-zinc-400 text-xs text-center max-w-xs px-2 line-clamp-3 mb-5 italic leading-relaxed">
                       {user.descricao ? `"${user.descricao}"` : "Escreva uma biografia nas configurações de conta!"}
@@ -860,7 +871,7 @@ export default function Header({
                       <span>Sair da Conta</span>
                     </button>
                   </div>
-                </div>
+                </ProfileSurface>
 
                 {/* Column 2 & 3: Bento Grid */}
                 <div className="lg:col-span-8 flex flex-col gap-8 w-full">
