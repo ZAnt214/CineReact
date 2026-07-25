@@ -73,7 +73,7 @@ export function createDefaultProfile(email: string): GamificationProfile {
     unlockedAchievements: [],
     unlockedSeals: [],
     inventory: [{ itemId: 'frame-amber', unlockedAt: now, unlockMethod: 'default' }],
-    loadout: { tags: [], badges: [] },
+    loadout: {},
     redeemedCodes: [],
     missionProgress: {},
     completedMissions: {},

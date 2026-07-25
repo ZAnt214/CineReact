@@ -128,7 +128,6 @@ export default function GamificationPage({
                 alt={user.nome}
                 size="lg"
                 loadout={profile?.loadout}
-                showEffect
               />
               {profile?.featuredInfluencer && (
                 <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] font-black text-black uppercase z-20">
@@ -390,7 +389,6 @@ export default function GamificationPage({
                       alt={entry.username}
                       size="md"
                       profileDisplay={entry.profileDisplay}
-                      showEffect
                     />
                     <div className="flex-1 min-w-0">
                       <ProfileNameRow

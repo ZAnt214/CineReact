@@ -8,6 +8,7 @@ import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileSurface from './profile/ProfileSurface.tsx';
+import ProfileThemeScope from './profile/ProfileThemeScope.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import type { GamificationMeResponse } from '../types/gamification.ts';
 
@@ -685,7 +686,6 @@ export default function Header({
                       size="sm"
                       loadout={gamificationData?.profile.loadout}
                       donorBadge={!!user.isDonor}
-                      showEffect
                     />
                   ) : (
                     <div className="w-7.5 h-7.5 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-all shadow-inner">
@@ -769,17 +769,18 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-zinc-950/98 backdrop-blur-3xl z-[100] overflow-y-auto flex flex-col justify-start"
+            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col justify-start"
           >
-            <div className="w-full border-b border-zinc-900 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-10">
+            <ProfileThemeScope loadout={gamificationData?.profile.loadout} className="flex-1 flex flex-col min-h-full bg-zinc-950/98 backdrop-blur-3xl">
+            <div className="w-full border-b border-white/10 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-10">
               <div className="cine-container w-full h-20 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                     <Film className="w-5 h-5 text-amber-400" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-extrabold text-sm tracking-wider text-zinc-100 uppercase">CineReact Club</span>
-                    <span className="text-[10px] text-zinc-500 font-mono tracking-wider">Painel do Membro</span>
+                    <span className="font-extrabold text-sm tracking-wider profile-text uppercase">CineReact Club</span>
+                    <span className="text-[10px] profile-text-muted font-mono tracking-wider">Painel do Membro</span>
                   </div>
                 </div>
                 <button 
@@ -799,6 +800,7 @@ export default function Header({
                 <ProfileSurface
                   loadout={gamificationData?.profile.loadout}
                   variant="panel"
+                  themed={false}
                   className="lg:col-span-4 flex flex-col justify-between items-center text-center shadow-2xl min-h-[460px] w-full"
                 >
                   <div className="flex flex-col items-center w-full relative z-10">
@@ -809,7 +811,6 @@ export default function Header({
                         size="xl"
                         loadout={gamificationData?.profile.loadout}
                         donorBadge={!!user.isDonor}
-                        showEffect
                       />
                     </div>
 
@@ -820,9 +821,9 @@ export default function Header({
                       nameSize="lg"
                       className="flex flex-col items-center"
                     />
-                    <p className="text-zinc-500 text-xs mt-1 mb-4 font-mono">{user.email}</p>
+                    <p className="profile-text-muted text-xs mt-1 mb-4 font-mono">{user.email}</p>
                     {/* Descrição / Biografia do Usuário */}
-                    <p className="text-zinc-400 text-xs text-center max-w-xs px-2 line-clamp-3 mb-5 italic leading-relaxed">
+                    <p className="profile-text-subtle text-xs text-center max-w-xs px-2 line-clamp-3 mb-5 italic leading-relaxed">
                       {user.descricao ? `"${user.descricao}"` : "Escreva uma biografia nas configurações de conta!"}
                     </p>
                     
@@ -876,7 +877,7 @@ export default function Header({
                 {/* Column 2 & 3: Bento Grid */}
                 <div className="lg:col-span-8 flex flex-col gap-8 w-full">
                   <div>
-                    <h3 className="text-[11px] uppercase font-mono tracking-widest text-zinc-500 mb-4 px-2 font-bold">Menu de Navegação</h3>
+                    <h3 className="text-[11px] uppercase font-mono tracking-widest profile-text-muted mb-4 px-2 font-bold">Menu de Navegação</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <button 
                         onClick={() => { setCurrentTab('inicio'); setShowProfileMenu(false); }}
@@ -1075,6 +1076,7 @@ export default function Header({
                 </button>
               </div>
             )}
+            </ProfileThemeScope>
           </motion.div>
         )}
       </AnimatePresence>

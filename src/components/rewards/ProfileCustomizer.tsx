@@ -8,7 +8,25 @@ import ProfileNameRow from '../profile/ProfileNameRow.tsx';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
-const EMPTY_LOADOUT = (): ProfileLoadout => ({ tags: [], badges: [] });
+const EMPTY_LOADOUT = (): ProfileLoadout => ({});
+
+const SLOT_GROUPS: { key: keyof ProfileLoadout; label: string }[] = [
+  { key: 'theme', label: 'Tema' },
+  { key: 'frame', label: 'Moldura' },
+  { key: 'title', label: 'Título' },
+  { key: 'avatar', label: 'Avatar' },
+  { key: 'reaction', label: 'Reação' },
+  { key: 'emoji', label: 'Emoji' },
+];
+
+const CAT_MAP: Record<string, string> = {
+  frame: 'frame',
+  theme: 'theme',
+  title: 'title',
+  avatar: 'avatar',
+  reaction: 'reaction',
+  emoji: 'emoji',
+};
 
 interface ProfileCustomizerProps {
   user: UserState;
@@ -17,40 +35,12 @@ interface ProfileCustomizerProps {
   onSave: (loadout: ProfileLoadout) => Promise<boolean>;
 }
 
-const SLOT_GROUPS: { key: keyof ProfileLoadout; label: string; max: number }[] = [
-  { key: 'frame', label: 'Moldura', max: 1 },
-  { key: 'background', label: 'Fundo', max: 1 },
-  { key: 'theme', label: 'Tema', max: 1 },
-  { key: 'effect', label: 'Efeito', max: 1 },
-  { key: 'profileCard', label: 'Cartão', max: 1 },
-  { key: 'title', label: 'Título', max: 1 },
-  { key: 'avatar', label: 'Avatar', max: 1 },
-  { key: 'tags', label: 'Tags', max: 3 },
-  { key: 'badges', label: 'Emblemas', max: 2 },
-  { key: 'reaction', label: 'Reação', max: 1 },
-  { key: 'emoji', label: 'Emoji', max: 1 },
-];
-
-const CAT_MAP: Record<string, string> = {
-  frame: 'frame',
-  background: 'background',
-  theme: 'theme',
-  effect: 'effect',
-  profileCard: 'profile_card',
-  title: 'title',
-  avatar: 'avatar',
-  tags: 'tag',
-  badges: 'badge',
-  reaction: 'reaction',
-  emoji: 'emoji',
-};
-
 export default function ProfileCustomizer({ user, inventory, loadout, onSave }: ProfileCustomizerProps) {
   const [draft, setDraft] = useState<ProfileLoadout>(loadout);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [previewItem, setPreviewItem] = useState<InventoryItemView | null>(null);
-  const [openCategory, setOpenCategory] = useState<string | null>('frame');
+  const [openCategory, setOpenCategory] = useState<string | null>('theme');
 
   useEffect(() => {
     setDraft(loadout);
@@ -59,64 +49,37 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
   const owned = inventory.filter((i) => i.owned);
 
   const equippedItems = useMemo(() => {
-    const ids: { slot: keyof ProfileLoadout; id: string }[] = [];
-    for (const { key } of SLOT_GROUPS) {
-      const val = draft[key];
-      if (Array.isArray(val)) {
-        val.forEach((id) => ids.push({ slot: key, id }));
-      } else if (val) {
-        ids.push({ slot: key, id: val });
-      }
-    }
-    return ids.map(({ slot, id }) => ({
-      slot,
-      item: inventory.find((i) => i.id === id),
-    })).filter((e) => e.item);
+    return SLOT_GROUPS
+      .map(({ key }) => {
+        const id = draft[key];
+        if (!id || typeof id !== 'string') return null;
+        const item = inventory.find((i) => i.id === id);
+        return item ? { slot: key, item } : null;
+      })
+      .filter((e): e is { slot: keyof ProfileLoadout; item: InventoryItemView } => !!e);
   }, [draft, inventory]);
 
-  const toggleSlot = (category: keyof ProfileLoadout, itemId: string, max: number) => {
+  const toggleSlot = (category: keyof ProfileLoadout, itemId: string) => {
     setDraft((prev) => {
-      const next = { ...prev, tags: [...prev.tags], badges: [...prev.badges] };
-      if (category === 'tags' || category === 'badges') {
-        const arr = next[category] as string[];
-        if (arr.includes(itemId)) {
-          next[category] = arr.filter((id) => id !== itemId) as never;
-        } else {
-          next[category] = [...arr, itemId].slice(-max) as never;
-        }
-      } else {
-        const current = next[category];
-        (next as Record<string, unknown>)[category] = current === itemId ? undefined : itemId;
-      }
+      const next = { ...prev };
+      const current = next[category];
+      (next as Record<string, unknown>)[category] = current === itemId ? undefined : itemId;
       return next;
     });
     setSaved(false);
   };
 
-  const removeItem = (category: keyof ProfileLoadout, itemId: string) => {
+  const removeItem = (category: keyof ProfileLoadout) => {
     setDraft((prev) => {
-      const next = { ...prev, tags: [...prev.tags], badges: [...prev.badges] };
-      if (category === 'tags' || category === 'badges') {
-        next[category] = (next[category] as string[]).filter((id) => id !== itemId) as never;
-      } else if ((next[category] as string | undefined) === itemId) {
-        (next as Record<string, unknown>)[category] = undefined;
-      }
+      const next = { ...prev };
+      delete next[category];
       return next;
     });
     setSaved(false);
   };
 
   const clearSlot = (category: keyof ProfileLoadout) => {
-    setDraft((prev) => {
-      const next = { ...prev, tags: [...prev.tags], badges: [...prev.badges] };
-      if (category === 'tags' || category === 'badges') {
-        next[category] = [] as never;
-      } else {
-        (next as Record<string, unknown>)[category] = undefined;
-      }
-      return next;
-    });
-    setSaved(false);
+    removeItem(category);
   };
 
   const clearAll = () => {
@@ -142,20 +105,9 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
               alt={user.nome}
               size="lg"
               loadout={draft}
-              showEffect
               className="mb-4"
             />
             <ProfileNameRow name={user.nome} loadout={draft} className="w-full flex flex-col items-center" />
-            <div className="flex gap-2 mt-4 flex-wrap justify-center">
-              {draft.badges.map((id) => {
-                const b = inventory.find((i) => i.id === id);
-                return b ? (
-                  <span key={id} title={b.name}>
-                    <RewardPreviewThumb item={b} size="sm" />
-                  </span>
-                ) : null;
-              })}
-            </div>
           </div>
         </ProfileSurface>
 
@@ -211,7 +163,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                   <span className="max-w-[72px] truncate">{item.name}</span>
                   <button
                     type="button"
-                    onClick={() => removeItem(slot, item.id)}
+                    onClick={() => removeItem(slot)}
                     title="Remover"
                     className="p-1 rounded-full hover:bg-red-500/20 text-zinc-500 hover:text-red-400 cursor-pointer"
                   >
@@ -224,13 +176,13 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
         )}
 
         <div className="space-y-3">
-          {SLOT_GROUPS.map(({ key, label, max }) => {
+          {SLOT_GROUPS.map(({ key, label }) => {
             const cat = CAT_MAP[key as string];
             const items = owned.filter((i) => i.category === cat);
             if (items.length === 0) return null;
 
             const selected = draft[key];
-            const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+            const selectedId = typeof selected === 'string' ? selected : undefined;
             const isOpen = openCategory === key;
             const categoryLabel = CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] || label;
 
@@ -244,13 +196,13 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-white">{categoryLabel}</p>
                     <p className="text-[10px] text-zinc-500 mt-0.5">
-                      {selectedIds.length > 0
-                        ? `${selectedIds.length} equipado${selectedIds.length > 1 ? 's' : ''}${max > 1 ? ` · máx. ${max}` : ''}`
+                      {selectedId
+                        ? '1 equipado'
                         : `${items.length} disponíve${items.length === 1 ? 'l' : 'is'}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {selectedIds.length > 0 && (
+                    {selectedId && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); clearSlot(key); }}
@@ -266,7 +218,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                 {isOpen && (
                   <div className="px-3 pb-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {items.map((item) => {
-                      const isOn = selectedIds.includes(item.id);
+                      const isOn = selectedId === item.id;
                       const style = RARITY_STYLES[item.rarity];
                       return (
                         <div
@@ -279,7 +231,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                         >
                           <button
                             type="button"
-                            onClick={() => toggleSlot(key, item.id, max)}
+                            onClick={() => toggleSlot(key, item.id)}
                             className="w-full p-3 flex flex-col items-center gap-2 text-center cursor-pointer"
                           >
                             <RewardPreviewThumb item={item} size="md" />
@@ -301,7 +253,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                             {isOn && (
                               <button
                                 type="button"
-                                onClick={() => removeItem(key, item.id)}
+                                onClick={() => removeItem(key)}
                                 title="Remover"
                                 className="p-1 rounded-md bg-zinc-950/80 border border-zinc-700 text-zinc-400 hover:text-red-400 cursor-pointer"
                               >

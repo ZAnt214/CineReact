@@ -242,6 +242,43 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   to { transform: rotate(360deg); }
 }
 
+.profile-themed-scope[data-theme-tone="dark"] {
+  --profile-text: #fafafa;
+  --profile-text-muted: #d4d4d8;
+  --profile-text-subtle: #a1a1aa;
+  --profile-theme-scrim: rgba(9, 9, 11, 0.52);
+}
+
+.profile-themed-scope[data-theme-tone="light"] {
+  --profile-text: #18181b;
+  --profile-text-muted: #3f3f46;
+  --profile-text-subtle: #52525b;
+  --profile-theme-scrim: rgba(255, 255, 255, 0.58);
+}
+
+.profile-themed-scope {
+  --profile-text: #fafafa;
+  --profile-text-muted: #d4d4d8;
+  --profile-text-subtle: #a1a1aa;
+  --profile-theme-scrim: rgba(9, 9, 11, 0.35);
+}
+
+.profile-theme-scrim {
+  background: var(--profile-theme-scrim);
+}
+
+.profile-text {
+  color: var(--profile-text);
+}
+
+.profile-text-muted {
+  color: var(--profile-text-muted);
+}
+
+.profile-text-subtle {
+  color: var(--profile-text-subtle);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .profile-surface-gradient,
   .profile-surface-shimmer::after,

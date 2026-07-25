@@ -120,16 +120,11 @@ export interface UnlockedRewardEntry {
 
 export interface ProfileLoadout {
   frame?: string;
-  tags: string[];
   title?: string;
   avatar?: string;
-  badges: string[];
   theme?: string;
-  effect?: string;
-  background?: string;
   reaction?: string;
   emoji?: string;
-  profileCard?: string;
 }
 
 /** @deprecated use ProfileLoadout */
@@ -274,14 +269,9 @@ export interface PublicProfileDisplay {
   frameVisualStyle?: RewardVisualStyle;
   frameAnimated?: boolean;
   avatarVisual?: RewardItemDefinition['avatarVisual'];
-  effectAnimated?: boolean;
-  effectVisualStyle?: RewardVisualStyle;
   themeVisualStyle?: RewardVisualStyle;
-  backgroundVisualStyle?: RewardVisualStyle;
-  profileCardVisualStyle?: RewardVisualStyle;
+  themeTone?: 'dark' | 'light';
   title?: { id: string; name: string; rarity: RewardRarity };
-  tags: PublicProfileTag[];
-  badgeIds: string[];
 }
 
 export interface LeaderboardEntry {
@@ -320,16 +310,22 @@ export interface PromoCodeDefinition {
   expiresAt?: string;
 }
 
-export const LOADOUT_SLOTS: Record<RewardCategory, { max: number; loadoutKey: keyof ProfileLoadout }> = {
+export const ACTIVE_COSMETIC_CATEGORIES = [
+  'frame',
+  'title',
+  'avatar',
+  'theme',
+  'reaction',
+  'emoji',
+] as const;
+
+export type ActiveCosmeticCategory = (typeof ACTIVE_COSMETIC_CATEGORIES)[number];
+
+export const LOADOUT_SLOTS: Record<ActiveCosmeticCategory, { max: number; loadoutKey: keyof ProfileLoadout }> = {
   frame: { max: 1, loadoutKey: 'frame' },
-  tag: { max: 3, loadoutKey: 'tags' },
   title: { max: 1, loadoutKey: 'title' },
   avatar: { max: 1, loadoutKey: 'avatar' },
-  badge: { max: 2, loadoutKey: 'badges' },
   theme: { max: 1, loadoutKey: 'theme' },
-  effect: { max: 1, loadoutKey: 'effect' },
-  background: { max: 1, loadoutKey: 'background' },
   reaction: { max: 1, loadoutKey: 'reaction' },
   emoji: { max: 1, loadoutKey: 'emoji' },
-  profile_card: { max: 1, loadoutKey: 'profileCard' },
 };

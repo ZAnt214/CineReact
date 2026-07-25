@@ -11,6 +11,7 @@ import {
 import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import RewardObtainInfo from './RewardObtainInfo.tsx';
 import type { InventoryItemView, RewardCategory, RewardRarity } from '../../types/gamification.ts';
+import { ACTIVE_COSMETIC_CATEGORIES } from '../../types/gamification.ts';
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   frame: Frame,
@@ -27,7 +28,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_ORDER: (RewardCategory | 'all')[] = [
-  'all', 'title', 'tag', 'frame', 'avatar', 'badge', 'theme', 'background', 'effect', 'profile_card', 'reaction', 'emoji',
+  'all', 'theme', 'title', 'frame', 'avatar', 'reaction', 'emoji',
 ];
 
 interface RewardInventoryProps {
@@ -60,6 +61,7 @@ export default function RewardInventory({
 
   const filtered = useMemo(() => {
     return items
+      .filter((i) => (ACTIVE_COSMETIC_CATEGORIES as readonly string[]).includes(i.category))
       .filter((i) => (category === 'all' ? true : i.category === category))
       .filter((i) => (ownedOnly ? i.owned : true))
       .filter((i) => !search || i.name.toLowerCase().includes(search.toLowerCase()) || i.description.toLowerCase().includes(search.toLowerCase()))
