@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
+import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export interface ProfileNameRowProps {
@@ -63,14 +64,26 @@ export default function ProfileNameRow({
         )}
       </div>
 
-      {display.title && (
+      {(display.title || display.tags.length > 0) && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <TitleRewardVisual
-            name={display.title.name}
-            rarity={display.title.rarity}
-            item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
-            size="sm"
-          />
+          {display.title && (
+            <TitleRewardVisual
+              name={display.title.name}
+              rarity={display.title.rarity}
+              item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
+              size="sm"
+            />
+          )}
+          {display.tags.map((tag) => (
+            <CreatorTagVisual
+              key={tag.id}
+              id={tag.id}
+              name={tag.name}
+              creatorName={tag.creatorName}
+              creatorColors={tag.creatorColors}
+              size="sm"
+            />
+          ))}
         </div>
       )}
     </div>

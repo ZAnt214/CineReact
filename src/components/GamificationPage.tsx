@@ -14,8 +14,6 @@ import {
   Sparkles,
   TrendingUp,
   Medal,
-  ShoppingBag,
-  Package,
   Palette,
   ChevronRight,
   Star,
@@ -28,8 +26,7 @@ import GamificationBar from './GamificationBar.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileSurface from './profile/ProfileSurface.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
-import RewardInventory from './rewards/RewardInventory.tsx';
-import ProfileCustomizer from './rewards/ProfileCustomizer.tsx';
+import ProfileCosmeticsHub from './rewards/ProfileCosmeticsHub.tsx';
 import type { GamificationMeResponse, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
 import type { UserState } from '../types.ts';
 
@@ -56,7 +53,7 @@ interface GamificationPageProps {
   leaderboards: Partial<Record<LeaderboardType, import('../types/gamification.ts').LeaderboardEntry[]>>;
 }
 
-type TabId = 'overview' | 'inventory' | 'customize' | 'achievements' | 'missions' | 'seals' | 'rankings';
+type TabId = 'overview' | 'cosmetics' | 'achievements' | 'missions' | 'seals' | 'rankings';
 
 const LEADERBOARD_TABS: { id: LeaderboardType; label: string }[] = [
   { id: 'xp', label: 'XP Geral' },
@@ -74,8 +71,6 @@ export default function GamificationPage({
   loading,
   onRefresh,
   onPurchase,
-  onEquip,
-  onUnequip,
   onSaveLoadout,
   onRedeemCode,
   onLoadLeaderboard,
@@ -103,8 +98,7 @@ export default function GamificationPage({
 
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: 'Visão Geral', icon: TrendingUp },
-    { id: 'inventory', label: 'Inventário', icon: Package },
-    { id: 'customize', label: 'Personalizar', icon: Palette },
+    { id: 'cosmetics', label: 'Perfil & Cosméticos', icon: Palette },
     { id: 'achievements', label: 'Conquistas', icon: Trophy },
     { id: 'missions', label: 'Missões', icon: Target },
     { id: 'seals', label: 'Selos', icon: Stamp },
@@ -236,25 +230,15 @@ export default function GamificationPage({
             </div>
           )}
 
-          {tab === 'inventory' && data && profile && (
-            <RewardInventory
-              items={data.inventory}
-              spotlight={profile.spotlight}
-              userName={user.nome}
-              userAvatar={user.avatar}
-              onEquip={onEquip}
-              onUnequip={onUnequip}
-              onPurchase={onPurchase}
-              onRedeemCode={onRedeemCode}
-            />
-          )}
-
-          {tab === 'customize' && data && profile && (
-            <ProfileCustomizer
+          {tab === 'cosmetics' && data && profile && (
+            <ProfileCosmeticsHub
               user={user}
               inventory={data.inventory}
               loadout={profile.loadout}
+              spotlight={profile.spotlight}
               onSave={onSaveLoadout}
+              onPurchase={onPurchase}
+              onRedeemCode={onRedeemCode}
             />
           )}
 
