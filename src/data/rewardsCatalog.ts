@@ -41,7 +41,7 @@ export const CATEGORY_INFO: Record<string, { icon: string; description: string; 
   },
   title: {
     icon: '👑',
-    description: 'Título exclusivo exibido abaixo do seu nome — status e prestígio.',
+    description: 'Título exibido abaixo do seu nome — para fãs, espectadores e membros do Club.',
     equipHint: 'Equipa 1 título',
   },
   avatar: {
@@ -261,14 +261,50 @@ const SEASONAL: RewardItemDefinition[] = [
   },
   {
     id: 'title-aniversario-cinereact',
-    name: 'Título: Pioneiro',
-    description: 'Pioneiro que marcou presença no aniversário da plataforma.',
+    name: 'Pioneiro',
+    description: 'Marcou presença no aniversário da plataforma.',
     category: 'title',
     rarity: 'exclusivo',
     cost: 0,
     unlockMethod: 'event',
     obtainHint: 'Evento Aniversário CineReact',
     seasonalEvent: 'aniversario-cinereact',
+    limited: true,
+  },
+  {
+    id: 'title-estreia-cinereact',
+    name: 'Estreia CineReact',
+    description: 'Esteve na estreia oficial da plataforma.',
+    category: 'title',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'event',
+    obtainHint: 'Evento de Estreia CineReact',
+    seasonalEvent: 'estreia-cinereact',
+    limited: true,
+  },
+  {
+    id: 'title-primeira-fileira',
+    name: 'Primeira Fileira',
+    description: 'Sentou na frente quando as luzes apagaram pela primeira vez.',
+    category: 'title',
+    rarity: 'lendário',
+    cost: 0,
+    unlockMethod: 'promo_code',
+    obtainHint: 'Código promocional ESTREIACINEREACT',
+    seasonalEvent: 'estreia-cinereact',
+    limited: true,
+  },
+  {
+    id: 'title-red-carpet',
+    name: 'Red Carpet',
+    description: 'Passou pelo tapete vermelho da estreia do CineReact.',
+    category: 'title',
+    rarity: 'mítico',
+    cost: 0,
+    unlockMethod: 'event',
+    obtainHint: 'Evento de Estreia — edição limitada',
+    seasonalEvent: 'estreia-cinereact',
     limited: true,
   },
   {
@@ -297,11 +333,19 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   { id: 'frame-rainbow', name: 'Moldura Rainbow', description: 'Borda arco-íris em movimento perpétuo.', category: 'frame', rarity: 'lendário', cost: 450, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 450 Spotlight', previewClass: 'ring-2 ring-white/30', animated: true, visualStyle: 'rainbow' },
 
   // Títulos
+  { id: 'title-espectador', name: 'Espectador', description: 'Fã de reações que curte cada sessão do sofá.', category: 'title', rarity: 'comum', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Espectador' },
   { id: 'title-entusiasta', name: 'Entusiasta', description: 'Quem vive o cinema reagindo a cada cena.', category: 'title', rarity: 'comum', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Entusiasta' },
-  { id: 'title-especialista', name: 'Especialista', description: 'Referência em análises e curadoria.', category: 'title', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Especialista' },
-  { id: 'title-curador', name: 'Curador', description: 'Monta listas que inspiram a comunidade.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
-  { id: 'title-lenda', name: 'Lenda', description: 'Presença lendária no CineReact Club.', category: 'title', rarity: 'lendário', cost: 500, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-cinefilo', name: 'Cinéfilo', description: 'Entre pipoca, créditos finais e plot twists.', category: 'title', rarity: 'comum', cost: 80, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-plateia', name: 'Da Plateia', description: 'Sente a energia da galera em cada momento.', category: 'title', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-maratonista', name: 'Maratonista', description: 'Uma reação atrás da outra — sem pausa.', category: 'title', rarity: 'incomum', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Maratonista Dedicado' },
+  { id: 'title-apaixonado', name: 'Apaixonado', description: 'Guarda favoritos e volta sempre aos clássicos.', category: 'title', rarity: 'incomum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-especialista', name: 'Especialista', description: 'Reconhece cada detalhe depois de maratonar dezenas de reacts.', category: 'title', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Especialista' },
+  { id: 'title-comentarista', name: 'Comentarista', description: 'Sempre com algo a dizer depois do react.', category: 'title', rarity: 'raro', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Comentarista Ativo' },
+  { id: 'title-curador', name: 'Organizador', description: 'Monta listas e favoritos para a próxima sessão.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
+  { id: 'title-lenda', name: 'Lenda', description: 'Fã veterano com presença marcante no Club.', category: 'title', rarity: 'lendário', cost: 500, unlockMethod: 'shop', obtainHint: 'Loja Spotlight' },
   { id: 'title-oraculo', name: 'Oráculo', description: 'Voz respeitada nos comentários da comunidade.', category: 'title', rarity: 'épico', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Oráculo da Comunidade' },
+  { id: 'title-luzes-camera', name: 'Luzes, Câmera', description: 'O crédito inicial de quem faz parte da história do CineReact.', category: 'title', rarity: 'épico', cost: 200, unlockMethod: 'shop', obtainHint: 'Loja Spotlight — Coleção Estreia' },
+  { id: 'title-cortina-sobe', name: 'Cortina Sobe', description: 'A emoção de cada abertura de filme, do início ao fim.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight — Coleção Estreia' },
 
   // Avatares
   { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema com balde dourado.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'popcorn', previewGradient: 'from-amber-600 via-orange-500 to-yellow-400' },
@@ -354,6 +398,7 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
 
 export const PROMO_CODES: PromoCodeDefinition[] = [
   { code: 'CINEREACT2026', rewardItemId: 'card-holographic', maxUses: 10000 },
+  { code: 'ESTREIACINEREACT', rewardItemId: 'title-primeira-fileira', maxUses: 5000 },
   { code: 'SPOTLIGHTVIP', rewardItemId: 'title-lenda', expiresAt: '2027-12-31' },
   { code: 'FANITLIN', rewardItemId: 'tag-squad-fanit-lin' },
 ];
