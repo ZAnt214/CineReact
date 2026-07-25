@@ -294,8 +294,53 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   .profile-surface-pulse,
   .profile-surface-star,
   .profile-avatar-aura,
-  .profile-avatar-ring {
+  .profile-avatar-ring,
+  .profile-atelier-beam,
+  .profile-atelier-orb {
     animation: none !important;
   }
+}
+
+/* Ateliê Visionário — tema exclusivo do Programa de Criadores */
+@keyframes profile-atelier-beam-pulse {
+  0%, 100% { opacity: 0.45; transform: scaleX(1); }
+  50% { opacity: 0.85; transform: scaleX(1.06); }
+}
+
+@keyframes profile-atelier-orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(14px, -20px) scale(1.05); }
+}
+
+.profile-theme-atelier {
+  --profile-theme-scrim: rgba(9, 9, 11, 0.42);
+}
+
+.profile-atelier-beam {
+  background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(251, 191, 36, 0.28) 0%, transparent 72%);
+  animation: profile-atelier-beam-pulse 9s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.profile-atelier-orb {
+  border-radius: 9999px;
+  filter: blur(48px);
+  animation: profile-atelier-orb-drift 14s ease-in-out infinite;
+  opacity: 0.55;
+}
+
+.profile-atelier-orb-teal {
+  background: rgba(20, 184, 166, 0.35);
+}
+
+.profile-atelier-orb-amber {
+  background: rgba(245, 158, 11, 0.28);
+  animation-delay: -4s;
+}
+
+.profile-atelier-grain {
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
 }
 

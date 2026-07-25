@@ -36,16 +36,26 @@ export default function ProfileThemeScope({
   const useCss = !!themeStyle?.gradientCss;
 
   const isFullscreen = variant === 'fullscreen';
+  const isAtelier = display.themeVisualStyle === 'atelier';
 
   return (
     <ProfileThemeContext.Provider value={tone}>
       <div
         data-theme-tone={tone}
-        className={`profile-themed-scope relative ${isFullscreen ? 'profile-themed-scope-fullscreen' : ''} ${className}`}
+        data-visual-style={display.themeVisualStyle}
+        className={`profile-themed-scope relative ${isFullscreen ? 'profile-themed-scope-fullscreen' : ''} ${isAtelier ? 'profile-theme-atelier' : ''} ${className}`}
       >
         {themeStyle && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
             {isFullscreen && <div className="absolute inset-0 bg-zinc-950" />}
+            {isAtelier && (
+              <>
+                <div className="profile-atelier-beam absolute inset-x-0 top-0 h-[55%]" />
+                <div className="profile-atelier-orb profile-atelier-orb-teal absolute w-56 h-56 -right-16 top-[38%]" />
+                <div className="profile-atelier-orb profile-atelier-orb-amber absolute w-44 h-44 -left-12 bottom-[18%]" />
+                <div className="profile-atelier-grain absolute inset-0" />
+              </>
+            )}
             <div
               className={`absolute inset-0 ${useCss && themeStyle.animated ? 'profile-surface-gradient' : ''} ${themeStyle.shimmer ? 'profile-surface-shimmer' : ''}`}
               style={useCss ? { background: themeStyle.gradientCss } : undefined}

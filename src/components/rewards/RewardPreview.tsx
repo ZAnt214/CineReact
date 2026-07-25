@@ -15,6 +15,7 @@ import {
   Zap,
   Film,
   Eye,
+  Palette,
 } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
@@ -54,6 +55,7 @@ const BADGE_ICONS: Record<string, React.ElementType> = {
   'badge-lenda': Crown,
   'badge-spotlight': Sparkles,
   'badge-streak-30': Flame,
+  'badge-atelie-visionario': Palette,
 };
 
 const SIZE_MAP = {
@@ -109,6 +111,11 @@ const AVATAR_VISUALS: Record<
     gradient: 'from-rose-600 via-amber-500 to-yellow-300',
     accent: 'text-amber-50',
     Icon: Star,
+  },
+  atelier: {
+    gradient: 'from-amber-600 via-teal-600 to-violet-700',
+    accent: 'text-amber-50',
+    Icon: Palette,
   },
 };
 

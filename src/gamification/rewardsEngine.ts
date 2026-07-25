@@ -1,5 +1,7 @@
 import {
   CREATOR_FOLLOW_REWARDS,
+  CREATOR_PROGRAM_ART_BUNDLE_ID,
+  CREATOR_PROGRAM_ART_ITEM_IDS,
   getRewardById,
   PROMO_CODES,
   REWARDS_CATALOG,
@@ -69,7 +71,11 @@ export function unlockAllCatalogRewards(profile: GamificationProfile): number {
 
   for (const promo of PROMO_CODES) {
     if (!profile.redeemedCodes.includes(promo.code)) {
-      unlockReward(profile, promo.rewardItemId, 'promo_code', promo.code);
+      if (promo.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID) {
+        unlockCreatorProgramArtSet(profile, promo.code);
+      } else if (promo.rewardItemId) {
+        unlockReward(profile, promo.rewardItemId, 'promo_code', promo.code);
+      }
       profile.redeemedCodes.push(promo.code);
     }
   }
@@ -101,6 +107,50 @@ export function unlockReward(
   });
   profile.updatedAt = new Date().toISOString();
   return item;
+}
+
+export function unlockCreatorProgramArtSet(
+  profile: GamificationProfile,
+  source?: string
+): RewardItemDefinition[] {
+  migrateProfile(profile);
+  const unlocked: RewardItemDefinition[] = [];
+
+  for (const itemId of CREATOR_PROGRAM_ART_ITEM_IDS) {
+    const item = unlockReward(profile, itemId, 'creator_program_art', source || CREATOR_PROGRAM_ART_BUNDLE_ID);
+    if (item) unlocked.push(item);
+  }
+
+  return unlocked;
+}
+
+export function equipCreatorProgramArtSet(profile: GamificationProfile): void {
+  migrateProfile(profile);
+
+  const map: Record<string, keyof ProfileLoadout> = {
+    'theme-atelie-visionario': 'theme',
+    'frame-atelie-visionario': 'frame',
+    'title-artista-oficial': 'title',
+    'avatar-atelie-visionario': 'avatar',
+  };
+
+  for (const itemId of Object.keys(map)) {
+    if (hasReward(profile, itemId)) {
+      (profile.loadout as Record<string, unknown>)[map[itemId]] = itemId;
+    }
+  }
+
+  if (hasReward(profile, 'badge-atelie-visionario')) {
+    const badges = profile.loadout.badges.filter((id) => id !== 'badge-atelie-visionario');
+    profile.loadout.badges = ['badge-atelie-visionario', ...badges].slice(0, 2);
+  }
+
+  if (hasReward(profile, 'tag-arte-programa-criadores')) {
+    const tags = profile.loadout.tags.filter((id) => id !== 'tag-arte-programa-criadores');
+    profile.loadout.tags = ['tag-arte-programa-criadores', ...tags].slice(0, 3);
+  }
+
+  profile.updatedAt = new Date().toISOString();
 }
 
 export function buildInventoryView(profile: GamificationProfile): InventoryItemView[] {
@@ -154,6 +204,10 @@ export function equipReward(
     delete profile.loadout[key];
   } else {
     (profile.loadout as Record<string, unknown>)[key] = itemId;
+  }
+
+  if (itemId === 'theme-atelie-visionario') {
+    equipCreatorProgramArtSet(profile);
   }
 
   profile.updatedAt = new Date().toISOString();
@@ -262,6 +316,20 @@ export function redeemPromoCode(
   }
   if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
     return { success: false, error: 'Código expirado.' };
+  }
+
+  if (promo.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID) {
+    const unlocked = unlockCreatorProgramArtSet(profile, normalized);
+    if (unlocked.length === 0) {
+      return { success: false, error: 'Você já possui esta coleção.' };
+    }
+    profile.redeemedCodes.push(normalized);
+    equipCreatorProgramArtSet(profile);
+    return { success: true, item: unlocked[0] };
+  }
+
+  if (!promo.rewardItemId) {
+    return { success: false, error: 'Recompensa não configurada.' };
   }
 
   const item = unlockReward(profile, promo.rewardItemId, 'promo_code', normalized);

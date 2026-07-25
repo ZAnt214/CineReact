@@ -46,7 +46,8 @@ export type UnlockMethod =
   | 'promo_code'
   | 'event'
   | 'streak'
-  | 'legacy';
+  | 'legacy'
+  | 'creator_program_art';
 
 export type RewardVisualStyle =
   | 'amber'
@@ -68,7 +69,8 @@ export type RewardVisualStyle =
   | 'rose'
   | 'forest'
   | 'slate'
-  | 'creator';
+  | 'creator'
+  | 'atelier';
 
 export type MissionPeriod = 'daily' | 'weekly';
 
@@ -224,9 +226,11 @@ export interface RewardItemDefinition {
   avatarUrl?: string;
   icon?: string;
   /** Visual premium para avatares cosméticos (substitui emojiChar) */
-  avatarVisual?: 'popcorn' | 'clapperboard' | 'crown' | 'ghost' | 'spotlight' | 'legend';
+  avatarVisual?: 'popcorn' | 'clapperboard' | 'crown' | 'ghost' | 'spotlight' | 'legend' | 'atelier';
   /** Estilo visual premium do preview (rainbow, galaxy, candy, etc.) */
   visualStyle?: RewardVisualStyle;
+  /** Identificador de coleção cosmética (ex.: creator-program-art) */
+  bundleId?: string;
 }
 
 /** @deprecated use RewardItemDefinition */
@@ -309,7 +313,9 @@ export interface GamificationMeResponse {
 
 export interface PromoCodeDefinition {
   code: string;
-  rewardItemId: string;
+  rewardItemId?: string;
+  /** Desbloqueia todos os itens de uma coleção exclusiva */
+  bundleId?: string;
   maxUses?: number;
   expiresAt?: string;
 }
