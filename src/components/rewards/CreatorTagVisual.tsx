@@ -51,17 +51,20 @@ export default function CreatorTagVisual({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-zinc-900/60 backdrop-blur-sm ${s.pad} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-zinc-950/55 overflow-hidden ${s.pad} ${className}`}
       title={name}
+      style={{ boxShadow: `inset 2px 0 0 0 ${from}` }}
     >
       <span
-        className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-white/90"
-        style={{ background: `linear-gradient(135deg, ${from}cc, ${to}cc)` }}
+        className="inline-flex items-center justify-center rounded-md shrink-0"
+        style={{ background: `linear-gradient(135deg, ${from}33, ${to}22)` }}
       >
-        <TierIcon className={s.icon} strokeWidth={2.5} />
-        <span className={`font-bold uppercase tracking-wide ${s.tier}`}>{tierCfg.label}</span>
+        <TierIcon className={`${s.icon} m-0.5`} style={{ color: from }} strokeWidth={2.25} />
       </span>
-      <span className={`font-medium text-zinc-300 truncate max-w-[5.5rem] ${s.name}`}>{displayName}</span>
+      <span className="flex flex-col leading-none min-w-0">
+        <span className={`font-bold uppercase tracking-[0.1em] text-zinc-500 ${s.tier}`}>{tierCfg.label}</span>
+        <span className={`font-medium text-zinc-200 truncate max-w-[5rem] ${s.name}`}>{displayName}</span>
+      </span>
     </span>
   );
 }

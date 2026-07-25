@@ -178,4 +178,78 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   }
 }
 
+/* Profile surface — GPU-friendly CSS animations (no JS loop per frame) */
+@keyframes profile-gradient-shift {
+  0%, 100% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+}
+
+@keyframes profile-shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes profile-layer-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes profile-star-twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.85; transform: scale(1.1); }
+}
+
+.profile-surface-root {
+  contain: layout paint style;
+  transform: translateZ(0);
+}
+
+.profile-surface-gradient {
+  background-size: 220% 220%;
+  will-change: background-position;
+  animation: profile-gradient-shift 12s linear infinite;
+}
+
+.profile-surface-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  animation: profile-shimmer 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.profile-surface-pulse {
+  animation: profile-layer-pulse 4s ease-in-out infinite;
+}
+
+.profile-surface-star {
+  animation: profile-star-twinkle 3s ease-in-out infinite;
+}
+
+.profile-avatar-aura {
+  animation: profile-layer-pulse 3s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.profile-avatar-ring {
+  animation: profile-avatar-spin 8s linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes profile-avatar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-surface-gradient,
+  .profile-surface-shimmer::after,
+  .profile-surface-pulse,
+  .profile-surface-star,
+  .profile-avatar-aura,
+  .profile-avatar-ring {
+    animation: none !important;
+  }
+}
 

@@ -1,15 +1,26 @@
 import React from 'react';
+import { Award } from 'lucide-react';
 import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
 import type { RewardRarity } from '../../types/gamification.ts';
 
-const RARITY_ACCENT: Record<string, string> = {
-  comum: 'from-zinc-500/80 to-zinc-600/80',
-  incomum: 'from-sky-500/80 to-cyan-500/80',
-  raro: 'from-violet-500/80 to-purple-500/80',
-  épico: 'from-fuchsia-500/80 to-purple-600/80',
-  lendário: 'from-amber-400/90 to-yellow-500/90',
-  mítico: 'from-cyan-400/80 via-purple-400/80 to-pink-400/80',
-  exclusivo: 'from-rose-500/80 via-amber-400/80 to-violet-500/80',
+const RARITY_BORDER: Record<string, string> = {
+  comum: 'from-zinc-500 to-zinc-600',
+  incomum: 'from-sky-400 to-cyan-500',
+  raro: 'from-violet-400 to-purple-500',
+  épico: 'from-fuchsia-400 to-purple-600',
+  lendário: 'from-amber-300 to-yellow-500',
+  mítico: 'from-cyan-400 via-purple-400 to-pink-400',
+  exclusivo: 'from-rose-400 via-amber-300 to-violet-500',
+};
+
+const RARITY_TEXT: Record<string, string> = {
+  comum: 'text-zinc-300',
+  incomum: 'text-sky-200',
+  raro: 'text-violet-200',
+  épico: 'text-fuchsia-200',
+  lendário: 'text-amber-100',
+  mítico: 'text-cyan-100',
+  exclusivo: 'text-rose-100',
 };
 
 interface TitleRewardVisualProps {
@@ -29,22 +40,24 @@ export default function TitleRewardVisual({
 }: TitleRewardVisualProps) {
   const visual = item ? resolveVisualStyle({ ...item, rarity, category: 'title' }) : 'amber';
   const style = getVisualStyle(visual);
-  const accent = RARITY_ACCENT[rarity] || RARITY_ACCENT.comum;
+  const border = RARITY_BORDER[rarity] || RARITY_BORDER.comum;
+  const textColor = RARITY_TEXT[rarity] || RARITY_TEXT.comum;
 
   const sizes = {
-    sm: { pad: 'px-2 py-0.5', text: 'text-[8px]', dot: 'w-1 h-1' },
-    md: { pad: 'px-2.5 py-1', text: 'text-[9px]', dot: 'w-1.5 h-1.5' },
-    lg: { pad: 'px-3 py-1.5', text: 'text-[11px]', dot: 'w-2 h-2' },
+    sm: { pad: 'pl-2 pr-2.5 py-0.5', text: 'text-[8px]', icon: 'w-2.5 h-2.5', bar: 'w-0.5' },
+    md: { pad: 'pl-2.5 pr-3 py-1', text: 'text-[9px]', icon: 'w-3 h-3', bar: 'w-0.5' },
+    lg: { pad: 'pl-3 pr-3.5 py-1.5', text: 'text-[11px]', icon: 'w-3.5 h-3.5', bar: 'w-1' },
   };
   const s = sizes[size];
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-zinc-900/70 backdrop-blur-sm ${s.pad} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-zinc-950/60 ${s.pad} ${className}`}
       title={name}
     >
-      <span className={`rounded-full bg-gradient-to-br ${accent} ${s.dot} shrink-0 ${style.glow}`} />
-      <span className={`font-semibold uppercase tracking-[0.12em] text-zinc-200 whitespace-nowrap ${s.text}`}>
+      <span className={`self-stretch rounded-full bg-gradient-to-b ${border} ${s.bar} shrink-0 ${style.glow}`} />
+      <Award className={`${s.icon} text-amber-400/80 shrink-0`} strokeWidth={2.25} />
+      <span className={`font-semibold uppercase tracking-[0.14em] whitespace-nowrap ${s.text} ${textColor}`}>
         {name}
       </span>
     </span>

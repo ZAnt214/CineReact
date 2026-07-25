@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
 import { User } from 'lucide-react';
 import { getVisualStyle } from '../../data/rewardVisualStyles.ts';
 import { PremiumFrameRing } from '../rewards/PremiumRewardSurface.tsx';
@@ -99,28 +98,21 @@ export default function ProfileAvatar({
     <div className={`relative inline-flex flex-shrink-0 ${className}`}>
       {hasEffect && (
         <>
-          <motion.div
-            className={`absolute ${cfg.aura} rounded-full pointer-events-none blur-md`}
+          <div
+            className={`absolute ${cfg.aura} rounded-full pointer-events-none blur-md profile-avatar-aura`}
             style={
               effectStyle?.gradientCss
                 ? { background: effectStyle.gradientCss, opacity: 0.72 }
                 : undefined
             }
-            animate={{ opacity: [0.58, 0.95, 0.58], scale: [0.94, 1.1, 0.94] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
           >
             {!effectStyle?.gradientCss && effectStyle && (
-              <motion.div
-                className={`w-full h-full rounded-full bg-gradient-to-br ${effectStyle.gradient}`}
-                animate={{ opacity: [0.65, 1, 0.65] }}
-                transition={{ duration: 2.6, repeat: Infinity }}
-              />
+              <div className={`w-full h-full rounded-full bg-gradient-to-br ${effectStyle.gradient}`} />
             )}
-          </motion.div>
-          <motion.div
-            className={`absolute ${cfg.aura} rounded-full border-2 border-white/30 pointer-events-none`}
-            animate={{ opacity: [0.35, 0.72, 0.35], rotate: [0, 180, 360] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+          </div>
+          <div
+            className={`absolute ${cfg.aura} rounded-full border-2 border-white/25 pointer-events-none profile-avatar-ring`}
+            style={{ opacity: 0.5 }}
           />
         </>
       )}
