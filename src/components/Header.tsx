@@ -767,7 +767,7 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col"
+            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col bg-zinc-950"
           >
             <ProfilePanel
               user={user}
