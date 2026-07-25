@@ -39,6 +39,9 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
   const avatarItem = normalized.avatar ? getRewardById(normalized.avatar) : null;
   const titleItem = normalized.title ? getRewardById(normalized.title) : null;
   const effectItem = normalized.effect ? getRewardById(normalized.effect) : null;
+  const themeItem = normalized.theme ? getRewardById(normalized.theme) : null;
+  const backgroundItem = normalized.background ? getRewardById(normalized.background) : null;
+  const cardItem = normalized.profileCard ? getRewardById(normalized.profileCard) : null;
 
   const tags = normalized.tags
     .map((id) => getRewardById(id))
@@ -54,7 +57,11 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
     frameVisualStyle,
     frameAnimated: frameItem?.animated,
     avatarVisual: avatarItem?.avatarVisual,
-    effectAnimated: effectItem?.animated,
+    effectAnimated: effectItem?.animated ?? !!effectItem,
+    effectVisualStyle: effectItem ? resolveVisualStyle(effectItem) : undefined,
+    themeVisualStyle: themeItem ? resolveVisualStyle(themeItem) : undefined,
+    backgroundVisualStyle: backgroundItem ? resolveVisualStyle(backgroundItem) : undefined,
+    profileCardVisualStyle: cardItem ? resolveVisualStyle(cardItem) : undefined,
     title: titleItem
       ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity }
       : undefined,

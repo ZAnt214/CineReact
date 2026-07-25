@@ -26,6 +26,8 @@ import { INFLUENCE_TIERS, getXpProgress } from '../data/gamification.ts';
 import { RARITY_STYLES as ACH_RARITY, RARITY_STYLES } from '../data/rewardsCatalog.ts';
 import GamificationBar from './GamificationBar.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import ProfileSurface from './profile/ProfileSurface.tsx';
+import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import RewardInventory from './rewards/RewardInventory.tsx';
 import ProfileCustomizer from './rewards/ProfileCustomizer.tsx';
 import type { GamificationMeResponse, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
@@ -117,12 +119,7 @@ export default function GamificationPage({
       className="cine-container py-24 pb-32 space-y-8"
     >
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/60 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-amber-950/30 p-6 md:p-10">
-        <motion.div
-          className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity }}
-        />
+      <ProfileSurface loadout={profile?.loadout} variant="hero" className="border-zinc-800/60">
         <div className="relative flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex items-center gap-5">
             <div className="relative">
@@ -141,8 +138,8 @@ export default function GamificationPage({
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-500/70 mb-1">CineReact Club</p>
-              <h1 className="text-2xl md:text-3xl font-black text-white">{user.nome}</h1>
-              <p className="text-amber-400 font-bold text-sm mt-0.5">{data?.tier || 'Espectador'}</p>
+              <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" />
+              <p className="text-amber-400 font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
                 <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-purple-400 font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" /> Acesso Antecipado
@@ -177,7 +174,7 @@ export default function GamificationPage({
             })}
           </div>
         </div>
-      </div>
+      </ProfileSurface>
 
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -393,9 +390,14 @@ export default function GamificationPage({
                       alt={entry.username}
                       size="md"
                       profileDisplay={entry.profileDisplay}
+                      showEffect
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-white truncate">{entry.username}</p>
+                      <ProfileNameRow
+                        name={entry.username}
+                        profileDisplay={entry.profileDisplay}
+                        nameSize="md"
+                      />
                       <p className="text-[10px] text-zinc-500">{entry.tier}{entry.isInfluencer ? ' · Influente' : ''}</p>
                     </div>
                     <div className="text-right">

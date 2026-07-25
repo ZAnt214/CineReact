@@ -275,6 +275,10 @@ export interface PublicProfileDisplay {
   frameAnimated?: boolean;
   avatarVisual?: RewardItemDefinition['avatarVisual'];
   effectAnimated?: boolean;
+  effectVisualStyle?: RewardVisualStyle;
+  themeVisualStyle?: RewardVisualStyle;
+  backgroundVisualStyle?: RewardVisualStyle;
+  profileCardVisualStyle?: RewardVisualStyle;
   title?: { id: string; name: string; rarity: RewardRarity };
   tags: PublicProfileTag[];
   badgeIds: string[];
