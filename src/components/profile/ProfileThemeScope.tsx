@@ -14,6 +14,7 @@ export function useProfileThemeTone() {
 export interface ProfileThemeScopeProps {
   loadout?: ProfileLoadout | null;
   profileDisplay?: PublicProfileDisplay | null;
+  variant?: 'default' | 'fullscreen';
   className?: string;
   children: React.ReactNode;
 }
@@ -21,6 +22,7 @@ export interface ProfileThemeScopeProps {
 export default function ProfileThemeScope({
   loadout,
   profileDisplay,
+  variant = 'default',
   className = '',
   children,
 }: ProfileThemeScopeProps) {
@@ -33,11 +35,17 @@ export default function ProfileThemeScope({
   const themeStyle = display.themeVisualStyle ? getVisualStyle(display.themeVisualStyle) : null;
   const useCss = !!themeStyle?.gradientCss;
 
+  const isFullscreen = variant === 'fullscreen';
+
   return (
     <ProfileThemeContext.Provider value={tone}>
-      <div data-theme-tone={tone} className={`profile-themed-scope relative ${className}`}>
+      <div
+        data-theme-tone={tone}
+        className={`profile-themed-scope relative ${isFullscreen ? 'profile-themed-scope-fullscreen' : ''} ${className}`}
+      >
         {themeStyle && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+            {isFullscreen && <div className="absolute inset-0 bg-zinc-950" />}
             <div
               className={`absolute inset-0 ${useCss && themeStyle.animated ? 'profile-surface-gradient' : ''} ${themeStyle.shimmer ? 'profile-surface-shimmer' : ''}`}
               style={useCss ? { background: themeStyle.gradientCss } : undefined}

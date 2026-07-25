@@ -131,9 +131,9 @@ export default function ProfilePanel({
   }
 
   return (
-    <ProfileThemeScope loadout={loadout} className="flex-1 flex flex-col min-h-full bg-zinc-950">
+    <ProfileThemeScope loadout={loadout} variant="fullscreen" className="flex-1 flex flex-col min-h-dvh bg-zinc-950">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-zinc-800/60 bg-zinc-950/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-zinc-800/60 bg-zinc-950">
         <div className="cine-container h-16 flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Conta</p>

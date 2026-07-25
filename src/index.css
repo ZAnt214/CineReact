@@ -263,6 +263,15 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   --profile-theme-scrim: rgba(9, 9, 11, 0.35);
 }
 
+.profile-themed-scope-fullscreen[data-theme-tone="dark"],
+.profile-themed-scope-fullscreen {
+  --profile-theme-scrim: rgb(9, 9, 11);
+}
+
+.profile-themed-scope-fullscreen[data-theme-tone="light"] {
+  --profile-theme-scrim: rgb(9, 9, 11);
+}
+
 .profile-theme-scrim {
   background: var(--profile-theme-scrim);
 }
