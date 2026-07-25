@@ -3,7 +3,7 @@ import path from "path";
 import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
-import { registerGamificationRoutes, handleGamificationEvent } from "./src/gamification/serverHelpers.ts";
+import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
 import { resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
@@ -2130,13 +2130,14 @@ app.get("/api/comentarios", (req, res) => {
     const obraId = req.query.obraId as string;
     const rawComments = localDb.getComentarios(obraId);
     
-    // Enrich comments with user's isDonor status and avatar URL
+    // Enrich comments with user's isDonor status, avatar URL and equipped cosmetics
     const enriched = rawComments.map(c => {
       const userAcct = localDb.findUsuarioByEmailSync(c.usuarioEmail);
       return {
         ...c,
         isDonor: userAcct?.isDonor || (c.usuarioEmail === "mateusvini.t10@gmail.com" ? true : false),
-        avatar: userAcct?.avatar || ""
+        avatar: userAcct?.avatar || "",
+        profileDisplay: getPublicProfileForEmail(c.usuarioEmail),
       };
     });
     
@@ -2162,7 +2163,12 @@ app.post("/api/comentarios", (req, res) => {
       criadoEm: new Date().toISOString()
     });
     const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
-    res.status(201).json({ ...novo, gamificationReward });
+    res.status(201).json({
+      ...novo,
+      avatar: localDb.findUsuarioByEmailSync(usuarioEmail)?.avatar || "",
+      profileDisplay: getPublicProfileForEmail(usuarioEmail),
+      gamificationReward,
+    });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao adicionar comentário." });
   }

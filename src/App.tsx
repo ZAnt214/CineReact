@@ -916,6 +916,7 @@ export default function App() {
                   reacts={reacts}
                   obras={obras}
                   user={user}
+                  userLoadout={gamification.data?.profile.loadout}
                   canaisSeguidos={canaisSeguidos}
                   onToggleSeguir={handleToggleSeguir}
                   onUpdateProgress={handleUpdateWatchProgress}

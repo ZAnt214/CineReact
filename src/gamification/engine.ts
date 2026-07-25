@@ -19,6 +19,7 @@ import {
   incrementCreatorWatch,
   checkCreatorFollowReward,
 } from './rewardsEngine.ts';
+import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import type {
   AchievementDefinition,
   GamificationEventType,
@@ -534,6 +535,7 @@ export function buildLeaderboard(
       tier: getTierFromXp(p.xp).tier,
       influenceIndex: p.influenceIndex,
       isInfluencer: p.featuredInfluencer,
+      profileDisplay: resolvePublicProfileDisplay(p.loadout),
     };
   });
 }

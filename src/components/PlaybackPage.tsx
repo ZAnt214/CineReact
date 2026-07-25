@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, Check, Sparkles, ChevronDown, ChevronUp, Copy, ThumbsUp, Film, User, Star, Trash2, Tv, Clock, Layers, Info } from 'lucide-react';
 import { Obra, ReactVideo, UserState, Comentario } from '../types.ts';
+import type { ProfileLoadout } from '../types/gamification.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import PlaybackSkeleton from './PlaybackSkeleton.tsx';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -68,6 +69,7 @@ interface PlaybackPageProps {
   onUpdateProgress?: (reactId: string, obraId: string, progress: number) => void;
   onOpenAuth?: () => void;
   onUpdateUser?: (updatedUser: UserState) => void;
+  userLoadout?: ProfileLoadout | null;
 }
 
 // Local Reusable Component for Horizontal React Carousels
@@ -157,7 +159,8 @@ export default function PlaybackPage({
   onGoToCanal,
   onUpdateProgress,
   onOpenAuth,
-  onUpdateUser
+  onUpdateUser,
+  userLoadout,
 }: PlaybackPageProps) {
   const [activeReactId, setActiveReactId] = useState<string | null>(initialReactId);
   const [shareFeedback, setShareFeedback] = useState(false);
@@ -888,7 +891,8 @@ export default function PlaybackPage({
             <Suspense fallback={<CommentSkeleton />}>
               <CommentSectionLazy 
                 obraId={activeReact?.obraId || ''} 
-                user={user} 
+                user={user}
+                userLoadout={userLoadout}
                 onOpenAuth={onOpenAuth} 
                 getFriendlyDate={getFriendlyDate} 
               />

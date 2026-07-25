@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Save, RotateCcw, Sparkles, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getLoadoutPreviewStyles } from '../../gamification/rewardsEngine.ts';
 import { AvatarRewardVisual, RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
+import ProfileAvatar from '../profile/ProfileAvatar.tsx';
 import TitleRewardVisual from './TitleRewardVisual.tsx';
 import CreatorTagVisual from './CreatorTagVisual.tsx';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
@@ -22,11 +23,14 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
   const [saved, setSaved] = useState(false);
   const [previewItem, setPreviewItem] = useState<InventoryItemView | null>(null);
 
+  useEffect(() => {
+    setDraft(loadout);
+  }, [loadout]);
+
   const owned = inventory.filter((i) => i.owned);
   const styles = useMemo(() => getLoadoutPreviewStyles(draft), [draft]);
 
   const titleItem = draft.title ? inventory.find((i) => i.id === draft.title) : null;
-  const avatarItem = draft.avatar ? inventory.find((i) => i.id === draft.avatar) : null;
   const tagItems = draft.tags.map((id) => inventory.find((i) => i.id === id)).filter(Boolean) as InventoryItemView[];
 
   const toggleSlot = (category: keyof ProfileLoadout, itemId: string, max: number) => {
@@ -88,17 +92,14 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
 
           <div className={`relative rounded-2xl border border-zinc-800/60 p-6 ${styles.cardClass}`}>
             <div className="flex flex-col items-center text-center">
-              <div className={`relative mb-4 rounded-full p-1 ${styles.frameClass} ${styles.effectClass}`}>
-                {avatarItem?.avatarVisual ? (
-                  <AvatarRewardVisual visual={avatarItem.avatarVisual} size="lg" />
-                ) : (
-                  <img
-                    src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}
-                    alt=""
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                )}
-              </div>
+              <ProfileAvatar
+                photoUrl={user.avatar}
+                alt={user.nome}
+                size="lg"
+                loadout={draft}
+                showEffect
+                className="mb-4"
+              />
 
               <h3 className="text-xl font-black text-white">{user.nome}</h3>
               {titleItem && (

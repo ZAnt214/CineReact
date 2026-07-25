@@ -28,6 +28,8 @@ export interface ReactVideo {
   likes?: number;
 }
 
+import type { PublicProfileDisplay } from './types/gamification.ts';
+
 export interface Comentario {
   id: string;
   obraId: string;
@@ -37,6 +39,9 @@ export interface Comentario {
   nota?: number; // 1 a 5 (legacy)
   likes?: number; // Contador de curtidas CineReact
   criadoEm: string;
+  avatar?: string;
+  isDonor?: boolean;
+  profileDisplay?: PublicProfileDisplay;
 }
 
 export interface ListaPersonalizada {

@@ -261,6 +261,25 @@ export interface GamificationReward {
   message?: string;
 }
 
+export interface PublicProfileTag {
+  id: string;
+  name: string;
+  creatorName?: string;
+  creatorColors?: { from: string; to: string; text: string };
+}
+
+/** Cosméticos equipados resolvidos para exibição pública */
+export interface PublicProfileDisplay {
+  loadout: ProfileLoadout;
+  frameVisualStyle?: RewardVisualStyle;
+  frameAnimated?: boolean;
+  avatarVisual?: RewardItemDefinition['avatarVisual'];
+  effectAnimated?: boolean;
+  title?: { id: string; name: string; rarity: RewardRarity };
+  tags: PublicProfileTag[];
+  badgeIds: string[];
+}
+
 export interface LeaderboardEntry {
   rank: number;
   email: string;
@@ -270,6 +289,7 @@ export interface LeaderboardEntry {
   tier: InfluenceTier;
   influenceIndex: number;
   isInfluencer: boolean;
+  profileDisplay?: PublicProfileDisplay;
 }
 
 export interface GamificationMeResponse {

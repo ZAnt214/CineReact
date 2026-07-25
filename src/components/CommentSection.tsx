@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Sparkles, User, Heart, Trash2 } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
+import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface CommentSectionProps {
   obraId: string;
   user: UserState;
+  userLoadout?: ProfileLoadout | null;
   onOpenAuth?: () => void;
   getFriendlyDate: (dateStr?: string) => string;
 }
@@ -12,6 +15,7 @@ interface CommentSectionProps {
 export default function CommentSection({
   obraId,
   user,
+  userLoadout,
   onOpenAuth,
   getFriendlyDate
 }: CommentSectionProps) {
@@ -167,7 +171,13 @@ export default function CommentSection({
         <form onSubmit={handleAddComentario} className="space-y-4 bg-zinc-950/50 p-4 md:p-5 rounded-xl shadow-inner">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <img src={user.avatar} alt={user.nome} className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-500/30" />
+              <ProfileAvatar
+                photoUrl={user.avatar}
+                alt={user.nome}
+                size="sm"
+                loadout={userLoadout}
+                donorBadge={!!user.isDonor}
+              />
               <div>
                 {user.isDonor ? (
                   <div className="flex items-center gap-1.5">
@@ -252,13 +262,13 @@ export default function CommentSection({
               return (
                 <div key={c.id} className="p-4 bg-zinc-950/50 hover:bg-zinc-950/80 rounded-xl space-y-2 flex gap-3.5 relative group transition-colors">
                   <div className="flex-shrink-0 pt-0.5">
-                    {c.avatar ? (
-                      <img src={c.avatar} className="w-9 h-9 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400">
-                        <User className="w-4 h-4" />
-                      </div>
-                    )}
+                    <ProfileAvatar
+                      photoUrl={c.avatar}
+                      alt={c.usuarioNome}
+                      size="md"
+                      profileDisplay={c.profileDisplay}
+                      loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-1.5">

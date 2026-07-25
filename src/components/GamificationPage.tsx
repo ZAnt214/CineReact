@@ -25,6 +25,7 @@ import {
 import { INFLUENCE_TIERS, getXpProgress } from '../data/gamification.ts';
 import { RARITY_STYLES as ACH_RARITY, RARITY_STYLES } from '../data/rewardsCatalog.ts';
 import GamificationBar from './GamificationBar.tsx';
+import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import RewardInventory from './rewards/RewardInventory.tsx';
 import ProfileCustomizer from './rewards/ProfileCustomizer.tsx';
 import type { GamificationMeResponse, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
@@ -83,7 +84,7 @@ export default function GamificationPage({
 
   useEffect(() => {
     if (tab === 'rankings') onLoadLeaderboard(lbTab);
-  }, [tab, lbTab, onLoadLeaderboard]);
+  }, [tab, lbTab, onLoadLeaderboard, data?.profile.loadout]);
 
   if (!user.isLoggedIn) {
     return (
@@ -125,13 +126,15 @@ export default function GamificationPage({
         <div className="relative flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex items-center gap-5">
             <div className="relative">
-              <img
-                src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+              <ProfileAvatar
+                photoUrl={user.avatar}
                 alt={user.nome}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover ring-2 ring-amber-500/50 shadow-xl"
+                size="lg"
+                loadout={profile?.loadout}
+                showEffect
               />
               {profile?.featuredInfluencer && (
-                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] font-black text-black uppercase">
+                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] font-black text-black uppercase z-20">
                   VIP
                 </span>
               )}
@@ -385,10 +388,11 @@ export default function GamificationPage({
                     }`}>
                       {entry.rank}
                     </span>
-                    <img
-                      src={entry.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'}
-                      alt=""
-                      className="w-10 h-10 rounded-full object-cover ring-1 ring-zinc-700"
+                    <ProfileAvatar
+                      photoUrl={entry.avatar}
+                      alt={entry.username}
+                      size="md"
+                      profileDisplay={entry.profileDisplay}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm text-white truncate">{entry.username}</p>
