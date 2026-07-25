@@ -6,6 +6,7 @@ import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
+import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import type { GamificationMeResponse } from '../types/gamification.ts';
 
 interface HeaderProps {
@@ -676,18 +677,13 @@ export default function Header({
                   }`}
                 >
                   {user.isLoggedIn ? (
-                    <div className="relative">
-                      <img 
-                        src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
-                        alt={user.nome} 
-                        className="w-7.5 h-7.5 rounded-full object-cover ring-2 ring-amber-500/80 hover:ring-amber-400 transition-all duration-250 shadow-md shadow-black/45" 
-                      />
-                      {user.isDonor && (
-                        <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full border border-zinc-950 flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-2 h-2 text-black fill-current" />
-                        </span>
-                      )}
-                    </div>
+                    <ProfileAvatar
+                      photoUrl={user.avatar}
+                      alt={user.nome}
+                      size="sm"
+                      loadout={gamificationData?.profile.loadout}
+                      donorBadge={!!user.isDonor}
+                    />
                   ) : (
                     <div className="w-7.5 h-7.5 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-all shadow-inner">
                       <User className="w-3.5 h-3.5" />
@@ -802,20 +798,13 @@ export default function Header({
                   
                   <div className="flex flex-col items-center w-full relative z-10">
                     <div className="relative mb-6">
-                      <img 
-                        src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
-                        alt={user.nome} 
-                        className={`w-24 h-24 md:w-30 md:h-30 rounded-full object-cover border-4 ${
-                          user.isDonor 
-                            ? 'border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.25)]' 
-                            : 'border-zinc-800'
-                        }`}
+                      <ProfileAvatar
+                        photoUrl={user.avatar}
+                        alt={user.nome}
+                        size="xl"
+                        loadout={gamificationData?.profile.loadout}
+                        donorBadge={!!user.isDonor}
                       />
-                      {user.isDonor && (
-                        <span className="absolute -bottom-1 -right-1 w-8 h-8 bg-amber-400 rounded-full border-4 border-zinc-950 flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-4 h-4 text-black fill-current animate-pulse" />
-                        </span>
-                      )}
                     </div>
                     
                     <h2 className="text-xl md:text-2xl font-black text-zinc-100 tracking-tight leading-tight">{user.nome}</h2>

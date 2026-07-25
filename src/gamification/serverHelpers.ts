@@ -6,6 +6,7 @@ import {
   processGamificationEvent,
   type ProcessEventMeta,
 } from './engine.ts';
+import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import {
   equipReward,
   migrateProfile,
@@ -54,6 +55,13 @@ export function getGamificationLeaderboard(type: LeaderboardType, limit = 20) {
   return buildLeaderboard(profiles, usernames, type, limit);
 }
 
+export function getPublicProfileForEmail(email: string) {
+  if (!email) return resolvePublicProfileDisplay();
+  const profile = localDb.getGamificationProfile(email);
+  migrateProfile(profile);
+  return resolvePublicProfileDisplay(profile.loadout);
+}
+
 export function purchaseCosmetic(email: string, itemId: string) {
   const profile = localDb.getGamificationProfile(email);
   const result = purchaseReward(profile, itemId);
@@ -94,6 +102,17 @@ export function registerGamificationRoutes(app: import('express').Express) {
     } catch (error) {
       console.error('Erro leaderboard:', error);
       res.status(500).json({ error: 'Erro ao carregar ranking.' });
+    }
+  });
+
+  app.get('/api/gamification/profile/:email', (req, res) => {
+    try {
+      const email = decodeURIComponent(req.params.email || '');
+      if (!email) return res.status(400).json({ error: 'Email requerido.' });
+      res.json(getPublicProfileForEmail(email));
+    } catch (error) {
+      console.error('Erro gamification/profile:', error);
+      res.status(500).json({ error: 'Erro ao carregar perfil público.' });
     }
   });
 
