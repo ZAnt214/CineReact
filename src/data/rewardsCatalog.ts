@@ -16,7 +16,7 @@ export const RARITY_STYLES: Record<RewardRarity, { border: string; bg: string; t
 
 export const CATEGORY_LABELS: Record<string, string> = {
   frame: 'Molduras',
-  tag: 'Tags de Perfil',
+  tag: 'Tags de Criador',
   title: 'Títulos',
   avatar: 'Avatares',
   badge: 'Emblemas',
@@ -26,6 +26,64 @@ export const CATEGORY_LABELS: Record<string, string> = {
   reaction: 'Reações',
   emoji: 'Emojis',
   profile_card: 'Cartões de Perfil',
+};
+
+export const CATEGORY_INFO: Record<string, { icon: string; description: string; equipHint: string }> = {
+  frame: {
+    icon: '⭕',
+    description: 'Borda decorativa ao redor da sua foto de perfil.',
+    equipHint: 'Equipa 1 moldura',
+  },
+  tag: {
+    icon: '🏷️',
+    description: 'Mostre apoio a criadores. Desbloqueie seguindo canais ou assistindo reacts.',
+    equipHint: 'Até 3 tags no perfil',
+  },
+  title: {
+    icon: '👑',
+    description: 'Título exclusivo exibido abaixo do seu nome — status e prestígio.',
+    equipHint: 'Equipa 1 título',
+  },
+  avatar: {
+    icon: '🎭',
+    description: 'Substitui sua foto por um avatar cosmético temático.',
+    equipHint: 'Equipa 1 avatar',
+  },
+  badge: {
+    icon: '🏅',
+    description: 'Emblemas de conquista exibidos no seu perfil.',
+    equipHint: 'Até 2 emblemas',
+  },
+  theme: {
+    icon: '🎨',
+    description: 'Paleta de cores aplicada ao fundo do seu perfil.',
+    equipHint: 'Equipa 1 tema',
+  },
+  effect: {
+    icon: '✨',
+    description: 'Animações e brilhos especiais no perfil.',
+    equipHint: 'Equipa 1 efeito',
+  },
+  background: {
+    icon: '🖼️',
+    description: 'Imagem ou gradiente de fundo do cartão de perfil.',
+    equipHint: 'Equipa 1 fundo',
+  },
+  reaction: {
+    icon: '💬',
+    description: 'Reação personalizada para usar em comentários.',
+    equipHint: 'Equipa 1 reação',
+  },
+  emoji: {
+    icon: '😀',
+    description: 'Emoji exclusivo para expressar nas interações.',
+    equipHint: 'Equipa 1 emoji',
+  },
+  profile_card: {
+    icon: '🃏',
+    description: 'Estilo visual do cartão que exibe suas informações.',
+    equipHint: 'Equipa 1 cartão',
+  },
 };
 
 const CREATOR_TAGS: RewardItemDefinition[] = [

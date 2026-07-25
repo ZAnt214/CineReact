@@ -4,6 +4,8 @@ import { Save, RotateCcw, Sparkles, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getLoadoutPreviewStyles } from '../../gamification/rewardsEngine.ts';
 import { AvatarRewardVisual, RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
+import TitleRewardVisual from './TitleRewardVisual.tsx';
+import CreatorTagVisual from './CreatorTagVisual.tsx';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -100,25 +102,21 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
 
               <h3 className="text-xl font-black text-white">{user.nome}</h3>
               {titleItem && (
-                <p className="text-xs font-bold text-amber-400 mt-1 uppercase tracking-widest">{titleItem.name}</p>
+                <div className="mt-2">
+                  <TitleRewardVisual name={titleItem.name} rarity={titleItem.rarity} item={titleItem} size="md" />
+                </div>
               )}
 
               <div className="flex flex-wrap justify-center gap-2 mt-3">
                 {tagItems.map((tag) => (
-                  <span
+                  <CreatorTagVisual
                     key={tag.id}
-                    className="text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={
-                      tag.creatorColors
-                        ? {
-                            background: `linear-gradient(90deg, ${tag.creatorColors.from}, ${tag.creatorColors.to})`,
-                            color: tag.creatorColors.text,
-                          }
-                        : undefined
-                    }
-                  >
-                    {tag.name}
-                  </span>
+                    id={tag.id}
+                    name={tag.name}
+                    creatorName={tag.creatorName}
+                    creatorColors={tag.creatorColors}
+                    size="sm"
+                  />
                 ))}
               </div>
 
