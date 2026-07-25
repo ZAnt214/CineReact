@@ -3,27 +3,38 @@ import { getVisualStyle, resolveVisualStyle } from '../data/rewardVisualStyles.t
 import type {
   ProfileLoadout,
   PublicProfileDisplay,
+  PublicProfileTag,
+  RewardItemDefinition,
   RewardVisualStyle,
 } from '../types/gamification.ts';
 
-const DEFAULT_LOADOUT = (): ProfileLoadout => ({});
-
-const ALLOWED_LOADOUT_KEYS: (keyof ProfileLoadout)[] = [
-  'frame', 'title', 'avatar', 'theme', 'reaction', 'emoji',
-];
+const DEFAULT_LOADOUT = (): ProfileLoadout => ({ tags: [], badges: [] });
 
 export function sanitizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
   if (!loadout) return DEFAULT_LOADOUT();
-  const result: ProfileLoadout = {};
-  for (const key of ALLOWED_LOADOUT_KEYS) {
+  const result: ProfileLoadout = {
+    tags: Array.isArray(loadout.tags) ? [...loadout.tags] : [],
+    badges: Array.isArray(loadout.badges) ? [...loadout.badges] : [],
+  };
+  const singles: (keyof ProfileLoadout)[] = ['frame', 'title', 'avatar', 'theme', 'reaction', 'emoji'];
+  for (const key of singles) {
     const val = loadout[key];
-    if (typeof val === 'string' && val) result[key] = val;
+    if (typeof val === 'string' && val) (result as Record<string, unknown>)[key] = val;
   }
   return result;
 }
 
 export function normalizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
   return sanitizeLoadout(loadout);
+}
+
+function resolveTag(item: RewardItemDefinition): PublicProfileTag {
+  return {
+    id: item.id,
+    name: item.name,
+    creatorName: item.creatorName,
+    creatorColors: item.creatorColors,
+  };
 }
 
 export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): PublicProfileDisplay {
@@ -33,6 +44,11 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
   const avatarItem = normalized.avatar ? getRewardById(normalized.avatar) : null;
   const titleItem = normalized.title ? getRewardById(normalized.title) : null;
   const themeItem = normalized.theme ? getRewardById(normalized.theme) : null;
+
+  const tags = normalized.tags
+    .map((id) => getRewardById(id))
+    .filter((item): item is RewardItemDefinition => !!item)
+    .map(resolveTag);
 
   const frameVisualStyle: RewardVisualStyle | undefined = frameItem
     ? resolveVisualStyle(frameItem)
@@ -51,6 +67,8 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
     title: titleItem
       ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity }
       : undefined,
+    tags,
+    badgeIds: [...normalized.badges],
   };
 }
 

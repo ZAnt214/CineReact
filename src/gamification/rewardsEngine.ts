@@ -14,7 +14,7 @@ import type {
 import { LOADOUT_SLOTS, ACTIVE_COSMETIC_CATEGORIES } from '../types/gamification.ts';
 import { sanitizeLoadout } from './profileDisplay.ts';
 
-const DEFAULT_LOADOUT = (): ProfileLoadout => ({});
+const DEFAULT_LOADOUT = (): ProfileLoadout => ({ tags: [], badges: [] });
 
 /** Conta do dono da plataforma — recebe desbloqueio total do catálogo */
 export const FULL_UNLOCK_OWNER_EMAIL = 'mateusvini.t10@gmail.com';
@@ -109,7 +109,9 @@ export function buildInventoryView(profile: GamificationProfile): InventoryItemV
   const isEquipped = (id: string, cat: string): boolean => {
     const slot = LOADOUT_SLOTS[cat as keyof typeof LOADOUT_SLOTS];
     if (!slot) return false;
-    return profile.loadout[slot.loadoutKey] === id;
+    const val = profile.loadout[slot.loadoutKey];
+    if (Array.isArray(val)) return val.includes(id);
+    return val === id;
   };
 
   return REWARDS_CATALOG.filter((item) =>
@@ -142,10 +144,16 @@ export function equipReward(
   const key = slot.loadoutKey;
   const current = profile.loadout[key];
 
-  if (current === itemId) {
+  if (Array.isArray(current)) {
+    if (current.includes(itemId)) {
+      profile.loadout[key] = current.filter((id) => id !== itemId) as never;
+    } else {
+      profile.loadout[key] = [...current, itemId].slice(-slot.max) as never;
+    }
+  } else if (current === itemId) {
     delete profile.loadout[key];
   } else {
-    profile.loadout[key] = itemId;
+    (profile.loadout as Record<string, unknown>)[key] = itemId;
   }
 
   profile.updatedAt = new Date().toISOString();
@@ -164,7 +172,11 @@ export function unequipReward(
   if (!slot) return { success: false, error: 'Categoria não disponível.' };
 
   const key = slot.loadoutKey;
-  if (profile.loadout[key] === itemId) {
+  const current = profile.loadout[key];
+
+  if (Array.isArray(current)) {
+    profile.loadout[key] = current.filter((id) => id !== itemId) as never;
+  } else if (current === itemId) {
     delete profile.loadout[key];
   }
 
@@ -185,9 +197,21 @@ export function saveLoadout(
     const val = clean[key];
     if (val === undefined) continue;
 
-    const item = getRewardById(val);
-    if (!item || item.category !== cat || !hasReward(profile, val)) {
-      return { success: false, error: `Item inválido: ${val}` };
+    if (Array.isArray(val)) {
+      for (const id of val) {
+        const item = getRewardById(id);
+        if (!item || item.category !== cat || !hasReward(profile, id)) {
+          return { success: false, error: `Item inválido: ${id}` };
+        }
+      }
+      if (val.length > slot.max) {
+        return { success: false, error: `Máximo ${slot.max} itens em ${cat}.` };
+      }
+    } else if (typeof val === 'string') {
+      const item = getRewardById(val);
+      if (!item || item.category !== cat || !hasReward(profile, val)) {
+        return { success: false, error: `Item inválido: ${val}` };
+      }
     }
   }
 

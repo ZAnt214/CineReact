@@ -125,6 +125,8 @@ export interface ProfileLoadout {
   theme?: string;
   reaction?: string;
   emoji?: string;
+  tags: string[];
+  badges: string[];
 }
 
 /** @deprecated use ProfileLoadout */
@@ -272,6 +274,8 @@ export interface PublicProfileDisplay {
   themeVisualStyle?: RewardVisualStyle;
   themeTone?: 'dark' | 'light';
   title?: { id: string; name: string; rarity: RewardRarity };
+  tags: PublicProfileTag[];
+  badgeIds: string[];
 }
 
 export interface LeaderboardEntry {
@@ -311,10 +315,12 @@ export interface PromoCodeDefinition {
 }
 
 export const ACTIVE_COSMETIC_CATEGORIES = [
+  'theme',
   'frame',
   'title',
   'avatar',
-  'theme',
+  'tag',
+  'badge',
   'reaction',
   'emoji',
 ] as const;
@@ -322,10 +328,12 @@ export const ACTIVE_COSMETIC_CATEGORIES = [
 export type ActiveCosmeticCategory = (typeof ACTIVE_COSMETIC_CATEGORIES)[number];
 
 export const LOADOUT_SLOTS: Record<ActiveCosmeticCategory, { max: number; loadoutKey: keyof ProfileLoadout }> = {
+  theme: { max: 1, loadoutKey: 'theme' },
   frame: { max: 1, loadoutKey: 'frame' },
   title: { max: 1, loadoutKey: 'title' },
   avatar: { max: 1, loadoutKey: 'avatar' },
-  theme: { max: 1, loadoutKey: 'theme' },
+  tag: { max: 3, loadoutKey: 'tags' },
+  badge: { max: 2, loadoutKey: 'badges' },
   reaction: { max: 1, loadoutKey: 'reaction' },
   emoji: { max: 1, loadoutKey: 'emoji' },
 };

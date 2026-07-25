@@ -51,12 +51,16 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
   });
 
   if (variant === 'compact') {
+    const ownedCollectible = item.owned && (item as InventoryItemView).category;
+    const showReason = item.owned && (ownedCollectible === 'badge' || ownedCollectible === 'tag');
     return (
       <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500">
         <Icon className={`w-3 h-3 shrink-0 ${item.owned ? 'text-emerald-400' : 'text-amber-500/70'}`} />
-        {item.owned && item.unlockedAt
-          ? `Desbloqueado em ${new Date(item.unlockedAt).toLocaleDateString('pt-BR')}`
-          : obtainText}
+        {showReason
+          ? `Por: ${item.obtainHint}`
+          : item.owned && item.unlockedAt
+            ? `Desbloqueado em ${new Date(item.unlockedAt).toLocaleDateString('pt-BR')}`
+            : obtainText}
       </span>
     );
   }
@@ -88,9 +92,11 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
             {item.owned ? 'Como obteve' : 'Como obter'}
           </p>
           <p className={`font-semibold text-zinc-200 leading-snug mt-0.5 ${isModal ? 'text-sm' : 'text-[11px]'}`}>
-            {item.owned && item.unlockedAt
-              ? `Desbloqueado em ${new Date(item.unlockedAt).toLocaleDateString('pt-BR')}`
-              : obtainText}
+            {item.owned && (item as InventoryItemView).category && ['badge', 'tag'].includes((item as InventoryItemView).category)
+              ? item.obtainHint
+              : item.owned && item.unlockedAt
+                ? `Desbloqueado em ${new Date(item.unlockedAt).toLocaleDateString('pt-BR')}`
+                : obtainText}
           </p>
           {!item.owned && (
             <p className={`text-zinc-500 mt-1 ${isModal ? 'text-xs' : 'text-[10px]'}`}>
