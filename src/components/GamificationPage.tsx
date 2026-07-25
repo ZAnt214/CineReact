@@ -241,6 +241,8 @@ export default function GamificationPage({
             <RewardInventory
               items={data.inventory}
               spotlight={profile.spotlight}
+              userName={user.nome}
+              userAvatar={user.avatar}
               onEquip={onEquip}
               onUnequip={onUnequip}
               onPurchase={onPurchase}

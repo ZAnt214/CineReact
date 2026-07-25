@@ -204,6 +204,8 @@ export interface RewardItemDefinition {
   emojiChar?: string;
   avatarUrl?: string;
   icon?: string;
+  /** Visual premium para avatares cosméticos (substitui emojiChar) */
+  avatarVisual?: 'popcorn' | 'clapperboard' | 'crown' | 'ghost' | 'spotlight' | 'legend';
 }
 
 /** @deprecated use RewardItemDefinition */

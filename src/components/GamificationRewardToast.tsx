@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Trophy, X, Zap } from 'lucide-react';
+import { RewardPreviewThumb } from './rewards/RewardPreview.tsx';
 import type { GamificationReward } from '../types/gamification.ts';
 
 interface GamificationRewardToastProps {
@@ -9,71 +10,93 @@ interface GamificationRewardToastProps {
 }
 
 export default function GamificationRewardToast({ reward, onClose }: GamificationRewardToastProps) {
+  const hasContent =
+    reward &&
+    (reward.xp > 0 ||
+      reward.spotlight > 0 ||
+      reward.achievements.length > 0 ||
+      reward.levelUp ||
+      (reward.unlockedItems?.length ?? 0) > 0);
+
   return (
     <AnimatePresence>
-      {reward && (reward.xp > 0 || reward.spotlight > 0 || reward.achievements.length > 0 || reward.levelUp || (reward.unlockedItems?.length ?? 0) > 0) && (
+      {hasContent && (
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          initial={{ opacity: 0, y: 24, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          className="fixed bottom-6 right-6 z-[200] max-w-sm w-full"
+          exit={{ opacity: 0, y: 12, scale: 0.98 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 360 }}
+          className="fixed z-[200] left-3 right-3 bottom-3 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[min(100%,18rem)] pointer-events-none"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-zinc-950/95 backdrop-blur-xl shadow-[0_0_40px_rgba(245,158,11,0.15)] p-5">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-purple-500/5 pointer-events-none" />
+          <div className="relative overflow-hidden rounded-xl border border-amber-500/25 bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/8 via-transparent to-purple-500/5 pointer-events-none" />
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-3 right-3 p-1 rounded-lg text-zinc-500 hover:text-white cursor-pointer"
+              className="absolute top-2 right-2 p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800/80 cursor-pointer z-10"
+              aria-label="Fechar"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
 
-            {reward.levelUp && (
-              <div className="flex items-center gap-2 mb-3">
-                <Zap className="w-5 h-5 text-amber-400" />
-                <span className="text-sm font-black text-amber-300 uppercase tracking-wider">
-                  Novo nível: {reward.levelUp.tier}
-                </span>
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-3 mb-2">
-              {reward.xp > 0 && (
-                <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold">
-                  +{reward.xp} XP
-                </span>
+            <motion.div className="relative pr-6 shrink-0">
+              {reward!.levelUp && (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="text-[11px] font-black text-amber-300 uppercase tracking-wide leading-tight">
+                    Nível {reward!.levelUp.tier}
+                  </span>
+                </div>
               )}
-              {reward.spotlight > 0 && (
-                <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  +{reward.spotlight}
-                </span>
+
+              <div className="flex flex-wrap gap-1.5">
+                {reward!.xp > 0 && (
+                  <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">
+                    +{reward!.xp} XP
+                  </span>
+                )}
+                {reward!.spotlight > 0 && (
+                  <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    +{reward!.spotlight}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+
+            <div className="relative mt-2 space-y-1.5 overflow-y-auto overscroll-contain min-h-0 flex-1">
+              {reward!.unlockedItems?.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 p-1.5 rounded-lg bg-cyan-950/30 border border-cyan-500/15"
+                >
+                  <RewardPreviewThumb item={item} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold text-white truncate">{item.name}</p>
+                    <p className="text-[9px] text-zinc-500 truncate">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+
+              {reward!.achievements.map((a) => (
+                <div
+                  key={a.id}
+                  className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-zinc-950/60 flex items-center justify-center shrink-0">
+                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold text-white truncate">{a.name}</p>
+                    <p className="text-[9px] text-zinc-500 truncate">{a.description}</p>
+                  </div>
+                </div>
+              ))}
+
+              {reward!.message && (
+                <p className="text-[10px] text-zinc-400 leading-snug pt-0.5">{reward!.message}</p>
               )}
             </div>
-
-            {reward.unlockedItems?.map((item) => (
-              <div key={item.id} className="flex items-start gap-2 mt-2 p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/20">
-                <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-bold text-white">Novo item: {item.name}</p>
-                  <p className="text-[10px] text-zinc-500">{item.description}</p>
-                </div>
-              </div>
-            ))}
-
-            {reward.achievements.map((a) => (
-              <div key={a.id} className="flex items-start gap-2 mt-2 p-2 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                <Trophy className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-bold text-white">{a.name}</p>
-                  <p className="text-[10px] text-zinc-500">{a.description}</p>
-                </div>
-              </div>
-            ))}
-
-            {reward.message && (
-              <p className="text-[11px] text-zinc-400 mt-2">{reward.message}</p>
-            )}
           </div>
         </motion.div>
       )}

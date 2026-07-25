@@ -245,10 +245,10 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   { id: 'title-oraculo', name: 'Oráculo', description: 'Para os maiores comentaristas.', category: 'title', rarity: 'épico', cost: 0, unlockMethod: 'achievement', obtainHint: 'Conquista Oráculo da Comunidade' },
 
   // Avatares
-  { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', emojiChar: '🍿' },
-  { id: 'avatar-clapper', name: 'Avatar Claquete', description: 'Diretor da sua própria sessão.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', emojiChar: '🎬' },
-  { id: 'avatar-royal', name: 'Avatar Real', description: 'Coroa dourada exclusiva.', category: 'avatar', rarity: 'lendário', cost: 600, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', emojiChar: '👑' },
-  { id: 'avatar-ghost', name: 'Avatar Fantasma', description: 'Edição Halloween.', category: 'avatar', rarity: 'raro', cost: 0, unlockMethod: 'seasonal', obtainHint: 'Halloween 2026', emojiChar: '👻', seasonalEvent: 'halloween-2026' },
+  { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema com balde dourado.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'popcorn', previewGradient: 'from-amber-600 via-orange-500 to-yellow-400' },
+  { id: 'avatar-clapper', name: 'Avatar Claquete', description: 'Diretor da sua própria sessão.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'clapperboard', previewGradient: 'from-violet-700 via-purple-600 to-fuchsia-500' },
+  { id: 'avatar-royal', name: 'Avatar Real', description: 'Coroa dourada exclusiva com brilho premium.', category: 'avatar', rarity: 'lendário', cost: 600, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'crown', previewGradient: 'from-yellow-600 via-amber-500 to-yellow-300', animated: true },
+  { id: 'avatar-ghost', name: 'Avatar Fantasma', description: 'Edição Halloween com aura espectral.', category: 'avatar', rarity: 'raro', cost: 0, unlockMethod: 'seasonal', obtainHint: 'Halloween 2026', avatarVisual: 'ghost', previewGradient: 'from-slate-600 via-zinc-500 to-purple-400', seasonalEvent: 'halloween-2026', animated: true },
 
   // Emblemas
   { id: 'badge-explorador', name: 'Explorador', description: 'Descobridor de conteúdos.', category: 'badge', rarity: 'comum', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Explorador' },

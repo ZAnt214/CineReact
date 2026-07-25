@@ -1,12 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Sparkles, Lock, Check, Package } from 'lucide-react';
+import { Search, Filter, Sparkles, Lock, Check, Package, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_ORDER, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
+import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import type { InventoryItemView, RewardCategory, RewardRarity } from '../../types/gamification.ts';
 
 interface RewardInventoryProps {
   items: InventoryItemView[];
   spotlight: number;
+  userName?: string;
+  userAvatar?: string;
   onEquip: (id: string) => void;
   onUnequip: (id: string) => void;
   onPurchase: (id: string) => void;
@@ -16,6 +19,8 @@ interface RewardInventoryProps {
 export default function RewardInventory({
   items,
   spotlight,
+  userName,
+  userAvatar,
   onEquip,
   onUnequip,
   onPurchase,
@@ -27,6 +32,7 @@ export default function RewardInventory({
   const [search, setSearch] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
+  const [previewItem, setPreviewItem] = useState<InventoryItemView | null>(null);
 
   const filtered = useMemo(() => {
     return items
@@ -52,7 +58,7 @@ export default function RewardInventory({
 
   return (
     <div className="space-y-6">
-      <motion.div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
         <div>
           <h2 className="text-lg font-black text-white flex items-center gap-2">
             <Package className="w-5 h-5 text-amber-400" />
@@ -78,7 +84,7 @@ export default function RewardInventory({
             Resgatar
           </button>
         </div>
-      </motion.div>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-3">
         <div className="relative flex-1">
@@ -128,12 +134,13 @@ export default function RewardInventory({
         <AnimatePresence>
           {filtered.map((item) => (
             <div key={item.id}>
-            <RewardCard
-              item={item}
-              onEquip={() => onEquip(item.id)}
-              onUnequip={() => onUnequip(item.id)}
-              onPurchase={() => onPurchase(item.id)}
-            />
+              <RewardCard
+                item={item}
+                onEquip={() => onEquip(item.id)}
+                onUnequip={() => onUnequip(item.id)}
+                onPurchase={() => onPurchase(item.id)}
+                onPreview={() => setPreviewItem(item)}
+              />
             </div>
           ))}
         </AnimatePresence>
@@ -141,6 +148,15 @@ export default function RewardInventory({
 
       {filtered.length === 0 && (
         <p className="text-center text-zinc-500 py-16 text-sm">Nenhum item encontrado com esses filtros.</p>
+      )}
+
+      {previewItem && (
+        <RewardPreviewModal
+          item={previewItem}
+          userName={userName}
+          userAvatar={userAvatar}
+          onClose={() => setPreviewItem(null)}
+        />
       )}
     </div>
   );
@@ -151,11 +167,13 @@ function RewardCard({
   onEquip,
   onUnequip,
   onPurchase,
+  onPreview,
 }: {
   item: InventoryItemView;
   onEquip: () => void;
   onUnequip: () => void;
   onPurchase: () => void;
+  onPreview: () => void;
 }) {
   const style = RARITY_STYLES[item.rarity];
 
@@ -175,18 +193,14 @@ function RewardCard({
       )}
 
       <div className="flex items-start gap-3 mb-3">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${
-          item.owned ? 'bg-zinc-950/50' : 'bg-zinc-900/80'
-        } ${item.previewClass || ''}`}>
-          {item.emojiChar || (item.owned ? '✨' : <Lock className="w-4 h-4 text-zinc-600" />)}
-        </div>
+        <RewardPreviewThumb item={item} size="sm" locked={!item.owned} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
+          <motion.div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-bold text-sm text-white truncate">{item.name}</h3>
             <span className={`text-[8px] uppercase font-mono px-1.5 py-0.5 rounded ${style.text} bg-black/20`}>
               {style.label}
             </span>
-          </div>
+          </motion.div>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5">
             {CATEGORY_LABELS[item.category]}
           </p>
@@ -212,30 +226,40 @@ function RewardCard({
         </span>
       )}
 
-      <button
-        type="button"
-        onClick={item.owned ? (item.equipped ? onUnequip : onEquip) : onPurchase}
-        className={`w-full py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-          item.equipped
-            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-            : item.owned
-            ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
-            : item.cost > 0
-            ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-black'
-            : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
-        }`}
-        disabled={!item.owned && item.cost === 0 && item.unlockMethod !== 'shop'}
-      >
-        {item.equipped ? (
-          <><Check className="w-3.5 h-3.5" /> Equipado</>
-        ) : item.owned ? (
-          'Equipar'
-        ) : item.cost > 0 ? (
-          <><Sparkles className="w-3.5 h-3.5" /> {item.cost}</>
-        ) : (
-          <><Lock className="w-3.5 h-3.5" /> Bloqueado</>
-        )}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onPreview}
+          className="px-3 py-2 rounded-xl text-xs font-bold border border-zinc-700/80 text-zinc-400 hover:text-white hover:border-zinc-600 cursor-pointer flex items-center gap-1.5 shrink-0"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          Testar
+        </button>
+        <button
+          type="button"
+          onClick={item.owned ? (item.equipped ? onUnequip : onEquip) : onPurchase}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            item.equipped
+              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+              : item.owned
+              ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+              : item.cost > 0
+              ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-black'
+              : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
+          }`}
+          disabled={!item.owned && item.cost === 0 && item.unlockMethod !== 'shop'}
+        >
+          {item.equipped ? (
+            <><Check className="w-3.5 h-3.5" /> Equipado</>
+          ) : item.owned ? (
+            'Equipar'
+          ) : item.cost > 0 ? (
+            <><Sparkles className="w-3.5 h-3.5" /> {item.cost}</>
+          ) : (
+            <><Lock className="w-3.5 h-3.5" /> Bloqueado</>
+          )}
+        </button>
+      </div>
     </motion.div>
   );
 }

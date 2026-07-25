@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { Save, RotateCcw, Sparkles } from 'lucide-react';
+import { Save, RotateCcw, Sparkles, Eye } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getLoadoutPreviewStyles } from '../../gamification/rewardsEngine.ts';
+import { AvatarRewardVisual, RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -17,6 +18,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
   const [draft, setDraft] = useState<ProfileLoadout>(loadout);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [previewItem, setPreviewItem] = useState<InventoryItemView | null>(null);
 
   const owned = inventory.filter((i) => i.owned);
   const styles = useMemo(() => getLoadoutPreviewStyles(draft), [draft]);
@@ -85,10 +87,8 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
           <div className={`relative rounded-2xl border border-zinc-800/60 p-6 ${styles.cardClass}`}>
             <div className="flex flex-col items-center text-center">
               <div className={`relative mb-4 rounded-full p-1 ${styles.frameClass} ${styles.effectClass}`}>
-                {avatarItem?.emojiChar ? (
-                  <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center text-4xl">
-                    {avatarItem.emojiChar}
-                  </div>
+                {avatarItem?.avatarVisual ? (
+                  <AvatarRewardVisual visual={avatarItem.avatarVisual} size="lg" />
                 ) : (
                   <img
                     src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}
@@ -126,7 +126,9 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                 {draft.badges.map((id) => {
                   const b = inventory.find((i) => i.id === id);
                   return b ? (
-                    <span key={id} className="text-lg" title={b.name}>{b.emojiChar || '🏅'}</span>
+                    <span key={id} title={b.name}>
+                      <RewardPreviewThumb item={b} size="sm" />
+                    </span>
                   ) : null;
                 })}
               </div>
@@ -155,7 +157,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
       </div>
 
       {/* Slot picker */}
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+      <motion.div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
         <h2 className="text-lg font-black text-white flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-amber-400" />
           Combinar itens
@@ -182,26 +184,44 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                   const isOn = selectedIds.includes(item.id);
                   const style = RARITY_STYLES[item.rarity];
                   return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => toggleSlot(key, item.id, max)}
-                      className={`px-3 py-2 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                        isOn
-                          ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
-                          : `${style.border} ${style.bg} text-zinc-400 hover:text-white`
-                      }`}
-                    >
-                      <span className="mr-1">{item.emojiChar || '◆'}</span>
-                      {item.name}
-                    </button>
+                    <div key={item.id} className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleSlot(key, item.id, max)}
+                        className={`px-2 py-2 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center gap-2 ${
+                          isOn
+                            ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+                            : `${style.border} ${style.bg} text-zinc-400 hover:text-white`
+                        }`}
+                      >
+                        <RewardPreviewThumb item={item} size="sm" />
+                        <span className="max-w-[100px] truncate">{item.name}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewItem(item)}
+                        title="Testar visual"
+                        className="p-2 rounded-lg border border-zinc-800 text-zinc-500 hover:text-amber-400 hover:border-amber-500/30 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   );
                 })}
               </div>
             </div>
           );
         })}
-      </div>
+      </motion.div>
+
+      {previewItem && (
+        <RewardPreviewModal
+          item={previewItem}
+          userName={user.nome}
+          userAvatar={user.avatar}
+          onClose={() => setPreviewItem(null)}
+        />
+      )}
     </div>
   );
 }
