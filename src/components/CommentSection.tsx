@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Sparkles, User, Heart, Trash2 } from 'lucide-react';
+import { MessageSquare, Sparkles, Heart, Trash2 } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
