@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { User } from 'lucide-react';
-import { getVisualStyle } from '../../data/rewardVisualStyles.ts';
 import { PremiumFrameRing } from '../rewards/PremiumRewardSurface.tsx';
 import { AvatarRewardVisual } from '../rewards/RewardPreview.tsx';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
@@ -81,8 +80,6 @@ export default function ProfileAvatar({
 
   const cfg = SIZE_MAP[size];
   const hasFrame = showFrame && !!display.frameVisualStyle;
-  const hasEffect = showEffect && !!display.effectVisualStyle;
-  const effectStyle = display.effectVisualStyle ? getVisualStyle(display.effectVisualStyle) : null;
   const src = photoUrl || DEFAULT_AVATAR;
 
   const avatarNode = (
@@ -96,26 +93,6 @@ export default function ProfileAvatar({
 
   return (
     <div className={`relative inline-flex flex-shrink-0 ${className}`}>
-      {hasEffect && (
-        <>
-          <div
-            className={`absolute ${cfg.aura} rounded-full pointer-events-none blur-md profile-avatar-aura`}
-            style={
-              effectStyle?.gradientCss
-                ? { background: effectStyle.gradientCss, opacity: 0.72 }
-                : undefined
-            }
-          >
-            {!effectStyle?.gradientCss && effectStyle && (
-              <div className={`w-full h-full rounded-full bg-gradient-to-br ${effectStyle.gradient}`} />
-            )}
-          </div>
-          <div
-            className={`absolute ${cfg.aura} rounded-full border-2 border-white/25 pointer-events-none profile-avatar-ring`}
-            style={{ opacity: 0.5 }}
-          />
-        </>
-      )}
 
       {hasFrame ? (
         <PremiumFrameRing visualStyle={display.frameVisualStyle} size={cfg.frame}>

@@ -7,6 +7,8 @@ export interface VisualStyleConfig {
   ring: string;
   glow: string;
   accent: string;
+  /** Text contrast on themed profile surfaces */
+  tone?: 'dark' | 'light';
   particles?: 'stars' | 'sparkles' | 'bubbles' | 'confetti';
   animated?: boolean;
   shimmer?: boolean;
@@ -70,7 +72,8 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
     gradientCss: 'linear-gradient(135deg, #f9a8d4, #e879f9, #c4b5fd, #7dd3fc)',
     ring: 'ring-pink-300/60 shadow-[0_0_25px_rgba(244,114,182,0.4)]',
     glow: 'shadow-[0_0_22px_rgba(236,72,153,0.3)]',
-    accent: 'text-pink-100',
+    accent: 'text-pink-900',
+    tone: 'light',
     animated: true,
     particles: 'bubbles',
   },

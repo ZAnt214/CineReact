@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
-import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export interface ProfileNameRowProps {
@@ -31,7 +30,6 @@ export default function ProfileNameRow({
     [profileDisplay, loadout]
   );
 
-  const hasCosmetics = !!display.title || display.tags.length > 0;
   const donorClass =
     donorBadgeSize === 'md'
       ? 'text-[6px] px-1.5 py-0.5'
@@ -39,10 +37,10 @@ export default function ProfileNameRow({
 
   const nameClass =
     nameSize === 'lg'
-      ? 'text-2xl md:text-3xl font-black text-white'
+      ? 'text-2xl md:text-3xl font-black profile-text'
       : nameSize === 'md'
-        ? 'text-sm font-bold text-zinc-100'
-        : 'text-xs font-bold text-zinc-200';
+        ? 'text-sm font-bold profile-text'
+        : 'text-xs font-bold profile-text';
 
   return (
     <div className={`min-w-0 space-y-1 ${className}`}>
@@ -61,30 +59,18 @@ export default function ProfileNameRow({
         )}
 
         {timestamp && (
-          <span className="text-[10px] text-zinc-500 font-mono">{timestamp}</span>
+          <span className="text-[10px] profile-text-muted font-mono">{timestamp}</span>
         )}
       </div>
 
-      {hasCosmetics && (
+      {display.title && (
         <div className="flex flex-wrap items-center gap-1.5">
-          {display.title && (
-            <TitleRewardVisual
-              name={display.title.name}
-              rarity={display.title.rarity}
-              item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
-              size="sm"
-            />
-          )}
-          {display.tags.map((tag) => (
-            <CreatorTagVisual
-              key={tag.id}
-              id={tag.id}
-              name={tag.name}
-              creatorName={tag.creatorName}
-              creatorColors={tag.creatorColors}
-              size="sm"
-            />
-          ))}
+          <TitleRewardVisual
+            name={display.title.name}
+            rarity={display.title.rarity}
+            item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
+            size="sm"
+          />
         </div>
       )}
     </div>

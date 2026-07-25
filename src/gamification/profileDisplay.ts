@@ -1,35 +1,29 @@
 import { getRewardById } from '../data/rewardsCatalog.ts';
-import { resolveVisualStyle } from '../data/rewardVisualStyles.ts';
+import { getVisualStyle, resolveVisualStyle } from '../data/rewardVisualStyles.ts';
 import type {
   ProfileLoadout,
   PublicProfileDisplay,
-  PublicProfileTag,
-  RewardItemDefinition,
   RewardVisualStyle,
 } from '../types/gamification.ts';
 
-const DEFAULT_LOADOUT = (): ProfileLoadout => ({
-  tags: [],
-  badges: [],
-});
+const DEFAULT_LOADOUT = (): ProfileLoadout => ({});
 
-export function normalizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
+const ALLOWED_LOADOUT_KEYS: (keyof ProfileLoadout)[] = [
+  'frame', 'title', 'avatar', 'theme', 'reaction', 'emoji',
+];
+
+export function sanitizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
   if (!loadout) return DEFAULT_LOADOUT();
-  return {
-    ...DEFAULT_LOADOUT(),
-    ...loadout,
-    tags: loadout.tags || [],
-    badges: loadout.badges || [],
-  };
+  const result: ProfileLoadout = {};
+  for (const key of ALLOWED_LOADOUT_KEYS) {
+    const val = loadout[key];
+    if (typeof val === 'string' && val) result[key] = val;
+  }
+  return result;
 }
 
-function resolveTag(item: RewardItemDefinition): PublicProfileTag {
-  return {
-    id: item.id,
-    name: item.name,
-    creatorName: item.creatorName,
-    creatorColors: item.creatorColors,
-  };
+export function normalizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
+  return sanitizeLoadout(loadout);
 }
 
 export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): PublicProfileDisplay {
@@ -38,35 +32,25 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
   const frameItem = normalized.frame ? getRewardById(normalized.frame) : null;
   const avatarItem = normalized.avatar ? getRewardById(normalized.avatar) : null;
   const titleItem = normalized.title ? getRewardById(normalized.title) : null;
-  const effectItem = normalized.effect ? getRewardById(normalized.effect) : null;
   const themeItem = normalized.theme ? getRewardById(normalized.theme) : null;
-  const backgroundItem = normalized.background ? getRewardById(normalized.background) : null;
-  const cardItem = normalized.profileCard ? getRewardById(normalized.profileCard) : null;
-
-  const tags = normalized.tags
-    .map((id) => getRewardById(id))
-    .filter((item): item is RewardItemDefinition => !!item)
-    .map(resolveTag);
 
   const frameVisualStyle: RewardVisualStyle | undefined = frameItem
     ? resolveVisualStyle(frameItem)
     : undefined;
+
+  const themeVisualStyle = themeItem ? resolveVisualStyle(themeItem) : undefined;
+  const themeTone = themeVisualStyle ? getVisualStyle(themeVisualStyle).tone ?? 'dark' : undefined;
 
   return {
     loadout: normalized,
     frameVisualStyle,
     frameAnimated: frameItem?.animated,
     avatarVisual: avatarItem?.avatarVisual,
-    effectAnimated: effectItem?.animated ?? !!effectItem,
-    effectVisualStyle: effectItem ? resolveVisualStyle(effectItem) : undefined,
-    themeVisualStyle: themeItem ? resolveVisualStyle(themeItem) : undefined,
-    backgroundVisualStyle: backgroundItem ? resolveVisualStyle(backgroundItem) : undefined,
-    profileCardVisualStyle: cardItem ? resolveVisualStyle(cardItem) : undefined,
+    themeVisualStyle,
+    themeTone,
     title: titleItem
       ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity }
       : undefined,
-    tags,
-    badgeIds: [...normalized.badges],
   };
 }
 

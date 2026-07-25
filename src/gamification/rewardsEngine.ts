@@ -11,12 +11,10 @@ import type {
   RewardItemDefinition,
   UnlockMethod,
 } from '../types/gamification.ts';
-import { LOADOUT_SLOTS } from '../types/gamification.ts';
+import { LOADOUT_SLOTS, ACTIVE_COSMETIC_CATEGORIES } from '../types/gamification.ts';
+import { sanitizeLoadout } from './profileDisplay.ts';
 
-const DEFAULT_LOADOUT = (): ProfileLoadout => ({
-  tags: [],
-  badges: [],
-});
+const DEFAULT_LOADOUT = (): ProfileLoadout => ({});
 
 /** Conta do dono da plataforma — recebe desbloqueio total do catálogo */
 export const FULL_UNLOCK_OWNER_EMAIL = 'mateusvini.t10@gmail.com';
@@ -33,13 +31,13 @@ export function migrateProfile(profile: GamificationProfile): GamificationProfil
 
   if (!profile.loadout) {
     const eq = profile.equippedCosmetics || {};
-    profile.loadout = {
-      ...DEFAULT_LOADOUT(),
+    profile.loadout = sanitizeLoadout({
       frame: eq.frame,
       title: eq.title,
       theme: eq.theme,
-      badges: eq.badge ? [eq.badge] : [],
-    };
+    });
+  } else {
+    profile.loadout = sanitizeLoadout(profile.loadout);
   }
 
   if (!profile.redeemedCodes) profile.redeemedCodes = [];
@@ -107,18 +105,16 @@ export function unlockReward(
 
 export function buildInventoryView(profile: GamificationProfile): InventoryItemView[] {
   migrateProfile(profile);
-  const loadout = profile.loadout;
 
   const isEquipped = (id: string, cat: string): boolean => {
     const slot = LOADOUT_SLOTS[cat as keyof typeof LOADOUT_SLOTS];
     if (!slot) return false;
-    const key = slot.loadoutKey;
-    const val = loadout[key];
-    if (Array.isArray(val)) return val.includes(id);
-    return val === id;
+    return profile.loadout[slot.loadoutKey] === id;
   };
 
-  return REWARDS_CATALOG.map((item) => {
+  return REWARDS_CATALOG.filter((item) =>
+    (ACTIVE_COSMETIC_CATEGORIES as readonly string[]).includes(item.category)
+  ).map((item) => {
     const entry = profile.inventory.find((e) => e.itemId === item.id);
     return {
       ...item,
@@ -140,23 +136,16 @@ export function equipReward(
   if (!item) return { success: false, error: 'Item não encontrado.' };
   if (!hasReward(profile, itemId)) return { success: false, error: 'Item não desbloqueado.' };
 
-  const slot = LOADOUT_SLOTS[item.category];
-  if (!slot) return { success: false, error: 'Categoria inválida.' };
+  const slot = LOADOUT_SLOTS[item.category as keyof typeof LOADOUT_SLOTS];
+  if (!slot) return { success: false, error: 'Categoria não disponível.' };
 
   const key = slot.loadoutKey;
   const current = profile.loadout[key];
 
-  if (Array.isArray(current)) {
-    if (current.includes(itemId)) {
-      profile.loadout[key] = current.filter((id) => id !== itemId) as never;
-    } else {
-      const next = [...current, itemId].slice(-slot.max);
-      profile.loadout[key] = next as never;
-    }
-  } else if (current === itemId) {
+  if (current === itemId) {
     delete profile.loadout[key];
   } else {
-    (profile.loadout as unknown as Record<string, unknown>)[key] = itemId;
+    profile.loadout[key] = itemId;
   }
 
   profile.updatedAt = new Date().toISOString();
@@ -171,13 +160,11 @@ export function unequipReward(
   const item = getRewardById(itemId);
   if (!item) return { success: false, error: 'Item não encontrado.' };
 
-  const slot = LOADOUT_SLOTS[item.category];
-  const key = slot.loadoutKey;
-  const current = profile.loadout[key];
+  const slot = LOADOUT_SLOTS[item.category as keyof typeof LOADOUT_SLOTS];
+  if (!slot) return { success: false, error: 'Categoria não disponível.' };
 
-  if (Array.isArray(current)) {
-    profile.loadout[key] = current.filter((id) => id !== itemId) as never;
-  } else if (current === itemId) {
+  const key = slot.loadoutKey;
+  if (profile.loadout[key] === itemId) {
     delete profile.loadout[key];
   }
 
@@ -191,30 +178,20 @@ export function saveLoadout(
 ): { success: boolean; error?: string } {
   migrateProfile(profile);
 
+  const clean = sanitizeLoadout(loadout);
+
   for (const [cat, slot] of Object.entries(LOADOUT_SLOTS)) {
     const key = slot.loadoutKey;
-    const val = loadout[key];
+    const val = clean[key];
     if (val === undefined) continue;
 
-    if (Array.isArray(val)) {
-      for (const id of val) {
-        const item = getRewardById(id);
-        if (!item || item.category !== cat || !hasReward(profile, id)) {
-          return { success: false, error: `Item inválido: ${id}` };
-        }
-      }
-      if (val.length > slot.max) {
-        return { success: false, error: `Máximo ${slot.max} itens em ${cat}.` };
-      }
-    } else if (typeof val === 'string') {
-      const item = getRewardById(val);
-      if (!item || item.category !== cat || !hasReward(profile, val)) {
-        return { success: false, error: `Item inválido: ${val}` };
-      }
+    const item = getRewardById(val);
+    if (!item || item.category !== cat || !hasReward(profile, val)) {
+      return { success: false, error: `Item inválido: ${val}` };
     }
   }
 
-  profile.loadout = { ...DEFAULT_LOADOUT(), ...loadout };
+  profile.loadout = clean;
   profile.updatedAt = new Date().toISOString();
   return { success: true };
 }
@@ -336,16 +313,10 @@ export function getOwnedInventory(profile: GamificationProfile): InventoryItemVi
 
 export function getLoadoutPreviewStyles(loadout: ProfileLoadout) {
   const frame = loadout.frame ? getRewardById(loadout.frame) : null;
-  const bg = loadout.background ? getRewardById(loadout.background) : null;
   const theme = loadout.theme ? getRewardById(loadout.theme) : null;
-  const effect = loadout.effect ? getRewardById(loadout.effect) : null;
-  const card = loadout.profileCard ? getRewardById(loadout.profileCard) : null;
 
   return {
     frameClass: frame?.previewClass || 'ring-2 ring-zinc-700',
-    backgroundClass: bg?.previewGradient ? `bg-gradient-to-br ${bg.previewGradient}` : 'bg-zinc-950',
     themeClass: theme?.previewGradient ? `bg-gradient-to-br ${theme.previewGradient}` : '',
-    effectClass: effect?.animated ? 'animate-pulse' : '',
-    cardClass: card?.previewGradient ? `bg-gradient-to-br ${card.previewGradient}` : 'bg-zinc-900/60',
   };
 }

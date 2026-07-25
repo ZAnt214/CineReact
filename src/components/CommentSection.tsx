@@ -178,7 +178,6 @@ export default function CommentSection({
                 size="sm"
                 loadout={userLoadout}
                 donorBadge={!!user.isDonor}
-                showEffect
               />
               <div className="min-w-0 flex-1">
                 <ProfileNameRow
@@ -263,7 +262,6 @@ export default function CommentSection({
                       size="md"
                       profileDisplay={c.profileDisplay}
                       loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
-                      showEffect
                     />
                   </div>
 
