@@ -31,6 +31,13 @@ import type {
   MissionDefinition,
 } from '../types/gamification.ts';
 
+/** Títulos desbloqueados automaticamente ao completar conquistas */
+const ACHIEVEMENT_COSMETIC_REWARDS: Record<string, string> = {
+  'watch-50': 'title-maratonista',
+  'comments-25': 'title-comentarista',
+  'comments-100': 'title-oraculo',
+};
+
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -176,6 +183,8 @@ function unlockAchievement(profile: GamificationProfile, id: string): Achievemen
   profile.unlockedAchievements.push(id);
   profile.xp += def.xpReward;
   profile.spotlight += def.spotlightReward;
+  const cosmeticId = ACHIEVEMENT_COSMETIC_REWARDS[id];
+  if (cosmeticId) unlockReward(profile, cosmeticId, 'achievement', id);
   return def;
 }
 

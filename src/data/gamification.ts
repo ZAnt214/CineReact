@@ -21,7 +21,7 @@ export const INFLUENCE_TIERS: InfluenceTier[] = [
 ];
 
 export const LEVELS: LevelDefinition[] = [
-  { tier: 'Espectador', minXp: 0, rewardSpotlight: 0, description: 'Começando sua jornada no CineReact.' },
+  { tier: 'Espectador', minXp: 0, rewardSpotlight: 0, unlockCosmetic: 'title-espectador', description: 'Começando sua jornada no CineReact.' },
   { tier: 'Entusiasta', minXp: 100, rewardSpotlight: 25, unlockCosmetic: 'title-entusiasta', description: 'Você já sente o clima da plateia.' },
   { tier: 'Explorador', minXp: 300, rewardSpotlight: 40, unlockCosmetic: 'badge-explorador', description: 'Descobre novos conteúdos com frequência.' },
   { tier: 'Crítico', minXp: 600, rewardSpotlight: 60, unlockCosmetic: 'frame-critico', description: 'Sua opinião começa a importar na comunidade.' },
@@ -128,10 +128,14 @@ export const COSMETIC_SHOP: CosmeticItem[] = [
   { id: 'frame-critico', name: 'Moldura Crítico', description: 'Desbloqueada no nível Crítico.', type: 'frame', cost: 0, rarity: 'raro', previewClass: 'ring-2 ring-rose-500/70' },
   { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Destaque exclusivo para influenciadores.', type: 'frame', cost: 0, rarity: 'épico', previewClass: 'ring-2 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.5)]' },
   { id: 'frame-elite', name: 'Moldura Elite', description: 'A moldura definitiva do CineReact.', type: 'frame', cost: 0, rarity: 'lendário', previewClass: 'ring-[3px] ring-amber-300 shadow-[0_0_40px_rgba(252,211,77,0.6)]' },
-  { id: 'title-entusiasta', name: 'Título: Entusiasta', description: 'Exiba seu título abaixo do nome.', type: 'title', cost: 0, rarity: 'comum' },
-  { id: 'title-especialista', name: 'Título: Especialista', description: 'Reconhecimento por domínio de conteúdo.', type: 'title', cost: 0, rarity: 'raro' },
-  { id: 'title-curador', name: 'Título: Curador', description: 'Para quem monta as melhores listas.', type: 'title', cost: 150, rarity: 'raro' },
-  { id: 'title-lenda', name: 'Título: Lenda', description: 'Título lendário da comunidade.', type: 'title', cost: 500, rarity: 'lendário' },
+  { id: 'title-espectador', name: 'Título: Espectador', description: 'Para quem curte reações do sofá.', type: 'title', cost: 0, rarity: 'comum' },
+  { id: 'title-entusiasta', name: 'Título: Entusiasta', description: 'Para fãs que vivem cada cena.', type: 'title', cost: 0, rarity: 'comum' },
+  { id: 'title-cinefilo', name: 'Título: Cinéfilo', description: 'Pipoca, créditos e plot twists.', type: 'title', cost: 80, rarity: 'comum' },
+  { id: 'title-maratonista', name: 'Título: Maratonista', description: 'Para quem não para de assistir.', type: 'title', cost: 0, rarity: 'incomum' },
+  { id: 'title-especialista', name: 'Título: Especialista', description: 'Reconhecimento por maratonar conteúdo.', type: 'title', cost: 0, rarity: 'raro' },
+  { id: 'title-curador', name: 'Título: Organizador', description: 'Para quem monta listas e favoritos.', type: 'title', cost: 150, rarity: 'raro' },
+  { id: 'title-lenda', name: 'Título: Lenda', description: 'Título lendário para fãs veteranos.', type: 'title', cost: 500, rarity: 'lendário' },
+  { id: 'title-luzes-camera', name: 'Título: Luzes, Câmera', description: 'Coleção Estreia CineReact.', type: 'title', cost: 200, rarity: 'épico' },
   { id: 'badge-explorador', name: 'Emblema Explorador', description: 'Distintivo para descobridores.', type: 'badge', cost: 0, rarity: 'comum' },
   { id: 'badge-curador', name: 'Emblema Curador', description: 'Para mestres das listas.', type: 'badge', cost: 0, rarity: 'raro' },
   { id: 'badge-lenda', name: 'Emblema Lenda', description: 'Distintivo lendário exclusivo.', type: 'badge', cost: 0, rarity: 'lendário' },
