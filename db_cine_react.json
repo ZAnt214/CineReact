@@ -83665,5 +83665,404 @@
       "createdAt": "2026-07-24T02:11:30.342Z",
       "isAdmin": true
     }
-  ]
+  ],
+  "gamificationProfiles": {
+    "mateusvini.t10@gmail.com": {
+      "email": "mateusvini.t10@gmail.com",
+      "xp": 0,
+      "spotlight": 50,
+      "influenceIndex": 0,
+      "currentStreak": 0,
+      "longestStreak": 0,
+      "lastActiveDate": "",
+      "unlockedAchievements": [],
+      "unlockedSeals": [],
+      "inventory": [
+        {
+          "itemId": "frame-amber",
+          "unlockedAt": "2026-07-25T00:59:10.500Z",
+          "unlockMethod": "default"
+        },
+        {
+          "itemId": "frame-neon",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-royal",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-critico",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-influencer",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-elite",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-pulse",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-rainbow",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-entusiasta",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-especialista",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-curador",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-lenda",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-oraculo",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "avatar-popcorn",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "avatar-clapper",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "avatar-royal",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "avatar-ghost",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "badge-explorador",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "badge-curador",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "badge-lenda",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "badge-spotlight",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "badge-streak-30",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-midnight",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-icone",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-aurora",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-rainbow",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-galaxy",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "theme-candy",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "effect-particles",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "effect-aurora",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "effect-sparkle",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "effect-rainbow-aura",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-cinema",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-nebula",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-gold",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-rainbow",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-candy-clouds",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "reaction-fire",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "reaction-mindblown",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "emoji-clap",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "emoji-crown",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "card-classic",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "card-premium",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "card-holographic",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-fan-isabela-roza",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-squad-isabela-roza",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-fan-janela-da-rua",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-vip-janela-da-rua",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-fan-gamer-bisonho",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-fan-fanit-lin",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-squad-fanit-lin",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "tag-fan-carol-rhay",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-halloween-2026",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "bg-halloween-2026",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "emoji-halloween-bat",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "frame-natal-2026",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "card-natal-2026",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "title-aniversario-cinereact",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        },
+        {
+          "itemId": "effect-confetti-ano-novo",
+          "unlockedAt": "2026-07-25T00:59:10.501Z",
+          "unlockMethod": "legacy",
+          "unlockSource": "owner_full_unlock"
+        }
+      ],
+      "loadout": {
+        "tags": [],
+        "badges": []
+      },
+      "redeemedCodes": [
+        "CINEREACT2026",
+        "SPOTLIGHTVIP",
+        "FANITLIN"
+      ],
+      "missionProgress": {},
+      "completedMissions": {},
+      "stats": {
+        "totalWatchTimeMinutes": 0,
+        "reactsWatched": 0,
+        "commentsCount": 0,
+        "favoritesCount": 0,
+        "ratingsCount": 0,
+        "listsCreated": 0,
+        "sharesCount": 0,
+        "creatorsDiscovered": [],
+        "categoriesWatched": {},
+        "franchisesWatched": {},
+        "watchedReacts": {},
+        "commentLikesReceived": 0,
+        "listEngagement": 0,
+        "creatorWatchCounts": {}
+      },
+      "earlyAccess": false,
+      "featuredInfluencer": false,
+      "createdAt": "2026-07-25T00:59:10.500Z",
+      "updatedAt": "2026-07-25T00:59:10.501Z"
+    }
+  }
 }

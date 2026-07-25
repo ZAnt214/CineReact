@@ -9,6 +9,7 @@ import {
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import {
   equipReward,
+  ensureOwnerFullUnlock,
   migrateProfile,
   purchaseReward,
   redeemPromoCode,
@@ -33,6 +34,7 @@ export function handleGamificationEvent(
 export function getGamificationMe(email: string) {
   const profile = localDb.getGamificationProfile(email);
   migrateProfile(profile);
+  ensureOwnerFullUnlock(profile);
   localDb.saveGamificationProfile(profile);
   const allProfiles = localDb.getAllGamificationProfiles();
   const enriched = enrichProfileResponse(profile);
