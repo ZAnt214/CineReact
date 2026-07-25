@@ -17,6 +17,9 @@ import {
   Eye,
 } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
+import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
+import { PremiumFrameRing, PremiumFullPreview, PremiumRewardSurface } from './PremiumRewardSurface.tsx';
+import RewardObtainInfo from './RewardObtainInfo.tsx';
 import type { InventoryItemView, RewardItemDefinition } from '../../types/gamification.ts';
 
 type RewardLike = Pick<
@@ -31,9 +34,16 @@ type RewardLike = Pick<
   | 'animated'
   | 'emojiChar'
   | 'avatarVisual'
+  | 'visualStyle'
   | 'creatorColors'
   | 'creatorName'
   | 'owned'
+  | 'unlockMethod'
+  | 'obtainHint'
+  | 'cost'
+  | 'unlockedAt'
+  | 'limited'
+  | 'seasonalEvent'
 >;
 
 const BADGE_ICONS: Record<string, React.ElementType> = {
@@ -147,6 +157,8 @@ export function RewardPreviewThumb({
 }) {
   const s = SIZE_MAP[size];
   const isLocked = locked || item.owned === false;
+  const visual = resolveVisualStyle(item);
+  const styleCfg = getVisualStyle(visual);
 
   if (isLocked) {
     return (
@@ -169,46 +181,33 @@ export function RewardPreviewThumb({
 
     case 'frame':
       return (
-        <div className={`${s.box} rounded-full flex items-center justify-center p-1 ${item.previewClass || 'ring-2 ring-amber-500/60'}`}>
-          <motion.div
-            className="w-full h-full rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900"
-            animate={item.animated ? { opacity: [0.7, 1, 0.7] } : undefined}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </div>
+        <PremiumFrameRing visualStyle={visual} size={size}>
+          <div className={`${size === 'sm' ? 'w-10 h-10' : size === 'lg' ? 'w-20 h-20' : 'w-14 h-14'} rounded-full bg-gradient-to-br ${styleCfg.gradient}`} />
+        </PremiumFrameRing>
       );
 
     case 'background':
     case 'theme':
     case 'profile_card':
-      return (
-        <motion.div
-          className={`${s.box} rounded-xl border border-zinc-700/50 bg-gradient-to-br ${item.previewGradient || 'from-zinc-900 to-zinc-950'}`}
-          animate={item.animated ? { scale: [1, 1.02, 1] } : undefined}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-      );
+      return <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" />;
 
     case 'effect':
       return (
-        <motion.div
-          className={`${s.box} rounded-xl bg-zinc-900 border border-purple-500/30 flex items-center justify-center relative overflow-hidden`}
-          animate={{ boxShadow: ['0 0 8px rgba(168,85,247,0.2)', '0 0 20px rgba(245,158,11,0.35)', '0 0 8px rgba(168,85,247,0.2)'] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-        >
-          <Sparkles className={`${s.icon} text-purple-300`} />
-        </motion.div>
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+          <Zap className={`${s.icon} ${styleCfg.accent}`} />
+        </PremiumRewardSurface>
       );
 
     case 'tag':
       return (
         <span
-          className={`${s.box} rounded-full flex items-center justify-center px-2 text-center font-bold leading-tight ${s.text}`}
+          className={`${s.box} rounded-full flex items-center justify-center px-2 text-center font-bold leading-tight ${s.text} shadow-lg`}
           style={
             item.creatorColors
               ? {
                   background: `linear-gradient(135deg, ${item.creatorColors.from}, ${item.creatorColors.to})`,
                   color: item.creatorColors.text,
+                  boxShadow: `0 0 16px ${item.creatorColors.from}55`,
                 }
               : { background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fffbeb' }
           }
@@ -219,45 +218,40 @@ export function RewardPreviewThumb({
 
     case 'title':
       return (
-        <motion.div className={`${s.box} rounded-xl bg-zinc-900 border border-amber-500/30 flex flex-col items-center justify-center px-1`}>
-          <Award className="w-4 h-4 text-amber-400 mb-0.5" />
-          <span className="text-[8px] font-black uppercase tracking-wider text-amber-300 text-center leading-none">
-            {item.name.slice(0, 8)}
-          </span>
-        </motion.div>
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+          <div className="flex flex-col items-center">
+            <Award className="w-4 h-4 mb-0.5" />
+            <span className="text-[8px] font-black uppercase tracking-wider text-center leading-none">
+              {item.name.slice(0, 8)}
+            </span>
+          </div>
+        </PremiumRewardSurface>
       );
 
     case 'badge': {
       const BadgeIcon = BADGE_ICONS[item.id] || Medal;
       return (
-        <motion.div
-          className={`${s.box} rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 border border-amber-500/25 flex items-center justify-center`}
-          whileHover={{ rotate: [0, -5, 5, 0] }}
-        >
-          <BadgeIcon className={`${s.icon} text-amber-400`} />
-        </motion.div>
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+          <BadgeIcon className={`${s.icon} ${styleCfg.accent}`} />
+        </PremiumRewardSurface>
       );
     }
 
     case 'reaction':
     case 'emoji':
       return (
-        <motion.div
-          className={`${s.box} rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-700 flex items-center justify-center text-2xl shadow-inner`}
-          animate={{ scale: [1, 1.06, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="2xl">
           <span className={size === 'sm' ? 'text-xl' : size === 'md' ? 'text-2xl' : 'text-4xl'}>
             {item.emojiChar || '✨'}
           </span>
-        </motion.div>
+        </PremiumRewardSurface>
       );
 
     default:
       return (
-        <div className={`${s.box} rounded-xl bg-zinc-900 flex items-center justify-center`}>
-          <Sparkles className={`${s.icon} text-amber-400`} />
-        </div>
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+          <Sparkles className={`${s.icon} ${styleCfg.accent}`} />
+        </PremiumRewardSurface>
       );
   }
 }
@@ -272,6 +266,8 @@ export function RewardProfileContextPreview({
   userAvatar?: string;
 }) {
   const rarityStyle = RARITY_STYLES[item.rarity];
+  const visual = resolveVisualStyle(item);
+  const styleCfg = getVisualStyle(visual);
 
   const renderInContext = () => {
     switch (item.category) {
@@ -300,16 +296,16 @@ export function RewardProfileContextPreview({
 
       case 'frame':
         return (
-          <div className="flex flex-col items-center gap-3">
-            <motion.div className={`rounded-full p-1.5 ${item.previewClass || 'ring-2 ring-amber-500/60'}`}>
+          <motion.div className="flex flex-col items-center gap-3">
+            <PremiumFrameRing visualStyle={visual} size="lg">
               <img
                 src={userAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}
                 alt=""
                 className="w-20 h-20 rounded-full object-cover"
               />
-            </motion.div>
+            </PremiumFrameRing>
             <p className="text-[10px] text-zinc-500">Moldura ao redor da foto de perfil</p>
-          </div>
+          </motion.div>
         );
 
       case 'title':
@@ -365,12 +361,9 @@ export function RewardProfileContextPreview({
       case 'background':
       case 'theme':
         return (
-          <motion.div
-            className={`w-full max-w-[240px] h-32 rounded-2xl border border-zinc-700/50 bg-gradient-to-br ${item.previewGradient || 'from-zinc-900 to-zinc-950'} flex items-center justify-center`}
-            animate={item.animated ? { opacity: [0.85, 1, 0.85] } : undefined}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            <Eye className="w-6 h-6 text-white/40" />
+          <motion.div className="flex flex-col items-center gap-3 w-full">
+            <PremiumFullPreview visualStyle={visual} />
+            <p className="text-[10px] text-zinc-500">Estilo {styleCfg.label} aplicado ao perfil</p>
           </motion.div>
         );
 
@@ -489,11 +482,12 @@ export function RewardPreviewModal({
             <RewardProfileContextPreview item={item} userName={userName} userAvatar={userAvatar} />
           </motion.div>
 
-          <motion.div className="relative px-5 py-4 border-t border-zinc-800/80 flex gap-2">
+          <motion.div className="relative px-5 py-4 border-t border-zinc-800/80 space-y-3">
+            <RewardObtainInfo item={item} variant="modal" />
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 cursor-pointer"
             >
               Fechar
             </button>

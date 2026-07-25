@@ -48,6 +48,28 @@ export type UnlockMethod =
   | 'streak'
   | 'legacy';
 
+export type RewardVisualStyle =
+  | 'amber'
+  | 'neon'
+  | 'royal'
+  | 'rainbow'
+  | 'galaxy'
+  | 'candy'
+  | 'holographic'
+  | 'nebula'
+  | 'aurora'
+  | 'gold'
+  | 'midnight'
+  | 'cinema'
+  | 'ember'
+  | 'crystal'
+  | 'halloween'
+  | 'natal'
+  | 'rose'
+  | 'forest'
+  | 'slate'
+  | 'creator';
+
 export type MissionPeriod = 'daily' | 'weekly';
 
 export type LeaderboardType =
@@ -206,6 +228,8 @@ export interface RewardItemDefinition {
   icon?: string;
   /** Visual premium para avatares cosméticos (substitui emojiChar) */
   avatarVisual?: 'popcorn' | 'clapperboard' | 'crown' | 'ghost' | 'spotlight' | 'legend';
+  /** Estilo visual premium do preview (rainbow, galaxy, candy, etc.) */
+  visualStyle?: RewardVisualStyle;
 }
 
 /** @deprecated use RewardItemDefinition */
