@@ -24,6 +24,7 @@ export interface ProfileAvatarProps {
   profileDisplay?: PublicProfileDisplay | null;
   showFrame?: boolean;
   showEffect?: boolean;
+  lite?: boolean;
   className?: string;
   donorBadge?: boolean;
 }
@@ -70,6 +71,7 @@ export default function ProfileAvatar({
   profileDisplay,
   showFrame = true,
   showEffect = true,
+  lite = false,
   className = '',
   donorBadge = false,
 }: ProfileAvatarProps) {
@@ -95,7 +97,7 @@ export default function ProfileAvatar({
     <div className={`relative inline-flex flex-shrink-0 ${className}`}>
 
       {hasFrame ? (
-        <PremiumFrameRing visualStyle={display.frameVisualStyle} size={cfg.frame}>
+        <PremiumFrameRing visualStyle={display.frameVisualStyle} size={cfg.frame} lite={lite}>
           {avatarNode}
         </PremiumFrameRing>
       ) : (

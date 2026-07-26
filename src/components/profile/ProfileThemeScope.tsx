@@ -14,7 +14,7 @@ export function useProfileThemeTone() {
 export interface ProfileThemeScopeProps {
   loadout?: ProfileLoadout | null;
   profileDisplay?: PublicProfileDisplay | null;
-  variant?: 'default' | 'fullscreen';
+  variant?: 'default' | 'fullscreen' | 'lite';
   className?: string;
   children: React.ReactNode;
 }
@@ -36,28 +36,26 @@ export default function ProfileThemeScope({
   const useCss = !!themeStyle?.gradientCss;
 
   const isFullscreen = variant === 'fullscreen';
-  const isAtelier = display.themeVisualStyle === 'atelier';
+  const isLite = variant === 'lite';
+  const isAtelier = display.themeVisualStyle === 'atelier' && !isLite;
+  const useAnimation = themeStyle?.animated && !isLite;
+  const useShimmer = themeStyle?.shimmer && !isLite;
 
   return (
     <ProfileThemeContext.Provider value={tone}>
       <div
         data-theme-tone={tone}
         data-visual-style={display.themeVisualStyle}
-        className={`profile-themed-scope relative ${isFullscreen ? 'profile-themed-scope-fullscreen' : ''} ${isAtelier ? 'profile-theme-atelier' : ''} ${className}`}
+        className={`profile-themed-scope relative ${isFullscreen ? 'profile-themed-scope-fullscreen' : ''} ${isLite ? 'profile-themed-scope-lite' : ''} ${isAtelier ? 'profile-theme-atelier' : ''} ${className}`}
       >
         {themeStyle && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
             {isFullscreen && <div className="absolute inset-0 bg-zinc-950" />}
             {isAtelier && (
-              <>
-                <div className="profile-atelier-beam absolute inset-x-0 top-0 h-[55%]" />
-                <div className="profile-atelier-orb profile-atelier-orb-teal absolute w-56 h-56 -right-16 top-[38%]" />
-                <div className="profile-atelier-orb profile-atelier-orb-amber absolute w-44 h-44 -left-12 bottom-[18%]" />
-                <div className="profile-atelier-grain absolute inset-0" />
-              </>
+              <div className="profile-atelier-beam absolute inset-x-0 top-0 h-[50%]" />
             )}
             <div
-              className={`absolute inset-0 ${useCss && themeStyle.animated ? 'profile-surface-gradient' : ''} ${themeStyle.shimmer ? 'profile-surface-shimmer' : ''}`}
+              className={`absolute inset-0 ${useCss && useAnimation ? 'profile-surface-gradient' : ''} ${useShimmer ? 'profile-surface-shimmer' : ''}`}
               style={useCss ? { background: themeStyle.gradientCss } : undefined}
             >
               {!useCss && (

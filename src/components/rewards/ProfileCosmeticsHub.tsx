@@ -109,10 +109,10 @@ export default function ProfileCosmeticsHub({
   };
 
   return (
-    <div className="relative z-0 space-y-6">
-      <ProfileSurface loadout={loadout} variant="preview" className="min-h-0">
+    <div className="relative z-0 space-y-6 cosmetics-hub-scroll">
+      <ProfileSurface loadout={loadout} variant="preview" lite className="min-h-0">
         <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 py-2">
-          <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={loadout} className="shrink-0" />
+          <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={loadout} lite className="shrink-0" />
           <div className="flex-1 text-center sm:text-left min-w-0">
             <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
               <Palette className="w-3.5 h-3.5" /> Prévia do perfil
@@ -124,7 +124,7 @@ export default function ProfileCosmeticsHub({
                   const b = inventory.find((i) => i.id === id);
                   return b ? (
                     <span key={id} title={b.name}>
-                      <RewardPreviewThumb item={b} size="sm" />
+                      <RewardPreviewThumb item={b} size="sm" lite />
                     </span>
                   ) : null;
                 })}
@@ -217,7 +217,7 @@ export default function ProfileCosmeticsHub({
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 cosmetics-hub-grid">
         {filtered.map((item) => {
           const style = RARITY_STYLES[item.rarity];
           const equipped = isEquipped(loadout, item);
@@ -226,9 +226,9 @@ export default function ProfileCosmeticsHub({
           return (
             <div
               key={item.id}
-              className={`group relative flex flex-col rounded-2xl border overflow-hidden transition-all ${
+              className={`cosmetics-hub-card group relative flex flex-col rounded-2xl border overflow-hidden transition-colors ${
                 equipped ? 'ring-2 ring-amber-500/50 border-amber-500/40' : style.border
-              } ${!item.owned ? 'opacity-75' : 'cursor-pointer hover:scale-[1.02]'}`}
+              } ${!item.owned ? 'opacity-75' : 'cursor-pointer hover:border-zinc-700'}`}
               onClick={() => item.owned && handleItemClick(item)}
               onKeyDown={(e) => e.key === 'Enter' && item.owned && handleItemClick(item)}
               role={item.owned ? 'button' : undefined}
@@ -240,7 +240,7 @@ export default function ProfileCosmeticsHub({
                     <Check className="w-2 h-2" />
                   </span>
                 )}
-                <RewardPreviewThumb item={item} size="md" locked={!item.owned} />
+                <RewardPreviewThumb item={item} size="md" locked={!item.owned} lite />
                 {item.owned && (
                   <button
                     type="button"

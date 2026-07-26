@@ -218,15 +218,14 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   },
   atelier: {
     label: 'Ateliê Visionário',
-    gradient: 'from-zinc-950 via-amber-950 to-teal-950',
+    gradient: 'from-fuchsia-500 via-cyan-400 to-amber-400',
     gradientCss:
-      'radial-gradient(ellipse 130% 90% at 50% -15%, rgba(251,191,36,0.42) 0%, transparent 58%), radial-gradient(ellipse 85% 65% at 88% 72%, rgba(20,184,166,0.28) 0%, transparent 52%), radial-gradient(ellipse 75% 55% at 8% 78%, rgba(168,85,247,0.22) 0%, transparent 48%), linear-gradient(168deg, #09090b 0%, #1c1917 32%, #0f172a 68%, #042f2e 100%)',
-    ring: 'ring-[2.5px] ring-amber-400/75 shadow-[0_0_36px_rgba(251,191,36,0.5)]',
-    glow: 'shadow-[0_0_40px_rgba(20,184,166,0.32)]',
-    accent: 'text-amber-100',
+      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(251,146,60,0.82) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(34,211,238,0.72) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(232,121,249,0.68) 0%, transparent 46%), linear-gradient(152deg, #86198f 0%, #0e7490 42%, #c2410c 100%)',
+    ring: 'ring-2 ring-fuchsia-400 shadow-[0_0_28px_rgba(217,70,239,0.7)]',
+    glow: 'shadow-[0_0_32px_rgba(34,211,238,0.5)]',
+    accent: 'text-fuchsia-50',
     animated: true,
     shimmer: true,
-    particles: 'sparkles',
   },
 };
 
