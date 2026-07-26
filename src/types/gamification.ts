@@ -301,6 +301,7 @@ export interface LeaderboardEntry {
   influenceIndex: number;
   isInfluencer: boolean;
   profileDisplay?: PublicProfileDisplay;
+  publicProfile?: import('../types.ts').PublicUserProfile;
 }
 
 export interface GamificationMeResponse {

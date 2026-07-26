@@ -1,11 +1,14 @@
 import { localDb } from '../db/local_db.ts';
-import {
-  buildLeaderboard,
+import { buildLeaderboard,
   enrichProfileResponse,
   getUserRank,
   processGamificationEvent,
   type ProcessEventMeta,
 } from './engine.ts';
+import {
+  findOfficialCreatorEmailForChannel,
+  getPublicUserProfile,
+} from './publicUserProfile.ts';
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import {
   equipReward,
@@ -58,10 +61,7 @@ export function getGamificationLeaderboard(type: LeaderboardType, limit = 20) {
 }
 
 export function getPublicProfileForEmail(email: string) {
-  if (!email) return resolvePublicProfileDisplay();
-  const profile = localDb.getGamificationProfile(email);
-  migrateProfile(profile);
-  return resolvePublicProfileDisplay(profile.loadout);
+  return getPublicUserProfile(email)?.profileDisplay ?? resolvePublicProfileDisplay();
 }
 
 export function purchaseCosmetic(email: string, itemId: string) {
@@ -111,7 +111,9 @@ export function registerGamificationRoutes(app: import('express').Express) {
     try {
       const email = decodeURIComponent(req.params.email || '');
       if (!email) return res.status(400).json({ error: 'Email requerido.' });
-      res.json(getPublicProfileForEmail(email));
+      const profile = getPublicUserProfile(email);
+      if (!profile) return res.status(404).json({ error: 'Perfil não encontrado.' });
+      res.json(profile);
     } catch (error) {
       console.error('Erro gamification/profile:', error);
       res.status(500).json({ error: 'Erro ao carregar perfil público.' });

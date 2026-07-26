@@ -3,6 +3,7 @@ import { MessageSquare, Sparkles, Heart, Trash2 } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
+import ProfileSocialLinks from './profile/ProfileSocialLinks.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface CommentSectionProps {
@@ -260,8 +261,9 @@ export default function CommentSection({
                       photoUrl={c.avatar}
                       alt={c.usuarioNome}
                       size="md"
-                      profileDisplay={c.profileDisplay}
+                      profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
                       loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
+                      lite={!!c.publicProfile?.isVerifiedCreator}
                     />
                   </div>
 
@@ -269,13 +271,20 @@ export default function CommentSection({
                     <ProfileNameRow
                       name={c.usuarioNome}
                       isDonor={!!c.isDonor}
-                      profileDisplay={c.profileDisplay}
+                      profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
                       loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
                       timestamp={getFriendlyDate(c.criadoEm)}
                       donorBadgeSize="md"
                     />
 
-
+                    {c.publicProfile?.isVerifiedCreator && c.publicProfile.socialLinks && (
+                      <ProfileSocialLinks
+                        links={c.publicProfile.socialLinks}
+                        size="sm"
+                        align="start"
+                        className="max-w-md"
+                      />
+                    )}
                     <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">{c.texto}</p>
 
                     {/* CINEREACT LIKES SYSTEM */}

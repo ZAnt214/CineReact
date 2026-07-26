@@ -20,6 +20,7 @@ import {
   checkCreatorFollowReward,
 } from './rewardsEngine.ts';
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
+import { getPublicUserProfile } from './publicUserProfile.ts';
 import type {
   AchievementDefinition,
   GamificationEventType,
@@ -545,6 +546,7 @@ export function buildLeaderboard(
       influenceIndex: p.influenceIndex,
       isInfluencer: p.featuredInfluencer,
       profileDisplay: resolvePublicProfileDisplay(p.loadout),
+      publicProfile: getPublicUserProfile(p.email) ?? undefined,
     };
   });
 }

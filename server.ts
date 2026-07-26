@@ -4,6 +4,9 @@ import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
+import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
+import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
+import { migrateProfile } from "./src/gamification/rewardsEngine.ts";
 import { resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
@@ -2134,11 +2137,13 @@ app.get("/api/comentarios", (req, res) => {
     // Enrich comments with user's isDonor status, avatar URL and equipped cosmetics
     const enriched = rawComments.map(c => {
       const userAcct = localDb.findUsuarioByEmailSync(c.usuarioEmail);
+      const publicProfile = getPublicUserProfile(c.usuarioEmail);
       return {
         ...c,
         isDonor: userAcct?.isDonor || (c.usuarioEmail === "mateusvini.t10@gmail.com" ? true : false),
         avatar: userAcct?.avatar || "",
-        profileDisplay: getPublicProfileForEmail(c.usuarioEmail),
+        profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(c.usuarioEmail),
+        publicProfile: publicProfile ?? undefined,
       };
     });
     
@@ -2164,10 +2169,12 @@ app.post("/api/comentarios", (req, res) => {
       criadoEm: new Date().toISOString()
     });
     const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
+    const publicProfile = getPublicUserProfile(usuarioEmail);
     res.status(201).json({
       ...novo,
       avatar: localDb.findUsuarioByEmailSync(usuarioEmail)?.avatar || "",
-      profileDisplay: getPublicProfileForEmail(usuarioEmail),
+      profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(usuarioEmail),
+      publicProfile: publicProfile ?? undefined,
       gamificationReward,
     });
   } catch (error: any) {
@@ -2730,6 +2737,40 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
   }
 });
 
+// Perfil público de usuário (cosméticos + redes para criadores verificados)
+app.get("/api/usuario/public/:email", (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email || "");
+    if (!email) return res.status(400).json({ error: "E-mail é obrigatório." });
+    const profile = getPublicUserProfile(email);
+    if (!profile) return res.status(404).json({ error: "Perfil não encontrado." });
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error("Erro ao obter perfil público:", error);
+    res.status(500).json({ error: "Erro interno ao obter perfil público." });
+  }
+});
+
+// Perfil oficial do criador vinculado a um canal
+app.get("/api/canais/:canalId/perfil-oficial", (req, res) => {
+  try {
+    const canalId = decodeURIComponent(req.params.canalId || "");
+    const obra = localDb.getObras().find((o) => o.id === canalId && o.tipo === "canal");
+    if (!obra) return res.status(404).json({ error: "Canal não encontrado." });
+
+    const creatorEmail = findOfficialCreatorEmailForChannel(canalId, obra.officialCreatorEmail);
+    if (!creatorEmail) {
+      return res.json({ success: true, profile: null });
+    }
+
+    const profile = getPublicUserProfile(creatorEmail);
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error("Erro ao obter perfil oficial do canal:", error);
+    res.status(500).json({ error: "Erro interno ao obter perfil oficial do canal." });
+  }
+});
+
 // Atualizar perfil do usuário (Avatar, Descricao & Senha)
 app.post("/api/usuario/update", async (req, res) => {
   try {
@@ -2738,11 +2779,26 @@ app.post("/api/usuario/update", async (req, res) => {
       return res.status(400).json({ error: "E-mail é obrigatório para identificação." });
     }
 
+    const existingUser = await localDb.findUsuarioByEmail(email);
+    if (!existingUser) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
     const updates: Partial<UserAccount> = {};
     if (avatar !== undefined) updates.avatar = avatar;
     if (descricao !== undefined) updates.descricao = descricao;
     if (password) updates.password = password;
-    if (socialLinks !== undefined) updates.socialLinks = sanitizeSocialLinks(socialLinks);
+
+    if (socialLinks !== undefined) {
+      const gamification = localDb.getGamificationProfile(email);
+      migrateProfile(gamification);
+      if (isVerifiedCreatorLoadout(gamification.loadout)) {
+        updates.socialLinks = {
+          ...sanitizeSocialLinks(existingUser.socialLinks),
+          ...sanitizeSocialLinks(socialLinks),
+        };
+      }
+    }
 
     const user = await localDb.updateUsuario(email, updates);
     if (!user) {
