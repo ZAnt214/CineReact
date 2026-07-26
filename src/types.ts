@@ -11,6 +11,8 @@ export interface Obra {
   trailerUrl: string;
   destacado?: boolean;
   channelId?: string;
+  /** E-mail da conta verificada do criador oficial na plataforma */
+  officialCreatorEmail?: string;
 }
 
 export interface ReactVideo {
@@ -29,6 +31,19 @@ export interface ReactVideo {
 }
 
 import type { PublicProfileDisplay } from './types/gamification.ts';
+import type { CreatorSocialLinks } from './utils/socialLinks.ts';
+
+export type { CreatorSocialLinks };
+
+export interface PublicUserProfile {
+  email: string;
+  nome: string;
+  avatar?: string;
+  descricao?: string;
+  socialLinks?: CreatorSocialLinks;
+  isVerifiedCreator: boolean;
+  profileDisplay: PublicProfileDisplay;
+}
 
 export interface Comentario {
   id: string;
@@ -42,6 +57,7 @@ export interface Comentario {
   avatar?: string;
   isDonor?: boolean;
   profileDisplay?: PublicProfileDisplay;
+  publicProfile?: PublicUserProfile;
 }
 
 export interface ListaPersonalizada {
@@ -58,10 +74,6 @@ export interface ContinueWatchingItem {
   progress: number;
   updatedAt: number;
 }
-
-import type { CreatorSocialLinks } from './utils/socialLinks.ts';
-
-export type { CreatorSocialLinks };
 
 export interface UserState {
   isLoggedIn: boolean;

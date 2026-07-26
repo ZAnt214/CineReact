@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, AlertCircle, ShieldAlert } from 'lucide-react';
-import { Obra, ReactVideo } from '../types.ts';
+import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, AlertCircle, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Obra, ReactVideo, PublicUserProfile } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
+import PublicCreatorProfile from './profile/PublicCreatorProfile.tsx';
 
 interface ChannelPageProps {
   canal: Obra;
@@ -28,6 +29,8 @@ export default function ChannelPage({
   const [loadingReacts, setLoadingReacts] = useState(reacts.length === 0);
   const [seguidores, setSeguidores] = useState<{ username: string; email: string; avatar?: string; isDonor?: boolean }[]>([]);
   const [loadingSeguidores, setLoadingSeguidores] = useState(true);
+  const [officialProfile, setOfficialProfile] = useState<PublicUserProfile | null>(null);
+  const [loadingOfficialProfile, setLoadingOfficialProfile] = useState(true);
 
   const canalNome = canal.titulo.replace(/^Canal\s+/i, '').trim();
   const isFollowing = canaisSeguidos.includes(canalNome);
@@ -79,6 +82,21 @@ export default function ChannelPage({
   useEffect(() => {
     fetchSeguidores();
   }, [canalNome, canaisSeguidos]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingOfficialProfile(true);
+    fetch(`/api/canais/${encodeURIComponent(canal.id)}/perfil-oficial`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled) setOfficialProfile(data?.profile ?? null);
+      })
+      .catch((err) => console.error('Erro ao carregar perfil oficial do criador:', err))
+      .finally(() => {
+        if (!cancelled) setLoadingOfficialProfile(false);
+      });
+    return () => { cancelled = true; };
+  }, [canal.id]);
 
   const filteredReacts = channelReacts
     .filter(react => {
@@ -155,10 +173,20 @@ export default function ChannelPage({
               </h1>
               
               <p className="text-zinc-300 text-sm md:text-base leading-relaxed max-w-3xl mt-2 font-medium">
-                {canal.sinopse || `Seja muito bem-vindo ao espaço de ${canalNome}. Acompanhe todos os reacts e vídeos aqui.`}
+                {officialProfile?.descricao || canal.sinopse || `Seja muito bem-vindo ao espaço de ${canalNome}. Acompanhe todos os reacts e vídeos aqui.`}
               </p>
 
-              {/* AVISO DE PERFIL NÃO OFICIAL E SUPORTE */}
+              {!loadingOfficialProfile && officialProfile && (
+                <div className="mt-6 max-w-2xl">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-400/70 mb-2 flex items-center gap-1.5">
+                    <BadgeCheck className="w-3.5 h-3.5 text-cyan-300" />
+                    Perfil oficial na CineReact
+                  </p>
+                  <PublicCreatorProfile profile={officialProfile} size="sm" align="start" />
+                </div>
+              )}
+
+              {!loadingOfficialProfile && !officialProfile && (
               <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-3.5 text-xs text-amber-200/90 backdrop-blur-md max-w-3xl">
                 <div className="flex items-start gap-2.5 text-left">
                   <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
@@ -173,6 +201,7 @@ export default function ChannelPage({
                   Entrar em Contato com o Suporte
                 </a>
               </div>
+              )}
             </div>
 
             {/* ACTION BUTTON & FOLLOWERS FACEPILE */}

@@ -382,15 +382,24 @@ export default function GamificationPage({
                       photoUrl={entry.avatar}
                       alt={entry.username}
                       size="md"
-                      profileDisplay={entry.profileDisplay}
+                      profileDisplay={entry.publicProfile?.profileDisplay ?? entry.profileDisplay}
+                      lite={!!entry.publicProfile?.isVerifiedCreator}
                     />
                     <div className="flex-1 min-w-0">
                       <ProfileNameRow
                         name={entry.username}
-                        profileDisplay={entry.profileDisplay}
+                        profileDisplay={entry.publicProfile?.profileDisplay ?? entry.profileDisplay}
                         nameSize="md"
                       />
                       <p className="text-[10px] text-zinc-500">{entry.tier}{entry.isInfluencer ? ' · Influente' : ''}</p>
+                      {entry.publicProfile?.isVerifiedCreator && entry.publicProfile.socialLinks && (
+                        <ProfileSocialLinks
+                          links={entry.publicProfile.socialLinks}
+                          size="sm"
+                          align="start"
+                          className="mt-2 max-w-xs"
+                        />
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-black text-amber-400">{entry.value.toLocaleString('pt-BR')}</p>
