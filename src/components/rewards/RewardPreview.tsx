@@ -72,8 +72,8 @@ function PopcornIcon({ className }: { className?: string }) {
       <path d="M10 32h28l-3 10H13l-3-10z" fill="currentColor" opacity="0.85" />
       <path d="M14 32V18c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx="18" cy="14" r="3" fill="#fde68a" />
-      <circle cx="24" cy="10" r="3.5" fill="#a5b4ff" />
-      <circle cx="30" cy="14" r="3" fill="#a5b4ff" />
+      <circle cx="24" cy="10" r="3.5" fill="#a78bfa" />
+      <circle cx="30" cy="14" r="3" fill="#a78bfa" />
       <circle cx="21" cy="18" r="2.5" fill="#fef3c7" />
       <circle cx="27" cy="17" r="2.5" fill="#fde68a" />
     </svg>
@@ -294,7 +294,7 @@ export function RewardProfileContextPreview({
           <motion.div className="flex flex-col items-center gap-3">
             <motion.div
               className={`rounded-full p-1 ${item.previewClass || 'ring-2 ring-cine-accent/50'}`}
-              animate={item.animated ? { boxShadow: ['0 0 12px rgba(123,140,255,0.2)', '0 0 28px rgba(123,140,255,0.45)', '0 0 12px rgba(123,140,255,0.2)'] } : undefined}
+              animate={item.animated ? { boxShadow: ['0 0 12px rgba(139,92,246,0.2)', '0 0 28px rgba(139,92,246,0.45)', '0 0 12px rgba(139,92,246,0.2)'] } : undefined}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
               {item.avatarVisual ? (
@@ -387,7 +387,7 @@ export function RewardProfileContextPreview({
         return (
           <motion.div
             className={`w-full max-w-[260px] rounded-2xl border border-zinc-700/60 p-5 bg-gradient-to-br ${item.previewGradient || 'from-zinc-900 to-zinc-950'}`}
-            animate={item.animated ? { boxShadow: ['0 0 0 rgba(123,140,255,0)', '0 0 30px rgba(123,140,255,0.15)', '0 0 0 rgba(123,140,255,0)'] } : undefined}
+            animate={item.animated ? { boxShadow: ['0 0 0 rgba(139,92,246,0)', '0 0 30px rgba(139,92,246,0.15)', '0 0 0 rgba(139,92,246,0)'] } : undefined}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <div className="flex flex-col items-center">

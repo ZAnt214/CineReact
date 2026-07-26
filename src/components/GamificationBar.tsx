@@ -74,7 +74,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       </div>
       <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden mb-3">
         <motion.div
-          className="h-full bg-gradient-to-r from-cine-accent-dark via-cine-accent-light to-cine-cream shadow-[0_0_12px_rgba(123,140,255,0.4)]"
+          className="h-full bg-gradient-to-r from-cine-accent-dark via-cine-accent-light to-cine-cream shadow-[0_0_12px_rgba(139,92,246,0.4)]"
           initial={{ width: 0 }}
           animate={{ width: `${progress.percent}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}

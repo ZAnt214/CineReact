@@ -327,7 +327,7 @@ export default function GamificationPage({
                     key={s.id}
                     className={`p-5 rounded-2xl border text-center transition-all ${
                       unlocked
-                        ? 'border-cine-accent/40 bg-cine-surface/20 shadow-[0_0_25px_rgba(123,140,255,0.1)]'
+                        ? 'border-cine-accent/40 bg-cine-surface/20 shadow-[0_0_25px_rgba(139,92,246,0.1)]'
                         : 'border-zinc-800 bg-zinc-900/30 opacity-70'
                     }`}
                   >

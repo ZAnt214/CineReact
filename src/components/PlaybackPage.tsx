@@ -524,8 +524,8 @@ export default function PlaybackPage({
   // Avatar Gradient styling based on channel name
   const getAvatarColor = (name: string) => {
     const colors = [
-      'from-cine-accent-light to-cine-accent-dark shadow-[0_0_12px_rgba(123,140,255,0.2)]',
-      'from-cine-accent to-cine-accent-dark shadow-[0_0_12px_rgba(123,140,255,0.2)]',
+      'from-cine-accent-light to-cine-accent-dark shadow-[0_0_12px_rgba(139,92,246,0.2)]',
+      'from-cine-accent to-cine-accent-dark shadow-[0_0_12px_rgba(139,92,246,0.2)]',
     ];
     let sum = 0;
     for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
@@ -538,7 +538,7 @@ export default function PlaybackPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="cine-container pt-24 pb-20 min-h-screen bg-[#080a14] w-full"
+      className="cine-container pt-24 pb-20 min-h-screen bg-[#0f0f0f] w-full"
     >
       {/* GRID LAYOUT: 12 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -547,7 +547,7 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-6 transition-all duration-300`}>
           
           {/* HIGH-END CINEMATIC GOLDEN BORDER PLAYER FRAME */}
-          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(123,140,255,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(123,140,255,0.45)] transition-all duration-500">
+          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(139,92,246,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(139,92,246,0.45)] transition-all duration-500">
             {/* Ambient Backlight Glow behind Player */}
             <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cine-accent/25 via-cine-accent-light/20 to-cine-accent-dark/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
 
@@ -594,7 +594,7 @@ export default function PlaybackPage({
                         <div className="absolute w-20 h-20 rounded-full bg-cine-accent/20 animate-ping" />
                         
                         {/* Spinning Amber Border Ring */}
-                        <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(123,140,255,0.3)]" />
+                        <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(139,92,246,0.3)]" />
                         
                         {/* Central Icon */}
                         <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-cine-accent/40 flex items-center justify-center shadow-lg">

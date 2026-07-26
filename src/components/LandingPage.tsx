@@ -29,17 +29,17 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#080a14] text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-[#0f0f0f] text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
       {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent/15 via-cine-accent/5 to-transparent rounded-full blur-3xl opacity-70" />
         <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-mint/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#1e2548_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+        <div className="absolute inset-0 bg-[radial-gradient(#303030_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-cine-border/80 bg-[#080a14]/95 max-md:backdrop-blur-none md:bg-[#080a14]/80 md:backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-cine-border/80 bg-[#0f0f0f]/95 max-md:backdrop-blur-none md:bg-[#0f0f0f]/80 md:backdrop-blur-md sticky top-0">
         <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
@@ -86,7 +86,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto font-sans"
         >
           A plataforma para quem ama vídeos de reação a{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cine-cream via-cine-accent-light to-cine-accent">
+          <span className="text-cine-accent">
             filmes, séries, animes e games.
           </span>
         </motion.h1>

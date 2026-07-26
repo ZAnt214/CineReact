@@ -1,197 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --color-cine-bg: #080a14;
-  --color-cine-surface: #0f1324;
-  --color-cine-elevated: #161b32;
-  --color-cine-border: #2a3158;
-  --color-cine-cream: #eaeaf4;
-  --color-cine-muted: #8b92b8;
-  --color-cine-accent: #7b8cff;
-  --color-cine-accent-light: #a5b4ff;
-  --color-cine-accent-dark: #5b6be0;
-  --color-cine-mint: #a78bfa;
-  --color-cine-mint-muted: #7c5fd4;
-  --color-cine-lilac: #c084fc;
-  --color-cine-lilac-muted: #9333ea;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-cine-bg: #0f0f0f;
+  --color-cine-surface: #181818;
+  --color-cine-elevated: #212121;
+  --color-cine-border: #303030;
+  --color-cine-cream: #f1f1f1;
+  --color-cine-muted: #aaaaaa;
+  --color-cine-accent: #8b5cf6;
+  --color-cine-accent-light: #a78bfa;
+  --color-cine-accent-dark: #7c3aed;
+  --color-cine-mint: #8b5cf6;
+  --color-cine-mint-muted: #7c3aed;
+  --color-cine-lilac: #8b5cf6;
+  --color-cine-lilac-muted: #7c3aed;
+  --color-cine-brand: #8b5cf6;
 }
 
 .font-display {
-  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
-/* ── CineReact lettermark — cinema marquee, text only ── */
-.cine-lettermark-root {
-  display: inline-block;
-}
-
-.cine-lettermark-frame {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0.15rem 0.1rem 0.35rem;
-}
-
-.cine-lettermark-frame--center {
-  align-items: center;
-  margin-inline: auto;
-}
-
-.cine-lettermark-aura {
-  position: absolute;
-  inset: -30% -12%;
-  background: radial-gradient(ellipse at 50% 60%, rgba(123, 140, 255, 0.28) 0%, rgba(167, 139, 250, 0.12) 42%, transparent 72%);
-  filter: blur(18px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.cine-lettermark-perfs {
-  display: flex;
-  gap: 0.28em;
-  margin-bottom: 0.28em;
-  padding-left: 0.12em;
-  opacity: 0.55;
-}
-
-.cine-lettermark-perf {
-  width: 0.34em;
-  height: 0.34em;
-  border-radius: 1px;
-  background: linear-gradient(145deg, #a5b4ff, #7b8cff);
-  box-shadow: 0 0 6px rgba(123, 140, 255, 0.35);
-}
-
-.cine-lettermark-ornament {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-  width: 100%;
-  margin-bottom: 0.1em;
-}
-
-.cine-lettermark-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(165, 180, 255, 0.55), transparent);
-}
-
-.cine-lettermark-gem {
-  font-size: 0.42em;
-  color: #c084fc;
-  text-shadow: 0 0 12px rgba(192, 132, 252, 0.65);
+/* CineReact wordmark — clean platform style (YouTube / Twitch inspired) */
+.cine-wordmark {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 800;
   line-height: 1;
-}
-
-.cine-lettermark-cine-top {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-weight: 600;
-  font-size: 0.72em;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: #d4d0f0;
-  text-shadow: 0 0 20px rgba(165, 180, 255, 0.25);
-  padding-inline: 0.1em;
-}
-
-.cine-lettermark-stack {
-  position: relative;
-  z-index: 1;
-  line-height: 0.88;
-}
-
-.cine-lettermark-react {
-  font-family: 'Outfit', system-ui, sans-serif;
-  font-weight: 900;
-  font-size: 1em;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  background: linear-gradient(118deg, #a5b4ff 0%, #7b8cff 35%, #a78bfa 68%, #c084fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px rgba(123, 140, 255, 0.45));
-  position: relative;
-}
-
-.cine-lettermark-react::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(118deg, #a5b4ff 0%, #7b8cff 35%, #a78bfa 68%, #c084fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  opacity: 0.35;
-  filter: blur(6px);
-  z-index: -1;
-}
-
-.cine-lettermark-rail {
-  display: block;
-  width: 92%;
-  height: 2px;
-  margin-top: 0.32em;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #5b6be0, #7b8cff 35%, #a78bfa 70%, transparent);
-  opacity: 0.75;
-  box-shadow: 0 0 14px rgba(123, 140, 255, 0.35);
-}
-
-/* Compact inline (xs / sm) */
-.cine-lettermark-inline {
+  letter-spacing: -0.035em;
   display: inline-flex;
   align-items: baseline;
-  gap: 0.28em;
-  line-height: 1;
+  white-space: nowrap;
 }
 
-.cine-lettermark-cine-compact {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: #d4d0f0;
+.cine-wordmark-cine {
+  color: #ffffff;
+  font-weight: 700;
 }
 
-.cine-lettermark-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #7b8cff, #c084fc);
-  box-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
-  align-self: center;
-  transform: translateY(-0.05em);
-}
-
-.cine-lettermark-react-compact {
-  font-family: 'Outfit', system-ui, sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  background: linear-gradient(110deg, #a5b4ff, #7b8cff 50%, #c084fc);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.cine-lettermark--xs { font-size: 0.95rem; }
-.cine-lettermark--sm { font-size: 1.15rem; }
-.cine-lettermark--md { font-size: 1.55rem; }
-.cine-lettermark--lg { font-size: 2.85rem; }
-.cine-lettermark--xl { font-size: 3.5rem; }
-
-@media (min-width: 640px) {
-  .cine-lettermark--sm { font-size: 1.3rem; }
-  .cine-lettermark--md { font-size: 1.85rem; }
-  .cine-lettermark--lg { font-size: 3.35rem; }
-  .cine-lettermark--xl { font-size: 4.1rem; }
+.cine-wordmark-react {
+  color: var(--color-cine-brand);
+  font-weight: 800;
 }
 
 .font-righteous {
@@ -209,16 +61,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #080a14;
+  background: #0f0f0f;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e2548;
+  background: #303030;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7b8cff;
+  background: #8b5cf6;
 }
 
 /* Hide scrollbar completely for all horizontal-scrolling carousels */
@@ -262,8 +114,8 @@ video,
 }
 
 html, body, #root {
-  background-color: #080a14;
-  color: #eaeaf4;
+  background-color: #0f0f0f;
+  color: #f1f1f1;
   font-family: var(--font-sans);
   overflow-x: hidden !important;
   width: 100%;
@@ -505,7 +357,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-atelier-beam {
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(123, 140, 255, 0.38) 0%, rgba(167, 139, 250, 0.16) 48%, transparent 72%);
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(139, 92, 246, 0.38) 0%, rgba(167, 139, 250, 0.16) 48%, transparent 72%);
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
@@ -519,14 +371,9 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-social-heading {
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-size: 0.95em;
-  background: linear-gradient(92deg, #a5b4ff 0%, #7b8cff 40%, #c084fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  letter-spacing: 0.04em;
+  color: #8b5cf6;
 }
 
