@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles, Eye, Search, Filter, Package, Lock, Check, Palette, X,
@@ -109,7 +110,7 @@ export default function ProfileCosmeticsHub({
   };
 
   return (
-    <div className="relative z-0 space-y-6 cosmetics-hub-scroll">
+    <div className="relative z-0 space-y-6">
       <ProfileSurface loadout={loadout} variant="preview" lite className="min-h-0">
         <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 py-2">
           <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={loadout} lite className="shrink-0" />
@@ -297,13 +298,14 @@ export default function ProfileCosmeticsHub({
         <p className="text-center py-16 text-zinc-500 text-sm">Nenhum item encontrado.</p>
       )}
 
-      <AnimatePresence>
-        {pendingItem && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {pendingItem && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/75"
             onClick={() => !acting && setPendingItem(null)}
           >
             <motion.div
@@ -370,7 +372,9 @@ export default function ProfileCosmeticsHub({
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
 
       {previewItem && (
         <RewardPreviewModal
