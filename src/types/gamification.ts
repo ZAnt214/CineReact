@@ -269,6 +269,13 @@ export interface PublicProfileTag {
   creatorColors?: { from: string; to: string; text: string };
 }
 
+export interface PublicProfileBadge {
+  id: string;
+  name: string;
+  description?: string;
+  rarity: RewardRarity;
+}
+
 /** Cosméticos equipados resolvidos para exibição pública */
 export interface PublicProfileDisplay {
   loadout: ProfileLoadout;
@@ -279,6 +286,8 @@ export interface PublicProfileDisplay {
   themeTone?: 'dark' | 'light';
   title?: { id: string; name: string; rarity: RewardRarity; description?: string };
   tags: PublicProfileTag[];
+  badges: PublicProfileBadge[];
+  verifiedBadge?: PublicProfileBadge;
   badgeIds: string[];
 }
 

@@ -1,4 +1,4 @@
-import { getRewardById } from '../data/rewardsCatalog.ts';
+import { getRewardById, VERIFIED_PROFILE_BADGE_ID } from '../data/rewardsCatalog.ts';
 import { getVisualStyle, resolveVisualStyle } from '../data/rewardVisualStyles.ts';
 import type {
   ProfileLoadout,
@@ -50,6 +50,18 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
     .filter((item): item is RewardItemDefinition => !!item)
     .map(resolveTag);
 
+  const badges = normalized.badges
+    .map((id) => getRewardById(id))
+    .filter((item): item is RewardItemDefinition => !!item)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      rarity: item.rarity,
+    }));
+
+  const verifiedBadge = badges.find((b) => b.id === VERIFIED_PROFILE_BADGE_ID);
+
   const frameVisualStyle: RewardVisualStyle | undefined = frameItem
     ? resolveVisualStyle(frameItem)
     : undefined;
@@ -68,6 +80,8 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
       ? { id: titleItem.id, name: titleItem.name, rarity: titleItem.rarity, description: titleItem.description }
       : undefined,
     tags,
+    badges,
+    verifiedBadge,
     badgeIds: [...normalized.badges],
   };
 }

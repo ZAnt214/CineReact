@@ -118,7 +118,7 @@ export default function ProfileCosmeticsHub({
             <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
               <Palette className="w-3.5 h-3.5" /> Prévia do perfil
             </p>
-            <ProfileNameRow name={user.nome} loadout={loadout} nameSize="md" className="items-center sm:items-start" />
+            <ProfileNameRow name={user.nome} loadout={loadout} nameSize="md" align="center" className="w-full" />
             {loadout.badges.length > 0 && (
               <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
                 {loadout.badges.map((id) => {

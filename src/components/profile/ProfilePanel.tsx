@@ -9,6 +9,7 @@ import ProfileSurface from './ProfileSurface.tsx';
 import ProfileThemeScope from './ProfileThemeScope.tsx';
 import ProfileNameRow from './ProfileNameRow.tsx';
 import { RewardPreviewThumb } from '../rewards/RewardPreview.tsx';
+import { VERIFIED_PROFILE_BADGE_ID } from '../../data/rewardsCatalog.ts';
 import type { GamificationMeResponse } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -96,7 +97,8 @@ export default function ProfilePanel({
   const loadout = profile?.loadout;
   const badgeItems = (loadout?.badges || [])
     .map((id) => gamificationData?.inventory.find((i) => i.id === id))
-    .filter((b): b is NonNullable<typeof b> => !!b);
+    .filter((b): b is NonNullable<typeof b> => !!b)
+    .filter((b) => b.id !== VERIFIED_PROFILE_BADGE_ID);
 
   const go = (tab: string, extra?: () => void) => {
     onNavigate(tab);
@@ -181,7 +183,7 @@ export default function ProfilePanel({
                 themed={false}
                 rounded="rounded-2xl"
                 className="border-zinc-800/70 bg-zinc-900/20 shadow-none"
-                innerClassName="flex flex-col items-center text-center"
+                innerClassName="flex flex-col items-center text-center w-full"
               >
                 <ProfileAvatar
                   photoUrl={user.avatar}
@@ -189,7 +191,7 @@ export default function ProfilePanel({
                   size="xl"
                   loadout={loadout}
                   donorBadge={!!user.isDonor}
-                  className="mb-5"
+                  className="mb-4"
                 />
 
                 <ProfileNameRow
@@ -197,17 +199,18 @@ export default function ProfilePanel({
                   isDonor={!!user.isDonor}
                   loadout={loadout}
                   nameSize="lg"
-                  className="items-center w-full"
+                  align="center"
+                  className="w-full"
                 />
 
-                <p className="profile-text-muted text-xs mt-2 font-mono truncate max-w-full">{user.email}</p>
+                <p className="profile-text-muted text-xs mt-3 font-mono truncate max-w-full w-full">{user.email}</p>
 
-                <p className="profile-text-subtle text-sm mt-4 leading-relaxed max-w-xs line-clamp-3">
+                <p className="profile-text-subtle text-sm mt-3 leading-relaxed max-w-xs w-full">
                   {user.descricao || 'Adicione uma bio nas configurações para personalizar seu perfil.'}
                 </p>
 
                 {badgeItems.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                  <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
                     {badgeItems.map((b) => (
                       <span key={b.id} title={b.name}>
                         <RewardPreviewThumb item={b} size="sm" />
@@ -216,7 +219,7 @@ export default function ProfilePanel({
                   </div>
                 )}
 
-                <div className="flex flex-wrap justify-center gap-2 mt-5 w-full">
+                <div className="flex flex-wrap justify-center gap-2 mt-5 w-full pt-1 border-t border-zinc-800/50">
                   {user.isAdmin && (
                     <span className="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold uppercase tracking-wide">
                       Admin

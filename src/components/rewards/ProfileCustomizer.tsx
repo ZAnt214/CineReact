@@ -107,7 +107,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
               loadout={draft}
               className="mb-4"
             />
-            <ProfileNameRow name={user.nome} loadout={draft} className="w-full flex flex-col items-center" />
+            <ProfileNameRow name={user.nome} loadout={draft} align="center" className="w-full" />
           </div>
         </ProfileSurface>
 

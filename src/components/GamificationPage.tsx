@@ -132,7 +132,7 @@ export default function GamificationPage({
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-500/70 mb-1">CineReact Club</p>
-              <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" />
+              <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" align="start" className="w-full" />
               <p className="text-amber-400 font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
                 <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-purple-400 font-bold uppercase tracking-wider">

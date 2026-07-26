@@ -16,6 +16,7 @@ import {
   Film,
   Eye,
   Palette,
+  BadgeCheck,
 } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { getVisualStyle, resolveVisualStyle } from '../../data/rewardVisualStyles.ts';
@@ -56,6 +57,7 @@ const BADGE_ICONS: Record<string, React.ElementType> = {
   'badge-spotlight': Sparkles,
   'badge-streak-30': Flame,
   'badge-atelie-visionario': Palette,
+  'badge-perfil-verificado-oficial': BadgeCheck,
 };
 
 const SIZE_MAP = {
