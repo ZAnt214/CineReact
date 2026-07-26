@@ -111,7 +111,7 @@ export default function RewardInventory({
             value={promoCode}
             onChange={(e) => setPromoCode(e.target.value)}
             placeholder="Código promocional"
-            className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-200 w-36 sm:w-44"
+            className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-zinc-200 w-36 sm:w-44"
           />
           <button
             type="button"
@@ -132,14 +132,14 @@ export default function RewardInventory({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou descrição..."
-            className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl py-2.5 pl-9 pr-4 text-sm text-zinc-200"
+            className="w-full bg-neutral-900/60 border border-neutral-800 rounded-xl py-2.5 pl-9 pr-4 text-sm text-zinc-200"
           />
         </div>
         <button
           type="button"
           onClick={() => setOwnedOnly(!ownedOnly)}
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer shrink-0 ${
-            ownedOnly ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-accent-light' : 'border-zinc-800 text-zinc-500 hover:text-zinc-300'
+            ownedOnly ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-accent-light' : 'border-neutral-800 text-zinc-500 hover:text-zinc-300'
           }`}
         >
           <Filter className="w-3.5 h-3.5" />
@@ -161,12 +161,12 @@ export default function RewardInventory({
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all cursor-pointer shrink-0 ${
                 active
                   ? 'bg-cine-accent/15 border-cine-accent/40 text-cine-cream'
-                  : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                  : 'bg-neutral-900/40 border-neutral-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5" />}
               {cat === 'all' ? 'Todas' : CATEGORY_LABELS[cat]}
-              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${active ? 'bg-cine-accent/20' : 'bg-zinc-800'}`}>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${active ? 'bg-cine-accent/20' : 'bg-neutral-800'}`}>
                 {count}
               </span>
             </button>
@@ -179,7 +179,7 @@ export default function RewardInventory({
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 flex gap-3 items-start"
+          className="rounded-xl border border-neutral-800/80 bg-neutral-900/40 px-4 py-3 flex gap-3 items-start"
         >
           <span className="text-xl shrink-0">{activeInfo.icon}</span>
           <div>
@@ -197,7 +197,7 @@ export default function RewardInventory({
             <section key={cat}>
               <div className="flex items-center gap-2 mb-3">
                 {CATEGORY_ICONS[cat] && (
-                  <span className="p-1.5 rounded-lg bg-zinc-800/80 text-cine-accent-light">
+                  <span className="p-1.5 rounded-lg bg-neutral-800/80 text-cine-accent-light">
                     {React.createElement(CATEGORY_ICONS[cat], { className: 'w-4 h-4' })}
                   </span>
                 )}
@@ -286,7 +286,7 @@ function RewardCard({
     >
       {/* Hero preview */}
       <div
-        className={`relative flex items-center justify-center border-b border-zinc-800/60 ${
+        className={`relative flex items-center justify-center border-b border-neutral-800/60 ${
           isHeroCategory ? 'min-h-[100px] py-5' : 'min-h-[80px] py-4'
         } ${style.bg}`}
       >
@@ -305,7 +305,7 @@ function RewardCard({
       </div>
 
       {/* Info */}
-      <div className="flex flex-col flex-1 p-4 bg-zinc-950/80">
+      <div className="flex flex-col flex-1 p-4 bg-neutral-950/80">
         <div className="flex items-start justify-between gap-2 mb-1">
           <div className="flex items-center gap-1.5 min-w-0">
             <CatIcon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
@@ -344,7 +344,7 @@ function RewardCard({
                 ? 'bg-cine-accent/15 text-cine-cream border border-cine-accent/30 hover:bg-cine-accent/25'
                 : item.cost > 0
                 ? 'bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black'
-                : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
+                : 'bg-neutral-900 text-zinc-500 border border-neutral-800'
             }`}
             disabled={!item.owned && item.cost === 0 && item.unlockMethod !== 'shop'}
           >

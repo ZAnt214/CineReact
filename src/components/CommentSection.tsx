@@ -157,7 +157,7 @@ export default function CommentSection({
   };
 
   return (
-    <div id="comment-section" className="bg-zinc-900/30 p-5 md:p-6 rounded-2xl transition-all duration-300 mt-6 space-y-6 shadow-xl">
+    <div id="comment-section" className="bg-neutral-900/30 p-5 md:p-6 rounded-2xl transition-all duration-300 mt-6 space-y-6 shadow-xl">
       <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -170,7 +170,7 @@ export default function CommentSection({
 
       {/* FORM DE COMENTÁRIO */}
       {user.isLoggedIn ? (
-        <form onSubmit={handleAddComentario} className="space-y-4 bg-zinc-950/50 p-4 md:p-5 rounded-xl shadow-inner">
+        <form onSubmit={handleAddComentario} className="space-y-4 bg-neutral-950/50 p-4 md:p-5 rounded-xl shadow-inner">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <ProfileAvatar
@@ -197,7 +197,7 @@ export default function CommentSection({
               onChange={(e) => setNovoComentarioTexto(e.target.value)}
               placeholder="O que achou deste react? Escreva seu comentário aqui..."
               rows={3}
-              className="w-full bg-zinc-900/90 rounded-xl p-3.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cine-accent/60 transition-all resize-none"
+              className="w-full bg-neutral-900/90 rounded-xl p-3.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cine-accent/60 transition-all resize-none"
             />
 
             {user.isDonor && (
@@ -214,7 +214,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={comentarioEnviando}
-                className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-cine-accent/20 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 bg-white hover:bg-[#cc0000] text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-cine-accent/20 cursor-pointer disabled:opacity-50"
               >
                 {comentarioEnviando ? 'Enviando...' : 'Publicar Comentário'}
               </button>
@@ -222,7 +222,7 @@ export default function CommentSection({
           </div>
         </form>
       ) : (
-        <div className="bg-zinc-950/60 p-6 rounded-xl text-center space-y-3">
+        <div className="bg-neutral-950/60 p-6 rounded-xl text-center space-y-3">
           <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto" />
           <p className="text-xs text-zinc-400">Entre na sua conta para deixar seu comentário e interagir.</p>
           <button 
@@ -239,11 +239,11 @@ export default function CommentSection({
       <div className="space-y-4">
         {comentariosLoading ? (
           <div className="space-y-3 animate-pulse">
-            <div className="h-16 bg-zinc-950/60 rounded-xl"></div>
-            <div className="h-16 bg-zinc-950/60 rounded-xl"></div>
+            <div className="h-16 bg-neutral-950/60 rounded-xl"></div>
+            <div className="h-16 bg-neutral-950/60 rounded-xl"></div>
           </div>
         ) : comentarios.length === 0 ? (
-          <div className="text-center py-10 bg-zinc-950/30 rounded-xl text-zinc-500 text-xs space-y-1">
+          <div className="text-center py-10 bg-neutral-950/30 rounded-xl text-zinc-500 text-xs space-y-1">
             <MessageSquare className="w-6 h-6 mx-auto text-zinc-600 opacity-60 mb-2" />
             <p className="font-semibold">Nenhum comentário ainda</p>
             <p className="text-[11px] text-zinc-600">Seja o primeiro a compartilhar sua opinião sobre este react!</p>
@@ -255,7 +255,7 @@ export default function CommentSection({
               const likesCount = c.likes || 0;
 
               return (
-                <div key={c.id} className="p-4 bg-zinc-950/50 hover:bg-zinc-950/80 rounded-xl space-y-2 flex gap-3.5 relative group transition-colors">
+                <div key={c.id} className="p-4 bg-neutral-950/50 hover:bg-neutral-950/80 rounded-xl space-y-2 flex gap-3.5 relative group transition-colors">
                   <div className="flex-shrink-0 pt-0.5">
                     <ProfileAvatar
                       photoUrl={c.avatar}
@@ -295,7 +295,7 @@ export default function CommentSection({
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                           isLiked 
                             ? 'bg-cine-accent/15 text-cine-accent-light border border-cine-accent/20' 
-                            : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850'
+                            : 'bg-neutral-900 text-zinc-400 hover:text-zinc-200 hover:bg-neutral-800'
                         }`}
                         title={isLiked ? "Remover curtida" : "Curtir comentário"}
                       >
@@ -309,7 +309,7 @@ export default function CommentSection({
                   {(user.isAdmin || user.email === c.usuarioEmail) && (
                     <button
                       onClick={() => handleDeleteComentario(c.id)}
-                      className="absolute top-3.5 right-3.5 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-zinc-900 rounded-lg cursor-pointer"
+                      className="absolute top-3.5 right-3.5 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-neutral-900 rounded-lg cursor-pointer"
                       title="Remover Comentário"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

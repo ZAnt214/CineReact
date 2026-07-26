@@ -178,7 +178,7 @@ export default function CategoryPage({
       <div className="flex items-center justify-between gap-4 mb-6">
         <button
           onClick={onBackToHome}
-          className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-zinc-800 cursor-pointer active:scale-95"
+          className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-neutral-800 cursor-pointer active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-cine-accent-light" />
           <span>Voltar ao Início</span>
@@ -190,7 +190,7 @@ export default function CategoryPage({
       </div>
 
       {/* Hero Banner Header */}
-      <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-cine-accent/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
+      <div className="relative bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border border-cine-accent/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-cine-accent/80" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           
@@ -219,7 +219,7 @@ export default function CategoryPage({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={`Buscar em ${config.title}...`}
-                className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:border-cine-accent/60 transition-colors"
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:border-cine-accent/60 transition-colors"
               />
               {searchQuery && (
                 <button
@@ -253,13 +253,13 @@ export default function CategoryPage({
         </div>
 
         {/* Scrollable Hashtag Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
           <button
             onClick={() => setSelectedHashtag(null)}
             className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
               selectedHashtag === null
                 ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
-                : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800'
+                : 'bg-neutral-900 hover:bg-neutral-800 text-zinc-300 border border-neutral-800'
             }`}
           >
             Todos os vídeos
@@ -275,7 +275,7 @@ export default function CategoryPage({
                 className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
                   isActive
                     ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
-                    : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800'
+                    : 'bg-neutral-900 hover:bg-neutral-800 text-zinc-300 border border-neutral-800'
                 }`}
               >
                 <span>{tag.startsWith('#') ? tag : `#${tag}`}</span>
@@ -287,7 +287,7 @@ export default function CategoryPage({
 
       {/* Video Content Grid */}
       {filteredReacts.length === 0 ? (
-        <div className="text-center py-20 bg-zinc-950/50 rounded-3xl border border-zinc-850 p-8 space-y-4 max-w-md mx-auto">
+        <div className="text-center py-20 bg-neutral-950/50 rounded-3xl border border-neutral-800 p-8 space-y-4 max-w-md mx-auto">
           <Filter className="w-10 h-10 text-cine-accent-light/50 mx-auto" />
           <h3 className="text-lg font-bold text-white">Nenhum react encontrado</h3>
           <p className="text-xs text-zinc-400 leading-relaxed">
@@ -315,10 +315,10 @@ export default function CategoryPage({
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => onPlayVideo(react.id, react.obraId)}
-                className="group bg-zinc-900/60 border border-zinc-800/80 hover:border-cine-accent/50 rounded-2xl overflow-hidden cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-cine-accent/10 hover:-translate-y-1"
+                className="group bg-neutral-900/60 border border-neutral-800/80 hover:border-cine-accent/50 rounded-2xl overflow-hidden cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-cine-accent/10 hover:-translate-y-1"
               >
                 {/* Thumbnail Container */}
-                <div className="relative aspect-video bg-zinc-950 overflow-hidden shrink-0">
+                <div className="relative aspect-video bg-neutral-950 overflow-hidden shrink-0">
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
@@ -342,7 +342,7 @@ export default function CategoryPage({
 
                   {/* Progress Bar */}
                   {progress > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-800">
                       <div
                         className="h-full bg-cine-accent"
                         style={{ width: `${Math.min(100, progress)}%` }}
@@ -375,7 +375,7 @@ export default function CategoryPage({
                   </div>
 
                   {/* Channel & Stats */}
-                  <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+                  <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
                     <span
                       onClick={(e) => {
                         if (onChannelClick) {

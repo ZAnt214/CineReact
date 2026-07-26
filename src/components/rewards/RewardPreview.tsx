@@ -72,8 +72,8 @@ function PopcornIcon({ className }: { className?: string }) {
       <path d="M10 32h28l-3 10H13l-3-10z" fill="currentColor" opacity="0.85" />
       <path d="M14 32V18c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx="18" cy="14" r="3" fill="#fde68a" />
-      <circle cx="24" cy="10" r="3.5" fill="#fafafa" />
-      <circle cx="30" cy="14" r="3" fill="#fafafa" />
+      <circle cx="24" cy="10" r="3.5" fill="#f1f1f1" />
+      <circle cx="30" cy="14" r="3" fill="#f1f1f1" />
       <circle cx="21" cy="18" r="2.5" fill="#fef3c7" />
       <circle cx="27" cy="17" r="2.5" fill="#fde68a" />
     </svg>
@@ -189,7 +189,7 @@ export function RewardPreviewThumb({
 
   if (isLocked) {
     return (
-      <div className={`${s.box} rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center shrink-0`}>
+      <div className={`${s.box} rounded-xl bg-neutral-900/80 border border-neutral-800 flex items-center justify-center shrink-0`}>
         <Lock className={`${s.icon} text-zinc-600`} />
       </div>
     );
@@ -201,7 +201,7 @@ export function RewardPreviewThumb({
         return <AvatarRewardVisual visual={item.avatarVisual} size={size} lite={lite} />;
       }
       return (
-        <div className={`${s.box} rounded-full bg-zinc-800 flex items-center justify-center`}>
+        <div className={`${s.box} rounded-full bg-neutral-800 flex items-center justify-center`}>
           <Film className={`${s.icon} text-zinc-400`} />
         </div>
       );
@@ -329,7 +329,7 @@ export function RewardProfileContextPreview({
       case 'title':
         return (
           <motion.div className="flex flex-col items-center gap-4 w-full">
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 w-full max-w-[280px]">
+            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 w-full max-w-[280px]">
               <p className="text-center text-lg font-black text-white mb-3">{userName}</p>
               <div className="flex justify-center">
                 <TitleRewardVisual name={item.name} rarity={item.rarity} item={item} size="lg" />
@@ -344,7 +344,7 @@ export function RewardProfileContextPreview({
       case 'tag':
         return (
           <motion.div className="flex flex-col items-center gap-4 w-full">
-            <motion.div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 w-full max-w-[280px] flex flex-col items-center gap-3">
+            <motion.div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 w-full max-w-[280px] flex flex-col items-center gap-3">
               <p className="text-sm font-bold text-white">{userName}</p>
               <CreatorTagVisual
                 id={item.id}
@@ -386,12 +386,12 @@ export function RewardProfileContextPreview({
       case 'profile_card':
         return (
           <motion.div
-            className={`w-full max-w-[260px] rounded-2xl border border-zinc-700/60 p-5 bg-gradient-to-br ${item.previewGradient || 'from-zinc-900 to-zinc-950'}`}
+            className={`w-full max-w-[260px] rounded-2xl border border-zinc-700/60 p-5 bg-gradient-to-br ${item.previewGradient || 'from-neutral-900 to-neutral-950'}`}
             animate={item.animated ? { boxShadow: ['0 0 0 rgba(255,255,255,0)', '0 0 30px rgba(255,255,255,0.15)', '0 0 0 rgba(255,255,255,0)'] } : undefined}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-zinc-800 mb-2" />
+              <div className="w-12 h-12 rounded-full bg-neutral-800 mb-2" />
               <p className="text-sm font-bold text-white">{userName}</p>
               <p className="text-[10px] text-zinc-500 mt-2">Cartão de perfil personalizado</p>
             </div>
@@ -406,7 +406,7 @@ export function RewardProfileContextPreview({
               animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 2.5, repeat: Infinity }}
             />
-            <div className="relative w-20 h-20 rounded-full ring-2 ring-cine-accent/40 flex items-center justify-center bg-zinc-900">
+            <div className="relative w-20 h-20 rounded-full ring-2 ring-cine-accent/40 flex items-center justify-center bg-neutral-900">
               <Zap className="w-8 h-8 text-cine-accent-light" />
             </div>
             <p className="text-[10px] text-zinc-500">Efeito animado no perfil</p>
@@ -424,7 +424,7 @@ export function RewardProfileContextPreview({
             >
               {item.emojiChar || '✨'}
             </motion.div>
-            <div className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-400">
+            <div className="px-4 py-2 rounded-full bg-neutral-900 border border-neutral-800 text-xs text-zinc-400">
               Usado em comentários e reações
             </div>
           </motion.div>
@@ -472,19 +472,19 @@ export function RewardPreviewModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className={`relative w-full max-w-sm rounded-2xl border ${rarityStyle.border} bg-zinc-950 shadow-2xl overflow-hidden`}
+          className={`relative w-full max-w-sm rounded-2xl border ${rarityStyle.border} bg-neutral-950 shadow-2xl overflow-hidden`}
           onClick={(e) => e.stopPropagation()}
         >
           <motion.div className={`absolute inset-0 opacity-30 ${rarityStyle.bg} pointer-events-none`} />
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3 right-3 z-10 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 cursor-pointer"
+            className="absolute top-3 right-3 z-10 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-neutral-800 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
 
-          <motion.div className="relative border-b border-zinc-800/80 px-5 pt-5 pb-4">
+          <motion.div className="relative border-b border-neutral-800/80 px-5 pt-5 pb-4">
             <div className="flex items-start gap-3 pr-8">
               <RewardPreviewThumb item={item} size="md" locked={!item.owned} />
               <motion.div className="min-w-0 flex-1">
@@ -494,16 +494,16 @@ export function RewardPreviewModal({
             </div>
           </motion.div>
 
-          <motion.div className="relative bg-zinc-900/40 min-h-[200px] flex items-center justify-center">
+          <motion.div className="relative bg-neutral-900/40 min-h-[200px] flex items-center justify-center">
             <RewardProfileContextPreview item={item} userName={userName} userAvatar={userAvatar} />
           </motion.div>
 
-          <motion.div className="relative px-5 py-4 border-t border-zinc-800/80 space-y-3">
+          <motion.div className="relative px-5 py-4 border-t border-neutral-800/80 space-y-3">
             <RewardObtainInfo item={item} variant="modal" />
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-neutral-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 cursor-pointer"
             >
               Fechar
             </button>

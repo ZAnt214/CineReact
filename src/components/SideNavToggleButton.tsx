@@ -30,7 +30,7 @@ export default function SideNavToggleButton({ visible }: SideNavToggleButtonProp
       className={`p-2 rounded-xl border transition-colors cursor-pointer ${
         isSideNavOpen
           ? 'bg-cine-accent/10 border-cine-accent/30 text-cine-accent-light'
-          : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+          : 'bg-neutral-900/60 border-neutral-800 text-zinc-400 hover:text-white hover:border-zinc-700'
       }`}
       aria-label={isSideNavOpen ? 'Fechar menu' : 'Abrir menu'}
       aria-expanded={isSideNavOpen}

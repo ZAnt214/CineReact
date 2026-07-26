@@ -18,7 +18,7 @@ export default function RowMoviesSkeleton() {
           
           {/* Row Title Skeleton */}
           <div className="cine-container">
-            <div className={`${row.titleWidth} h-6 bg-zinc-800 rounded-md`} />
+            <div className={`${row.titleWidth} h-6 bg-neutral-800 rounded-md`} />
           </div>
 
           {/* Horizontal Row Skeletons Container */}
@@ -26,15 +26,15 @@ export default function RowMoviesSkeleton() {
             {skeletonCards.map((_, cardIndex) => (
               <div
                 key={cardIndex}
-                className="shrink-0 w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] bg-zinc-900/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-zinc-850/60 shadow-lg shadow-black/50"
+                className="shrink-0 w-[220px] sm:w-[280px] md:w-[320px] lg:w-[350px] bg-neutral-900/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-neutral-800/60 shadow-lg shadow-black/50"
               >
                 {/* Thumbnail Skeleton */}
-                <div className="relative h-36 md:h-44 w-full bg-zinc-900/50 flex items-center justify-center">
+                <div className="relative h-36 md:h-44 w-full bg-neutral-900/50 flex items-center justify-center">
                   {/* Subtle inner accent to mimic empty image area */}
-                  <div className="w-10 h-10 rounded-full bg-zinc-800/40" />
+                  <div className="w-10 h-10 rounded-full bg-neutral-800/40" />
                   
                   {/* Fake duration badge skeleton */}
-                  <div className="absolute bottom-2 right-2 w-14 h-4 bg-zinc-800 rounded border border-zinc-700/30" />
+                  <div className="absolute bottom-2 right-2 w-14 h-4 bg-neutral-800 rounded border border-zinc-700/30" />
                 </div>
 
                 {/* Card Body Skeleton */}
@@ -42,21 +42,21 @@ export default function RowMoviesSkeleton() {
                   
                   {/* Fake double-line title */}
                   <div className="space-y-2">
-                    <div className="h-3.5 bg-zinc-800 rounded w-11/12" />
-                    <div className="h-3.5 bg-zinc-800 rounded w-2/3" />
+                    <div className="h-3.5 bg-neutral-800 rounded w-11/12" />
+                    <div className="h-3.5 bg-neutral-800 rounded w-2/3" />
                   </div>
 
                   {/* Metadata: Channel & Views */}
                   <div className="flex items-center justify-between pt-1">
                     {/* Channel name skeleton */}
-                    <div className="h-3 bg-zinc-800 rounded w-1/3" />
+                    <div className="h-3 bg-neutral-800 rounded w-1/3" />
                     {/* View count skeleton */}
-                    <div className="h-2.5 bg-zinc-800 rounded w-1/4" />
+                    <div className="h-2.5 bg-neutral-800 rounded w-1/4" />
                   </div>
 
                   {/* CineReact Branding Footer Divider */}
-                  <div className="pt-2 border-t border-zinc-800/50 flex items-center">
-                    <div className="h-2 bg-zinc-800/20 rounded w-12" />
+                  <div className="pt-2 border-t border-neutral-800/50 flex items-center">
+                    <div className="h-2 bg-neutral-800/20 rounded w-12" />
                   </div>
 
                 </div>

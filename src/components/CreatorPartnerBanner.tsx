@@ -15,7 +15,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent-light/25 bg-zinc-950/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
+        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent-light/25 bg-neutral-950/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
@@ -77,7 +77,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors border border-zinc-800 cursor-pointer shrink-0"
+              className="p-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 text-zinc-400 hover:text-white transition-colors border border-neutral-800 cursor-pointer shrink-0"
               title="Fechar aviso"
               aria-label="Fechar aviso"
             >

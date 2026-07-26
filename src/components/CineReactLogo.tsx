@@ -2,12 +2,12 @@ import { motion } from 'motion/react';
 
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-const sizeStyles: Record<CineReactLogoSize, string> = {
-  xs: 'cine-wordmark--xs',
-  sm: 'cine-wordmark--sm',
-  md: 'cine-wordmark--md',
-  lg: 'cine-wordmark--lg',
-  xl: 'cine-wordmark--xl',
+const sizeStyles: Record<CineReactLogoSize, { scale: string; compact: boolean }> = {
+  xs: { scale: 'cine-brand--xs', compact: true },
+  sm: { scale: 'cine-brand--sm', compact: true },
+  md: { scale: 'cine-brand--md', compact: false },
+  lg: { scale: 'cine-brand--lg', compact: false },
+  xl: { scale: 'cine-brand--xl', compact: false },
 };
 
 interface CineReactLogoProps {
@@ -18,18 +18,53 @@ interface CineReactLogoProps {
   heading?: boolean;
 }
 
-function Lockup({ sizeClass, heading }: { sizeClass: string; heading: boolean }) {
-  const className = `cine-wordmark ${sizeClass}`;
+function PlayMark() {
+  return (
+    <span className="cine-brand-play" aria-hidden>
+      <svg viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="34" rx="9" fill="#FF0000" />
+        <path d="M20 10.5v13l11-6.5-11-6.5Z" fill="#FFFFFF" />
+      </svg>
+    </span>
+  );
+}
+
+function Perforations() {
+  return (
+    <span className="cine-brand-perfs" aria-hidden>
+      {Array.from({ length: 9 }).map((_, i) => (
+        <span key={i} className="cine-brand-perf" />
+      ))}
+    </span>
+  );
+}
+
+function BrandLockup({
+  scale,
+  compact,
+  heading,
+}: {
+  scale: string;
+  compact: boolean;
+  heading: boolean;
+}) {
+  const className = `cine-brand ${scale}`;
 
   const inner = (
-    <span className="cine-wordmark-frame">
-      <span className="cine-wordmark-text">
-        C<span className="cine-wordmark-i">i</span>
-        <span className="cine-wordmark-join">ne</span>
-        <span className="cine-wordmark-join">R</span>
-        eact
+    <span className="cine-brand-lockup">
+      <PlayMark />
+      <span className="cine-brand-panel">
+        {!compact && <Perforations />}
+        <span className="cine-brand-type">
+          <span className="cine-brand-cine">Cine</span>
+          <span className="cine-brand-react">React</span>
+        </span>
+        <span className="cine-brand-scrubber" aria-hidden>
+          <span className="cine-brand-scrubber-track" />
+          <span className="cine-brand-scrubber-fill" />
+          <span className="cine-brand-scrubber-head" />
+        </span>
       </span>
-      <span className="cine-wordmark-rail" aria-hidden />
     </span>
   );
 
@@ -47,28 +82,30 @@ export default function CineReactLogo({
   className = '',
   heading = false,
 }: CineReactLogoProps) {
-  const sizeClass = sizeStyles[size];
+  const styles = sizeStyles[size];
   const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto block w-fit' : ''} ${className}`;
 
-  const wordmark = <Lockup sizeClass={sizeClass} heading={heading} />;
+  const lockup = (
+    <BrandLockup scale={styles.scale} compact={styles.compact} heading={heading} />
+  );
 
   if (animated) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className={wrapperClass}
         aria-label="CineReact"
       >
-        {wordmark}
+        {lockup}
       </motion.div>
     );
   }
 
   return (
     <div className={wrapperClass} aria-label="CineReact">
-      {wordmark}
+      {lockup}
     </div>
   );
 }

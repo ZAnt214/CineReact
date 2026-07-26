@@ -80,7 +80,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   holographic: {
     label: 'Holográfico',
     gradient: 'from-cyan-400 via-purple-400 to-pink-400',
-    gradientCss: 'linear-gradient(135deg, #22d3ee, #fafafa, #f472b6, #34d399, #22d3ee)',
+    gradientCss: 'linear-gradient(135deg, #22d3ee, #f1f1f1, #f472b6, #34d399, #22d3ee)',
     ring: 'ring-white/40 shadow-[0_0_35px_rgba(34,211,238,0.35)]',
     glow: 'shadow-[0_0_32px_rgba(168,85,247,0.35)]',
     accent: 'text-cyan-100',
@@ -131,7 +131,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   },
   cinema: {
     label: 'Cinema',
-    gradient: 'from-red-950 via-zinc-950 to-black',
+    gradient: 'from-red-950 via-neutral-950 to-black',
     gradientCss: 'radial-gradient(ellipse at 50% 0%, #7f1d1d 0%, #18181b 50%, #000 100%)',
     ring: 'ring-red-400/60 shadow-[0_0_30px_rgba(239,68,68,0.45)]',
     glow: 'shadow-[0_0_28px_rgba(185,28,28,0.4)]',
@@ -162,7 +162,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   },
   halloween: {
     label: 'Halloween',
-    gradient: 'from-cine-surface via-zinc-950 to-purple-950',
+    gradient: 'from-cine-surface via-neutral-950 to-purple-950',
     ring: 'ring-cine-accent/70 shadow-[0_0_28px_rgba(120,113,108,0.4)]',
     glow: 'shadow-[0_0_24px_rgba(168,85,247,0.3)]',
     accent: 'text-cine-accent-light',
@@ -190,7 +190,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   },
   forest: {
     label: 'Floresta',
-    gradient: 'from-green-900 via-emerald-950 to-zinc-950',
+    gradient: 'from-green-900 via-emerald-950 to-neutral-950',
     gradientCss: 'linear-gradient(145deg, #14532d, #064e3b, #09090b)',
     ring: 'ring-emerald-500/50 shadow-[0_0_20px_rgba(34,197,94,0.3)]',
     glow: 'shadow-[0_0_18px_rgba(22,163,74,0.25)]',
@@ -200,7 +200,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   },
   slate: {
     label: 'Grafite',
-    gradient: 'from-zinc-800 via-zinc-900 to-zinc-950',
+    gradient: 'from-neutral-800 via-neutral-900 to-neutral-950',
     gradientCss: 'linear-gradient(145deg, #52525b, #27272a, #09090b)',
     ring: 'ring-zinc-400/50 shadow-[0_0_18px_rgba(161,161,170,0.25)]',
     glow: 'shadow-[0_0_16px_rgba(113,113,122,0.2)]',

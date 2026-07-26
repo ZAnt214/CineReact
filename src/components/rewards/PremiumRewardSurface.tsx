@@ -179,7 +179,7 @@ export function PremiumFrameRing({
   const ringClass = `relative inline-flex rounded-full ${pad} ${useRotatingBorder ? '' : style.ring}`;
 
   const inner = (
-    <div className="relative rounded-full bg-zinc-950 p-[2px] shadow-inner shadow-black/60">
+    <div className="relative rounded-full bg-neutral-950 p-[2px] shadow-inner shadow-black/60">
       {!lite && style.shimmer && (
         <motion.div
           className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/25 to-white/0 pointer-events-none z-10"

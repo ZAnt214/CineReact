@@ -50,7 +50,7 @@ export default function ProfileThemeScope({
       >
         {themeStyle && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-            {isFullscreen && <div className="absolute inset-0 bg-zinc-950" />}
+            {isFullscreen && <div className="absolute inset-0 bg-neutral-950" />}
             {isAtelier && (
               <div className="profile-atelier-beam absolute inset-x-0 top-0 h-[50%]" />
             )}

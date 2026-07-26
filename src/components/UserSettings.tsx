@@ -161,12 +161,12 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           </p>
         </div>
 
-        <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
+        <div className="bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-6">
           <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
             <Palette className="text-cine-accent-light w-4 h-4" /> Aparência e Desempenho
           </h2>
 
-          <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+          <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-neutral-950/60 border border-neutral-800/80">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-white">Efeito blur (vidro fosco)</p>
               <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
@@ -196,14 +196,14 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
         </div>
 
         {!user.isLoggedIn ? (
-          <div className="bg-zinc-900/20 border border-zinc-800/80 rounded-2xl p-6 text-center text-sm text-zinc-400">
+          <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 text-center text-sm text-zinc-400">
             Entre na sua conta para editar perfil, foto e senha.
           </div>
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
           {/* Left Panel: Profile Preview & Status */}
-          <div className="md:col-span-5 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6 flex flex-col items-center justify-between space-y-6 text-center">
+          <div className="md:col-span-5 bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-6 flex flex-col items-center justify-between space-y-6 text-center">
             
             {/* Profile Avatar Live Preview */}
             <div className="space-y-4">
@@ -212,7 +212,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                 {user.isDonor && (
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cine-accent-light via-cine-accent-light to-cine-cream blur-md opacity-75 animate-pulse" />
                 )}
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center mx-auto">
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-neutral-800 bg-neutral-950 flex items-center justify-center mx-auto">
                   {avatarUrl ? (
                     <img 
                       src={avatarUrl} 
@@ -244,7 +244,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
             </div>
 
             {/* Badge / Donor Status Showcase */}
-            <div className="w-full pt-4 border-t border-zinc-800/60 space-y-3">
+            <div className="w-full pt-4 border-t border-neutral-800/60 space-y-3">
               <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
               
               {user.isDonor ? (
@@ -260,8 +260,8 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   </p>
                 </div>
               ) : (
-                <div className="bg-zinc-900/10 border border-zinc-800 rounded-xl p-4 text-center space-y-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
+                <div className="bg-neutral-900/10 border border-neutral-800 rounded-xl p-4 text-center space-y-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
                     Membro Comum
                   </div>
                   <p className="text-[10px] text-zinc-500 leading-relaxed">
@@ -280,7 +280,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           </div>
 
           {/* Right Panel: Settings Form */}
-          <div className="md:col-span-7 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
+          <div className="md:col-span-7 bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-6">
             <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
               <User className="text-cine-accent-light w-4 h-4" /> Editar Informações
             </h2>
@@ -315,7 +315,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   className={`border-2 border-dashed rounded-xl p-6 text-center transition-all relative ${
                     dragActive 
                       ? 'border-cine-accent bg-cine-accent/5' 
-                      : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40'
+                      : 'border-neutral-800 hover:border-zinc-700 bg-neutral-950/40'
                   }`}
                 >
                   <input
@@ -326,7 +326,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   />
                   
                   <div className="flex flex-col items-center justify-center space-y-2.5">
-                    <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 text-zinc-400">
+                    <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center border border-neutral-800 text-zinc-400">
                       <Upload className="w-5 h-5" />
                     </div>
                     <div className="space-y-1">
@@ -341,11 +341,11 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                 </div>
 
                 {avatarUrl && (
-                  <div className="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-lg border border-zinc-855">
+                  <div className="flex items-center gap-3 bg-neutral-950 p-2.5 rounded-lg border border-zinc-855">
                     <img 
                       src={avatarUrl} 
                       alt="Thumbnail" 
-                      className="w-10 h-10 rounded-full object-cover border border-zinc-800"
+                      className="w-10 h-10 rounded-full object-cover border border-neutral-800"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120";
                       }}
@@ -366,7 +366,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               </div>
 
               {/* Field: Biografia / Descrição do Perfil */}
-              <div className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/20 via-zinc-950/40 to-fuchsia-950/15 p-4 space-y-2">
+              <div className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/20 via-neutral-950/40 to-fuchsia-950/15 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-cyan-400" />
                   <label className="text-[10px] font-mono text-cyan-300/90 uppercase tracking-wider">
@@ -382,7 +382,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={3}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-cyan-500/50 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-cyan-500/50 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
                 />
                 <div className="flex justify-end text-[9px] text-zinc-600 font-mono">
                   {descricao.length}/180 caracteres
@@ -390,7 +390,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               </div>
 
               {isVerifiedCreator && (
-                <div className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/25 via-zinc-950/40 to-cyan-950/20 p-4 space-y-3">
+                <div className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/25 via-neutral-950/40 to-cyan-950/20 p-4 space-y-3">
                   <div className="flex items-start gap-2">
                     <BadgeCheck className="w-4 h-4 text-cyan-300 shrink-0 mt-0.5" />
                     <div>
@@ -413,7 +413,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                           value={socialLinks[key] || ''}
                           onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
                           placeholder={placeholder}
-                          className="w-full bg-zinc-950 border border-zinc-800 focus:border-fuchsia-500/40 rounded-lg px-3 py-2 text-xs text-white outline-none transition-colors"
+                          className="w-full bg-neutral-950 border border-neutral-800 focus:border-fuchsia-500/40 rounded-lg px-3 py-2 text-xs text-white outline-none transition-colors"
                         />
                       </div>
                     ))}
@@ -423,9 +423,9 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
 
               {/* Password Divider */}
               <div className="relative py-2 flex items-center">
-                <div className="flex-grow border-t border-zinc-800/80"></div>
+                <div className="flex-grow border-t border-neutral-800/80"></div>
                 <span className="flex-shrink mx-4 text-[9px] text-zinc-500 uppercase font-mono tracking-widest">Segurança</span>
-                <div className="flex-grow border-t border-zinc-800/80"></div>
+                <div className="flex-grow border-t border-neutral-800/80"></div>
               </div>
 
               {/* Field: New Password */}
@@ -440,7 +440,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Sua nova senha secreta"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Repita a nova senha"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -466,7 +466,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="w-full bg-white hover:bg-[#cc0000] disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

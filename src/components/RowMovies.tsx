@@ -194,14 +194,14 @@ export default function RowMovies({
               <div
                 key={react.id}
                 onClick={() => handleCardClick(react.id, react.obraId)}
-                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
+                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
                     ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(255,255,255,0.18)] ring-1 ring-cine-accent/30' 
-                    : 'border border-zinc-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
+                    : 'border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
                 }`}
               >
                 {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
-                <div className="relative aspect-video w-full overflow-hidden bg-zinc-950 shrink-0">
+                <div className="relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0">
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
@@ -211,7 +211,7 @@ export default function RowMovies({
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-accent text-black' : 'bg-white text-black'
+                      isEditorial ? 'bg-cine-accent text-black' : 'bg-[#ff0000] text-white'
                     }`}>
                       <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-black" />
                     </div>
@@ -225,15 +225,15 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(255,255,255,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
-                      <Sparkles className="w-3.5 h-3.5 fill-zinc-950 text-zinc-950 shrink-0" />
+                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-neutral-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(255,255,255,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
+                      <Sparkles className="w-3.5 h-3.5 fill-neutral-950 text-neutral-950 shrink-0" />
                       <span>Recomenda</span>
                     </span>
                   )}
 
                   {/* Progress Bar */}
                   {progressMap && progressMap[react.id] !== undefined && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-zinc-950/60">
+                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
                         className="h-full bg-cine-accent-light rounded-r-xs shadow-[0_0_10px_rgba(251,191,36,0.9)]" 
                         style={{ width: `${progressMap[react.id]}%` }}
@@ -243,12 +243,12 @@ export default function RowMovies({
                 </div>
 
                 {/* CARD BODY */}
-                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 bg-gradient-to-b from-zinc-900/50 to-zinc-900/80">
+                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 bg-gradient-to-b from-neutral-900/50 to-neutral-900/80">
                   <h3 className="text-sm sm:text-base md:text-lg font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors min-h-[2.5rem] sm:min-h-[2.75rem]">
                     {react.titulo}
                   </h3>
                   
-                  <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-zinc-800/60 min-w-0">
+                  <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-neutral-800/60 min-w-0">
                     <span 
                       onClick={(e) => {
                         if (onChannelClick) {
@@ -263,7 +263,7 @@ export default function RowMovies({
                     >
                       {react.canalNome}
                     </span>
-                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-display font-medium tracking-wide shadow-xs">
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-display font-medium tracking-wide shadow-xs">
                       <Eye className="w-3.5 h-3.5 text-cine-accent-light shrink-0" />
                       <span>{formatViews(react.visualizacoes)}</span>
                     </div>

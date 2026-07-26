@@ -312,13 +312,13 @@ export default function AuthModal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
+            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-neutral-950 text-zinc-300"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-white-dark" />
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-neutral-900 transition-colors cursor-pointer"
               aria-label="Fechar"
             >
               <X className="w-5 h-5" />
@@ -326,9 +326,9 @@ export default function AuthModal({
 
             <div className="grid grid-cols-1 md:grid-cols-5 min-h-full">
               {/* Brand panel */}
-              <div className="hidden md:flex md:col-span-2 flex-col justify-between p-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-r border-zinc-800/80 relative overflow-hidden">
+              <div className="hidden md:flex md:col-span-2 flex-col justify-between p-8 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black border-r border-neutral-800/80 relative overflow-hidden">
                 <div className="absolute -top-20 -right-20 w-48 h-48 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-neutral-950 to-transparent pointer-events-none" />
 
                 <div className="relative z-10 space-y-8">
                   <CineReactLogo size="xl" animated heading />
@@ -378,7 +378,7 @@ export default function AuthModal({
                   </p>
                 </div>
 
-                <motion.div className="flex p-1 mb-6 bg-zinc-900/80 border border-zinc-800 rounded-xl">
+                <motion.div className="flex p-1 mb-6 bg-neutral-900/80 border border-neutral-800 rounded-xl">
                   <button
                       type="button"
                       onClick={() => switchMode('login')}
@@ -412,7 +412,7 @@ export default function AuthModal({
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
-                      className="bg-zinc-900/95 border border-cine-accent/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5 shadow-lg shadow-black/30"
+                      className="bg-neutral-900/95 border border-cine-accent/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5 shadow-lg shadow-black/30"
                     >
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-cine-accent-light" />
                       <span>{errorMsg}</span>
@@ -448,7 +448,7 @@ export default function AuthModal({
                             placeholder="Como quer ser chamado?"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
+                            className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
                           />
                         </div>
                       </div>
@@ -468,7 +468,7 @@ export default function AuthModal({
                           placeholder="seu@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
+                          className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -497,7 +497,7 @@ export default function AuthModal({
                           placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : 'Sua senha'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
+                          className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
                         />
                         <button
                           type="button"
@@ -511,7 +511,7 @@ export default function AuthModal({
 
                       {mode === 'register' && password.length > 0 && (
                         <div className="mt-2 space-y-1">
-                          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-1 bg-neutral-800 rounded-full overflow-hidden">
                             <motion.div
                               className={`h-full ${passwordStrength.color} transition-all duration-300`}
                               style={{ width: passwordStrength.width }}
@@ -536,7 +536,7 @@ export default function AuthModal({
                             placeholder="Repita a senha"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
+                            className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-cine-accent focus:ring-1 focus:ring-cine-accent/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
                           />
                           <button
                             type="button"
@@ -555,7 +555,7 @@ export default function AuthModal({
                           type="checkbox"
                           checked={rememberEmail}
                           onChange={(e) => setRememberEmail(e.target.checked)}
-                          className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-cine-accent focus:ring-cine-accent/30"
+                          className="w-4 h-4 rounded border-zinc-700 bg-neutral-900 text-cine-accent focus:ring-cine-accent/30"
                         />
                         <span className="text-xs text-zinc-500">Lembrar meu e-mail neste dispositivo</span>
                       </label>
@@ -569,7 +569,7 @@ export default function AuthModal({
                           exit={{ opacity: 0, height: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 leading-relaxed">
+                          <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs text-zinc-400 leading-relaxed">
                             Para recuperar sua senha, envie um e-mail para{' '}
                             <a
                               href="mailto:atendimentocinereact@gmail.com?subject=Recuperação%20de%20senha%20CineReact"
@@ -586,7 +586,7 @@ export default function AuthModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
+                      className="w-full bg-white hover:bg-[#cc0000] disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
                     >
                       {loading ? (
                         <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

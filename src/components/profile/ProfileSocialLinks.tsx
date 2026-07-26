@@ -127,7 +127,7 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-fuchsia-500/10 bg-zinc-950/75 backdrop-blur-sm transition-all hover:border-cyan-400/25 hover:bg-zinc-900/80 hover:shadow-[0_0_18px_rgba(34,211,238,0.08)] ${cfg.strip}`}
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-fuchsia-500/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cyan-400/25 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(34,211,238,0.08)] ${cfg.strip}`}
             >
               <span
                 className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${style.accent} opacity-80`}

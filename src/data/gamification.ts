@@ -147,7 +147,7 @@ export const COSMETIC_SHOP: CosmeticItem[] = [
 ];
 
 export const RARITY_STYLES: Record<string, { border: string; bg: string; text: string; glow: string }> = {
-  comum: { border: 'border-zinc-700', bg: 'bg-zinc-900/50', text: 'text-zinc-300', glow: '' },
+  comum: { border: 'border-zinc-700', bg: 'bg-neutral-900/50', text: 'text-zinc-300', glow: '' },
   raro: { border: 'border-blue-500/40', bg: 'bg-blue-950/30', text: 'text-blue-300', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]' },
   épico: { border: 'border-purple-500/50', bg: 'bg-purple-950/30', text: 'text-purple-300', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]' },
   lendário: { border: 'border-cine-accent/60', bg: 'bg-cine-surface/30', text: 'text-cine-cream', glow: 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' },

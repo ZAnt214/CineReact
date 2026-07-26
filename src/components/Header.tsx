@@ -353,8 +353,8 @@ export default function Header({
       <header 
         className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
-            ? 'bg-zinc-950 max-md:backdrop-blur-none md:bg-zinc-950/90 md:backdrop-blur-md border-b border-zinc-900/80 shadow-lg shadow-black/30' 
-            : 'bg-zinc-950/95 max-md:backdrop-blur-none md:bg-zinc-950/40 md:backdrop-blur-sm border-b border-transparent'
+            ? 'bg-neutral-950 max-md:backdrop-blur-none md:bg-neutral-950/90 md:backdrop-blur-md border-b border-neutral-900/80 shadow-lg shadow-black/30' 
+            : 'bg-neutral-950/95 max-md:backdrop-blur-none md:bg-neutral-950/40 md:backdrop-blur-sm border-b border-transparent'
         }`}
       >
         <div className="cine-container w-full">
@@ -379,8 +379,8 @@ export default function Header({
                   onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'inicio' 
-                      ? 'text-white bg-zinc-900 shadow-sm border border-zinc-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-zinc-900/30'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Início
@@ -390,8 +390,8 @@ export default function Header({
                   onClick={() => setCurrentTab('canais')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'canais' 
-                      ? 'text-white bg-zinc-900 shadow-sm border border-zinc-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-zinc-900/30'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Canais Seguidos
@@ -401,8 +401,8 @@ export default function Header({
                   onClick={() => setCurrentTab('minha-lista')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'minha-lista' 
-                      ? 'text-white bg-zinc-900 shadow-sm border border-zinc-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-zinc-900/30'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Minha Lista
@@ -415,7 +415,7 @@ export default function Header({
                   className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
                     currentTab === 'doacoes' 
                       ? 'bg-cine-accent/15 text-cine-accent-light border-cine-accent/30 shadow-lg shadow-cine-surface/10' 
-                      : 'border-zinc-800 bg-zinc-900/40 text-cine-accent-light hover:bg-cine-accent hover:text-black hover:border-cine-accent-light'
+                      : 'border-neutral-800 bg-neutral-900/40 text-cine-accent-light hover:bg-cine-accent hover:text-black hover:border-cine-accent-light'
                   }`}
                 >
                   <Heart className="w-3 h-3 fill-current" />
@@ -448,7 +448,7 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 focus:bg-zinc-900 border border-zinc-800/80 focus:border-cine-accent/80 focus:ring-1 focus:ring-cine-accent/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
+                  className="w-full bg-neutral-900/50 hover:bg-neutral-900/80 focus:bg-neutral-900 border border-neutral-800/80 focus:border-cine-accent/80 focus:ring-1 focus:ring-cine-accent/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
                 />
                 {searchQuery && (
                   <button 
@@ -478,7 +478,7 @@ export default function Header({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
-                    className="absolute left-0 right-0 top-11 bg-zinc-950/95 backdrop-blur-xl border border-zinc-900 rounded-xl shadow-2xl p-2.5 max-h-[380px] overflow-y-auto z-50 divide-y divide-zinc-900"
+                    className="absolute left-0 right-0 top-11 bg-neutral-950/95 backdrop-blur-xl border border-neutral-900 rounded-xl shadow-2xl p-2.5 max-h-[380px] overflow-y-auto z-50 divide-y divide-neutral-900"
                   >
                     <div className="text-[10px] text-zinc-500 font-mono pb-2 px-2 uppercase tracking-wider flex justify-between items-center">
                       <span>Sugestões</span>
@@ -493,14 +493,14 @@ export default function Header({
                             setSearchQuery('');
                             setSearchResults([]);
                           }}
-                          className="w-full flex items-center gap-3 p-2 hover:bg-zinc-900/50 rounded-lg transition-colors text-left group"
+                          className="w-full flex items-center gap-3 p-2 hover:bg-neutral-900/50 rounded-lg transition-colors text-left group"
                         >
-                          <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md shadow bg-zinc-900" />
+                          <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md shadow bg-neutral-900" />
                           <div className="flex-1 min-w-0">
                             <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-cine-accent-light transition-colors truncate leading-tight">{obra.titulo}</h4>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <div className="flex items-center gap-2">
-                                <span className="text-[9px] uppercase font-mono px-1 rounded bg-zinc-800 text-zinc-400 font-medium">{obra.tipo}</span>
+                                <span className="text-[9px] uppercase font-mono px-1 rounded bg-neutral-800 text-zinc-400 font-medium">{obra.tipo}</span>
                                 <span className="text-[9px] text-zinc-500">{obra.ano}</span>
                               </div>
                               {(() => {
@@ -525,7 +525,7 @@ export default function Header({
                     </div>
                     <button 
                       onClick={() => handleSearchSubmit()}
-                      className="w-full text-center py-2 text-xs text-cine-accent-light font-bold hover:text-cine-cream transition-colors mt-1.5 pt-2 border-t border-zinc-900/60"
+                      className="w-full text-center py-2 text-xs text-cine-accent-light font-bold hover:text-cine-cream transition-colors mt-1.5 pt-2 border-t border-neutral-900/60"
                     >
                       Ver todos os resultados
                     </button>
@@ -551,7 +551,7 @@ export default function Header({
               <button 
                 id="search-toggle"
                 onClick={() => setSearchOpen(!searchOpen)} 
-                className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900/50 sm:hidden transition-colors"
+                className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-900/50 sm:hidden transition-colors"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -565,12 +565,12 @@ export default function Header({
                     setShowProfileMenu(false);
                   }} 
                   className={`p-2 text-zinc-400 hover:text-white rounded-lg transition-all duration-200 ${
-                    showNotifications ? 'bg-zinc-900 text-white border border-zinc-800/80' : 'hover:bg-zinc-900/40 border border-transparent'
+                    showNotifications ? 'bg-neutral-900 text-white border border-neutral-800/80' : 'hover:bg-neutral-900/40 border border-transparent'
                   }`}
                 >
                   <Bell className="w-4.5 h-4.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cine-accent-light rounded-full ring-2 ring-zinc-950 animate-pulse" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cine-accent-light rounded-full ring-2 ring-neutral-950 animate-pulse" />
                   )}
                 </button>
 
@@ -581,9 +581,9 @@ export default function Header({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 12, scale: 0.97 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="fixed md:absolute top-16 md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-zinc-950/98 backdrop-blur-2xl border border-zinc-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-zinc-900/60"
+                      className="fixed md:absolute top-16 md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-neutral-950/98 backdrop-blur-2xl border border-neutral-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-neutral-900/60"
                     >
-                      <div className="px-4 py-3.5 flex justify-between items-center bg-zinc-900/20">
+                      <div className="px-4 py-3.5 flex justify-between items-center bg-neutral-900/20">
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-[13px] text-zinc-100 uppercase tracking-wider font-sans">Notificações</h3>
                           {unreadCount > 0 && (
@@ -602,10 +602,10 @@ export default function Header({
                         )}
                       </div>
 
-                      <div className="max-h-80 overflow-y-auto divide-y divide-zinc-900/40 scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800">
+                      <div className="max-h-80 overflow-y-auto divide-y divide-neutral-900/40 scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800">
                         {notifications.length === 0 ? (
                           <div className="py-12 px-4 flex flex-col items-center justify-center text-center">
-                            <div className="w-10 h-10 rounded-full bg-zinc-900/50 flex items-center justify-center border border-zinc-800/40 mb-3 animate-pulse">
+                            <div className="w-10 h-10 rounded-full bg-neutral-900/50 flex items-center justify-center border border-neutral-800/40 mb-3 animate-pulse">
                               <Bell className="w-5 h-5 text-zinc-600 stroke-[1.5]" />
                             </div>
                             <p className="text-zinc-400 font-semibold text-xs leading-none">Tudo limpo por aqui!</p>
@@ -625,7 +625,7 @@ export default function Header({
                                 className={`p-3.5 text-xs flex gap-3 transition-all relative ${
                                   isUnread 
                                     ? 'bg-cine-surface/10 hover:bg-cine-surface/20' 
-                                    : 'bg-transparent hover:bg-zinc-900/30'
+                                    : 'bg-transparent hover:bg-neutral-900/30'
                                 }`}
                               >
                                 {isUnread && (
@@ -642,7 +642,7 @@ export default function Header({
                                       <Play className="w-3.5 h-3.5 text-cine-accent-light fill-current ml-0.5" />
                                     </div>
                                   ) : (
-                                    <div className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                                    <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
                                       <Bell className="w-3.5 h-3.5 text-zinc-400" />
                                     </div>
                                   )}
@@ -666,7 +666,7 @@ export default function Header({
                                   <button 
                                     onClick={() => markAsRead(n.id)} 
                                     title="Marcar como lida"
-                                    className="text-zinc-500 hover:text-cine-accent-light self-center p-1.5 rounded-lg hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 flex-shrink-0"
+                                    className="text-zinc-500 hover:text-cine-accent-light self-center p-1.5 rounded-lg hover:bg-neutral-900 transition-all border border-transparent hover:border-neutral-800 flex-shrink-0"
                                   >
                                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                                   </button>
@@ -701,7 +701,7 @@ export default function Header({
                     setShowNotifications(false);
                   }} 
                   className={`flex items-center gap-2 p-1 rounded-full transition-all focus:outline-none ${
-                    showProfileMenu ? 'bg-zinc-900 ring-1 ring-zinc-800/80 shadow-inner' : 'hover:bg-zinc-900/40'
+                    showProfileMenu ? 'bg-neutral-900 ring-1 ring-neutral-800/80 shadow-inner' : 'hover:bg-neutral-900/40'
                   }`}
                 >
                   {user.isLoggedIn ? (
@@ -713,7 +713,7 @@ export default function Header({
                       donorBadge={!!user.isDonor}
                     />
                   ) : (
-                    <div className="w-7.5 h-7.5 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-all shadow-inner">
+                    <div className="w-7.5 h-7.5 rounded-full bg-neutral-900 border border-neutral-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-neutral-800/50 transition-all shadow-inner">
                       <User className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -731,7 +731,7 @@ export default function Header({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="sm:hidden bg-zinc-950 border-b border-zinc-900 px-4 py-3"
+              className="sm:hidden bg-neutral-950 border-b border-neutral-900 px-4 py-3"
             >
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -744,7 +744,7 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900/80 border border-neutral-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-cine-accent"
                   autoFocus
                 />
                 <button 
@@ -759,7 +759,7 @@ export default function Header({
               </div>
 
               {searchQuery.trim() && searchResults.length > 0 && (
-                <div className="bg-zinc-950/95 rounded-xl border border-zinc-900 mt-2 p-2 max-h-60 overflow-y-auto divide-y divide-zinc-900 shadow-xl">
+                <div className="bg-neutral-950/95 rounded-xl border border-neutral-900 mt-2 p-2 max-h-60 overflow-y-auto divide-y divide-neutral-900 shadow-xl">
                   {searchResults.map((obra) => (
                     <button
                       key={obra.id}
@@ -769,7 +769,7 @@ export default function Header({
                         setSearchResults([]);
                         setSearchOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-zinc-900 rounded-lg text-left"
+                      className="w-full flex items-center gap-3 p-2 hover:bg-neutral-900 rounded-lg text-left"
                     >
                       <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md" />
                       <div className="flex-1 min-w-0">
@@ -794,7 +794,7 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain flex flex-col bg-zinc-950 touch-pan-y"
+            className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain flex flex-col bg-neutral-950 touch-pan-y"
           >
             <ProfilePanel
               user={user}
@@ -826,9 +826,9 @@ export default function Header({
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-2xl p-6.5 shadow-2xl overflow-hidden text-zinc-300 z-10 space-y-5"
+              className="relative w-full max-w-md bg-neutral-950 border border-neutral-900 rounded-2xl p-6.5 shadow-2xl overflow-hidden text-zinc-300 z-10 space-y-5"
             >
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-3">
+              <div className="flex justify-between items-center border-b border-neutral-900 pb-3">
                 <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2"><Youtube className="w-5 h-5 text-cine-accent-light" /> Solicitar Canal</h3>
                 <button onClick={() => setShowRequestModal(false)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
               </div>
@@ -836,21 +836,21 @@ export default function Header({
               <form onSubmit={handleRequestSubmit} className="space-y-4 text-xs">
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Nome do Canal*</label>
-                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
+                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">URL do Canal (YouTube)*</label>
-                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
+                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Seu E-mail de Contato*</label>
-                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
+                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-cine-accent" />
                 </div>
 
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-neutral-200 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-[#cc0000] text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>

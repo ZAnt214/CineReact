@@ -183,7 +183,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
+            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-neutral-950 text-zinc-300"
           >
             <motion.div
               className="absolute top-0 left-0 w-full h-1 bg-white-dark"
@@ -195,7 +195,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-20 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-20 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-neutral-900 transition-colors cursor-pointer"
               aria-label="Fechar"
             >
               <X className="w-5 h-5" />
@@ -226,7 +226,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
                 }}
-                className="lg:col-span-2 flex flex-col justify-between p-6 sm:p-8 pt-16 sm:pt-20 lg:pt-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-b lg:border-b-0 lg:border-r border-zinc-800/80 relative overflow-hidden"
+                className="lg:col-span-2 flex flex-col justify-between p-6 sm:p-8 pt-16 sm:pt-20 lg:pt-8 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black border-b lg:border-b-0 lg:border-r border-neutral-800/80 relative overflow-hidden"
               >
                 <motion.div
                   className="absolute -top-24 -right-24 w-56 h-56 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none"
@@ -239,7 +239,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 />
                 <motion.div
-                  className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none"
+                  className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-neutral-950 to-transparent pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
@@ -271,7 +271,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     ))}
                   </ul>
 
-                  <div className="hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80">
+                  <div className="hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cine-accent/10 border border-cine-accent/20">
                       <Youtube className="w-5 h-5 text-cine-accent-light" />
                     </span>
@@ -321,7 +321,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 </header>
 
                 {/* Highlight card */}
-                <div className="relative overflow-hidden rounded-2xl border border-cine-accent/30 bg-gradient-to-br from-cine-accent/10 via-zinc-900/80 to-zinc-950 p-5 sm:p-6">
+                <div className="relative overflow-hidden rounded-2xl border border-cine-accent/30 bg-gradient-to-br from-cine-accent/10 via-neutral-900/80 to-neutral-950 p-5 sm:p-6">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-cine-accent/10 rounded-full blur-2xl pointer-events-none" />
                   <motion.div
                     className="relative flex flex-col sm:flex-row sm:items-center gap-4"
@@ -353,7 +353,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wide">
                       Em breve para parceiros
                     </h3>
-                    <span className="text-[10px] font-bold bg-zinc-900 text-cine-accent-light px-2.5 py-1 rounded-full border border-cine-accent/30 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold bg-neutral-900 text-cine-accent-light px-2.5 py-1 rounded-full border border-cine-accent/30 uppercase tracking-wider">
                       Em desenvolvimento
                     </span>
                   </div>
@@ -365,7 +365,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 + index * 0.05 }}
-                        className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-cine-accent/30 hover:bg-zinc-900/80 transition-all duration-200"
+                        className="group p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/80 hover:border-cine-accent/30 hover:bg-neutral-900/80 transition-all duration-200"
                       >
                         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cine-accent/10 border border-cine-accent/20 mb-3 group-hover:bg-cine-accent/15 transition-colors">
                           <Icon className="w-4 h-4 text-cine-accent-light" />
@@ -378,7 +378,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 </section>
 
                 {/* Steps */}
-                <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6">
+                <section className="rounded-2xl border border-neutral-800/80 bg-neutral-900/40 p-5 sm:p-6">
                   <h3 className="text-sm font-black text-white uppercase tracking-wide mb-4">
                     Como participar
                   </h3>
@@ -386,7 +386,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     {steps.map(({ number, title, text }) => (
                       <div
                         key={number}
-                        className="relative p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80"
+                        className="relative p-4 rounded-xl bg-neutral-950/80 border border-neutral-800/80"
                       >
                         <span className="text-2xl font-black text-cine-accent/30 leading-none">{number}</span>
                         <p className="text-sm font-bold text-white mt-2">{title}</p>
@@ -397,7 +397,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 </section>
 
                 {/* Footer CTA */}
-                <footer className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-zinc-800/80">
+                <footer className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-neutral-800/80">
                   <div className="flex items-center gap-2.5 text-xs text-zinc-500">
                     <Mail className="w-4 h-4 text-cine-accent-light shrink-0" />
                     <span>
@@ -414,7 +414,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   >
                     <button
                       onClick={onClose}
-                      className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-colors border border-zinc-800 cursor-pointer w-full sm:w-auto"
+                      className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-zinc-300 text-xs font-bold transition-colors border border-neutral-800 cursor-pointer w-full sm:w-auto"
                     >
                       Fechar
                     </button>

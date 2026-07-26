@@ -116,7 +116,7 @@ export default function GamificationPage({
       className="cine-container py-24 pb-32 space-y-8"
     >
       {/* Hero */}
-      <ProfileSurface loadout={profile?.loadout} variant="hero" className="border-zinc-800/60">
+      <ProfileSurface loadout={profile?.loadout} variant="hero" className="border-neutral-800/60">
         <div className="relative flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex items-center gap-5">
             <div className="relative">
@@ -167,7 +167,7 @@ export default function GamificationPage({
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border transition-all ${
                     active
                       ? 'bg-cine-accent/15 border-cine-accent/40 text-cine-cream'
-                      : 'bg-zinc-900/40 border-zinc-800 text-zinc-600'
+                      : 'bg-neutral-900/40 border-neutral-800 text-zinc-600'
                   }`}
                 >
                   {t}
@@ -190,7 +190,7 @@ export default function GamificationPage({
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 tab === t.id
                   ? 'bg-cine-accent/15 text-cine-accent-light border border-cine-accent/30'
-                  : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/60 hover:text-zinc-300'
+                  : 'bg-neutral-900/40 text-zinc-500 border border-neutral-800/60 hover:text-zinc-300'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -228,7 +228,7 @@ export default function GamificationPage({
                 return (
                   <div
                     key={stat.label}
-                    className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/80 transition-colors"
+                    className="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800/60 hover:border-zinc-700/80 transition-colors"
                   >
                     <Icon className="w-4 h-4 text-cine-accent/70 mb-2" />
                     <p className="text-xl font-black text-white">{stat.value}</p>
@@ -267,7 +267,7 @@ export default function GamificationPage({
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`p-2.5 rounded-xl bg-zinc-950/50 ${style.text}`}>
+                      <div className={`p-2.5 rounded-xl bg-neutral-950/50 ${style.text}`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -328,11 +328,11 @@ export default function GamificationPage({
                     className={`p-5 rounded-2xl border text-center transition-all ${
                       unlocked
                         ? 'border-cine-accent/40 bg-cine-surface/20 shadow-[0_0_25px_rgba(255,255,255,0.1)]'
-                        : 'border-zinc-800 bg-zinc-900/30 opacity-70'
+                        : 'border-neutral-800 bg-neutral-900/30 opacity-70'
                     }`}
                   >
                     <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-3 ${
-                      unlocked ? 'bg-cine-accent/20 text-cine-accent-light' : 'bg-zinc-800 text-zinc-600'
+                      unlocked ? 'bg-cine-accent/20 text-cine-accent-light' : 'bg-neutral-800 text-zinc-600'
                     }`}>
                       <Icon className="w-8 h-8" />
                     </div>
@@ -370,7 +370,7 @@ export default function GamificationPage({
                     className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
                       entry.email === user.email
                         ? 'border-cine-accent/40 bg-cine-accent/5'
-                        : 'border-zinc-800/60 bg-zinc-900/30'
+                        : 'border-neutral-800/60 bg-neutral-900/30'
                     }`}
                   >
                     <span className={`w-8 text-center font-black text-lg ${
@@ -427,7 +427,7 @@ function MissionCard({
   xp: number; spotlight: number; current: number; target: number; weekly?: boolean;
 } & Record<string, unknown>) {
   return (
-    <div className={`p-4 rounded-2xl border ${done ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-zinc-800 bg-zinc-900/40'}`}>
+    <div className={`p-4 rounded-2xl border ${done ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-neutral-800 bg-neutral-900/40'}`}>
       <div className="flex justify-between items-start gap-3 mb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -441,7 +441,7 @@ function MissionCard({
           <p className="text-[10px] text-purple-400 font-bold">+{spotlight}</p>
         </div>
       </div>
-      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-1">
+      <div className="h-1.5 bg-neutral-800 rounded-full overflow-hidden mb-1">
         <motion.div
           className={`h-full rounded-full ${done ? 'bg-emerald-500' : 'bg-gradient-to-r from-cine-accent-dark to-cine-accent-light'}`}
           initial={{ width: 0 }}

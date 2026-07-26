@@ -124,13 +124,13 @@ export default function ChannelPage({
       {/* HEADER NAVIGATION CONTROLS */}
       <button 
         onClick={onBack}
-        className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/80 hover:bg-cine-accent/20 text-zinc-300 hover:text-cine-accent-light border border-zinc-800 hover:border-cine-accent/40 text-xs font-black uppercase tracking-wider transition-all duration-200 mb-8 cursor-pointer shadow-lg backdrop-blur-md"
+        className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/80 hover:bg-cine-accent/20 text-zinc-300 hover:text-cine-accent-light border border-neutral-800 hover:border-cine-accent/40 text-xs font-black uppercase tracking-wider transition-all duration-200 mb-8 cursor-pointer shadow-lg backdrop-blur-md"
       >
         <ArrowLeft className="w-4 h-4 text-cine-accent-light group-hover:-translate-x-1 transition-transform" />
         <span>Voltar ao Início</span>
       </button>
       {/* CHANNEL HERO BANNER */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-10 border border-zinc-800/80 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+      <div className="relative w-full rounded-3xl overflow-hidden mb-10 border border-neutral-800/80 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
         
         {/* Ambient lighting */}
         <div className="absolute -top-12 -left-12 w-80 h-80 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
@@ -142,7 +142,7 @@ export default function ChannelPage({
           {/* Avatar with Ring */}
           <div className="relative group shrink-0">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-cine-cream via-cine-accent-light to-cine-accent blur-sm opacity-70 group-hover:opacity-100 transition duration-500" />
-            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-zinc-950 bg-zinc-900 overflow-hidden shadow-2xl">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-neutral-950 bg-neutral-900 overflow-hidden shadow-2xl">
               <OptimizedImage 
                 src={canal.poster} 
                 alt={canal.titulo} 
@@ -160,7 +160,7 @@ export default function ChannelPage({
                     href={canal.trailerUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/80 text-xs font-bold transition-all shadow-md"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/90 hover:bg-neutral-800 text-zinc-300 hover:text-white border border-zinc-700/80 text-xs font-bold transition-all shadow-md"
                   >
                     <ExternalLink className="w-3.5 h-3.5 text-cine-accent-light" />
                     <span>YouTube Oficial</span>
@@ -205,7 +205,7 @@ export default function ChannelPage({
                 onClick={() => onToggleSeguir(canalNome)}
                 className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 shadow-xl cursor-pointer ${
                   isFollowing 
-                    ? 'bg-zinc-900 hover:bg-red-500/20 text-zinc-200 hover:text-red-400 border border-zinc-700 hover:border-red-500/50' 
+                    ? 'bg-neutral-900 hover:bg-red-500/20 text-zinc-200 hover:text-red-400 border border-zinc-700 hover:border-red-500/50' 
                     : 'bg-gradient-to-r from-cine-cream via-cine-accent-light to-cine-accent text-black hover:scale-105 active:scale-95 shadow-cine-accent/25'
                 }`}
               >
@@ -215,7 +215,7 @@ export default function ChannelPage({
 
               {/* Followers Facepile */}
               {!loadingSeguidores && seguidores.length > 0 && (
-                <div className="flex items-center gap-2.5 bg-zinc-900/60 border border-zinc-800/80 px-3.5 py-2 rounded-2xl backdrop-blur-md">
+                <div className="flex items-center gap-2.5 bg-neutral-900/60 border border-neutral-800/80 px-3.5 py-2 rounded-2xl backdrop-blur-md">
                   <div className="flex -space-x-2 overflow-hidden">
                     {seguidores.slice(0, 4).map((seg, i) => {
                       const initials = seg.username.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -223,7 +223,7 @@ export default function ChannelPage({
                         <div 
                           key={i} 
                           title={seg.username}
-                          className="inline-block h-7 w-7 rounded-full ring-2 ring-zinc-950 bg-gradient-to-br from-cine-cream to-cine-accent text-black flex items-center justify-center text-[10px] font-black font-mono select-none"
+                          className="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-950 bg-gradient-to-br from-cine-cream to-cine-accent text-black flex items-center justify-center text-[10px] font-black font-mono select-none"
                         >
                           {seg.avatar ? (
                             <img src={seg.avatar} alt={seg.username} className="h-full w-full object-cover rounded-full" referrerPolicy="no-referrer" />
@@ -247,7 +247,7 @@ export default function ChannelPage({
       </div>
 
       {/* SINGLE CLEAN CATEGORY SECTION HEADER & SEARCH */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-zinc-950/80 border border-zinc-800/80 p-5 rounded-3xl backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-neutral-950/80 border border-neutral-800/80 p-5 rounded-3xl backdrop-blur-xl shadow-xl">
         
         {/* Title */}
         <div className="flex items-center gap-3">
@@ -277,7 +277,7 @@ export default function ChannelPage({
             placeholder="Pesquisar nos vídeos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 focus:border-cine-accent-light rounded-2xl py-2.5 pl-10 pr-4 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none transition-all shadow-inner"
+            className="w-full bg-neutral-900 border border-neutral-800 focus:border-cine-accent-light rounded-2xl py-2.5 pl-10 pr-4 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none transition-all shadow-inner"
           />
         </div>
 
@@ -300,10 +300,10 @@ export default function ChannelPage({
               transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.2) }}
               whileHover={{ y: -6 }}
               onClick={() => onPlayVideo(react.id, react.obraId)}
-              className="bg-zinc-950 border border-zinc-800/80 hover:border-cine-accent/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col h-full relative"
+              className="bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col h-full relative"
             >
               {/* Thumbnail Container */}
-              <div className="relative aspect-video w-full overflow-hidden bg-zinc-900">
+              <div className="relative aspect-video w-full overflow-hidden bg-neutral-900">
                 <OptimizedImage
                   src={react.thumbnailUrl}
                   alt={react.titulo}
@@ -332,7 +332,7 @@ export default function ChannelPage({
                 </h3>
                 
                 {/* Footer Metadata */}
-                <div className="mt-auto pt-3 border-t border-zinc-900 flex items-center justify-between text-[11px] text-zinc-400 font-mono font-semibold">
+                <div className="mt-auto pt-3 border-t border-neutral-900 flex items-center justify-between text-[11px] text-zinc-400 font-mono font-semibold">
                   <span className="flex items-center gap-1 text-zinc-300">
                     <Eye className="w-3.5 h-3.5 text-cine-accent-light" />
                     <span>{formatViews(react.visualizacoes)}</span>
@@ -348,7 +348,7 @@ export default function ChannelPage({
 
         {/* Empty State */}
         {filteredReacts.length === 0 && (
-          <div className="col-span-full py-16 text-center bg-zinc-900/30 rounded-2xl border border-zinc-800 p-8">
+          <div className="col-span-full py-16 text-center bg-neutral-900/30 rounded-2xl border border-neutral-800 p-8">
             <Tv className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
             <p className="text-sm font-bold text-zinc-300">Nenhum react encontrado</p>
             <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">

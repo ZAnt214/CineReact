@@ -215,7 +215,7 @@ export default function LunchTimePage({
       <div className="flex items-center justify-between gap-4 mb-6">
         <button
           onClick={onBackToHome}
-          className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-zinc-800 cursor-pointer active:scale-95"
+          className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-neutral-800 cursor-pointer active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-cine-accent-light" />
           <span>Voltar ao Início</span>
@@ -227,7 +227,7 @@ export default function LunchTimePage({
         )}
       </div>
 
-      <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-cine-accent/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
+      <div className="relative bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border border-cine-accent/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-cine-accent/80" />
         <motion.div className="absolute -top-20 -right-20 w-64 h-64 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -249,7 +249,7 @@ export default function LunchTimePage({
             <button
               onClick={handleSortearEAssistir}
               disabled={!hasVideos}
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-black text-sm transition-all shadow-lg shadow-cine-accent/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-[#cc0000] text-black font-black text-sm transition-all shadow-lg shadow-cine-accent/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
             >
               <Sparkles className="w-4 h-4" />
               {sortearButtonLabel}
@@ -280,7 +280,7 @@ export default function LunchTimePage({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-neutral-900 shadow-2xl">
               <OptimizedImage
                 src={displayReact.thumbnailUrl}
                 alt={displayReact.titulo}
@@ -360,7 +360,7 @@ export default function LunchTimePage({
                 {countdown === null && (
                   <button
                     onClick={() => startPlayback(displayReact)}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     Assistir Agora

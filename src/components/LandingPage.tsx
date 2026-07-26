@@ -35,7 +35,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent/15 via-cine-accent/5 to-transparent rounded-full blur-3xl opacity-70" />
         <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-mint/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#303030_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+        <div className="absolute inset-0 bg-[radial-gradient(#3f3f3f_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
       </div>
 
       {/* HEADER / BRAND BAR */}
@@ -53,7 +53,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white text-black font-extrabold text-xs sm:text-sm hover:bg-neutral-200 transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
+            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#ff0000] text-white font-extrabold text-xs sm:text-sm hover:bg-[#cc0000] transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
           >
             <span>{isNavigating ? 'Abrindo...' : 'Acessar Plataforma'}</span>
             {isNavigating ? (
@@ -111,7 +111,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-black font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#ff0000] text-white font-black text-base sm:text-lg hover:brightness-105 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
           >
             <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
             {isNavigating ? (
@@ -145,7 +145,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* KEY BENEFITS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-zinc-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-900/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Por que usar o CineReact?
@@ -157,7 +157,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Benefit 1 */}
-          <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
                 <Users className="w-6 h-6" />
@@ -172,7 +172,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Benefit 2 */}
-          <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
                 <Tv className="w-6 h-6" />
@@ -187,7 +187,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Benefit 3 */}
-          <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
                 <BookmarkCheck className="w-6 h-6" />
@@ -202,7 +202,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Benefit 4 */}
-          <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
                 <Compass className="w-6 h-6" />
@@ -219,7 +219,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-zinc-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-900/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Como Funciona
@@ -231,7 +231,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Step 1 */}
-          <div className="p-6 rounded-2xl bg-zinc-950/80 border border-zinc-800/60 relative">
+          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
             <span className="text-4xl font-black text-cine-accent/30 mb-3 block">01</span>
             <h3 className="text-lg font-bold text-white mb-2">Organização em Catálogo</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
@@ -240,7 +240,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Step 2 */}
-          <div className="p-6 rounded-2xl bg-zinc-950/80 border border-zinc-800/60 relative">
+          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
             <span className="text-4xl font-black text-cine-accent/30 mb-3 block">02</span>
             <h3 className="text-lg font-bold text-white mb-2">Player Oficial do YouTube</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
@@ -249,7 +249,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Step 3 */}
-          <div className="p-6 rounded-2xl bg-zinc-950/80 border border-zinc-800/60 relative">
+          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
             <span className="text-4xl font-black text-cine-accent/30 mb-3 block">03</span>
             <h3 className="text-lg font-bold text-white mb-2">Comunidade e Interação</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
@@ -261,7 +261,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
       {/* SECONDARY CTA BANNER */}
       <section className="relative z-10 cine-container w-full py-12 my-8">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900 border border-cine-accent/30 text-center relative overflow-hidden shadow-2xl">
+        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border border-cine-accent/30 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
           
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight relative z-10">
@@ -274,7 +274,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
             <button
               onClick={onExplore}
               disabled={isNavigating}
-              className="px-8 py-4 rounded-2xl bg-white-light text-black font-black text-base hover:brightness-110 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
+              className="px-8 py-4 rounded-2xl bg-white-light text-black font-black text-base hover:brightness-105 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
             >
               <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
               {isNavigating ? (
@@ -288,7 +288,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 border-t border-zinc-900 bg-zinc-950 py-12 mt-12 text-zinc-400">
+      <footer className="relative z-10 border-t border-neutral-900 bg-neutral-950 py-12 mt-12 text-zinc-400">
         <div className="cine-container w-full space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}
@@ -318,13 +318,13 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Legal Disclaimer / Notice */}
-          <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/60 text-center w-full max-w-5xl mx-auto">
+          <div className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/60 text-center w-full max-w-5xl mx-auto">
             <p className="text-xs text-zinc-400 leading-relaxed font-sans">
               <strong>Aviso Legal:</strong> O CineReact não hospeda vídeos. Todo o conteúdo exibido é incorporado de plataformas públicas, como o YouTube, respeitando os direitos e políticas de seus respectivos proprietários.
             </p>
           </div>
 
-          <div className="text-center text-xs text-zinc-500 pt-4 border-t border-zinc-900">
+          <div className="text-center text-xs text-zinc-500 pt-4 border-t border-neutral-900">
             © {new Date().getFullYear()} CineReact. Todos os direitos reservados.
           </div>
         </div>
@@ -346,11 +346,11 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl text-zinc-300 z-10"
+              className="relative w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl text-zinc-300 z-10"
             >
               <button 
                 onClick={() => setActiveModal(null)}
-                className="absolute top-5 right-5 p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800/60 transition-colors cursor-pointer"
+                className="absolute top-5 right-5 p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-800/60 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -412,7 +412,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
                   <p className="text-sm text-zinc-300 leading-relaxed">
                     Tem alguma dúvida, sugestão ou solicitação de parceria? Entre em contato conosco através dos nossos canais oficiais:
                   </p>
-                  <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2 my-4">
+                  <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 space-y-2 my-4">
                     <div className="text-xs text-zinc-400 font-mono">E-mail de Atendimento:</div>
                     <a 
                       href="mailto:atendimentocinereact@gmail.com" 
@@ -431,7 +431,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={() => setActiveModal(null)}
-                  className="px-6 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-xs transition-colors cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white font-medium text-xs transition-colors cursor-pointer"
                 >
                   Fechar
                 </button>

@@ -1,6 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 72" width="800" height="144">
-  <rect width="400" height="72" rx="10" fill="#0f0f0f"/>
-  <text x="20" y="48" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="40" fill="#ffffff" letter-spacing="-2.2">CineReact</text>
-  <rect x="22" y="14" width="5" height="5" rx="1" fill="#a3a3a3"/>
-  <rect x="20" y="54" width="280" height="3" rx="1.5" fill="#737373"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100" width="1040" height="200">
+  <rect width="520" height="100" rx="12" fill="#0f0f0f"/>
+  <rect x="20" y="24" width="68" height="48" rx="12" fill="#FF0000"/>
+  <path d="M44 36v24l18-12-18-12Z" fill="#FFFFFF"/>
+  <rect x="100" y="22" width="300" height="56" rx="12" fill="#212121" stroke="#3f3f3f" stroke-width="1.5"/>
+  <g opacity="0.65">
+    <rect x="114" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="126" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="138" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="150" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="162" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="174" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="186" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="198" y="30" width="6" height="6" rx="1" fill="#909090"/>
+    <rect x="210" y="30" width="6" height="6" rx="1" fill="#909090"/>
+  </g>
+  <text x="114" y="58" font-family="Roboto, Arial, sans-serif" font-weight="700" font-size="28" fill="#f1f1f1">Cine</text>
+  <text x="196" y="58" font-family="Roboto, Arial, sans-serif" font-weight="900" font-size="28" fill="#FF0000">React</text>
+  <rect x="114" y="66" width="270" height="4" rx="2" fill="#3f3f3f"/>
+  <rect x="114" y="66" width="115" height="4" rx="2" fill="#FF0000"/>
+  <circle cx="229" cy="68" r="4" fill="#FF0000"/>
 </svg>

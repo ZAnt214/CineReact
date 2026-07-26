@@ -781,7 +781,7 @@ export default function App() {
                 </div>
 
                 {matchingReacts.length === 0 && searchResults.length === 0 ? (
-                  <div className="text-center py-24 bg-zinc-900/10 rounded-xl border border-zinc-850">
+                  <div className="text-center py-24 bg-neutral-900/10 rounded-xl border border-neutral-800">
                     <p className="text-zinc-400 text-sm">Nenhum resultado encontrado para esta pesquisa.</p>
                     <p className="text-zinc-600 text-xs mt-1">Tente pesquisar por termos como Marvel, animes, ou nomes de criadores.</p>
                   </div>
@@ -790,7 +790,7 @@ export default function App() {
                     {/* VIDEO RESULTS (THUMBNAILS) */}
                     {matchingReacts.length > 0 && (
                       <div className="space-y-4">
-                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2 flex items-center gap-2 font-sans">
+                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-neutral-800 pb-2 flex items-center gap-2 font-sans">
                           <span className="w-2.5 h-2.5 bg-cine-accent-light rounded-full inline-block animate-pulse" />
                           Vídeos Encontrados ({matchingReacts.length})
                         </h2>
@@ -804,9 +804,9 @@ export default function App() {
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
                                 style={{ touchAction: 'pan-y pinch-zoom' }}
-                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
+                                className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-neutral-800 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
                               >
-                                <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
+                                <div className="relative h-36 md:h-44 w-full overflow-hidden bg-neutral-950">
                                   <OptimizedImage
                                     src={react.thumbnailUrl}
                                     alt={react.titulo}
@@ -850,7 +850,7 @@ export default function App() {
                     {/* OBRAS & CANAIS RESULTS */}
                     {searchResults.length > 0 && (
                       <div className="space-y-4 pt-4">
-                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2">
+                        <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-neutral-800 pb-2">
                           Obras & Canais ({searchResults.length})
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -862,9 +862,9 @@ export default function App() {
                                 setSelectedReactId(null);
                                 setCurrentTab('obra');
                               }}
-                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-cine-accent/40 hover:shadow-lg hover:shadow-cine-accent/5 transition-all cursor-pointer group"
+                              className="bg-neutral-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-neutral-800 hover:border-cine-accent/40 hover:shadow-lg hover:shadow-cine-accent/5 transition-all cursor-pointer group"
                             >
-                              <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
+                              <div className="aspect-3/4 relative overflow-hidden bg-neutral-950">
                                 <OptimizedImage src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                   <div className="w-12 h-12 bg-cine-accent text-black rounded-full flex items-center justify-center shadow-lg font-bold">
@@ -873,7 +873,7 @@ export default function App() {
                                 </div>
                               </div>
                               <div className="p-3 text-center space-y-1">
-                                <span className="text-[9px] uppercase font-mono bg-zinc-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400">{obra.tipo}</span>
+                                <span className="text-[9px] uppercase font-mono bg-neutral-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400">{obra.tipo}</span>
                                 <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-cine-accent-light transition-colors pt-1">{obra.titulo}</h4>
                                 <span className="text-[10px] text-zinc-500">{obra.ano}</span>
                               </div>
@@ -902,7 +902,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#ff0000] text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1159,7 +1159,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Canal não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#ff0000] text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1194,7 +1194,7 @@ export default function App() {
                   Canais Seguidos
                 </h2>
                 {canaisSeguidos.length === 0 ? (
-                  <div className="text-center py-24 bg-zinc-900/10 rounded-2xl border border-zinc-850 max-w-xl mx-auto">
+                  <div className="text-center py-24 bg-neutral-900/10 rounded-2xl border border-neutral-800 max-w-xl mx-auto">
                     <p className="text-zinc-500">Você não segue nenhum canal ainda.</p>
                     <p className="text-zinc-600 text-xs mt-1">Siga canais de criadores nas páginas de reprodução para vê-los listados aqui.</p>
                   </div>
@@ -1204,7 +1204,7 @@ export default function App() {
                       const canal = obras.find(o => o.tipo === 'canal' && o.titulo.includes(nome));
                       if (!canal) return null;
                       return (
-                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-cine-accent/30 shadow-md">
+                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-neutral-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-neutral-900 transition-all border border-neutral-800 hover:border-cine-accent/30 shadow-md">
                            <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-cine-accent/30" />
                            <div>
                              <h3 className="text-base font-bold text-white hover:text-cine-accent-light transition-colors">{nome}</h3>
@@ -1371,7 +1371,7 @@ export default function App() {
                     return (
                       <motion.div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Categoria do canal não encontrada</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#ff0000] text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </motion.div>
@@ -1431,7 +1431,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-12 w-full">
+      <footer className="bg-neutral-950 border-t border-neutral-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-12 w-full">
         <div className="cine-container space-y-3">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
@@ -1527,7 +1527,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
+              className="relative w-full max-w-lg bg-neutral-950 border border-neutral-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
             >
               {/* Visual element decorator */}
               <div className="absolute top-0 left-0 w-full h-[3px] bg-white-dark" />
@@ -1561,7 +1561,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-neutral-200 text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-[#cc0000] text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>

@@ -51,7 +51,7 @@ export default function CreatorTagVisual({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-zinc-950/55 overflow-hidden ${s.pad} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-neutral-950/55 overflow-hidden ${s.pad} ${className}`}
       title={name}
       style={{ boxShadow: `inset 2px 0 0 0 ${from}` }}
     >

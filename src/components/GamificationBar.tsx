@@ -22,11 +22,11 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       <button
         type="button"
         onClick={onClick}
-        className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-cine-accent/30 transition-all cursor-pointer group"
+        className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-cine-accent/30 transition-all cursor-pointer group"
       >
         <div className="flex flex-col items-end min-w-[72px]">
           <span className="text-[9px] font-mono uppercase tracking-widest text-cine-accent/80">{tier}</span>
-          <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
+          <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden mt-0.5">
             <motion.div
               className="h-full bg-gradient-to-r from-cine-accent-dark to-cine-accent-light"
               initial={{ width: 0 }}
@@ -53,7 +53,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-zinc-800/70 bg-zinc-900/30 p-4"
+      className="rounded-2xl border border-neutral-800/70 bg-neutral-900/30 p-4"
     >
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
@@ -72,7 +72,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
         <span>{profile.xp} XP</span>
         <span>{progress.percent}%</span>
       </div>
-      <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden mb-3">
+      <div className="h-2 bg-neutral-800/80 rounded-full overflow-hidden mb-3">
         <motion.div
           className="h-full bg-gradient-to-r from-cine-accent-dark via-cine-accent-light to-cine-cream shadow-[0_0_12px_rgba(255,255,255,0.4)]"
           initial={{ width: 0 }}

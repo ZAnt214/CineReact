@@ -29,7 +29,7 @@ export default function ProfileSurface({
 
   const card = (
     <div
-      className={`profile-surface-root relative overflow-hidden border border-zinc-800/60 bg-zinc-950/40 ${rounded} ${pad} min-h-0 ${className}`}
+      className={`profile-surface-root relative overflow-hidden border border-neutral-800/60 bg-neutral-950/40 ${rounded} ${pad} min-h-0 ${className}`}
     >
       <div className={`relative z-10 ${innerClassName}`}>{children}</div>
     </div>

@@ -343,7 +343,7 @@ export default function CineReactPlayer({
 
           {/* DUAL VIEW PANEL (OBRA CONTEXT & SYNCHRONIZED METADATA) */}
           {dualView && obra && (
-            <div className="w-full md:w-1/3 h-full bg-zinc-950/95 border-t md:border-t-0 md:border-l border-cine-accent/30 p-4 sm:p-6 overflow-y-auto flex flex-col justify-between gap-4 backdrop-blur-2xl z-10">
+            <div className="w-full md:w-1/3 h-full bg-neutral-950/95 border-t md:border-t-0 md:border-l border-cine-accent/30 p-4 sm:p-6 overflow-y-auto flex flex-col justify-between gap-4 backdrop-blur-2xl z-10">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cine-accent/20 text-cine-accent-light border border-cine-accent/30 flex items-center gap-1.5 shadow-md">
@@ -358,7 +358,7 @@ export default function CineReactPlayer({
                   </button>
                 </div>
 
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-800 shadow-xl group">
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-xl group">
                   <img src={obra.banner || obra.poster} alt={obra.titulo} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-3">
                     <div>
@@ -368,12 +368,12 @@ export default function CineReactPlayer({
                   </div>
                 </div>
 
-                <p className="text-xs text-zinc-300 leading-relaxed line-clamp-4 font-sans bg-zinc-900/60 p-3 rounded-xl border border-zinc-800/80 shadow-inner">
+                <p className="text-xs text-zinc-300 leading-relaxed line-clamp-4 font-sans bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80 shadow-inner">
                   {obra.sinopse || obra.synopsis || 'Sem sinopse disponível.'}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+              <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400">
                 <span className="flex items-center gap-1">
                   <Flame className="w-3.5 h-3.5 text-cine-accent" /> Modo Reação CineReact
                 </span>
@@ -454,8 +454,8 @@ export default function CineReactPlayer({
                   onClick={() => setDualView(!dualView)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xl cursor-pointer ${
                     dualView 
-                      ? 'bg-white text-black border-cine-cream shadow-cine-accent/40 font-black' 
-                      : 'bg-black/70 hover:bg-zinc-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
+                      ? 'bg-[#ff0000] text-white border-cine-cream shadow-cine-accent/40 font-black' 
+                      : 'bg-black/70 hover:bg-neutral-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
                   }`}
                   title="Modo Duplo (Vídeo + Obra)"
                 >
@@ -466,7 +466,7 @@ export default function CineReactPlayer({
 
               <button
                 onClick={() => setShowNativePlayer(!showNativePlayer)}
-                className="px-2.5 py-1.5 rounded-xl text-[10px] font-mono font-bold bg-black/70 hover:bg-black text-zinc-400 hover:text-white border border-zinc-800 transition-colors backdrop-blur-md cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl text-[10px] font-mono font-bold bg-black/70 hover:bg-black text-zinc-400 hover:text-white border border-neutral-800 transition-colors backdrop-blur-md cursor-pointer"
                 title="Alternar entre Player CineReact e Player Padrão"
               >
                 {showNativePlayer ? 'Player CineReact' : 'Player YouTube'}
@@ -487,7 +487,7 @@ export default function CineReactPlayer({
               {/* HOVER TIMESTAMP TOOLTIP */}
               {hoverTime !== null && (
                 <div 
-                  className="absolute -top-8 transform -translate-x-1/2 bg-zinc-950/95 text-cine-cream border border-cine-accent/50 text-[11px] font-mono px-2.5 py-1 rounded-md shadow-2xl pointer-events-none backdrop-blur-md font-bold"
+                  className="absolute -top-8 transform -translate-x-1/2 bg-neutral-950/95 text-cine-cream border border-cine-accent/50 text-[11px] font-mono px-2.5 py-1 rounded-md shadow-2xl pointer-events-none backdrop-blur-md font-bold"
                   style={{ left: `${hoverX}px` }}
                 >
                   {formatTime(hoverTime)}
@@ -498,7 +498,7 @@ export default function CineReactPlayer({
               <div 
                 onMouseMove={handleTimelineMouseMove}
                 onMouseLeave={handleTimelineMouseLeave}
-                className="relative h-2 group-hover/timeline:h-3 bg-zinc-800/90 rounded-full overflow-hidden transition-all duration-200 shadow-inner border border-zinc-700/40"
+                className="relative h-2 group-hover/timeline:h-3 bg-neutral-800/90 rounded-full overflow-hidden transition-all duration-200 shadow-inner border border-zinc-700/40"
               >
                 {/* PROGRESS TRACK FILL WITH GLOW */}
                 <div 
@@ -529,7 +529,7 @@ export default function CineReactPlayer({
                 {/* Play / Pause Toggle */}
                 <button
                   onClick={togglePlay}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-neutral-200 text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-[#cc0000] text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
                   title={isPlaying ? 'Pausar (Espaço/K)' : 'Reproduzir (Espaço/K)'}
                 >
                   {isPlaying ? (
@@ -596,22 +596,22 @@ export default function CineReactPlayer({
                 <div className="relative">
                   <button
                     onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                    className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-xs font-mono font-bold text-cine-accent-light border border-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1 shadow-md"
+                    className="px-2.5 py-1.5 rounded-xl bg-neutral-900/90 hover:bg-neutral-800 text-xs font-mono font-bold text-cine-accent-light border border-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1 shadow-md"
                     title="Velocidade de reprodução"
                   >
                     {playbackSpeed}x
                   </button>
 
                   {showSpeedMenu && (
-                    <div className="absolute bottom-11 right-0 bg-zinc-950/95 border border-cine-accent/40 backdrop-blur-2xl rounded-xl p-1.5 shadow-2xl flex flex-col gap-1 z-30 min-w-[120px]">
+                    <div className="absolute bottom-11 right-0 bg-neutral-950/95 border border-cine-accent/40 backdrop-blur-2xl rounded-xl p-1.5 shadow-2xl flex flex-col gap-1 z-30 min-w-[120px]">
                       {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
                         <button
                           key={s}
                           onClick={() => changeSpeed(s)}
                           className={`text-xs font-mono px-3 py-1.5 rounded-lg text-left transition-colors cursor-pointer flex items-center justify-between ${
                             playbackSpeed === s
-                              ? 'bg-white text-black font-bold'
-                              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                              ? 'bg-[#ff0000] text-white font-bold'
+                              : 'text-zinc-300 hover:bg-neutral-800 hover:text-white'
                           }`}
                         >
                           <span>{s === 1.0 ? '1.0x (Normal)' : `${s}x`}</span>

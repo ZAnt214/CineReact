@@ -153,7 +153,7 @@ export default function ProfileCosmeticsHub({
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
               placeholder="Código promocional"
-              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-200 w-36"
+              className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-zinc-200 w-36"
             />
             <button
               type="button"
@@ -173,14 +173,14 @@ export default function ProfileCosmeticsHub({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar cosméticos..."
-              className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl py-2.5 pl-9 pr-4 text-sm text-zinc-200"
+              className="w-full bg-neutral-900/60 border border-neutral-800 rounded-xl py-2.5 pl-9 pr-4 text-sm text-zinc-200"
             />
           </div>
           <button
             type="button"
             onClick={() => setOwnedOnly(!ownedOnly)}
             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer shrink-0 ${
-              ownedOnly ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-accent-light' : 'border-zinc-800 text-zinc-500'
+              ownedOnly ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-accent-light' : 'border-neutral-800 text-zinc-500'
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export default function ProfileCosmeticsHub({
                 className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap border cursor-pointer shrink-0 ${
                   active
                     ? 'bg-cine-accent/15 border-cine-accent/40 text-cine-cream'
-                    : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500 hover:text-zinc-300'
+                    : 'bg-neutral-900/40 border-neutral-800/80 text-zinc-500 hover:text-zinc-300'
                 }`}
               >
                 {cat === 'all' ? 'Todos' : CATEGORY_LABELS[cat]}
@@ -211,7 +211,7 @@ export default function ProfileCosmeticsHub({
         </div>
 
         {category !== 'all' && CATEGORY_INFO[category] && (
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-400">
+          <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/40 px-4 py-3 text-xs text-zinc-400">
             <span className="text-white font-bold">{CATEGORY_LABELS[category]}</span>
             {' — '}{CATEGORY_INFO[category].description}
             <span className="block text-[10px] text-cine-accent/80 mt-1 font-mono">{CATEGORY_INFO[category].equipHint}</span>
@@ -236,7 +236,7 @@ export default function ProfileCosmeticsHub({
               role={item.owned ? 'button' : undefined}
               tabIndex={item.owned ? 0 : undefined}
             >
-              <div className={`relative flex items-center justify-center aspect-square border-b border-zinc-800/60 ${style.bg}`}>
+              <div className={`relative flex items-center justify-center aspect-square border-b border-neutral-800/60 ${style.bg}`}>
                 {equipped && (
                   <span className="absolute top-1.5 left-1.5 text-[7px] font-black uppercase px-1 py-0.5 rounded bg-cine-accent/25 text-cine-cream border border-cine-accent/30 z-10 flex items-center gap-0.5">
                     <Check className="w-2 h-2" />
@@ -254,7 +254,7 @@ export default function ProfileCosmeticsHub({
                 )}
               </div>
 
-              <div className="flex flex-col flex-1 p-2.5 bg-zinc-950/80 gap-1">
+              <div className="flex flex-col flex-1 p-2.5 bg-neutral-950/80 gap-1">
                 <span className="text-[8px] uppercase font-mono text-zinc-500 truncate">{CATEGORY_LABELS[item.category]}</span>
                 {item.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID && (
                   <span className="text-[7px] font-bold uppercase tracking-wider text-cine-accent-light/90 truncate">
@@ -279,7 +279,7 @@ export default function ProfileCosmeticsHub({
                     className={`mt-auto w-full py-1.5 rounded-lg text-[10px] font-bold cursor-pointer flex items-center justify-center gap-1 ${
                       item.cost > 0
                         ? 'bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black'
-                        : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
+                        : 'bg-neutral-900 text-zinc-500 border border-neutral-800'
                     }`}
                   >
                     {item.cost > 0 ? (
@@ -313,7 +313,7 @@ export default function ProfileCosmeticsHub({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+              className="w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-3 mb-4">

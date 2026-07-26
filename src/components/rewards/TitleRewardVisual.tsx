@@ -52,7 +52,7 @@ export default function TitleRewardVisual({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-zinc-950/60 ${s.pad} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-neutral-950/60 ${s.pad} ${className}`}
       title={name}
     >
       <span className={`self-stretch rounded-full bg-gradient-to-b ${border} ${s.bar} shrink-0 ${style.glow}`} />

@@ -45,7 +45,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
           
           {/* Card 1 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-20 h-20 bg-cine-accent/5 blur-2xl rounded-full" />
             <div>
               <div className="w-10 h-10 rounded-xl bg-cine-accent/10 flex items-center justify-center text-cine-accent-light mb-4 border border-cine-accent/20">
@@ -62,7 +62,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
           </div>
 
           {/* Card 2 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-20 h-20 bg-cine-accent/5 blur-2xl rounded-full" />
             <div>
               <div className="w-10 h-10 rounded-xl bg-cine-accent/10 flex items-center justify-center text-cine-accent-light mb-4 border border-cine-accent/20">
@@ -79,7 +79,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
           </div>
 
           {/* Card 3 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-20 h-20 bg-cine-accent/5 blur-2xl rounded-full" />
             <div>
               <div className="w-10 h-10 rounded-xl bg-cine-accent/10 flex items-center justify-center text-cine-accent-light mb-4 border border-cine-accent/20">
@@ -99,7 +99,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
 
         {/* Action Panel */}
         <div className="max-w-2xl mx-auto pt-4">
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 text-center flex flex-col items-center">
+          <div className="bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-6 md:p-8 space-y-6 text-center flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-cine-accent/10 flex items-center justify-center text-cine-accent-light border border-cine-accent/20 mb-1">
               <Mail className="w-6 h-6" />
             </div>
@@ -114,14 +114,14 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             </div>
 
             {/* Email Box */}
-            <div className="w-full bg-zinc-950 border border-zinc-850 rounded-xl p-4 flex items-center justify-between gap-4 max-w-md">
+            <div className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 flex items-center justify-between gap-4 max-w-md">
               <div className="overflow-hidden text-left">
                 <span className="text-[9px] uppercase font-mono text-zinc-600 block">Chave PIX (E-mail)</span>
                 <span className="text-xs md:text-sm font-bold text-white select-all block truncate mt-0.5">{pixEmail}</span>
               </div>
               <button
                 onClick={handleCopyEmail}
-                className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white p-2.5 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+                className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-zinc-400 hover:text-white p-2.5 rounded-lg transition-colors cursor-pointer flex-shrink-0"
                 title="Copiar Chave PIX"
               >
                 {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}

@@ -12,15 +12,15 @@ const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
 // Lightweight Skeleton Fallbacks for Lazy Sections
 function CommentSkeleton() {
   return (
-    <div className="bg-zinc-900/30 backdrop-blur-md rounded-2xl p-6 border border-zinc-900 shadow-xl space-y-4 animate-pulse">
+    <div className="bg-neutral-900/30 backdrop-blur-md rounded-2xl p-6 border border-neutral-900 shadow-xl space-y-4 animate-pulse">
       <div className="flex items-center gap-2">
-        <div className="w-5 h-5 rounded-md bg-zinc-800" />
-        <div className="h-4 w-36 bg-zinc-800 rounded-md" />
+        <div className="w-5 h-5 rounded-md bg-neutral-800" />
+        <div className="h-4 w-36 bg-neutral-800 rounded-md" />
       </div>
-      <div className="h-12 w-full bg-zinc-950/60 rounded-xl border border-zinc-850/50" />
+      <div className="h-12 w-full bg-neutral-950/60 rounded-xl border border-neutral-800/50" />
       <div className="space-y-3 pt-2">
-        <div className="h-16 bg-zinc-950/40 rounded-xl" />
-        <div className="h-16 bg-zinc-950/40 rounded-xl" />
+        <div className="h-16 bg-neutral-950/40 rounded-xl" />
+        <div className="h-16 bg-neutral-950/40 rounded-xl" />
       </div>
     </div>
   );
@@ -28,11 +28,11 @@ function CommentSkeleton() {
 
 function ShelfSkeleton() {
   return (
-    <div className="space-y-4 pt-4 border-t border-zinc-900 animate-pulse">
-      <div className="h-5 w-52 bg-zinc-850 rounded-md" />
+    <div className="space-y-4 pt-4 border-t border-neutral-900 animate-pulse">
+      <div className="h-5 w-52 bg-neutral-800 rounded-md" />
       <div className="flex gap-4 overflow-hidden pt-1">
         {[1, 2, 3].map(i => (
-          <div key={i} className="flex-shrink-0 w-[240px] md:w-[290px] h-[190px] bg-zinc-900/30 rounded-xl border border-zinc-850/50" />
+          <div key={i} className="flex-shrink-0 w-[240px] md:w-[290px] h-[190px] bg-neutral-900/30 rounded-xl border border-neutral-800/50" />
         ))}
       </div>
     </div>
@@ -43,12 +43,12 @@ function SidebarSkeleton() {
   return (
     <div className="space-y-3 animate-pulse">
       {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="flex gap-3.5 p-2.5 rounded-xl bg-zinc-900/20 border border-zinc-900">
-          <div className="w-28 h-18 sm:w-36 sm:h-22 bg-zinc-850 rounded-lg flex-shrink-0" />
+        <div key={i} className="flex gap-3.5 p-2.5 rounded-xl bg-neutral-900/20 border border-neutral-900">
+          <div className="w-28 h-18 sm:w-36 sm:h-22 bg-neutral-800 rounded-lg flex-shrink-0" />
           <div className="flex-1 space-y-2 py-1">
-            <div className="h-3.5 bg-zinc-800 rounded w-5/6" />
-            <div className="h-3 bg-zinc-850 rounded w-1/2" />
-            <div className="h-2.5 bg-zinc-900 rounded w-1/3" />
+            <div className="h-3.5 bg-neutral-800 rounded w-5/6" />
+            <div className="h-3 bg-neutral-800 rounded w-1/2" />
+            <div className="h-2.5 bg-neutral-900 rounded w-1/3" />
           </div>
         </div>
       ))}
@@ -89,7 +89,7 @@ function PremiumVideoShelf({
   if (videos.length === 0) return null;
 
   return (
-    <div className="space-y-4 pt-4 border-t border-zinc-900">
+    <div className="space-y-4 pt-4 border-t border-neutral-900">
       <div className="flex items-center justify-between">
         <h3 className="text-md md:text-lg font-black text-white tracking-tight flex items-center gap-2">
           <span className="w-1 h-5 bg-cine-accent rounded-full" />
@@ -105,10 +105,10 @@ function PremiumVideoShelf({
             whileHover={{ y: -4, scale: 1.01 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => onSelect(video.id)}
-            className="flex-shrink-0 w-[240px] md:w-[290px] bg-zinc-900/10 backdrop-blur-md border border-zinc-850 hover:border-cine-accent/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
+            className="flex-shrink-0 w-[240px] md:w-[290px] bg-neutral-900/10 backdrop-blur-md border border-neutral-800 hover:border-cine-accent/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
           >
             {/* Thumbnail */}
-            <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
+            <div className="relative aspect-video w-full overflow-hidden bg-neutral-950">
               <img
                 src={video.thumbnailUrl}
                 alt={video.titulo}
@@ -116,7 +116,7 @@ function PremiumVideoShelf({
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
-              <span className="absolute bottom-2 right-2 bg-black/85 backdrop-blur-md text-[10px] font-bold px-1.5 py-0.5 rounded text-zinc-200 font-mono border border-zinc-800/40 shadow-lg">
+              <span className="absolute bottom-2 right-2 bg-black/85 backdrop-blur-md text-[10px] font-bold px-1.5 py-0.5 rounded text-zinc-200 font-mono border border-neutral-800/40 shadow-lg">
                 {video.duracao}
               </span>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -135,7 +135,7 @@ function PremiumVideoShelf({
                 <p className="text-[11px] text-zinc-400 font-medium tracking-wide">{video.canalNome}</p>
               </div>
               
-              <div className="pt-2 border-t border-zinc-900/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+              <div className="pt-2 border-t border-neutral-900/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
                 <span>{formatViews(video.visualizacoes)} visualizações</span>
                 <span className="text-zinc-500/40 tracking-widest font-black">CINE</span>
               </div>
@@ -572,7 +572,7 @@ export default function PlaybackPage({
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="absolute inset-0 z-20 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden pointer-events-none"
+                    className="absolute inset-0 z-20 bg-neutral-950 flex flex-col items-center justify-center overflow-hidden pointer-events-none"
                   >
                     {/* Background Thumbnail with Blur */}
                     {activeReact.thumbnailUrl && (
@@ -583,7 +583,7 @@ export default function PlaybackPage({
                           className="w-full h-full object-cover blur-xl opacity-35 scale-110" 
                           referrerPolicy="no-referrer"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/60" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-neutral-950/60" />
                       </div>
                     )}
 
@@ -597,7 +597,7 @@ export default function PlaybackPage({
                         <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
                         
                         {/* Central Icon */}
-                        <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-cine-accent/40 flex items-center justify-center shadow-lg">
+                        <div className="absolute w-12 h-12 rounded-full bg-neutral-900/90 border border-cine-accent/40 flex items-center justify-center shadow-lg">
                           <Play className="w-5 h-5 fill-cine-accent-light text-cine-accent-light ml-0.5 animate-pulse" />
                         </div>
                       </div>
@@ -614,7 +614,7 @@ export default function PlaybackPage({
                     </div>
 
                     {/* Bottom Loading Bar */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900/80 overflow-hidden">
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-900/80 overflow-hidden">
                       <div className="h-full bg-white animate-[pulse_1.5s_infinite] w-full" />
                     </div>
                   </motion.div>
@@ -660,7 +660,7 @@ export default function PlaybackPage({
                     {activeObra.titulo && activeObra.tipo !== 'canal' && (
                       <span 
                         onClick={() => onGoToObra(activeObra.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 transition-colors cursor-pointer"
                       >
                         <Film className="w-3 h-3 text-zinc-400" />
                         {activeObra.titulo}
@@ -677,7 +677,7 @@ export default function PlaybackPage({
             </div>
 
             {/* CHANNEL ROW & MODERN ACTIONS BAR */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 border-b border-zinc-900 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 border-b border-neutral-900 pb-5">
               
               {/* Creator details and avatar */}
               <div className="flex items-center gap-3.5">
@@ -688,7 +688,7 @@ export default function PlaybackPage({
                   
                   return (
                     <div 
-                      className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center cursor-pointer border border-zinc-700/50 relative group overflow-hidden"
+                      className="w-11 h-11 rounded-full bg-neutral-800 flex items-center justify-center cursor-pointer border border-zinc-700/50 relative group overflow-hidden"
                       onClick={() => {
                         const cId = channelObra?.id || activeReact.canalId;
                         if (cId) onGoToCanal(cId);
@@ -735,8 +735,8 @@ export default function PlaybackPage({
                   onClick={() => onToggleSeguir(activeReact.canalNome)}
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
-                      ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-850 hover:text-white border border-zinc-800' 
-                      : 'bg-white text-black font-black hover:bg-neutral-200 shadow-lg shadow-cine-accent/20'
+                      ? 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800' 
+                      : 'bg-[#ff0000] text-white font-black hover:bg-[#cc0000] shadow-lg shadow-cine-accent/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}
@@ -752,7 +752,7 @@ export default function PlaybackPage({
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     videoLiked
                       ? 'bg-cine-accent/20 border-cine-accent/40 text-cine-cream shadow-md shadow-cine-accent/10'
-                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
+                      : 'bg-neutral-900/60 border-neutral-800 text-zinc-300 hover:bg-neutral-800 hover:text-white'
                   }`}
                   title={videoLiked ? "Remover curtida do vídeo" : "Gostei deste vídeo"}
                 >
@@ -767,7 +767,7 @@ export default function PlaybackPage({
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     isFavorited
                       ? 'bg-cine-accent/20 border-cine-accent/40 text-cine-cream shadow-md shadow-cine-accent/10'
-                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
+                      : 'bg-neutral-900/60 border-neutral-800 text-zinc-300 hover:bg-neutral-800 hover:text-white'
                   }`}
                 >
                   <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-cine-accent-light text-cine-accent-light scale-110' : 'text-zinc-400'}`} />
@@ -779,7 +779,7 @@ export default function PlaybackPage({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={handleShareVideo}
-                    className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 hover:bg-zinc-850 hover:text-white px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer"
+                    className="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 hover:bg-neutral-800 hover:text-white px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer"
                   >
                     <Share2 className="w-4 h-4 text-zinc-400" />
                     Compartilhar
@@ -792,7 +792,7 @@ export default function PlaybackPage({
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-950 text-white border border-cine-accent/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
+                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-neutral-950 text-white border border-cine-accent/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
                       >
                         <Check className="w-3.5 h-3.5 text-cine-accent-light" />
                         Link copiado!
@@ -814,7 +814,7 @@ export default function PlaybackPage({
             </div>
 
             {/* INFORMATION PANEL */}
-            <div className="bg-zinc-900/30 backdrop-blur-md p-5 md:p-6 rounded-2xl space-y-4 shadow-xl">
+            <div className="bg-neutral-900/30 backdrop-blur-md p-5 md:p-6 rounded-2xl space-y-4 shadow-xl">
               <div className="flex items-center justify-between pb-1">
                 <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                   <Info className="w-4 h-4 text-cine-accent-light" />
@@ -824,28 +824,28 @@ export default function PlaybackPage({
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 text-xs">
-                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <ThumbsUp className="w-3.5 h-3.5 text-cine-accent-light" /> Curtidas CineReact
                   </span>
                   <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(videoLikesCount)} curtidas</span>
                 </div>
 
-                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <Eye className="w-3.5 h-3.5 text-cine-accent-light" /> Visualizações
                   </span>
                   <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(activeReact.visualizacoes)} views</span>
                 </div>
 
-                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-cine-accent-light" /> Duração
                   </span>
                   <span className="text-white font-bold font-mono text-xs block pt-0.5">{activeReact.duracao || 'N/A'}</span>
                 </div>
 
-                <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-cine-accent-light" /> Criador / Canal
                   </span>
@@ -862,7 +862,7 @@ export default function PlaybackPage({
 
                 {activeObra && (
                   <>
-                    <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                    <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                       <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                         <Film className="w-3.5 h-3.5 text-cine-accent-light" /> Categoria
                       </span>
@@ -871,7 +871,7 @@ export default function PlaybackPage({
                       </span>
                     </div>
 
-                    <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
+                    <div className="bg-neutral-950/50 p-3.5 rounded-xl space-y-1 hover:bg-neutral-950/70 transition-colors">
                       <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-cine-accent-light" /> Coleção / Obra
                       </span>
@@ -939,7 +939,7 @@ export default function PlaybackPage({
 
         {/* RIGHT COLUMN: RECOMMENDATIONS SIDEBAR */}
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'} space-y-5 transition-all duration-300`}>
-          <div className="border-b border-zinc-900 pb-3">
+          <div className="border-b border-neutral-900 pb-3">
             <h3 className="font-black text-white text-md uppercase tracking-wider flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cine-accent-light animate-pulse" />
               Recomendações
@@ -947,7 +947,7 @@ export default function PlaybackPage({
             <p className="text-[10px] text-zinc-500 mt-1 tracking-wide">Vídeos semelhantes baseados no seu gosto</p>
           </div>
           
-          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800 hover:scrollbar-thumb-cine-accent/20">
+          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800 hover:scrollbar-thumb-cine-accent/20">
             {!loadDeferredSections ? (
               <SidebarSkeleton />
             ) : (
@@ -957,16 +957,16 @@ export default function PlaybackPage({
                   whileHover={{ scale: 1.01, x: 2 }}
                   transition={{ duration: 0.2 }}
                   onClick={() => setActiveReactId(react.id)}
-                  className="flex gap-3.5 cursor-pointer group hover:bg-zinc-900/30 p-2.5 -ml-2 rounded-xl transition-all duration-300 border border-transparent hover:border-zinc-850/60"
+                  className="flex gap-3.5 cursor-pointer group hover:bg-neutral-900/30 p-2.5 -ml-2 rounded-xl transition-all duration-300 border border-transparent hover:border-neutral-800/60"
                 >
                   {/* Visual Thumbnail Frame */}
-                  <div className="relative w-28 h-18 sm:w-36 sm:h-22 flex-shrink-0 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-850 shadow-md">
+                  <div className="relative w-28 h-18 sm:w-36 sm:h-22 flex-shrink-0 bg-neutral-950 rounded-lg overflow-hidden border border-neutral-800 shadow-md">
                     <OptimizedImage 
                       src={react.thumbnailUrl} 
                       alt={react.titulo} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <span className="absolute bottom-1 right-1 bg-black/85 backdrop-blur-md text-[9px] font-mono font-bold px-1 py-0.5 rounded text-zinc-200 border border-zinc-800/40">
+                    <span className="absolute bottom-1 right-1 bg-black/85 backdrop-blur-md text-[9px] font-mono font-bold px-1 py-0.5 rounded text-zinc-200 border border-neutral-800/40">
                       {react.duracao}
                     </span>
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -993,7 +993,7 @@ export default function PlaybackPage({
             )}
             
             {loadDeferredSections && sidebarRecommendations.length === 0 && (
-              <div className="text-zinc-500 text-xs italic p-6 bg-zinc-900/10 rounded-2xl text-center border border-zinc-900">
+              <div className="text-zinc-500 text-xs italic p-6 bg-neutral-900/10 rounded-2xl text-center border border-neutral-900">
                 Nenhuma outra recomendação disponível no momento.
               </div>
             )}

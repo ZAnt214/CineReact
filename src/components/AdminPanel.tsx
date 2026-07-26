@@ -699,7 +699,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     <motion.div className="min-h-screen bg-[#0f0f0f] cine-container pt-24 pb-20 w-full space-y-8 text-white">
       
       {/* HEADER */}
-      <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">
+      <div className="border-b border-neutral-800 pb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight flex items-center gap-2">
             <Settings className="text-cine-accent-light w-8 h-8" />
@@ -710,7 +710,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         <button
           onClick={() => { fetchAdminData(); fetchSolicitacoes(); fetchSupabaseStatus(); }}
           disabled={loading}
-          className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-50"
+          className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
@@ -742,7 +742,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === id
                 ? 'bg-cine-accent text-black shadow-lg shadow-cine-accent/20'
-                : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+                : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -767,7 +767,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
       {!loading && activeTab === 'catalogo' && (
         <motion.div className="space-y-8">
-          <motion.div className="bg-gradient-to-br from-cine-accent/10 via-zinc-900/40 to-zinc-950 p-6 rounded-2xl border border-cine-accent/20 space-y-3">
+          <motion.div className="bg-gradient-to-br from-cine-accent/10 via-neutral-900/40 to-neutral-950 p-6 rounded-2xl border border-cine-accent/20 space-y-3">
             <h2 className="text-lg font-black text-white flex items-center gap-2">
               <Link2 className="w-5 h-5 text-cine-accent-light" />
               Catálogo por Link
@@ -788,7 +788,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </motion.div>
 
           {/* CANAL */}
-          <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
+          <motion.div className="bg-neutral-900/30 backdrop-blur-md p-6 rounded-2xl border border-neutral-800 space-y-5">
             <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Youtube className="w-4 h-4" />
               Adicionar Canal
@@ -799,12 +799,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={catalogCanalUrl}
                 onChange={(e) => { setCatalogCanalUrl(e.target.value); setCatalogCanalPreview(null); }}
                 placeholder="https://youtube.com/@nome-do-canal"
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               />
               <button
                 onClick={handleCatalogCanalPreview}
                 disabled={loadingCatalogCanalPreview || !catalogCanalUrl.trim()}
-                className="px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="px-4 py-3 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingCatalogCanalPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                 Pré-visualizar
@@ -812,7 +812,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogCanalSave}
                 disabled={savingCatalogCanal || !catalogCanalUrl.trim()}
-                className="px-4 py-3 rounded-xl bg-white text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="px-4 py-3 rounded-xl bg-[#ff0000] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogCanal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Salvar Canal
@@ -820,7 +820,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             </div>
 
             {catalogCanalPreview && (
-              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
                 {catalogCanalPreview.poster && (
                   <img src={catalogCanalPreview.poster} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-cine-accent/30 shrink-0" />
                 )}
@@ -838,7 +838,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </motion.div>
 
           {/* VÍDEO */}
-          <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
+          <motion.div className="bg-neutral-900/30 backdrop-blur-md p-6 rounded-2xl border border-neutral-800 space-y-5">
             <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Film className="w-4 h-4" />
               Adicionar Vídeo
@@ -849,12 +849,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={catalogVideoUrl}
                 onChange={(e) => { setCatalogVideoUrl(e.target.value); setCatalogVideoPreview(null); }}
                 placeholder="https://youtube.com/watch?v=..."
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               />
               <select
                 value={catalogVideoObraId}
                 onChange={(e) => setCatalogVideoObraId(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               >
                 <option value="">Detectar canal automaticamente</option>
                 {obras.filter(o => o.tipo === 'canal').map(canal => (
@@ -866,7 +866,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogVideoPreview}
                 disabled={loadingCatalogVideoPreview || !catalogVideoUrl.trim()}
-                className="flex-1 px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingCatalogVideoPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                 Pré-visualizar
@@ -874,7 +874,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogVideoSave}
                 disabled={savingCatalogVideo || !catalogVideoUrl.trim()}
-                className="flex-1 px-4 py-3 rounded-xl bg-white text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-xl bg-[#ff0000] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Adicionar ao Catálogo
@@ -882,7 +882,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             </div>
 
             {catalogVideoPreview && (
-              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
                 {catalogVideoPreview.thumbnailUrl && (
                   <img src={catalogVideoPreview.thumbnailUrl} alt="" className="w-full sm:w-48 aspect-video rounded-lg object-cover shrink-0" />
                 )}
@@ -904,10 +904,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       )}
 
       {!loading && activeTab === 'sistema' && (
-      <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 space-y-6">
+      <div className="bg-neutral-900/40 backdrop-blur-md rounded-2xl border border-neutral-800 p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-cine-accent-light">
+            <div className="w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center border border-neutral-800 text-cine-accent-light">
               <Database className="w-6 h-6" />
             </div>
             <div>
@@ -920,7 +920,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     Conectado
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-neutral-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
                     Modo Local (JSON)
                   </span>
                 )}
@@ -937,7 +937,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             <button
               onClick={fetchSupabaseStatus}
               disabled={loadingSupabaseStatus}
-              className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
               title="Atualizar Status"
             >
               <RefreshCw className={`w-4 h-4 ${loadingSupabaseStatus ? 'animate-spin' : ''}`} />
@@ -948,7 +948,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleSyncSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-cine-accent/30 text-cine-accent-light text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-cine-accent/30 text-cine-accent-light text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   {syncingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Server className="w-3.5 h-3.5" />}
                   Importar do Supabase
@@ -969,20 +969,20 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
         {/* STATS COUNT */}
         {supabaseStatus && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-850">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-neutral-950/50 p-4 rounded-xl border border-neutral-800">
             <div className="space-y-1 text-center md:text-left">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Obras / Canais</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.obras}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Reacts / Vídeos</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.reacts}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Comentários</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.comentarios}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Usuários Ativos</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.usuarios}</p>
             </div>
@@ -990,7 +990,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         )}
 
         {/* HOW TO CONFIGURE EXPANDER */}
-        <div className="border-t border-zinc-800/60 pt-4">
+        <div className="border-t border-neutral-800/60 pt-4">
           <button
             onClick={() => setShowSqlInstructions(!showSqlInstructions)}
             className="flex items-center justify-between w-full text-zinc-400 hover:text-white transition-colors text-xs font-bold"
@@ -1008,12 +1008,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               animate={{ opacity: 1, height: 'auto' }}
               className="mt-4 space-y-4 text-xs text-zinc-400 leading-relaxed"
             >
-              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-850 space-y-2.5">
+              <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-2.5">
                 <p className="font-bold text-white">Passo 1: Adicione as variáveis de ambiente no AI Studio</p>
                 <p>
                   Abra as configurações do seu projeto no menu de engrenagem do AI Studio (Secrets / Env) e adicione os seguintes segredos:
                 </p>
-                <div className="bg-zinc-900 p-3 rounded-lg font-mono text-[10px] text-zinc-300 space-y-1 border border-zinc-800">
+                <div className="bg-neutral-900 p-3 rounded-lg font-mono text-[10px] text-zinc-300 space-y-1 border border-neutral-800">
                   <div>SUPABASE_URL = "https://seu-projeto.supabase.co"</div>
                   <div>SUPABASE_ANON_KEY = "sua-anon-key-secreta"</div>
                 </div>
@@ -1022,12 +1022,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </p>
               </div>
 
-              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-850 space-y-3">
+              <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="font-bold text-white">Passo 2: Execute o script SQL no Supabase</p>
                   <button
                     onClick={copySqlToClipboard}
-                    className="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-750 text-zinc-300 transition-all flex items-center gap-1 font-mono text-[10px] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-zinc-750 text-zinc-300 transition-all flex items-center gap-1 font-mono text-[10px] cursor-pointer"
                   >
                     {copiedSql ? (
                       <>
@@ -1052,7 +1052,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
       {!loading && activeTab === 'criadores' && (
         <div className="space-y-6">
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Inbox className="w-4 h-4" />
               Solicitações de Criadores ({solicitacoes.length})
@@ -1062,7 +1062,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             ) : (
               <motion.div className="space-y-3">
                 {solicitacoes.map((notif) => (
-                  <div key={notif.id} className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800 space-y-3">
+                  <div key={notif.id} className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3">
                     <div>
                       <p className="text-sm font-bold text-white">{notif.canalNome || 'Canal solicitado'}</p>
                       <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{notif.mensagem}</p>
@@ -1079,7 +1079,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       <button
                         onClick={() => handleDismissSolicitacao(notif.id)}
                         disabled={processingSolicitacao === notif.id}
-                        className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
+                        className="px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
                       >
                         Dispensar
                       </button>
@@ -1090,7 +1090,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             )}
           </div>
 
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
             <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Youtube className="w-4 h-4 text-cine-accent-light" />
               Importar Canal do YouTube
@@ -1101,12 +1101,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={canalUrl}
                 onChange={(e) => setCanalUrl(e.target.value)}
                 placeholder="ex: @casimiro ou link do canal..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-cine-accent"
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2.5 outline-none focus:border-cine-accent"
               />
               <button
                 type="submit"
                 disabled={importingCanal || !canalUrl.trim()}
-                className="bg-white text-black font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
+                className="bg-[#ff0000] text-white font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
               >
                 {importingCanal ? 'Importando...' : 'Importar'}
               </button>
@@ -1119,7 +1119,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       <div className="space-y-8">
           
           {/* GEMINI INTELLIGENT DISCOVERY (EASY CADASTRO!) */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
             <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin-slow" />
               Descoberta e Cadastro Inteligente (Gemini AI)
@@ -1134,12 +1134,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={importQuery}
                 onChange={(e) => setImportQuery(e.target.value)}
                 placeholder="ex: Inception, Deadpool 3, Elden Ring, Naruto..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-cine-accent"
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2.5 outline-none focus:border-cine-accent"
               />
               <button
                 onClick={handleIntelligentImport}
                 disabled={importing || !importQuery.trim()}
-                className="bg-white hover:bg-neutral-200 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="bg-white hover:bg-[#cc0000] disabled:bg-neutral-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
@@ -1147,8 +1147,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* MANUAL CADASTRO */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4 shadow-md">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4 shadow-md">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <Plus className="text-cine-accent-light w-5 h-5" />
               Cadastrar Obra Manualmente
             </h2>
@@ -1162,7 +1162,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={obraId}
                   onChange={(e) => setObraId(e.target.value)}
                   placeholder="interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1174,7 +1174,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1183,7 +1183,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as any)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 >
                   <option value="filme">Filme</option>
                   <option value="serie">Série</option>
@@ -1199,7 +1199,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   required
                   value={ano}
                   onChange={(e) => setAno(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1211,7 +1211,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={generos}
                   onChange={(e) => setGeneros(e.target.value)}
                   placeholder="Ficção, Ação, Aventura"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1223,7 +1223,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={sinopse}
                   onChange={(e) => setSinopse(e.target.value)}
                   placeholder="Escreva a sinopse oficial aqui..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1234,7 +1234,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={banner}
                   onChange={(e) => setBanner(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1245,7 +1245,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={poster}
                   onChange={(e) => setPoster(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1256,7 +1256,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={trailerUrl}
                   onChange={(e) => setTrailerUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1275,7 +1275,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingObra}
-                  className="w-full bg-white hover:bg-neutral-200 disabled:bg-zinc-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
+                  className="w-full bg-white hover:bg-[#cc0000] disabled:bg-neutral-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
                 >
                   {submittingObra ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -1285,13 +1285,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* OBRAS CATALOG LIST */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <Film className="text-cine-accent-light w-5 h-5" />
               Obras Cadastradas ({obras.length})
             </h2>
 
-            <div className="divide-y divide-zinc-800 max-h-96 overflow-y-auto">
+            <div className="divide-y divide-neutral-800 max-h-96 overflow-y-auto">
               {obras.map(o => (
                 <div key={o.id} className="py-3 flex items-center justify-between text-xs gap-4">
                   <div className="flex items-center gap-3">
@@ -1308,14 +1308,14 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setEditingObra({ ...o })}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white"
                       title="Editar Obra"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onSelectObra(o.id)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-cine-accent-light"
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-cine-accent-light"
                       title="Ver Página"
                     >
                       <Film className="w-3.5 h-3.5" />
@@ -1334,8 +1334,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* GERENCIAR CINEREACT RECOMENDA */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <Sparkles className="text-cine-accent-light w-5 h-5 animate-pulse" />
               CineReact Recomenda (Escolha dos Editores)
             </h2>
@@ -1355,12 +1355,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={recomendadoLink}
                   onChange={(e) => setRecomendadoLink(e.target.value)}
                   placeholder="Cole o link do vídeo (ex: https://www.youtube.com/watch?v=...)"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
+                  className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-white hover:bg-neutral-200 text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-4 rounded bg-white hover:bg-[#cc0000] text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>
@@ -1386,18 +1386,18 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={reactSearch}
                   onChange={(e) => setReactSearch(e.target.value)}
                   placeholder="Digite o título do vídeo..."
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
+                  className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
               </div>
 
               {/* SEARCH RESULTS */}
               {reactSearch.trim() !== '' && (
-                <div className="bg-zinc-950 border border-zinc-850 rounded-lg divide-y divide-zinc-900 overflow-hidden max-h-60 overflow-y-auto shadow-xl">
+                <div className="bg-neutral-950 border border-neutral-800 rounded-lg divide-y divide-neutral-900 overflow-hidden max-h-60 overflow-y-auto shadow-xl">
                   {reacts.filter(r => 
                     r.titulo.toLowerCase().includes(reactSearch.toLowerCase()) || 
                     r.canalNome.toLowerCase().includes(reactSearch.toLowerCase())
                   ).slice(0, 5).map(r => (
-                    <div key={r.id} className="p-2.5 flex items-center justify-between gap-3 text-xs hover:bg-zinc-900/30">
+                    <div key={r.id} className="p-2.5 flex items-center justify-between gap-3 text-xs hover:bg-neutral-900/30">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0" />
                         <div className="min-w-0">
@@ -1425,11 +1425,11 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             {/* CURRENT RECOMMENDED LIST */}
             <div className="space-y-2 pt-2">
               <label className="block text-zinc-400 font-bold text-[11px] uppercase tracking-wider">Recomendações Ativas</label>
-              <div className="bg-zinc-950/60 rounded-xl border border-zinc-850 divide-y divide-zinc-900 max-h-60 overflow-y-auto">
+              <div className="bg-neutral-950/60 rounded-xl border border-neutral-800 divide-y divide-neutral-900 max-h-60 overflow-y-auto">
                 {reacts.filter(r => r.isRecomendado).map(r => (
                   <div key={r.id} className="p-3 flex items-center justify-between gap-4 text-xs">
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0 border border-zinc-800" />
+                      <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0 border border-neutral-800" />
                       <div className="min-w-0">
                         <h4 className="font-bold text-white truncate text-xs">{r.titulo}</h4>
                         <p className="text-[10px] text-zinc-500 truncate">{r.canalNome}</p>
@@ -1437,7 +1437,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     </div>
                     <button
                       onClick={() => handleToggleRecomendado(r.id, true)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-red-400 hover:text-red-300 hover:bg-zinc-850 cursor-pointer"
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-red-400 hover:text-red-300 hover:bg-neutral-800 cursor-pointer"
                       title="Remover Recomendação"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1462,8 +1462,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         <div className="space-y-8">
           
           {/* USER MANAGEMENT (VIP STATUS ACTIVATOR) */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <Users className="text-cine-accent-light w-5 h-5" />
               Usuários Registrados ({usuarios.length})
             </h2>
@@ -1472,7 +1472,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               Ative ou desative o status de Apoiador VIP de qualquer usuário cadastrado para que seu nome brilhe e exiba a insígnia na plataforma!
             </p>
 
-            <div className="divide-y divide-zinc-800 max-h-[280px] overflow-y-auto pr-1">
+            <div className="divide-y divide-neutral-800 max-h-[280px] overflow-y-auto pr-1">
               {usuarios.map(u => {
                 const handleToggleVIP = async () => {
                   try {
@@ -1512,7 +1512,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                         u.isDonor 
                           ? 'bg-cine-accent/15 border border-cine-accent/20 text-cine-accent-light hover:bg-cine-accent/30' 
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+                          : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
                       }`}
                     >
                       {u.isDonor ? 'Remover VIP' : 'Dar VIP'}
@@ -1524,13 +1524,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* LATEST COMMENTS */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <MessageSquare className="text-cine-accent-light w-5 h-5" />
               Últimos Comentários ({comentarios.length})
             </h2>
 
-            <div className="divide-y divide-zinc-800 max-h-[400px] overflow-y-auto pr-1 space-y-3">
+            <div className="divide-y divide-neutral-800 max-h-[400px] overflow-y-auto pr-1 space-y-3">
               {comentarios.map(c => (
                 <div key={c.id} className="pt-2 text-xs space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
@@ -1543,13 +1543,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <p className="text-zinc-400 text-[11px] leading-relaxed italic bg-zinc-950/40 p-2 rounded border border-zinc-850/60">
+                  <p className="text-zinc-400 text-[11px] leading-relaxed italic bg-neutral-950/40 p-2 rounded border border-neutral-800/60">
                     "{c.texto}"
                   </p>
                   <div className="flex items-center justify-between text-[9px] text-zinc-500 font-mono">
                     <span className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map(st => (
-                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-cine-accent-light text-cine-accent-light' : 'text-zinc-800'}`} />
+                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-cine-accent-light text-cine-accent-light' : 'text-neutral-800'}`} />
                       ))}
                     </span>
                     <span>{new Date(c.criadoEm).toLocaleDateString('pt-BR')}</span>
@@ -1575,11 +1575,11 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-4"
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-black text-white">Editar Obra</h3>
-                <button onClick={() => setEditingObra(null)} className="p-2 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white cursor-pointer">
+                <button onClick={() => setEditingObra(null)} className="p-2 rounded-lg hover:bg-neutral-900 text-zinc-400 hover:text-white cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -1587,15 +1587,15 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <form onSubmit={handleUpdateObra} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="md:col-span-2">
                   <label className="block text-zinc-500 mb-1">ID (não editável)</label>
-                  <input value={editingObra.id} disabled className="w-full bg-zinc-900/50 border border-zinc-800 rounded p-2 text-zinc-500" />
+                  <input value={editingObra.id} disabled className="w-full bg-neutral-900/50 border border-neutral-800 rounded p-2 text-zinc-500" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Título</label>
-                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Tipo</label>
-                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent">
+                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent">
                     <option value="filme">Filme</option>
                     <option value="serie">Série</option>
                     <option value="anime">Anime</option>
@@ -1605,22 +1605,22 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-zinc-400 mb-1">Sinopse</label>
-                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Ano</label>
-                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Gêneros (vírgula)</label>
-                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div className="md:col-span-2 flex items-center gap-2">
                   <input type="checkbox" id="edit-destacado" checked={!!editingObra.destacado} onChange={(e) => setEditingObra({ ...editingObra, destacado: e.target.checked })} className="accent-cine-accent" />
                   <label htmlFor="edit-destacado" className="text-zinc-300">Destacar na Home</label>
                 </div>
                 <div className="md:col-span-2 flex gap-2">
-                  <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
+                  <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
                   <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-cine-accent text-black font-black disabled:opacity-50 cursor-pointer">
                     {savingObra ? 'Salvando...' : 'Salvar Alterações'}
                   </button>

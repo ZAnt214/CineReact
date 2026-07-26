@@ -51,13 +51,13 @@ function AvatarInner({
       <img
         src={photoUrl}
         alt={alt || ''}
-        className={`${cfg.img} rounded-full object-cover bg-zinc-900`}
+        className={`${cfg.img} rounded-full object-cover bg-neutral-900`}
       />
     );
   }
 
   return (
-    <div className={`${cfg.img} rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500`}>
+    <div className={`${cfg.img} rounded-full bg-neutral-900 flex items-center justify-center text-zinc-500`}>
       <User className={size === 'xs' || size === 'sm' ? 'w-3.5 h-3.5' : 'w-5 h-5'} />
     </div>
   );
@@ -105,7 +105,7 @@ export default function ProfileAvatar({
       )}
 
       {donorBadge && (
-        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white-light rounded-full border border-zinc-950 flex items-center justify-center shadow-lg z-20">
+        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white-light rounded-full border border-neutral-950 flex items-center justify-center shadow-lg z-20">
           <span className="text-[8px] text-black font-black">★</span>
         </span>
       )}

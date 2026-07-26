@@ -38,7 +38,7 @@ export default function PublicCreatorProfile({
         themed={false}
         lite
         rounded="rounded-2xl"
-        className="border-fuchsia-500/15 bg-zinc-950/60"
+        className="border-fuchsia-500/15 bg-neutral-950/60"
         innerClassName={`flex flex-col gap-3 ${isCenter ? 'items-center text-center' : 'items-start text-left'}`}
       >
         <div className={`flex w-full gap-4 ${isCenter ? 'flex-col items-center' : 'flex-row items-center'}`}>

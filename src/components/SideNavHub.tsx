@@ -61,7 +61,7 @@ function CreatorAvatar({
   sizeClass?: string;
 }) {
   if (!src) {
-    return <span className={`${sizeClass} shrink-0 rounded-full bg-zinc-800 block`} />;
+    return <span className={`${sizeClass} shrink-0 rounded-full bg-neutral-800 block`} />;
   }
 
   return (
@@ -92,8 +92,8 @@ function CreatorNavRow({
       title={creator.nome}
       className={`relative w-full min-w-0 flex items-center gap-2.5 pl-2.5 pr-2 py-2 rounded-lg text-left transition-colors cursor-pointer overflow-hidden ${
         isActive
-          ? 'bg-zinc-900 text-white'
-          : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
+          ? 'bg-neutral-900 text-white'
+          : 'text-zinc-400 hover:bg-neutral-900/50 hover:text-zinc-200'
       } ${creator.isDemo ? 'border border-fuchsia-500/20 bg-fuchsia-500/5' : ''}`}
     >
       {isActive && (
@@ -103,7 +103,7 @@ function CreatorNavRow({
       <div className="relative shrink-0">
         <CreatorAvatar src={creator.poster} />
         {creator.isVerified && (
-          <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3 h-3 text-cyan-400 bg-zinc-950 rounded-full" />
+          <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3 h-3 text-cyan-400 bg-neutral-950 rounded-full" />
         )}
       </div>
 
@@ -193,17 +193,17 @@ function SideNavHub({
       />
 
       <aside
-        className="fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-zinc-950 border-r border-zinc-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden"
+        className="fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-neutral-950 border-r border-neutral-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden"
         aria-label="Menu principal"
       >
-        <div className="h-16 shrink-0 border-b border-zinc-800/60 flex items-center justify-between px-4">
+        <div className="h-16 shrink-0 border-b border-neutral-800/60 flex items-center justify-between px-4">
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cine-accent/80">
             Navegação
           </span>
           <button
             type="button"
             onClick={closeSideNav}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-neutral-900 transition-colors cursor-pointer"
             aria-label="Fechar menu"
           >
             <X className="w-4 h-4" />
@@ -224,7 +224,7 @@ function SideNavHub({
                 className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer group ${
                   isActive
                     ? 'bg-cine-accent/10 text-cine-accent-light'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                    : 'text-zinc-400 hover:text-white hover:bg-neutral-900/60'
                 }`}
               >
                 {isActive && (
@@ -241,14 +241,14 @@ function SideNavHub({
             );
           })}
 
-          <div className="pt-3 mt-3 border-t border-zinc-800/60 min-w-0 overflow-hidden">
+          <div className="pt-3 mt-3 border-t border-neutral-800/60 min-w-0 overflow-hidden">
             <button
               type="button"
               onClick={() => setCreatorsExpanded((prev) => !prev)}
               className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer group ${
                 creatorsActive
                   ? 'bg-cine-accent/10 text-cine-accent-light'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                  : 'text-zinc-400 hover:text-white hover:bg-neutral-900/60'
               }`}
             >
               {creatorsActive && (

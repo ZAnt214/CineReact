@@ -45,8 +45,8 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
       </button>
 
       {/* OBRA HEADER */}
-      <div className="relative h-64 md:h-80 w-full rounded-2xl overflow-hidden mb-12 shadow-2xl border border-zinc-800">
-        <div className="absolute inset-0 bg-zinc-900">
+      <div className="relative h-64 md:h-80 w-full rounded-2xl overflow-hidden mb-12 shadow-2xl border border-neutral-800">
+        <div className="absolute inset-0 bg-neutral-900">
           <OptimizedImage 
             src={obra.banner} 
             alt={obra.titulo} 
@@ -71,22 +71,22 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
       </div>
 
       {/* FILTERS */}
-      <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-zinc-800 pb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-neutral-800 pb-4">
         <button 
           onClick={() => setFilter('relevantes')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'relevantes' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'relevantes' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800'}`}
         >
           Mais Relevantes
         </button>
         <button 
           onClick={() => setFilter('recentes')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'recentes' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'recentes' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800'}`}
         >
           Mais Recentes
         </button>
         <button 
           onClick={() => setFilter('antigos')}
-          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'antigos' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${filter === 'antigos' ? 'bg-cine-accent-light text-black shadow-lg shadow-cine-accent-light/20' : 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800'}`}
         >
           Mais Antigos
         </button>
@@ -101,9 +101,9 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
             transition={{ duration: 0.2 }}
             onClick={() => onPlayVideo(react.id, react.obraId)}
             style={{ touchAction: 'pan-y pinch-zoom' }}
-            className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-cine-accent/40 transition-colors cursor-pointer group/card flex flex-col select-none"
+            className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-855 hover:border-cine-accent/40 transition-colors cursor-pointer group/card flex flex-col select-none"
           >
-            <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
+            <div className="relative aspect-video w-full overflow-hidden bg-neutral-950">
               <OptimizedImage
                 src={react.thumbnailUrl}
                 alt={react.titulo}
@@ -124,7 +124,7 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
                 {react.titulo}
               </h3>
               
-              <div className="mt-auto pt-3 border-t border-zinc-800/50 space-y-1.5">
+              <div className="mt-auto pt-3 border-t border-neutral-800/50 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
                   <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
                     {react.canalNome}

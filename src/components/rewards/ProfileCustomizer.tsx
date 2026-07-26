@@ -125,7 +125,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
             type="button"
             onClick={() => { setDraft(loadout); setSaved(false); }}
             title="Desfazer alterações"
-            className="px-4 py-3 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+            className="px-4 py-3 rounded-xl border border-neutral-800 text-zinc-400 hover:text-white cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -133,7 +133,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
       </div>
 
       <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1 custom-scrollbar">
-        <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm py-2 -mt-2">
+        <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-neutral-950/95 backdrop-blur-sm py-2 -mt-2">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-cine-accent-light" />
             Cosméticos
@@ -157,7 +157,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
               {equippedItems.map(({ slot, item }) => item && (
                 <span
                   key={`${slot}-${item.id}`}
-                  className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full border border-zinc-700/80 bg-zinc-900/80 text-[10px] text-zinc-200"
+                  className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full border border-zinc-700/80 bg-neutral-900/80 text-[10px] text-zinc-200"
                 >
                   <RewardPreviewThumb item={item} size="sm" />
                   <span className="max-w-[72px] truncate">{item.name}</span>
@@ -187,11 +187,11 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
             const categoryLabel = CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] || label;
 
             return (
-              <div key={key as string} className="rounded-2xl border border-zinc-800/80 bg-zinc-900/30 overflow-hidden">
+              <div key={key as string} className="rounded-2xl border border-neutral-800/80 bg-neutral-900/30 overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setOpenCategory(isOpen ? null : key)}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-zinc-900/50 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-neutral-900/50 transition-colors cursor-pointer"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-white">{categoryLabel}</p>
@@ -206,7 +206,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); clearSlot(key); }}
-                        className="text-[9px] uppercase font-bold text-zinc-500 hover:text-red-400 px-2 py-1 rounded-md border border-zinc-800 hover:border-red-500/30 cursor-pointer"
+                        className="text-[9px] uppercase font-bold text-zinc-500 hover:text-red-400 px-2 py-1 rounded-md border border-neutral-800 hover:border-red-500/30 cursor-pointer"
                       >
                         Limpar
                       </button>
@@ -246,7 +246,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                               type="button"
                               onClick={() => setPreviewItem(item)}
                               title="Visualizar"
-                              className="p-1 rounded-md bg-zinc-950/80 border border-zinc-700 text-zinc-400 hover:text-cine-accent-light cursor-pointer"
+                              className="p-1 rounded-md bg-neutral-950/80 border border-zinc-700 text-zinc-400 hover:text-cine-accent-light cursor-pointer"
                             >
                               <Eye className="w-3 h-3" />
                             </button>
@@ -255,7 +255,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                                 type="button"
                                 onClick={() => removeItem(key)}
                                 title="Remover"
-                                className="p-1 rounded-md bg-zinc-950/80 border border-zinc-700 text-zinc-400 hover:text-red-400 cursor-pointer"
+                                className="p-1 rounded-md bg-neutral-950/80 border border-zinc-700 text-zinc-400 hover:text-red-400 cursor-pointer"
                               >
                                 <X className="w-3 h-3" />
                               </button>

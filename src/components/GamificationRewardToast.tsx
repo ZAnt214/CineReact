@@ -28,12 +28,12 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
           transition={{ type: 'spring', damping: 28, stiffness: 360 }}
           className="fixed z-[200] left-3 right-3 bottom-3 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[min(100%,18rem)] pointer-events-none"
         >
-          <div className="relative overflow-hidden rounded-xl border border-cine-accent/25 bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
+          <div className="relative overflow-hidden rounded-xl border border-cine-accent/25 bg-neutral-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-br from-cine-accent-light/8 via-transparent to-purple-500/5 pointer-events-none" />
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-2 right-2 p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800/80 cursor-pointer z-10"
+              className="absolute top-2 right-2 p-1 rounded-md text-zinc-500 hover:text-white hover:bg-neutral-800/80 cursor-pointer z-10"
               aria-label="Fechar"
             >
               <X className="w-3.5 h-3.5" />
@@ -81,9 +81,9 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
               {reward!.achievements.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80"
+                  className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/50 border border-neutral-800/80"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-zinc-950/60 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-neutral-950/60 flex items-center justify-center shrink-0">
                     <Trophy className="w-3.5 h-3.5 text-cine-accent-light" />
                   </div>
                   <div className="min-w-0 flex-1">
