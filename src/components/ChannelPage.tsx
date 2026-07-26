@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, AlertCircle, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, BadgeCheck } from 'lucide-react';
 import { Obra, ReactVideo, PublicUserProfile } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -187,20 +187,15 @@ export default function ChannelPage({
               )}
 
               {!loadingOfficialProfile && !officialProfile && (
-              <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-3.5 text-xs text-amber-200/90 backdrop-blur-md max-w-3xl">
-                <div className="flex items-start gap-2.5 text-left">
-                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">
-                    <strong className="text-amber-300 font-bold">Aviso:</strong> O perfil do canal <strong className="text-white">{canalNome}</strong> não é oficial na plataforma CineReact. Se você é o criador ou proprietário deste canal e deseja obter a verificação oficial, entre em contato com o suporte.
-                  </span>
-                </div>
-                <a 
-                  href={`mailto:atendimentocinereact@gmail.com?subject=${encodeURIComponent(`[CineReact] Solicitação de Verificação - Canal ${canalNome}`)}`}
-                  className="w-full sm:w-auto shrink-0 px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold hover:text-white transition-all text-xs text-center whitespace-nowrap shadow-sm cursor-pointer"
-                >
-                  Entrar em Contato com o Suporte
-                </a>
-              </div>
+                <p className="mt-4 text-xs text-zinc-500 max-w-2xl leading-relaxed">
+                  Canal não verificado na CineReact.{' '}
+                  <a
+                    href={`mailto:atendimentocinereact@gmail.com?subject=${encodeURIComponent(`[CineReact] Verificação - ${canalNome}`)}`}
+                    className="text-amber-400/90 hover:text-amber-300 underline underline-offset-2"
+                  >
+                    Solicitar verificação
+                  </a>
+                </p>
               )}
             </div>
 

@@ -703,6 +703,8 @@ export default function App() {
         <SideNavHub
           currentTab={currentTab}
           selectedCanalId={selectedObraId}
+          obras={obras}
+          reacts={reacts}
           setCurrentTab={(tab) => {
             setCurrentTab(tab);
             setSelectedObraId(null);
