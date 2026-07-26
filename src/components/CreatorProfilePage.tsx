@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, BadgeCheck, Loader2, Sparkles } from 'lucide-react';
 import PublicCreatorProfile from './profile/PublicCreatorProfile.tsx';
-import { DEMO_CREATOR_EMAIL } from '../gamification/demoCreator.ts';
+import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
 import type { PublicUserProfile } from '../types.ts';
 
 interface CreatorProfilePageProps {
