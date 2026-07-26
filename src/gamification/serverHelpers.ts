@@ -6,7 +6,6 @@ import { buildLeaderboard,
   type ProcessEventMeta,
 } from './engine.ts';
 import {
-  findOfficialCreatorEmailForChannel,
   getPublicUserProfile,
 } from './publicUserProfile.ts';
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
