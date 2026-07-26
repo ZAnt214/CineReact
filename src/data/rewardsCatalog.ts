@@ -9,7 +9,7 @@ export const RARITY_STYLES: Record<RewardRarity, { border: string; bg: string; t
   incomum: { border: 'border-emerald-500/40', bg: 'bg-emerald-950/25', text: 'text-emerald-300', glow: 'shadow-[0_0_12px_rgba(16,185,129,0.12)]', label: 'Incomum' },
   raro: { border: 'border-blue-500/40', bg: 'bg-blue-950/30', text: 'text-blue-300', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]', label: 'Raro' },
   épico: { border: 'border-purple-500/50', bg: 'bg-purple-950/30', text: 'text-purple-300', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]', label: 'Épico' },
-  lendário: { border: 'border-amber-500/60', bg: 'bg-amber-950/30', text: 'text-amber-300', glow: 'shadow-[0_0_25px_rgba(245,158,11,0.25)]', label: 'Lendário' },
+  lendário: { border: 'border-stone-400/60', bg: 'bg-stone-900/30', text: 'text-stone-200', glow: 'shadow-[0_0_25px_rgba(168,162,158,0.25)]', label: 'Lendário' },
   mítico: { border: 'border-rose-500/60', bg: 'bg-rose-950/35', text: 'text-rose-300', glow: 'shadow-[0_0_30px_rgba(244,63,94,0.3)]', label: 'Mítico' },
   exclusivo: { border: 'border-cyan-400/70', bg: 'bg-gradient-to-br from-cyan-950/40 to-purple-950/40', text: 'text-cyan-200', glow: 'shadow-[0_0_35px_rgba(34,211,238,0.35)]', label: 'Exclusivo' },
 };
@@ -366,7 +366,7 @@ export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
     obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
     bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
     limited: true,
-    previewGradient: 'from-fuchsia-600 via-cyan-500 to-amber-400',
+    previewGradient: 'from-fuchsia-600 via-cyan-500 to-stone-300',
     animated: true,
     visualStyle: 'atelier',
   },
@@ -423,7 +423,7 @@ export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
     bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
     limited: true,
     avatarVisual: 'atelier',
-    previewGradient: 'from-fuchsia-500 via-cyan-400 to-amber-400',
+    previewGradient: 'from-fuchsia-500 via-cyan-400 to-stone-300',
     animated: true,
     visualStyle: 'atelier',
   },
@@ -456,7 +456,7 @@ const SEASONAL: RewardItemDefinition[] = [
     obtainHint: 'Evento Halloween 2026',
     seasonalEvent: 'halloween-2026',
     limited: true,
-    previewClass: 'ring-2 ring-orange-500/80 shadow-[0_0_25px_rgba(249,115,22,0.4)]',
+    previewClass: 'ring-2 ring-stone-400/80 shadow-[0_0_25px_rgba(120,113,108,0.4)]',
     animated: true,
   },
   {
@@ -469,7 +469,7 @@ const SEASONAL: RewardItemDefinition[] = [
     unlockMethod: 'seasonal',
     obtainHint: 'Loja Spotlight — Halloween',
     seasonalEvent: 'halloween-2026',
-    previewGradient: 'from-orange-950 via-zinc-950 to-purple-950',
+    previewGradient: 'from-stone-900 via-zinc-950 to-purple-950',
   },
   {
     id: 'emoji-halloween-bat',
@@ -574,12 +574,12 @@ const SEASONAL: RewardItemDefinition[] = [
 
 export const REWARDS_CATALOG: RewardItemDefinition[] = [
   // Molduras
-  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante.', category: 'frame', rarity: 'comum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.3)]' },
+  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante.', category: 'frame', rarity: 'comum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-stone-400/80 shadow-[0_0_20px_rgba(168,162,158,0.3)]' },
   { id: 'frame-neon', name: 'Moldura Neon', description: 'Brilho cyberpunk.', category: 'frame', rarity: 'raro', cost: 200, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cyan-400/80 shadow-[0_0_25px_rgba(34,211,238,0.4)]', animated: true },
   { id: 'frame-royal', name: 'Moldura Real', description: 'Gradiente violeta premium.', category: 'frame', rarity: 'épico', cost: 400, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-purple-500/80', animated: true },
   { id: 'frame-critico', name: 'Moldura Crítico', description: 'Desbloqueada no nível Crítico.', category: 'frame', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Alcance o nível Crítico', previewClass: 'ring-2 ring-rose-500/70' },
-  { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Para membros influentes.', category: 'frame', rarity: 'épico', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Influenciador', previewClass: 'ring-2 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.5)]', animated: true },
-  { id: 'frame-elite', name: 'Moldura Elite', description: 'A moldura definitiva.', category: 'frame', rarity: 'mítico', cost: 0, unlockMethod: 'level', obtainHint: 'Elite CineReact', previewClass: 'ring-[3px] ring-amber-300 shadow-[0_0_40px_rgba(252,211,77,0.6)]', animated: true },
+  { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Para membros influentes.', category: 'frame', rarity: 'épico', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Influenciador', previewClass: 'ring-2 ring-stone-300 shadow-[0_0_35px_rgba(251,191,36,0.5)]', animated: true },
+  { id: 'frame-elite', name: 'Moldura Elite', description: 'A moldura definitiva.', category: 'frame', rarity: 'mítico', cost: 0, unlockMethod: 'level', obtainHint: 'Elite CineReact', previewClass: 'ring-[3px] ring-stone-200 shadow-[0_0_40px_rgba(252,211,77,0.6)]', animated: true },
   { id: 'frame-pulse', name: 'Moldura Pulse', description: 'Animação pulsante suave.', category: 'frame', rarity: 'incomum', cost: 150, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 150 Spotlight', previewClass: 'ring-2 ring-violet-400/70', animated: true, visualStyle: 'neon' },
   { id: 'frame-rainbow', name: 'Moldura Rainbow', description: 'Borda arco-íris em movimento perpétuo.', category: 'frame', rarity: 'lendário', cost: 450, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 450 Spotlight', previewClass: 'ring-2 ring-white/30', animated: true, visualStyle: 'rainbow' },
 
@@ -599,9 +599,9 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   { id: 'title-cortina-sobe', name: 'Cortina Sobe', description: 'A emoção de cada abertura de filme, do início ao fim.', category: 'title', rarity: 'raro', cost: 150, unlockMethod: 'shop', obtainHint: 'Loja Spotlight — Coleção Estreia' },
 
   // Avatares
-  { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema com balde dourado.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'popcorn', previewGradient: 'from-amber-600 via-orange-500 to-yellow-400' },
+  { id: 'avatar-popcorn', name: 'Avatar Pipoca', description: 'Clássico do cinema com balde dourado.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'popcorn', previewGradient: 'from-stone-500 via-stone-500 to-stone-300' },
   { id: 'avatar-clapper', name: 'Avatar Claquete', description: 'Diretor da sua própria sessão.', category: 'avatar', rarity: 'incomum', cost: 120, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'clapperboard', previewGradient: 'from-violet-700 via-purple-600 to-fuchsia-500' },
-  { id: 'avatar-royal', name: 'Avatar Real', description: 'Coroa dourada exclusiva com brilho premium.', category: 'avatar', rarity: 'lendário', cost: 600, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'crown', previewGradient: 'from-yellow-600 via-amber-500 to-yellow-300', animated: true },
+  { id: 'avatar-royal', name: 'Avatar Real', description: 'Coroa dourada exclusiva com brilho premium.', category: 'avatar', rarity: 'lendário', cost: 600, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', avatarVisual: 'crown', previewGradient: 'from-stone-500 via-stone-400 to-stone-200', animated: true },
   { id: 'avatar-ghost', name: 'Avatar Fantasma', description: 'Edição Halloween com aura espectral.', category: 'avatar', rarity: 'raro', cost: 0, unlockMethod: 'seasonal', obtainHint: 'Halloween 2026', avatarVisual: 'ghost', previewGradient: 'from-slate-600 via-zinc-500 to-purple-400', seasonalEvent: 'halloween-2026', animated: true },
 
   // Emblemas
@@ -613,9 +613,9 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
 
   // Temas
   { id: 'theme-midnight', name: 'Midnight', description: 'Tons azulados profundos.', category: 'theme', rarity: 'raro', cost: 180, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewGradient: 'from-slate-900 to-blue-950' },
-  { id: 'theme-icone', name: 'Ícone', description: 'Tema do nível Ícone.', category: 'theme', rarity: 'épico', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Ícone', previewGradient: 'from-amber-950 to-zinc-950' },
+  { id: 'theme-icone', name: 'Ícone', description: 'Tema do nível Ícone.', category: 'theme', rarity: 'épico', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Ícone', previewGradient: 'from-stone-900 to-zinc-950' },
   { id: 'theme-aurora', name: 'Aurora', description: 'Gradiente aurora boreal com luzes dançantes.', category: 'theme', rarity: 'lendário', cost: 320, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 320 Spotlight', previewGradient: 'from-purple-900 via-zinc-900 to-cyan-950', animated: true, visualStyle: 'aurora' },
-  { id: 'theme-rainbow', name: 'Arco-íris Prismático', description: 'Gradiente arco-íris animado ultra premium.', category: 'theme', rarity: 'mítico', cost: 380, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 380 Spotlight', previewGradient: 'from-rose-500 via-amber-400 to-violet-500', animated: true, visualStyle: 'rainbow' },
+  { id: 'theme-rainbow', name: 'Arco-íris Prismático', description: 'Gradiente arco-íris animado ultra premium.', category: 'theme', rarity: 'mítico', cost: 380, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 380 Spotlight', previewGradient: 'from-rose-500 via-stone-300 to-violet-500', animated: true, visualStyle: 'rainbow' },
   { id: 'theme-galaxy', name: 'Galáxia Profunda', description: 'Estrelas, nebulosas e brilho cósmico no perfil.', category: 'theme', rarity: 'lendário', cost: 420, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 420 Spotlight', previewGradient: 'from-indigo-950 via-purple-900 to-violet-950', animated: true, visualStyle: 'galaxy' },
   { id: 'theme-candy', name: 'Cotton Candy', description: 'Tons doces de algodão-doce com bolhas pastel.', category: 'theme', rarity: 'épico', cost: 340, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 340 Spotlight', previewGradient: 'from-pink-400 via-fuchsia-300 to-sky-300', animated: true, visualStyle: 'candy' },
 
@@ -628,7 +628,7 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
   // Fundos
   { id: 'bg-cinema', name: 'Sala de Cinema', description: 'Cortinas vermelhas e holofotes.', category: 'background', rarity: 'incomum', cost: 140, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewGradient: 'from-red-950 via-zinc-950 to-black' },
   { id: 'bg-nebula', name: 'Nebulosa', description: 'Espaço sideral profundo com estrelas.', category: 'background', rarity: 'raro', cost: 200, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 200 Spotlight', previewGradient: 'from-indigo-950 via-purple-950 to-zinc-950', visualStyle: 'galaxy' },
-  { id: 'bg-gold', name: 'Ouro Líquido', description: 'Luxo absoluto em tons dourados.', category: 'background', rarity: 'épico', cost: 280, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 280 Spotlight', previewGradient: 'from-amber-900/40 via-zinc-900 to-amber-950/60', visualStyle: 'gold' },
+  { id: 'bg-gold', name: 'Ouro Líquido', description: 'Luxo absoluto em tons dourados.', category: 'background', rarity: 'épico', cost: 280, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 280 Spotlight', previewGradient: 'from-stone-800/40 via-zinc-900 to-stone-900/60', visualStyle: 'gold' },
   { id: 'bg-rainbow', name: 'Aurora Rainbow', description: 'Fundo com arco-íris líquido animado.', category: 'background', rarity: 'mítico', cost: 360, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 360 Spotlight', previewGradient: 'from-rose-500 via-emerald-400 to-violet-500', animated: true, visualStyle: 'rainbow' },
   { id: 'bg-candy-clouds', name: 'Nuvens Candy', description: 'Nuvens pastel flutuantes estilo algodão-doce.', category: 'background', rarity: 'épico', cost: 260, unlockMethod: 'shop', obtainHint: 'Compre na Loja Spotlight com 260 Spotlight', previewGradient: 'from-pink-300 via-purple-200 to-sky-200', animated: true, visualStyle: 'candy' },
 
@@ -640,7 +640,7 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
 
   // Cartões de perfil
   { id: 'card-classic', name: 'Cartão Clássico', description: 'Layout limpo e elegante.', category: 'profile_card', rarity: 'comum', cost: 80, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewGradient: 'from-zinc-900 to-zinc-950' },
-  { id: 'card-premium', name: 'Cartão Premium', description: 'Bordas douradas e brilho.', category: 'profile_card', rarity: 'épico', cost: 300, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewGradient: 'from-amber-950/50 via-zinc-900 to-zinc-950', animated: true },
+  { id: 'card-premium', name: 'Cartão Premium', description: 'Bordas douradas e brilho.', category: 'profile_card', rarity: 'épico', cost: 300, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewGradient: 'from-stone-900/50 via-zinc-900 to-zinc-950', animated: true },
   { id: 'card-holographic', name: 'Cartão Holográfico', description: 'Efeito holográfico exclusivo.', category: 'profile_card', rarity: 'mítico', cost: 0, unlockMethod: 'promo_code', obtainHint: 'Resgate com código promocional CINEREACT2026', previewGradient: 'from-cyan-900/40 via-purple-900/40 to-pink-900/40', animated: true, visualStyle: 'holographic' },
 
   ...CREATOR_TAGS,

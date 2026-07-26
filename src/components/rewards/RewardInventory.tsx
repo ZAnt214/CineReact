@@ -99,11 +99,11 @@ export default function RewardInventory({
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-white flex items-center gap-2">
-            <Package className="w-5 h-5 text-amber-400" />
+            <Package className="w-5 h-5 text-stone-300" />
             Loja & Inventário
           </h2>
           <p className="text-xs text-zinc-500 mt-1">
-            {ownedCount}/{items.length} desbloqueados · <span className="text-amber-400 font-bold">{spotlight} Spotlight</span>
+            {ownedCount}/{items.length} desbloqueados · <span className="text-stone-300 font-bold">{spotlight} Spotlight</span>
           </p>
         </div>
         <div className="flex gap-2">
@@ -117,7 +117,7 @@ export default function RewardInventory({
             type="button"
             onClick={handleRedeem}
             disabled={redeeming}
-            className="px-3 py-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold cursor-pointer hover:bg-amber-500/30"
+            className="px-3 py-2 rounded-xl bg-stone-400/20 text-stone-300 border border-stone-400/30 text-xs font-bold cursor-pointer hover:bg-stone-400/30"
           >
             Resgatar
           </button>
@@ -139,7 +139,7 @@ export default function RewardInventory({
           type="button"
           onClick={() => setOwnedOnly(!ownedOnly)}
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer shrink-0 ${
-            ownedOnly ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' : 'border-zinc-800 text-zinc-500 hover:text-zinc-300'
+            ownedOnly ? 'bg-stone-400/15 border-stone-400/30 text-stone-300' : 'border-zinc-800 text-zinc-500 hover:text-zinc-300'
           }`}
         >
           <Filter className="w-3.5 h-3.5" />
@@ -160,13 +160,13 @@ export default function RewardInventory({
               onClick={() => setCategory(cat)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all cursor-pointer shrink-0 ${
                 active
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  ? 'bg-stone-400/15 border-stone-400/40 text-stone-200'
                   : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5" />}
               {cat === 'all' ? 'Todas' : CATEGORY_LABELS[cat]}
-              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${active ? 'bg-amber-500/20' : 'bg-zinc-800'}`}>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${active ? 'bg-stone-400/20' : 'bg-zinc-800'}`}>
                 {count}
               </span>
             </button>
@@ -185,7 +185,7 @@ export default function RewardInventory({
           <div>
             <p className="text-sm font-bold text-white">{CATEGORY_LABELS[category]}</p>
             <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">{activeInfo.description}</p>
-            <p className="text-[10px] text-amber-500/80 font-mono mt-1">{activeInfo.equipHint}</p>
+            <p className="text-[10px] text-stone-400/80 font-mono mt-1">{activeInfo.equipHint}</p>
           </div>
         </motion.div>
       )}
@@ -197,7 +197,7 @@ export default function RewardInventory({
             <section key={cat}>
               <div className="flex items-center gap-2 mb-3">
                 {CATEGORY_ICONS[cat] && (
-                  <span className="p-1.5 rounded-lg bg-zinc-800/80 text-amber-400">
+                  <span className="p-1.5 rounded-lg bg-zinc-800/80 text-stone-300">
                     {React.createElement(CATEGORY_ICONS[cat], { className: 'w-4 h-4' })}
                   </span>
                 )}
@@ -341,9 +341,9 @@ function RewardCard({
               item.equipped
                 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                 : item.owned
-                ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25'
+                ? 'bg-stone-400/15 text-stone-200 border border-stone-400/30 hover:bg-stone-400/25'
                 : item.cost > 0
-                ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-black'
+                ? 'bg-gradient-to-r from-stone-500 to-stone-400 text-black'
                 : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
             }`}
             disabled={!item.owned && item.cost === 0 && item.unlockMethod !== 'shop'}

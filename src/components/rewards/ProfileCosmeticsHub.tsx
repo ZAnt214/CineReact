@@ -116,7 +116,7 @@ export default function ProfileCosmeticsHub({
         <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 py-2">
           <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={loadout} lite className="shrink-0" />
           <div className="flex-1 text-center sm:text-left min-w-0">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-stone-400/70 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
               <Palette className="w-3.5 h-3.5" /> Prévia do perfil
             </p>
             <ProfileNameRow name={user.nome} loadout={loadout} nameSize="md" align="center" className="w-full" />
@@ -140,12 +140,12 @@ export default function ProfileCosmeticsHub({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <Package className="w-5 h-5 text-amber-400" />
+              <Package className="w-5 h-5 text-stone-300" />
               Coleção & Loja
             </h2>
             <p className="text-xs text-zinc-500 mt-1">
               {ownedCount}/{items.length} desbloqueados ·{' '}
-              <span className="text-amber-400 font-bold">{spotlight} Spotlight</span>
+              <span className="text-stone-300 font-bold">{spotlight} Spotlight</span>
             </p>
           </div>
           <div className="flex gap-2">
@@ -159,7 +159,7 @@ export default function ProfileCosmeticsHub({
               type="button"
               onClick={handleRedeem}
               disabled={redeeming}
-              className="px-3 py-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-stone-400/20 text-stone-300 border border-stone-400/30 text-xs font-bold cursor-pointer"
             >
               Resgatar
             </button>
@@ -180,7 +180,7 @@ export default function ProfileCosmeticsHub({
             type="button"
             onClick={() => setOwnedOnly(!ownedOnly)}
             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer shrink-0 ${
-              ownedOnly ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' : 'border-zinc-800 text-zinc-500'
+              ownedOnly ? 'bg-stone-400/15 border-stone-400/30 text-stone-300' : 'border-zinc-800 text-zinc-500'
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export default function ProfileCosmeticsHub({
                 onClick={() => setCategory(cat)}
                 className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap border cursor-pointer shrink-0 ${
                   active
-                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    ? 'bg-stone-400/15 border-stone-400/40 text-stone-200'
                     : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500 hover:text-zinc-300'
                 }`}
               >
@@ -214,7 +214,7 @@ export default function ProfileCosmeticsHub({
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-400">
             <span className="text-white font-bold">{CATEGORY_LABELS[category]}</span>
             {' — '}{CATEGORY_INFO[category].description}
-            <span className="block text-[10px] text-amber-500/80 mt-1 font-mono">{CATEGORY_INFO[category].equipHint}</span>
+            <span className="block text-[10px] text-stone-400/80 mt-1 font-mono">{CATEGORY_INFO[category].equipHint}</span>
           </div>
         )}
       </div>
@@ -229,7 +229,7 @@ export default function ProfileCosmeticsHub({
             <div
               key={item.id}
               className={`cosmetics-hub-card group relative flex flex-col rounded-2xl border overflow-hidden transition-colors ${
-                equipped ? 'ring-2 ring-amber-500/50 border-amber-500/40' : style.border
+                equipped ? 'ring-2 ring-stone-400/50 border-stone-400/40' : style.border
               } ${!item.owned ? 'opacity-75' : 'cursor-pointer hover:border-zinc-700'}`}
               onClick={() => item.owned && handleItemClick(item)}
               onKeyDown={(e) => e.key === 'Enter' && item.owned && handleItemClick(item)}
@@ -238,7 +238,7 @@ export default function ProfileCosmeticsHub({
             >
               <div className={`relative flex items-center justify-center aspect-square border-b border-zinc-800/60 ${style.bg}`}>
                 {equipped && (
-                  <span className="absolute top-1.5 left-1.5 text-[7px] font-black uppercase px-1 py-0.5 rounded bg-amber-500/25 text-amber-200 border border-amber-500/30 z-10 flex items-center gap-0.5">
+                  <span className="absolute top-1.5 left-1.5 text-[7px] font-black uppercase px-1 py-0.5 rounded bg-stone-400/25 text-stone-100 border border-stone-400/30 z-10 flex items-center gap-0.5">
                     <Check className="w-2 h-2" />
                   </span>
                 )}
@@ -257,7 +257,7 @@ export default function ProfileCosmeticsHub({
               <div className="flex flex-col flex-1 p-2.5 bg-zinc-950/80 gap-1">
                 <span className="text-[8px] uppercase font-mono text-zinc-500 truncate">{CATEGORY_LABELS[item.category]}</span>
                 {item.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID && (
-                  <span className="text-[7px] font-bold uppercase tracking-wider text-amber-400/90 truncate">
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-stone-300/90 truncate">
                     Coleção Ateliê Visionário
                   </span>
                 )}
@@ -278,7 +278,7 @@ export default function ProfileCosmeticsHub({
                     disabled={item.cost === 0 && item.unlockMethod === 'shop'}
                     className={`mt-auto w-full py-1.5 rounded-lg text-[10px] font-bold cursor-pointer flex items-center justify-center gap-1 ${
                       item.cost > 0
-                        ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-black'
+                        ? 'bg-gradient-to-r from-stone-500 to-stone-400 text-black'
                         : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
                     }`}
                   >
@@ -318,7 +318,7 @@ export default function ProfileCosmeticsHub({
             >
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/80 mb-1">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-stone-400/80 mb-1">
                     {pendingEquipped ? 'Remover cosmético' : 'Equipar cosmético'}
                   </p>
                   <h3 className="text-lg font-black text-white">{pendingItem.name}</h3>
@@ -365,7 +365,7 @@ export default function ProfileCosmeticsHub({
                   type="button"
                   onClick={confirmEquip}
                   disabled={acting}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-black text-sm font-bold cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-stone-500 to-stone-400 text-black text-sm font-bold cursor-pointer disabled:opacity-50"
                 >
                   {acting ? 'Aplicando...' : pendingEquipped ? 'Remover' : 'Equipar'}
                 </button>

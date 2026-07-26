@@ -122,12 +122,12 @@ export const FRANCHISE_SEALS: SealDefinition[] = [
 ];
 
 export const COSMETIC_SHOP: CosmeticItem[] = [
-  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante para seu avatar.', type: 'frame', cost: 100, rarity: 'comum', previewClass: 'ring-2 ring-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.3)]' },
+  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante para seu avatar.', type: 'frame', cost: 100, rarity: 'comum', previewClass: 'ring-2 ring-stone-400/80 shadow-[0_0_20px_rgba(168,162,158,0.3)]' },
   { id: 'frame-neon', name: 'Moldura Neon', description: 'Brilho cyberpunk para perfis ousados.', type: 'frame', cost: 200, rarity: 'raro', previewClass: 'ring-2 ring-cyan-400/80 shadow-[0_0_25px_rgba(34,211,238,0.4)]' },
   { id: 'frame-royal', name: 'Moldura Real', description: 'Moldura premium com gradiente violeta.', type: 'frame', cost: 400, rarity: 'épico', previewClass: 'ring-2 ring-purple-500/80 shadow-[0_0_30px_rgba(168,85,247,0.4)]' },
   { id: 'frame-critico', name: 'Moldura Crítico', description: 'Desbloqueada no nível Crítico.', type: 'frame', cost: 0, rarity: 'raro', previewClass: 'ring-2 ring-rose-500/70' },
-  { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Destaque exclusivo para influenciadores.', type: 'frame', cost: 0, rarity: 'épico', previewClass: 'ring-2 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.5)]' },
-  { id: 'frame-elite', name: 'Moldura Elite', description: 'A moldura definitiva do CineReact.', type: 'frame', cost: 0, rarity: 'lendário', previewClass: 'ring-[3px] ring-amber-300 shadow-[0_0_40px_rgba(252,211,77,0.6)]' },
+  { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Destaque exclusivo para influenciadores.', type: 'frame', cost: 0, rarity: 'épico', previewClass: 'ring-2 ring-stone-300 shadow-[0_0_35px_rgba(251,191,36,0.5)]' },
+  { id: 'frame-elite', name: 'Moldura Elite', description: 'A moldura definitiva do CineReact.', type: 'frame', cost: 0, rarity: 'lendário', previewClass: 'ring-[3px] ring-stone-200 shadow-[0_0_40px_rgba(252,211,77,0.6)]' },
   { id: 'title-espectador', name: 'Título: Espectador', description: 'Para quem curte reações do sofá.', type: 'title', cost: 0, rarity: 'comum' },
   { id: 'title-entusiasta', name: 'Título: Entusiasta', description: 'Para fãs que vivem cada cena.', type: 'title', cost: 0, rarity: 'comum' },
   { id: 'title-cinefilo', name: 'Título: Cinéfilo', description: 'Pipoca, créditos e plot twists.', type: 'title', cost: 80, rarity: 'comum' },
@@ -150,7 +150,7 @@ export const RARITY_STYLES: Record<string, { border: string; bg: string; text: s
   comum: { border: 'border-zinc-700', bg: 'bg-zinc-900/50', text: 'text-zinc-300', glow: '' },
   raro: { border: 'border-blue-500/40', bg: 'bg-blue-950/30', text: 'text-blue-300', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]' },
   épico: { border: 'border-purple-500/50', bg: 'bg-purple-950/30', text: 'text-purple-300', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]' },
-  lendário: { border: 'border-amber-500/60', bg: 'bg-amber-950/30', text: 'text-amber-300', glow: 'shadow-[0_0_25px_rgba(245,158,11,0.25)]' },
+  lendário: { border: 'border-stone-400/60', bg: 'bg-stone-900/30', text: 'text-stone-200', glow: 'shadow-[0_0_25px_rgba(168,162,158,0.25)]' },
 };
 
 export function getTierFromXp(xp: number): LevelDefinition {

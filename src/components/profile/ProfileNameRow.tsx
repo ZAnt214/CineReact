@@ -66,10 +66,10 @@ export default function ProfileNameRow({
 
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         {isDonor ? (
-          <span className={`${nameClass} bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
+          <span className={`${nameClass} bg-gradient-to-r from-stone-200 via-stone-200 to-stone-100 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(168,162,158,0.4)] inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
             {name}
             <span
-              className={`rounded bg-gradient-to-r from-amber-500 to-yellow-400 uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}
+              className={`rounded bg-gradient-to-r from-stone-300 to-stone-300 uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}
             >
               <Sparkles className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
             </span>

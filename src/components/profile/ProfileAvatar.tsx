@@ -105,7 +105,7 @@ export default function ProfileAvatar({
       )}
 
       {donorBadge && (
-        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full border border-zinc-950 flex items-center justify-center shadow-lg z-20">
+        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-to-r from-stone-300 to-stone-300 rounded-full border border-zinc-950 flex items-center justify-center shadow-lg z-20">
           <span className="text-[8px] text-black font-black">★</span>
         </span>
       )}

@@ -89,7 +89,7 @@ export default function GamificationPage({
   if (!user.isLoggedIn) {
     return (
       <motion.div className="cine-container py-28 text-center">
-        <Crown className="w-12 h-12 text-amber-500/50 mx-auto mb-4" />
+        <Crown className="w-12 h-12 text-stone-400/50 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">CineReact Club</h2>
         <p className="text-zinc-500 text-sm">Faça login para acessar seu progresso, conquistas e rankings.</p>
       </motion.div>
@@ -127,13 +127,13 @@ export default function GamificationPage({
                 loadout={profile?.loadout}
               />
               {profile?.featuredInfluencer && (
-                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] font-black text-black uppercase z-20">
+                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-stone-300 to-stone-300 text-[9px] font-black text-black uppercase z-20">
                   VIP
                 </span>
               )}
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-500/70 mb-1">CineReact Club</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-stone-400/70 mb-1">CineReact Club</p>
               <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" align="start" className="w-full" />
               {user.descricao && (
                 <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">{user.descricao}</p>
@@ -141,7 +141,7 @@ export default function GamificationPage({
               {isVerifiedCreatorLoadout(profile?.loadout) && (
                 <ProfileSocialLinks links={user.socialLinks} size="sm" align="start" className="mt-3 max-w-md" />
               )}
-              <p className="text-amber-400 font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
+              <p className="text-stone-300 font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
                 <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-purple-400 font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" /> Acesso Antecipado
@@ -166,7 +166,7 @@ export default function GamificationPage({
                   key={t}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border transition-all ${
                     active
-                      ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                      ? 'bg-stone-400/15 border-stone-400/40 text-stone-200'
                       : 'bg-zinc-900/40 border-zinc-800 text-zinc-600'
                   }`}
                 >
@@ -189,7 +189,7 @@ export default function GamificationPage({
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 tab === t.id
-                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                  ? 'bg-stone-400/15 text-stone-300 border border-stone-400/30'
                   : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/60 hover:text-zinc-300'
               }`}
             >
@@ -230,7 +230,7 @@ export default function GamificationPage({
                     key={stat.label}
                     className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/80 transition-colors"
                   >
-                    <Icon className="w-4 h-4 text-amber-500/70 mb-2" />
+                    <Icon className="w-4 h-4 text-stone-400/70 mb-2" />
                     <p className="text-xl font-black text-white">{stat.value}</p>
                     <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wide">{stat.label}</p>
                   </div>
@@ -276,7 +276,7 @@ export default function GamificationPage({
                           <span className={`text-[9px] uppercase font-mono ${style.text}`}>{a.rarity}</span>
                         </motion.div>
                         <p className="text-[11px] text-zinc-500 leading-snug">{a.description}</p>
-                        <p className="text-[10px] text-amber-500/80 mt-2 font-mono">+{a.xpReward} XP · +{a.spotlightReward} Spotlight</p>
+                        <p className="text-[10px] text-stone-400/80 mt-2 font-mono">+{a.xpReward} XP · +{a.spotlightReward} Spotlight</p>
                       </div>
                     </div>
                   </div>
@@ -327,12 +327,12 @@ export default function GamificationPage({
                     key={s.id}
                     className={`p-5 rounded-2xl border text-center transition-all ${
                       unlocked
-                        ? 'border-amber-500/40 bg-amber-950/20 shadow-[0_0_25px_rgba(245,158,11,0.1)]'
+                        ? 'border-stone-400/40 bg-stone-900/20 shadow-[0_0_25px_rgba(168,162,158,0.1)]'
                         : 'border-zinc-800 bg-zinc-900/30 opacity-70'
                     }`}
                   >
                     <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-3 ${
-                      unlocked ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-800 text-zinc-600'
+                      unlocked ? 'bg-stone-400/20 text-stone-300' : 'bg-zinc-800 text-zinc-600'
                     }`}>
                       <Icon className="w-8 h-8" />
                     </div>
@@ -356,7 +356,7 @@ export default function GamificationPage({
                     type="button"
                     onClick={() => setLbTab(lb.id)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide whitespace-nowrap cursor-pointer transition-all ${
-                      lbTab === lb.id ? 'bg-amber-500/15 text-amber-400' : 'text-zinc-500 hover:text-zinc-300'
+                      lbTab === lb.id ? 'bg-stone-400/15 text-stone-300' : 'text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     {lb.label}
@@ -369,12 +369,12 @@ export default function GamificationPage({
                     key={entry.email}
                     className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
                       entry.email === user.email
-                        ? 'border-amber-500/40 bg-amber-500/5'
+                        ? 'border-stone-400/40 bg-stone-400/5'
                         : 'border-zinc-800/60 bg-zinc-900/30'
                     }`}
                   >
                     <span className={`w-8 text-center font-black text-lg ${
-                      entry.rank <= 3 ? 'text-amber-400' : 'text-zinc-600'
+                      entry.rank <= 3 ? 'text-stone-300' : 'text-zinc-600'
                     }`}>
                       {entry.rank}
                     </span>
@@ -402,7 +402,7 @@ export default function GamificationPage({
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="font-black text-amber-400">{entry.value.toLocaleString('pt-BR')}</p>
+                      <p className="font-black text-stone-300">{entry.value.toLocaleString('pt-BR')}</p>
                       <p className="text-[9px] text-zinc-600 uppercase">pontos</p>
                     </div>
                   </div>
@@ -437,13 +437,13 @@ function MissionCard({
           <p className="text-[11px] text-zinc-500 mt-0.5">{description}</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-[10px] text-amber-400 font-bold">+{xp} XP</p>
+          <p className="text-[10px] text-stone-300 font-bold">+{xp} XP</p>
           <p className="text-[10px] text-purple-400 font-bold">+{spotlight}</p>
         </div>
       </div>
       <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-1">
         <motion.div
-          className={`h-full rounded-full ${done ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-600 to-amber-400'}`}
+          className={`h-full rounded-full ${done ? 'bg-emerald-500' : 'bg-gradient-to-r from-stone-500 to-stone-300'}`}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.6 }}

@@ -282,7 +282,7 @@ export default function AuthModal({
   const passwordStrength = (() => {
     if (!password) return { label: '', width: '0%', color: 'bg-zinc-700' };
     if (password.length < 6) return { label: 'Fraca', width: '33%', color: 'bg-red-500' };
-    if (password.length < 10) return { label: 'Média', width: '66%', color: 'bg-amber-500' };
+    if (password.length < 10) return { label: 'Média', width: '66%', color: 'bg-stone-400' };
     return { label: 'Forte', width: '100%', color: 'bg-green-500' };
   })();
 
@@ -314,7 +314,7 @@ export default function AuthModal({
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-stone-300 via-stone-300 to-stone-500" />
 
             <button
               onClick={onClose}
@@ -327,7 +327,7 @@ export default function AuthModal({
             <div className="grid grid-cols-1 md:grid-cols-5 min-h-full">
               {/* Brand panel */}
               <div className="hidden md:flex md:col-span-2 flex-col justify-between p-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-r border-zinc-800/80 relative overflow-hidden">
-                <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -top-20 -right-20 w-48 h-48 bg-stone-400/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
 
                 <div className="relative z-10 space-y-8">
@@ -345,8 +345,8 @@ export default function AuthModal({
                   <ul className="space-y-3">
                     {benefits.map(({ icon: Icon, text }) => (
                       <li key={text} className="flex items-start gap-2.5 text-xs text-zinc-400">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20">
-                          <Icon className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-stone-400/10 border border-stone-400/20">
+                          <Icon className="w-3.5 h-3.5 text-stone-300" />
                         </span>
                         {text}
                       </li>
@@ -365,7 +365,7 @@ export default function AuthModal({
                   <CineReactLogo size="lg" align="center" animated />
                 </div>
                 <div className="text-center md:text-left mb-6">
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase mb-3">
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-stone-400/10 border border-stone-400/20 text-stone-300 text-[10px] font-bold tracking-wider uppercase mb-3">
                     Acesso gratuito
                   </div>
                   <h2 id="auth-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -384,7 +384,7 @@ export default function AuthModal({
                       onClick={() => switchMode('login')}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         mode === 'login'
-                          ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                          ? 'bg-stone-400 text-black shadow-md shadow-stone-400/20'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -396,7 +396,7 @@ export default function AuthModal({
                       onClick={() => switchMode('register')}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         mode === 'register'
-                          ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                          ? 'bg-stone-400 text-black shadow-md shadow-stone-400/20'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -412,9 +412,9 @@ export default function AuthModal({
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
-                      className="bg-zinc-900/95 border border-amber-500/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5 shadow-lg shadow-black/30"
+                      className="bg-zinc-900/95 border border-stone-400/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5 shadow-lg shadow-black/30"
                     >
-                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-stone-300" />
                       <span>{errorMsg}</span>
                     </motion.div>
                   )}
@@ -424,7 +424,7 @@ export default function AuthModal({
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
-                      className="bg-amber-950/40 border border-amber-500/30 text-amber-300 p-3 rounded-xl text-xs font-medium mb-4 flex items-start gap-2"
+                      className="bg-stone-900/40 border border-stone-400/30 text-stone-200 p-3 rounded-xl text-xs font-medium mb-4 flex items-start gap-2"
                     >
                       <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>{infoMsg}</span>
@@ -448,7 +448,7 @@ export default function AuthModal({
                             placeholder="Como quer ser chamado?"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
+                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-stone-400 focus:ring-1 focus:ring-stone-400/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
                           />
                         </div>
                       </div>
@@ -468,7 +468,7 @@ export default function AuthModal({
                           placeholder="seu@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
+                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-stone-400 focus:ring-1 focus:ring-stone-400/30 rounded-xl pl-10 pr-3 py-3 text-sm text-white outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -482,7 +482,7 @@ export default function AuthModal({
                           <button
                             type="button"
                             onClick={() => setShowForgotPassword((v) => !v)}
-                            className="text-[10px] text-amber-400 hover:text-amber-300 font-bold transition-colors cursor-pointer"
+                            className="text-[10px] text-stone-300 hover:text-stone-200 font-bold transition-colors cursor-pointer"
                           >
                             Esqueci a senha
                           </button>
@@ -497,7 +497,7 @@ export default function AuthModal({
                           placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : 'Sua senha'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
+                          className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-stone-400 focus:ring-1 focus:ring-stone-400/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
                         />
                         <button
                           type="button"
@@ -536,7 +536,7 @@ export default function AuthModal({
                             placeholder="Repita a senha"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
+                            className="w-full bg-zinc-900/80 border border-zinc-800 focus:border-stone-400 focus:ring-1 focus:ring-stone-400/30 rounded-xl pl-10 pr-11 py-3 text-sm text-white outline-none transition-all"
                           />
                           <button
                             type="button"
@@ -555,7 +555,7 @@ export default function AuthModal({
                           type="checkbox"
                           checked={rememberEmail}
                           onChange={(e) => setRememberEmail(e.target.checked)}
-                          className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-500/30"
+                          className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-stone-400 focus:ring-stone-400/30"
                         />
                         <span className="text-xs text-zinc-500">Lembrar meu e-mail neste dispositivo</span>
                       </label>
@@ -573,7 +573,7 @@ export default function AuthModal({
                             Para recuperar sua senha, envie um e-mail para{' '}
                             <a
                               href="mailto:atendimentocinereact@gmail.com?subject=Recuperação%20de%20senha%20CineReact"
-                              className="text-amber-400 hover:text-amber-300 font-bold underline"
+                              className="text-stone-300 hover:text-stone-200 font-bold underline"
                             >
                               atendimentocinereact@gmail.com
                             </a>{' '}
@@ -586,7 +586,7 @@ export default function AuthModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer active:scale-[0.99]"
+                      className="w-full bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-stone-400/20 cursor-pointer active:scale-[0.99]"
                     >
                       {loading ? (
                         <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

@@ -414,8 +414,8 @@ export default function Header({
                   onClick={() => setCurrentTab('doacoes')} 
                   className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
                     currentTab === 'doacoes' 
-                      ? 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-lg shadow-amber-950/10' 
-                      : 'border-zinc-800 bg-zinc-900/40 text-amber-400 hover:bg-amber-500 hover:text-black hover:border-amber-400'
+                      ? 'bg-stone-400/15 text-stone-300 border-stone-400/30 shadow-lg shadow-stone-900/10' 
+                      : 'border-zinc-800 bg-zinc-900/40 text-stone-300 hover:bg-stone-400 hover:text-black hover:border-stone-300'
                   }`}
                 >
                   <Heart className="w-3 h-3 fill-current" />
@@ -427,7 +427,7 @@ export default function Header({
                   <button 
                     id="nav-admin"
                     onClick={() => setCurrentTab('admin')} 
-                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-black hover:border-amber-400 cursor-pointer`}
+                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-stone-400/30 text-stone-300 bg-stone-400/10 hover:bg-stone-400 hover:text-black hover:border-stone-300 cursor-pointer`}
                   >
                     Painel Admin
                   </button>
@@ -448,7 +448,7 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 focus:bg-zinc-900 border border-zinc-800/80 focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
+                  className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 focus:bg-zinc-900 border border-zinc-800/80 focus:border-stone-400/80 focus:ring-1 focus:ring-stone-400/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
                 />
                 {searchQuery && (
                   <button 
@@ -464,7 +464,7 @@ export default function Header({
               <button
                 id="install-app-btn-desktop"
                 onClick={handleInstallApp}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black border border-amber-500/30 hover:border-amber-400 text-xs font-extrabold transition-all duration-200 cursor-pointer shadow-sm active:scale-95 shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-400/10 hover:bg-stone-400 text-stone-300 hover:text-black border border-stone-400/30 hover:border-stone-300 text-xs font-extrabold transition-all duration-200 cursor-pointer shadow-sm active:scale-95 shrink-0"
                 title="Instalar CineReact no seu celular ou computador"
               >
                 <Download className="w-3.5 h-3.5 shrink-0" />
@@ -482,7 +482,7 @@ export default function Header({
                   >
                     <div className="text-[10px] text-zinc-500 font-mono pb-2 px-2 uppercase tracking-wider flex justify-between items-center">
                       <span>Sugestões</span>
-                      {searching && <span className="w-2.5 h-2.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />}
+                      {searching && <span className="w-2.5 h-2.5 border border-stone-300 border-t-transparent rounded-full animate-spin" />}
                     </div>
                     <div className="py-1 space-y-1">
                       {searchResults.map((obra) => (
@@ -497,7 +497,7 @@ export default function Header({
                         >
                           <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md shadow bg-zinc-900" />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors truncate leading-tight">{obra.titulo}</h4>
+                            <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-stone-300 transition-colors truncate leading-tight">{obra.titulo}</h4>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <div className="flex items-center gap-2">
                                 <span className="text-[9px] uppercase font-mono px-1 rounded bg-zinc-800 text-zinc-400 font-medium">{obra.tipo}</span>
@@ -509,7 +509,7 @@ export default function Header({
                                   return (
                                     <div className="flex gap-1 overflow-hidden max-w-[120px]">
                                       {matchedTags.slice(0, 2).map((tag, idx) => (
-                                        <span key={idx} className="text-[9px] text-amber-400 font-semibold truncate bg-amber-500/10 px-1 rounded border border-amber-500/20">
+                                        <span key={idx} className="text-[9px] text-stone-300 font-semibold truncate bg-stone-400/10 px-1 rounded border border-stone-400/20">
                                           {tag}
                                         </span>
                                       ))}
@@ -525,7 +525,7 @@ export default function Header({
                     </div>
                     <button 
                       onClick={() => handleSearchSubmit()}
-                      className="w-full text-center py-2 text-xs text-amber-400 font-bold hover:text-amber-300 transition-colors mt-1.5 pt-2 border-t border-zinc-900/60"
+                      className="w-full text-center py-2 text-xs text-stone-300 font-bold hover:text-stone-200 transition-colors mt-1.5 pt-2 border-t border-zinc-900/60"
                     >
                       Ver todos os resultados
                     </button>
@@ -541,7 +541,7 @@ export default function Header({
               <button
                 id="install-app-btn-mobile"
                 onClick={handleInstallApp}
-                className="p-2 text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg sm:hidden transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                className="p-2 text-stone-300 hover:text-stone-200 bg-stone-400/10 hover:bg-stone-400/20 border border-stone-400/30 rounded-lg sm:hidden transition-colors cursor-pointer flex items-center justify-center shrink-0"
                 title="Baixar Aplicativo"
               >
                 <Download className="w-4.5 h-4.5" />
@@ -570,7 +570,7 @@ export default function Header({
                 >
                   <Bell className="w-4.5 h-4.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full ring-2 ring-zinc-950 animate-pulse" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-stone-300 rounded-full ring-2 ring-zinc-950 animate-pulse" />
                   )}
                 </button>
 
@@ -587,7 +587,7 @@ export default function Header({
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-[13px] text-zinc-100 uppercase tracking-wider font-sans">Notificações</h3>
                           {unreadCount > 0 && (
-                            <span className="px-2 py-0.5 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold rounded-full font-mono">
+                            <span className="px-2 py-0.5 text-[9px] bg-stone-400/10 border border-stone-400/20 text-stone-300 font-bold rounded-full font-mono">
                               {unreadCount} novas
                             </span>
                           )}
@@ -595,7 +595,7 @@ export default function Header({
                         {notifications.length > 0 && (
                           <button 
                             onClick={clearNotifications} 
-                            className="text-[10px] text-zinc-500 hover:text-amber-400 transition-all font-semibold hover:underline"
+                            className="text-[10px] text-zinc-500 hover:text-stone-300 transition-all font-semibold hover:underline"
                           >
                             Limpar Tudo
                           </button>
@@ -624,22 +624,22 @@ export default function Header({
                                 key={n.id} 
                                 className={`p-3.5 text-xs flex gap-3 transition-all relative ${
                                   isUnread 
-                                    ? 'bg-amber-950/10 hover:bg-amber-950/20' 
+                                    ? 'bg-stone-900/10 hover:bg-stone-900/20' 
                                     : 'bg-transparent hover:bg-zinc-900/30'
                                 }`}
                               >
                                 {isUnread && (
-                                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-amber-500" />
+                                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-400" />
                                 )}
 
                                 <div className="flex-shrink-0 mt-0.5">
                                   {isApoio ? (
-                                    <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                                      <Heart className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                                    <div className="w-7 h-7 rounded-full bg-stone-400/10 border border-stone-400/20 flex items-center justify-center">
+                                      <Heart className="w-3.5 h-3.5 text-stone-300 fill-current" />
                                     </div>
                                   ) : isNewReact ? (
-                                    <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                                      <Play className="w-3.5 h-3.5 text-amber-400 fill-current ml-0.5" />
+                                    <div className="w-7 h-7 rounded-full bg-stone-400/10 border border-stone-400/20 flex items-center justify-center">
+                                      <Play className="w-3.5 h-3.5 text-stone-300 fill-current ml-0.5" />
                                     </div>
                                   ) : (
                                     <div className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
@@ -666,7 +666,7 @@ export default function Header({
                                   <button 
                                     onClick={() => markAsRead(n.id)} 
                                     title="Marcar como lida"
-                                    className="text-zinc-500 hover:text-amber-400 self-center p-1.5 rounded-lg hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 flex-shrink-0"
+                                    className="text-zinc-500 hover:text-stone-300 self-center p-1.5 rounded-lg hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 flex-shrink-0"
                                   >
                                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                                   </button>
@@ -744,7 +744,7 @@ export default function Header({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                   placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-amber-500"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-stone-400"
                   autoFocus
                 />
                 <button 
@@ -829,28 +829,28 @@ export default function Header({
               className="relative w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-2xl p-6.5 shadow-2xl overflow-hidden text-zinc-300 z-10 space-y-5"
             >
               <div className="flex justify-between items-center border-b border-zinc-900 pb-3">
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2"><Youtube className="w-5 h-5 text-amber-400" /> Solicitar Canal</h3>
+                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2"><Youtube className="w-5 h-5 text-stone-300" /> Solicitar Canal</h3>
                 <button onClick={() => setShowRequestModal(false)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
               </div>
 
               <form onSubmit={handleRequestSubmit} className="space-y-4 text-xs">
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Nome do Canal*</label>
-                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
+                  <input type="text" required value={canalNome} onChange={(e) => setCanalNome(e.target.value)} placeholder="ex: @casimiro" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-stone-400" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">URL do Canal (YouTube)*</label>
-                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
+                  <input type="url" required value={canalUrl} onChange={(e) => setCanalUrl(e.target.value)} placeholder="https://www.youtube.com/@..." className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-stone-400" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 font-bold mb-1">Seu E-mail de Contato*</label>
-                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-amber-500" />
+                  <input type="email" required value={emailContato} onChange={(e) => setEmailContato(e.target.value)} placeholder="contato@criador.com" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-stone-400" />
                 </div>
 
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-stone-400/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>

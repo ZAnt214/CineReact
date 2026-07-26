@@ -57,7 +57,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
     const showReason = item.owned && (ownedCollectible === 'badge' || ownedCollectible === 'tag');
     return (
       <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500">
-        <Icon className={`w-3 h-3 shrink-0 ${item.owned ? 'text-emerald-400' : 'text-amber-500/70'}`} />
+        <Icon className={`w-3 h-3 shrink-0 ${item.owned ? 'text-emerald-400' : 'text-stone-400/70'}`} />
         {showReason
           ? `Por: ${item.obtainHint}`
           : item.owned && item.unlockedAt
@@ -74,7 +74,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
       className={`rounded-xl border ${
         item.owned
           ? 'border-emerald-500/25 bg-emerald-950/20'
-          : 'border-amber-500/20 bg-amber-950/10'
+          : 'border-stone-400/20 bg-stone-900/10'
       } ${isModal ? 'p-4' : 'p-2.5'}`}
     >
       <div className="flex items-start gap-2.5">
@@ -84,7 +84,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
           } ${
             item.owned
               ? 'bg-emerald-500/15 text-emerald-400'
-              : 'bg-amber-500/10 text-amber-400'
+              : 'bg-stone-400/10 text-stone-300'
           }`}
         >
           <Icon className={isModal ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
@@ -102,7 +102,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
           </p>
           {!item.owned && (
             <p className={`text-zinc-500 mt-1 ${isModal ? 'text-xs' : 'text-[10px]'}`}>
-              <span className="text-amber-500/80 font-medium">{info.shortLabel}</span>
+              <span className="text-stone-400/80 font-medium">{info.shortLabel}</span>
               {item.limited && (
                 <span className="ml-2 text-rose-400 font-bold">· Edição limitada</span>
               )}
@@ -112,7 +112,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
             </p>
           )}
           {!item.owned && method === 'shop' && item.cost > 0 && (
-            <p className={`flex items-center gap-1 mt-1.5 text-amber-400 font-bold ${isModal ? 'text-xs' : 'text-[10px]'}`}>
+            <p className={`flex items-center gap-1 mt-1.5 text-stone-300 font-bold ${isModal ? 'text-xs' : 'text-[10px]'}`}>
               <Sparkles className="w-3 h-3" />
               Custa {item.cost} Spotlight
             </p>
