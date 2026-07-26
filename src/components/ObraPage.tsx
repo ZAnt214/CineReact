@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Eye, Clock, ArrowLeft } from 'lucide-react';
+import { Play, Clock, ArrowLeft } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -25,11 +25,6 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
     }
   });
 
-  const formatViews = (views: number) => {
-    if (views >= 1000000) return (views / 1000000).toFixed(1).replace('.', ',') + 'M';
-    if (views >= 1000) return (views / 1000).toFixed(0) + ' mil';
-    return views.toString();
-  };
 
   return (
     <motion.div 
@@ -125,13 +120,10 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
                 {react.titulo}
               </h3>
               
-              <div className="mt-auto pt-3 border-t border-neutral-800/50 space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                  <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
+                <div className="mt-auto pt-3 border-t border-neutral-800/50 space-y-1.5">
+                <div className="text-[11px] text-zinc-400">
+                  <span className="font-semibold text-zinc-300 truncate block">
                     {react.canalNome}
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] font-mono shrink-0">
-                    <Eye className="w-3.5 h-3.5 text-zinc-500" /> {formatViews(react.visualizacoes)}
                   </span>
                 </div>
                 <div className="flex items-center opacity-60">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Eye, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, BadgeCheck } from 'lucide-react';
+import { Play, Clock, ArrowLeft, Search, Heart, Tv, ExternalLink, Users, BadgeCheck } from 'lucide-react';
 import { Obra, ReactVideo, PublicUserProfile } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -106,12 +106,6 @@ export default function ChannelPage({
       return true;
     })
     .sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime());
-
-  const formatViews = (views: number) => {
-    if (views >= 1000000) return (views / 1000000).toFixed(1).replace('.', ',') + 'M';
-    if (views >= 1000) return (views / 1000).toFixed(0) + ' mil';
-    return views.toString();
-  };
 
   return (
     <motion.div 
@@ -331,13 +325,8 @@ export default function ChannelPage({
                   {react.titulo}
                 </h3>
                 
-                {/* Footer Metadata */}
-                <div className="mt-auto pt-3 border-t border-neutral-900 flex items-center justify-between text-[11px] text-zinc-400 font-mono font-semibold">
-                  <span className="flex items-center gap-1 text-zinc-300">
-                    <Eye className="w-3.5 h-3.5 text-cine-accent-light" />
-                    <span>{formatViews(react.visualizacoes)}</span>
-                  </span>
-                  <span className="text-zinc-500">
+                <div className="mt-auto pt-3 border-t border-neutral-900 flex items-center justify-end text-[11px] text-zinc-500 font-mono font-semibold">
+                  <span>
                     {react.publicadoEm ? react.publicadoEm.split('-').reverse().join('/') : 'Recente'}
                   </span>
                 </div>

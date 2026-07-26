@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, UtensilsCrossed, Sparkles, Play, Clock, Eye, Heart } from 'lucide-react';
+import { ArrowLeft, UtensilsCrossed, Sparkles, Play, Clock, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ReactVideo } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -345,10 +345,6 @@ export default function LunchTimePage({
                     {displayReact.titulo}
                   </h2>
                   <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-500">
-                    <span className="flex items-center gap-1.5">
-                      <Eye className="w-4 h-4" />
-                      {displayReact.visualizacoes?.toLocaleString('pt-BR') || 0}
-                    </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-4 h-4" />
                       {displayReact.duracao || '—'}
