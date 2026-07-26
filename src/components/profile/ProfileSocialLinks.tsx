@@ -28,8 +28,8 @@ const PLATFORM_STYLES: Record<
   youtube: {
     Icon: Youtube,
     label: 'YouTube',
-    accent: 'from-amber-400 via-orange-400 to-amber-500',
-    iconClass: 'text-amber-300',
+    accent: 'from-stone-200 via-stone-400 to-stone-400',
+    iconClass: 'text-stone-200',
   },
   x: {
     Icon: XBrandIcon,

@@ -116,7 +116,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-black font-bold text-sm cursor-pointer disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-stone-500 to-stone-400 text-black font-bold text-sm cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Salvando...' : saved ? 'Salvo!' : 'Salvar personalização'}
@@ -135,7 +135,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
       <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1 custom-scrollbar">
         <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm py-2 -mt-2">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" />
+            <Sparkles className="w-5 h-5 text-stone-300" />
             Cosméticos
           </h2>
           {equippedItems.length > 0 && (
@@ -151,8 +151,8 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
         </div>
 
         {equippedItems.length > 0 && (
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3 space-y-2">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500/80">Equipados agora</p>
+          <div className="rounded-2xl border border-stone-400/20 bg-stone-400/5 p-3 space-y-2">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-stone-400/80">Equipados agora</p>
             <div className="flex flex-wrap gap-2">
               {equippedItems.map(({ slot, item }) => item && (
                 <span
@@ -225,7 +225,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                           key={item.id}
                           className={`relative group rounded-xl border transition-all ${
                             isOn
-                              ? 'border-amber-500/50 bg-amber-500/10 ring-1 ring-amber-500/20'
+                              ? 'border-stone-400/50 bg-stone-400/10 ring-1 ring-stone-400/20'
                               : `${style.border} ${style.bg} hover:border-zinc-600`
                           }`}
                         >
@@ -246,7 +246,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                               type="button"
                               onClick={() => setPreviewItem(item)}
                               title="Visualizar"
-                              className="p-1 rounded-md bg-zinc-950/80 border border-zinc-700 text-zinc-400 hover:text-amber-400 cursor-pointer"
+                              className="p-1 rounded-md bg-zinc-950/80 border border-zinc-700 text-zinc-400 hover:text-stone-300 cursor-pointer"
                             >
                               <Eye className="w-3 h-3" />
                             </button>
@@ -263,7 +263,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
                           </div>
 
                           {isOn && (
-                            <span className="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                            <span className="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-stone-300 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
                           )}
                         </div>
                       );

@@ -28,8 +28,8 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
           transition={{ type: 'spring', damping: 28, stiffness: 360 }}
           className="fixed z-[200] left-3 right-3 bottom-3 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[min(100%,18rem)] pointer-events-none"
         >
-          <div className="relative overflow-hidden rounded-xl border border-amber-500/25 bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/8 via-transparent to-purple-500/5 pointer-events-none" />
+          <div className="relative overflow-hidden rounded-xl border border-stone-400/25 bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
+            <div className="absolute inset-0 bg-gradient-to-br from-stone-300/8 via-transparent to-purple-500/5 pointer-events-none" />
             <button
               type="button"
               onClick={onClose}
@@ -42,8 +42,8 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
             <motion.div className="relative pr-6 shrink-0">
               {reward!.levelUp && (
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="text-[11px] font-black text-amber-300 uppercase tracking-wide leading-tight">
+                  <Zap className="w-4 h-4 text-stone-300 shrink-0" />
+                  <span className="text-[11px] font-black text-stone-200 uppercase tracking-wide leading-tight">
                     Nível {reward!.levelUp.tier}
                   </span>
                 </div>
@@ -51,7 +51,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
 
               <div className="flex flex-wrap gap-1.5">
                 {reward!.xp > 0 && (
-                  <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-md bg-stone-400/10 border border-stone-400/20 text-stone-200 text-[10px] font-bold">
                     +{reward!.xp} XP
                   </span>
                 )}
@@ -84,7 +84,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
                   className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80"
                 >
                   <div className="w-8 h-8 rounded-lg bg-zinc-950/60 flex items-center justify-center shrink-0">
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <Trophy className="w-3.5 h-3.5 text-stone-300" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-bold text-white truncate">{a.name}</p>

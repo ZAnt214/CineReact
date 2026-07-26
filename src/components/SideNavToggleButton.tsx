@@ -29,7 +29,7 @@ export default function SideNavToggleButton({ visible }: SideNavToggleButtonProp
       onClick={isMobile ? undefined : toggle}
       className={`p-2 rounded-xl border transition-colors cursor-pointer ${
         isSideNavOpen
-          ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+          ? 'bg-stone-400/10 border-stone-400/30 text-stone-300'
           : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
       }`}
       aria-label={isSideNavOpen ? 'Fechar menu' : 'Abrir menu'}

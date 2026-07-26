@@ -72,8 +72,8 @@ function PopcornIcon({ className }: { className?: string }) {
       <path d="M10 32h28l-3 10H13l-3-10z" fill="currentColor" opacity="0.85" />
       <path d="M14 32V18c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx="18" cy="14" r="3" fill="#fde68a" />
-      <circle cx="24" cy="10" r="3.5" fill="#fbbf24" />
-      <circle cx="30" cy="14" r="3" fill="#fcd34d" />
+      <circle cx="24" cy="10" r="3.5" fill="#d6d3d1" />
+      <circle cx="30" cy="14" r="3" fill="#d6d3d1" />
       <circle cx="21" cy="18" r="2.5" fill="#fef3c7" />
       <circle cx="27" cy="17" r="2.5" fill="#fde68a" />
     </svg>
@@ -85,8 +85,8 @@ const AVATAR_VISUALS: Record<
   { gradient: string; accent: string; Icon?: React.ElementType; CustomIcon?: React.FC<{ className?: string }> }
 > = {
   popcorn: {
-    gradient: 'from-amber-600 via-orange-500 to-yellow-400',
-    accent: 'text-amber-100',
+    gradient: 'from-stone-500 via-stone-500 to-stone-300',
+    accent: 'text-stone-50',
     CustomIcon: PopcornIcon,
   },
   clapperboard: {
@@ -95,8 +95,8 @@ const AVATAR_VISUALS: Record<
     Icon: Clapperboard,
   },
   crown: {
-    gradient: 'from-yellow-600 via-amber-500 to-yellow-300',
-    accent: 'text-amber-50',
+    gradient: 'from-stone-500 via-stone-400 to-stone-200',
+    accent: 'text-stone-50',
     Icon: Crown,
   },
   ghost: {
@@ -105,17 +105,17 @@ const AVATAR_VISUALS: Record<
     Icon: Ghost,
   },
   spotlight: {
-    gradient: 'from-purple-700 via-fuchsia-600 to-amber-400',
+    gradient: 'from-purple-700 via-fuchsia-600 to-stone-300',
     accent: 'text-white',
     Icon: Sparkles,
   },
   legend: {
-    gradient: 'from-rose-600 via-amber-500 to-yellow-300',
-    accent: 'text-amber-50',
+    gradient: 'from-rose-600 via-stone-400 to-stone-200',
+    accent: 'text-stone-50',
     Icon: Star,
   },
   atelier: {
-    gradient: 'from-fuchsia-500 via-cyan-400 to-amber-400',
+    gradient: 'from-fuchsia-500 via-cyan-400 to-stone-300',
     accent: 'text-white',
     Icon: Palette,
   },
@@ -293,8 +293,8 @@ export function RewardProfileContextPreview({
         return (
           <motion.div className="flex flex-col items-center gap-3">
             <motion.div
-              className={`rounded-full p-1 ${item.previewClass || 'ring-2 ring-amber-500/50'}`}
-              animate={item.animated ? { boxShadow: ['0 0 12px rgba(245,158,11,0.2)', '0 0 28px rgba(245,158,11,0.45)', '0 0 12px rgba(245,158,11,0.2)'] } : undefined}
+              className={`rounded-full p-1 ${item.previewClass || 'ring-2 ring-stone-400/50'}`}
+              animate={item.animated ? { boxShadow: ['0 0 12px rgba(168,162,158,0.2)', '0 0 28px rgba(168,162,158,0.45)', '0 0 12px rgba(168,162,158,0.2)'] } : undefined}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
               {item.avatarVisual ? (
@@ -365,8 +365,8 @@ export function RewardProfileContextPreview({
         return (
           <div className="flex flex-col items-center gap-3">
             <div className="flex gap-3">
-              <BadgeIcon className="w-10 h-10 text-amber-400" />
-              <BadgeIcon className="w-10 h-10 text-amber-400/60" />
+              <BadgeIcon className="w-10 h-10 text-stone-300" />
+              <BadgeIcon className="w-10 h-10 text-stone-300/60" />
             </div>
             <p className="text-sm font-bold text-white">{item.name}</p>
             <p className="text-[10px] text-zinc-500">Emblemas ao lado do perfil (máx. 2)</p>
@@ -387,7 +387,7 @@ export function RewardProfileContextPreview({
         return (
           <motion.div
             className={`w-full max-w-[260px] rounded-2xl border border-zinc-700/60 p-5 bg-gradient-to-br ${item.previewGradient || 'from-zinc-900 to-zinc-950'}`}
-            animate={item.animated ? { boxShadow: ['0 0 0 rgba(245,158,11,0)', '0 0 30px rgba(245,158,11,0.15)', '0 0 0 rgba(245,158,11,0)'] } : undefined}
+            animate={item.animated ? { boxShadow: ['0 0 0 rgba(168,162,158,0)', '0 0 30px rgba(168,162,158,0.15)', '0 0 0 rgba(168,162,158,0)'] } : undefined}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <div className="flex flex-col items-center">
@@ -402,12 +402,12 @@ export function RewardProfileContextPreview({
         return (
           <motion.div className="relative flex flex-col items-center gap-3">
             <motion.div
-              className="absolute w-28 h-28 rounded-full bg-amber-500/20 blur-xl"
+              className="absolute w-28 h-28 rounded-full bg-stone-400/20 blur-xl"
               animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 2.5, repeat: Infinity }}
             />
-            <div className="relative w-20 h-20 rounded-full ring-2 ring-amber-500/40 flex items-center justify-center bg-zinc-900">
-              <Zap className="w-8 h-8 text-amber-400" />
+            <div className="relative w-20 h-20 rounded-full ring-2 ring-stone-400/40 flex items-center justify-center bg-zinc-900">
+              <Zap className="w-8 h-8 text-stone-300" />
             </div>
             <p className="text-[10px] text-zinc-500">Efeito animado no perfil</p>
           </motion.div>

@@ -97,7 +97,7 @@ function CreatorNavRow({
       } ${creator.isDemo ? 'border border-fuchsia-500/20 bg-fuchsia-500/5' : ''}`}
     >
       {isActive && (
-        <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-amber-400 rounded-full" />
+        <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-stone-300 rounded-full" />
       )}
 
       <div className="relative shrink-0">
@@ -197,7 +197,7 @@ function SideNavHub({
         aria-label="Menu principal"
       >
         <div className="h-16 shrink-0 border-b border-zinc-800/60 flex items-center justify-between px-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/80">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400/80">
             Navegação
           </span>
           <button
@@ -223,17 +223,17 @@ function SideNavHub({
                 title={item.label}
                 className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer group ${
                   isActive
-                    ? 'bg-amber-500/10 text-amber-400'
+                    ? 'bg-stone-400/10 text-stone-300'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
                 }`}
               >
                 {isActive && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-amber-400 rounded-r-full" />
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-stone-300 rounded-r-full" />
                 )}
 
                 <Icon
                   className={`w-5 h-5 shrink-0 ${
-                    isActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-amber-400'
+                    isActive ? 'text-stone-300' : 'text-zinc-500 group-hover:text-stone-300'
                   }`}
                 />
                 <span className="text-sm font-bold truncate">{item.label}</span>
@@ -247,16 +247,16 @@ function SideNavHub({
               onClick={() => setCreatorsExpanded((prev) => !prev)}
               className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer group ${
                 creatorsActive
-                  ? 'bg-amber-500/10 text-amber-400'
+                  ? 'bg-stone-400/10 text-stone-300'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
               }`}
             >
               {creatorsActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-amber-400 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-stone-300 rounded-r-full" />
               )}
               <Radio
                 className={`w-5 h-5 shrink-0 ${
-                  creatorsActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-amber-400'
+                  creatorsActive ? 'text-stone-300' : 'text-zinc-500 group-hover:text-stone-300'
                 }`}
               />
               <span className="text-sm font-bold truncate flex-1">Criadores</span>

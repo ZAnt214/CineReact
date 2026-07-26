@@ -71,7 +71,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-          <Loader2 className="w-7 h-7 animate-spin mb-3 text-amber-400" />
+          <Loader2 className="w-7 h-7 animate-spin mb-3 text-stone-300" />
           <p className="text-sm">Carregando perfil...</p>
         </div>
       )}

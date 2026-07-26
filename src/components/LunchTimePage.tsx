@@ -101,7 +101,7 @@ function WarmMessage({ message }: { message: string }) {
       transition={{ duration: 0.45 }}
       className="flex flex-col items-center gap-3 px-6 text-center"
     >
-      <Heart className="w-5 h-5 text-amber-400 fill-amber-400/30" />
+      <Heart className="w-5 h-5 text-stone-300 fill-stone-300/30" />
       <p className="text-base sm:text-lg font-semibold text-white leading-relaxed max-w-sm">
         {message}
       </p>
@@ -217,7 +217,7 @@ export default function LunchTimePage({
           onClick={onBackToHome}
           className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-extrabold text-xs transition-all flex items-center gap-2 border border-zinc-800 cursor-pointer active:scale-95"
         >
-          <ArrowLeft className="w-4 h-4 text-amber-400" />
+          <ArrowLeft className="w-4 h-4 text-stone-300" />
           <span>Voltar ao Início</span>
         </button>
         {hasVideos && (
@@ -227,13 +227,13 @@ export default function LunchTimePage({
         )}
       </div>
 
-      <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/80" />
-        <motion.div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-stone-400/30 rounded-3xl p-6 sm:p-8 mb-8 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-stone-400/80" />
+        <motion.div className="absolute -top-20 -right-20 w-64 h-64 bg-stone-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-3 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-400/10 border border-stone-400/30 text-stone-300 text-xs font-extrabold uppercase tracking-wider">
               <UtensilsCrossed className="w-4 h-4" />
               <span>Hora do Almoço</span>
             </div>
@@ -249,7 +249,7 @@ export default function LunchTimePage({
             <button
               onClick={handleSortearEAssistir}
               disabled={!hasVideos}
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 text-black font-black text-sm transition-all shadow-lg shadow-stone-400/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
             >
               <Sparkles className="w-4 h-4" />
               {sortearButtonLabel}
@@ -265,8 +265,8 @@ export default function LunchTimePage({
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 px-6"
           >
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 mb-6">
-              <UtensilsCrossed className="w-9 h-9 text-amber-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-stone-400/10 mb-6">
+              <UtensilsCrossed className="w-9 h-9 text-stone-300" />
             </div>
             <p className="text-lg text-zinc-300 font-medium leading-relaxed max-w-md mx-auto">
               Que tal um react aleatório para acompanhar sua refeição? É só um clique.
@@ -296,7 +296,7 @@ export default function LunchTimePage({
                 <>
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
                     <div
-                      className="h-full bg-amber-400 transition-[width] duration-300 ease-out"
+                      className="h-full bg-stone-300 transition-[width] duration-300 ease-out"
                       style={{ width: `${shuffleProgress}%` }}
                     />
                   </div>
@@ -322,7 +322,7 @@ export default function LunchTimePage({
                   <p className="text-sm text-zinc-300">Bom apetite! Começando em instantes…</p>
                   <button
                     onClick={() => picked && startPlayback(picked)}
-                    className="mt-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                    className="mt-1 text-xs font-bold text-stone-300 hover:text-stone-200 transition-colors cursor-pointer"
                   >
                     Assistir agora →
                   </button>
@@ -338,7 +338,7 @@ export default function LunchTimePage({
                 className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wider text-amber-500/80 mb-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-stone-400/80 mb-1">
                     Escolhido para você
                   </p>
                   <h2 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">

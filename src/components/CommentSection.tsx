@@ -161,7 +161,7 @@ export default function CommentSection({
       <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-amber-400" />
+            <MessageSquare className="w-4 h-4 text-stone-300" />
             Comentários e Opiniões ({comentarios.length})
           </h3>
         </div>
@@ -197,12 +197,12 @@ export default function CommentSection({
               onChange={(e) => setNovoComentarioTexto(e.target.value)}
               placeholder="O que achou deste react? Escreva seu comentário aqui..."
               rows={3}
-              className="w-full bg-zinc-900/90 rounded-xl p-3.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/60 transition-all resize-none"
+              className="w-full bg-zinc-900/90 rounded-xl p-3.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-stone-400/60 transition-all resize-none"
             />
 
             {user.isDonor && (
-              <p className="text-[10px] text-amber-400 flex items-center gap-1.5 font-medium">
-                <Sparkles className="w-3 h-3 animate-pulse text-amber-300" />
+              <p className="text-[10px] text-stone-300 flex items-center gap-1.5 font-medium">
+                <Sparkles className="w-3 h-3 animate-pulse text-stone-200" />
                 Apoiador VIP: Seu comentário ganha destaque especial no topo!
               </p>
             )}
@@ -214,7 +214,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={comentarioEnviando}
-                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-stone-400/20 cursor-pointer disabled:opacity-50"
               >
                 {comentarioEnviando ? 'Enviando...' : 'Publicar Comentário'}
               </button>
@@ -228,7 +228,7 @@ export default function CommentSection({
           <button 
             type="button"
             onClick={() => onOpenAuth?.()}
-            className="px-5 py-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 font-bold text-xs rounded-full transition-all cursor-pointer inline-block"
+            className="px-5 py-2 bg-stone-400/15 hover:bg-stone-400/25 text-stone-300 font-bold text-xs rounded-full transition-all cursor-pointer inline-block"
           >
             Entrar ou Criar Conta
           </button>
@@ -294,12 +294,12 @@ export default function CommentSection({
                         onClick={() => handleToggleLike(c.id)}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                           isLiked 
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' 
+                            ? 'bg-stone-400/15 text-stone-300 border border-stone-400/20' 
                             : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850'
                         }`}
                         title={isLiked ? "Remover curtida" : "Curtir comentário"}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-amber-400 text-amber-400' : 'text-zinc-500'}`} />
+                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-stone-300 text-stone-300' : 'text-zinc-500'}`} />
                         <span>{likesCount}</span>
                       </button>
                     </div>
