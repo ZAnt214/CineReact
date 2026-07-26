@@ -4,6 +4,7 @@ import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import ProfileSocialLinks from './profile/ProfileSocialLinks.tsx';
+import CineReactLogo from './CineReactLogo.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface CommentSectionProps {
@@ -165,7 +166,7 @@ export default function CommentSection({
             Comentários e Opiniões ({comentarios.length})
           </h3>
         </div>
-        <span className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">CINEREACT COMUNIDADE</span>
+        <CineReactLogo size="xs" className="opacity-60" />
       </div>
 
       {/* FORM DE COMENTÁRIO */}

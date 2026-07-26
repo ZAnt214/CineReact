@@ -358,9 +358,7 @@ export default function Header({
         }`}
       >
         <div className="cine-container w-full">
-          <div className="flex h-16 items-center justify-between gap-4">
-            
-            {/* LEFT SECTION: Logo & Desktop Navigation */}
+          <div className="flex min-h-16 items-center justify-between gap-4 py-1.5">
             <div className="flex items-center gap-3 lg:gap-6 flex-shrink-0">
               <SideNavToggleButton visible={hasSideNav} />
 
@@ -369,7 +367,7 @@ export default function Header({
                 onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
                 className="group focus:outline-none cursor-pointer py-1"
               >
-                <CineReactLogo size="sm" showTagline={false} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+                <CineReactLogo size="sm" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
               </button>
 
               {/* DESKTOP NAV */}
@@ -581,7 +579,7 @@ export default function Header({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 12, scale: 0.97 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="fixed md:absolute top-16 md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-neutral-950/98 backdrop-blur-2xl border border-neutral-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-neutral-900/60"
+                      className="fixed md:absolute top-[4.5rem] md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-neutral-950/98 backdrop-blur-2xl border border-neutral-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-neutral-900/60"
                     >
                       <div className="px-4 py-3.5 flex justify-between items-center bg-neutral-900/20">
                         <div className="flex items-center gap-2">

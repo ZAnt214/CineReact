@@ -17,6 +17,7 @@ import SideNavHub, { resetSideNavOnLeave, parseCreatorProfileTab } from './compo
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
 import LandingPage from './components/LandingPage.tsx';
+import CineReactLogo from './components/CineReactLogo.tsx';
 import GamificationPage from './components/GamificationPage.tsx';
 import CreatorProfilePage from './components/CreatorProfilePage.tsx';
 import GamificationRewardToast from './components/GamificationRewardToast.tsx';
@@ -27,7 +28,7 @@ import { Obra, ReactVideo, UserState } from './types.ts';
 import { hasSocialLinks } from './utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
-import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
+import { Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -1534,9 +1535,7 @@ export default function App() {
               
               {/* Top Icon */}
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center shadow-lg shadow-cine-accent/5">
-                  <Film className="w-8 h-8 text-cine-accent-light stroke-[2]" />
-                </div>
+                <CineReactLogo size="lg" align="center" animated />
               </div>
 
               {/* Title */}
