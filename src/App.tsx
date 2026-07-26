@@ -902,7 +902,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1159,7 +1159,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Canal não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1371,7 +1371,7 @@ export default function App() {
                     return (
                       <motion.div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Categoria do canal não encontrada</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-white text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </motion.div>
@@ -1530,7 +1530,7 @@ export default function App() {
               className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
             >
               {/* Visual element decorator */}
-              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent-dark" />
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-white-dark" />
               
               {/* Top Icon */}
               <div className="flex justify-center mb-6">
@@ -1561,7 +1561,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-neutral-200 text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>

@@ -53,7 +53,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-extrabold text-xs sm:text-sm hover:from-cine-cream hover:to-cine-accent-light transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
+            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white text-black font-extrabold text-xs sm:text-sm hover:bg-neutral-200 transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
           >
             <span>{isNavigating ? 'Abrindo...' : 'Acessar Plataforma'}</span>
             {isNavigating ? (
@@ -111,7 +111,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent text-black font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-black font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
           >
             <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
             {isNavigating ? (
@@ -274,7 +274,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
             <button
               onClick={onExplore}
               disabled={isNavigating}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cine-accent-light to-cine-accent-light text-black font-black text-base hover:brightness-110 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
+              className="px-8 py-4 rounded-2xl bg-white-light text-black font-black text-base hover:brightness-110 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
             >
               <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
               {isNavigating ? (

@@ -214,7 +214,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={comentarioEnviando}
-                className="px-5 py-2.5 bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-cine-accent/20 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-black font-black text-xs rounded-xl transition-all shadow-lg shadow-cine-accent/20 cursor-pointer disabled:opacity-50"
               >
                 {comentarioEnviando ? 'Enviando...' : 'Publicar Comentário'}
               </button>

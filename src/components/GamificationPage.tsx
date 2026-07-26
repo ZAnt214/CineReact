@@ -127,7 +127,7 @@ export default function GamificationPage({
                 loadout={profile?.loadout}
               />
               {profile?.featuredInfluencer && (
-                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-cine-accent-light to-cine-accent-light text-[9px] font-black text-black uppercase z-20">
+                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-white-light text-[9px] font-black text-black uppercase z-20">
                   VIP
                 </span>
               )}
@@ -327,7 +327,7 @@ export default function GamificationPage({
                     key={s.id}
                     className={`p-5 rounded-2xl border text-center transition-all ${
                       unlocked
-                        ? 'border-cine-accent/40 bg-cine-surface/20 shadow-[0_0_25px_rgba(139,92,246,0.1)]'
+                        ? 'border-cine-accent/40 bg-cine-surface/20 shadow-[0_0_25px_rgba(255,255,255,0.1)]'
                         : 'border-zinc-800 bg-zinc-900/30 opacity-70'
                     }`}
                   >

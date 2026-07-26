@@ -186,7 +186,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
             className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
             <motion.div
-              className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent-dark"
+              className="absolute top-0 left-0 w-full h-1 bg-white-dark"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}

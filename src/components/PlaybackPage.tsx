@@ -120,7 +120,7 @@ function PremiumVideoShelf({
                 {video.duracao}
               </span>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cine-accent-light to-cine-accent flex items-center justify-center shadow-lg shadow-cine-accent/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg shadow-cine-accent/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
                   <Play className="w-5 h-5 fill-black text-black ml-0.5" />
                 </div>
               </div>
@@ -524,8 +524,8 @@ export default function PlaybackPage({
   // Avatar Gradient styling based on channel name
   const getAvatarColor = (name: string) => {
     const colors = [
-      'from-cine-accent-light to-cine-accent-dark shadow-[0_0_12px_rgba(139,92,246,0.2)]',
-      'from-cine-accent to-cine-accent-dark shadow-[0_0_12px_rgba(139,92,246,0.2)]',
+      'from-cine-accent-light to-cine-accent-dark shadow-[0_0_12px_rgba(255,255,255,0.2)]',
+      'from-cine-accent to-cine-accent-dark shadow-[0_0_12px_rgba(255,255,255,0.2)]',
     ];
     let sum = 0;
     for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
@@ -547,7 +547,7 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-6 transition-all duration-300`}>
           
           {/* HIGH-END CINEMATIC GOLDEN BORDER PLAYER FRAME */}
-          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(139,92,246,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(139,92,246,0.45)] transition-all duration-500">
+          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(255,255,255,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(255,255,255,0.45)] transition-all duration-500">
             {/* Ambient Backlight Glow behind Player */}
             <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cine-accent/25 via-cine-accent-light/20 to-cine-accent-dark/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
 
@@ -594,7 +594,7 @@ export default function PlaybackPage({
                         <div className="absolute w-20 h-20 rounded-full bg-cine-accent/20 animate-ping" />
                         
                         {/* Spinning Amber Border Ring */}
-                        <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(139,92,246,0.3)]" />
+                        <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
                         
                         {/* Central Icon */}
                         <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-cine-accent/40 flex items-center justify-center shadow-lg">
@@ -615,7 +615,7 @@ export default function PlaybackPage({
 
                     {/* Bottom Loading Bar */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900/80 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent animate-[pulse_1.5s_infinite] w-full" />
+                      <div className="h-full bg-white animate-[pulse_1.5s_infinite] w-full" />
                     </div>
                   </motion.div>
                 )}
@@ -736,7 +736,7 @@ export default function PlaybackPage({
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
                       ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-850 hover:text-white border border-zinc-800' 
-                      : 'bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black hover:from-cine-cream hover:to-cine-accent-light shadow-lg shadow-cine-accent/20'
+                      : 'bg-white text-black font-black hover:bg-neutral-200 shadow-lg shadow-cine-accent/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}

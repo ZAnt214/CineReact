@@ -314,7 +314,7 @@ export default function AuthModal({
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent-dark" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-white-dark" />
 
             <button
               onClick={onClose}
@@ -586,7 +586,7 @@ export default function AuthModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
+                      className="w-full bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
                     >
                       {loading ? (
                         <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

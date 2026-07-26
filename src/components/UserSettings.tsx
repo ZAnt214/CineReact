@@ -234,7 +234,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div>
                 <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
                   user.isDonor 
-                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(139,92,246,0.3)] animate-pulse" 
+                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(255,255,255,0.3)] animate-pulse" 
                     : "text-white"
                 }`}>
                   {user.nome}
@@ -466,7 +466,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="w-full bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

@@ -70,7 +70,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
               </div>
               <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Tag Exclusiva</h3>
               <p className="text-xs text-zinc-500 leading-relaxed">
-                Exiba orgulhosamente a tag <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-cine-accent-light to-cine-accent-light text-[9px] uppercase font-black text-black tracking-wider">APOIADOR VIP</span> ao lado do seu nome, diferenciando você nas avaliações e chats.
+                Exiba orgulhosamente a tag <span className="px-1.5 py-0.5 rounded bg-white-light text-[9px] uppercase font-black text-black tracking-wider">APOIADOR VIP</span> ao lado do seu nome, diferenciando você nas avaliações e chats.
               </p>
             </div>
             <div className="text-[10px] text-cine-accent-light/80 font-mono mt-4 flex items-center gap-1.5">

@@ -196,7 +196,7 @@ export default function RowMovies({
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
-                    ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(139,92,246,0.18)] ring-1 ring-cine-accent/30' 
+                    ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(255,255,255,0.18)] ring-1 ring-cine-accent/30' 
                     : 'border border-zinc-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
                 }`}
               >
@@ -211,7 +211,7 @@ export default function RowMovies({
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-accent text-black' : 'bg-gradient-to-r from-cine-accent-light to-cine-accent text-black'
+                      isEditorial ? 'bg-cine-accent text-black' : 'bg-white text-black'
                     }`}>
                       <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-black" />
                     </div>
@@ -225,7 +225,7 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(139,92,246,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
+                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(255,255,255,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
                       <Sparkles className="w-3.5 h-3.5 fill-zinc-950 text-zinc-950 shrink-0" />
                       <span>Recomenda</span>
                     </span>

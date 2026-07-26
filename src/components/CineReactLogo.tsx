@@ -3,11 +3,11 @@ import { motion } from 'motion/react';
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 const sizeStyles: Record<CineReactLogoSize, string> = {
-  xs: 'text-[1.05rem]',
-  sm: 'text-[1.2rem] sm:text-[1.35rem]',
-  md: 'text-[1.5rem] sm:text-[1.75rem]',
-  lg: 'text-[2.5rem] sm:text-[3rem]',
-  xl: 'text-[3rem] sm:text-[3.75rem]',
+  xs: 'cine-wordmark--xs',
+  sm: 'cine-wordmark--sm',
+  md: 'cine-wordmark--md',
+  lg: 'cine-wordmark--lg',
+  xl: 'cine-wordmark--xl',
 };
 
 interface CineReactLogoProps {
@@ -18,24 +18,26 @@ interface CineReactLogoProps {
   heading?: boolean;
 }
 
-function Wordmark({ sizeClass, heading }: { sizeClass: string; heading: boolean }) {
+function Lockup({ sizeClass, heading }: { sizeClass: string; heading: boolean }) {
   const className = `cine-wordmark ${sizeClass}`;
 
+  const inner = (
+    <span className="cine-wordmark-frame">
+      <span className="cine-wordmark-text">
+        C<span className="cine-wordmark-i">i</span>
+        <span className="cine-wordmark-join">ne</span>
+        <span className="cine-wordmark-join">R</span>
+        eact
+      </span>
+      <span className="cine-wordmark-rail" aria-hidden />
+    </span>
+  );
+
   if (heading) {
-    return (
-      <h1 className={className}>
-        <span className="cine-wordmark-cine">Cine</span>
-        <span className="cine-wordmark-react">React</span>
-      </h1>
-    );
+    return <h1 className={className}>{inner}</h1>;
   }
 
-  return (
-    <div className={className} aria-hidden>
-      <span className="cine-wordmark-cine">Cine</span>
-      <span className="cine-wordmark-react">React</span>
-    </div>
-  );
+  return <div className={className}>{inner}</div>;
 }
 
 export default function CineReactLogo({
@@ -46,16 +48,16 @@ export default function CineReactLogo({
   heading = false,
 }: CineReactLogoProps) {
   const sizeClass = sizeStyles[size];
-  const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto' : ''} ${className}`;
+  const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto block w-fit' : ''} ${className}`;
 
-  const wordmark = <Wordmark sizeClass={sizeClass} heading={heading} />;
+  const wordmark = <Lockup sizeClass={sizeClass} heading={heading} />;
 
   if (animated) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         className={wrapperClass}
         aria-label="CineReact"
       >

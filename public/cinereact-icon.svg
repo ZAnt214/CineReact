@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
   <rect width="200" height="200" rx="40" fill="#0f0f0f"/>
-  <text x="20" y="118" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="700" font-size="34" fill="#ffffff" letter-spacing="-1">Cine</text>
-  <text x="20" y="158" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="34" fill="#8b5cf6" letter-spacing="-1">React</text>
+  <text x="16" y="118" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="32" fill="#ffffff" letter-spacing="-1.8">CineReact</text>
+  <rect x="38" y="88" width="4" height="4" rx="1" fill="#a3a3a3"/>
+  <rect x="16" y="128" width="168" height="3" rx="1.5" fill="#737373"/>
 </svg>
