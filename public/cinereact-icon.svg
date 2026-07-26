@@ -1,9 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
   <rect width="200" height="200" rx="40" fill="#0a0e14"/>
-  <circle cx="44" cy="88" r="7" fill="#22d3ee"/>
-  <circle cx="44" cy="88" r="14" stroke="#22d3ee" stroke-width="1.5" stroke-opacity="0.5" fill="none"/>
-  <circle cx="44" cy="88" r="21" stroke="#22d3ee" stroke-width="1.2" stroke-opacity="0.25" fill="none"/>
-  <text x="72" y="96" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="28" fill="#ffffff" letter-spacing="-1">Cine</text>
-  <text x="72" y="132" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="28" fill="#22d3ee" letter-spacing="-1">React</text>
-  <path d="M72 148 C82 148 82 144 92 144 C102 144 102 152 112 152 C122 152 122 144 132 144 C142 144 142 152 152 152 C162 152 162 144 172 144" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <text x="24" y="108" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="32" fill="#ffffff" letter-spacing="-1">Cine</text>
+  <text x="24" y="148" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="32" fill="#22d3ee" letter-spacing="-1">React</text>
 </svg>

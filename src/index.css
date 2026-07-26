@@ -26,36 +26,16 @@
   font-family: 'Sora', 'Inter', system-ui, sans-serif;
 }
 
-/* CineReact — marca original: onda de reação + letreiro */
+/* CineReact — letreiro limpo */
 .cine-brand {
   display: inline-block;
   line-height: 1;
 }
 
-.cine-brand-lockup {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.28em;
-  min-width: 0;
-}
-
-.cine-brand-row {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-}
-
-.cine-brand-ripple {
-  width: 1.55em;
-  height: 1.55em;
-  flex-shrink: 0;
-}
-
 .cine-brand-name {
   font-family: 'Sora', 'Inter', system-ui, sans-serif;
   font-weight: 800;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   color: #ffffff;
   white-space: nowrap;
 }
@@ -64,30 +44,17 @@
   color: #22d3ee;
 }
 
-.cine-brand-wave {
-  display: block;
-  width: 100%;
-  height: 0.45em;
-  min-width: 4.5em;
-  opacity: 0.9;
-}
-
-.cine-brand--xs { font-size: 0.95rem; }
-.cine-brand--sm { font-size: 1.1rem; }
-.cine-brand--md { font-size: 1.45rem; }
+.cine-brand--xs { font-size: 1rem; }
+.cine-brand--sm { font-size: 1.15rem; }
+.cine-brand--md { font-size: 1.5rem; }
 .cine-brand--lg { font-size: 2.5rem; }
 .cine-brand--xl { font-size: 3.1rem; }
 
 @media (min-width: 640px) {
-  .cine-brand--sm { font-size: 1.25rem; }
-  .cine-brand--md { font-size: 1.65rem; }
+  .cine-brand--sm { font-size: 1.3rem; }
+  .cine-brand--md { font-size: 1.7rem; }
   .cine-brand--lg { font-size: 2.85rem; }
   .cine-brand--xl { font-size: 3.55rem; }
-}
-
-.cine-brand--xs .cine-brand-ripple {
-  width: 1.35em;
-  height: 1.35em;
 }
 
 .font-righteous {
