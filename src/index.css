@@ -319,10 +319,6 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
-.cosmetics-hub-scroll {
-  contain: layout style;
-}
-
 .cosmetics-hub-grid {
   contain: layout style;
 }
@@ -330,6 +326,5 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 .cosmetics-hub-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 220px;
-  contain: layout paint style;
 }
 
