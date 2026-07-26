@@ -8,8 +8,10 @@ import ProfileAvatar from './ProfileAvatar.tsx';
 import ProfileSurface from './ProfileSurface.tsx';
 import ProfileThemeScope from './ProfileThemeScope.tsx';
 import ProfileNameRow from './ProfileNameRow.tsx';
+import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import { RewardPreviewThumb } from '../rewards/RewardPreview.tsx';
 import { VERIFIED_PROFILE_BADGE_ID } from '../../data/rewardsCatalog.ts';
+import { isVerifiedCreatorLoadout } from '../../gamification/verifiedCreator.ts';
 import type { GamificationMeResponse } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -95,6 +97,7 @@ export default function ProfilePanel({
 }: ProfilePanelProps) {
   const profile = gamificationData?.profile;
   const loadout = profile?.loadout;
+  const isVerifiedCreator = isVerifiedCreatorLoadout(loadout);
   const badgeItems = (loadout?.badges || [])
     .map((id) => gamificationData?.inventory.find((i) => i.id === id))
     .filter((b): b is NonNullable<typeof b> => !!b)
@@ -203,11 +206,18 @@ export default function ProfilePanel({
                   className="w-full"
                 />
 
-                <p className="profile-text-muted text-xs mt-3 font-mono truncate max-w-full w-full">{user.email}</p>
-
                 <p className="profile-text-subtle text-sm mt-3 leading-relaxed max-w-xs w-full">
                   {user.descricao || 'Adicione uma bio nas configurações para personalizar seu perfil.'}
                 </p>
+
+                {isVerifiedCreator && (
+                  <ProfileSocialLinks
+                    links={user.socialLinks}
+                    size="md"
+                    align="center"
+                    className="mt-4"
+                  />
+                )}
 
                 {badgeItems.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">

@@ -20,6 +20,7 @@ import LandingPage from './components/LandingPage.tsx';
 import GamificationPage from './components/GamificationPage.tsx';
 import GamificationRewardToast from './components/GamificationRewardToast.tsx';
 import { useGamification } from './hooks/useGamification.ts';
+import { isVerifiedCreatorLoadout } from './gamification/verifiedCreator.ts';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
@@ -1276,7 +1277,8 @@ export default function App() {
                 <UserSettings 
                   user={user} 
                   onUpdateUser={setUser} 
-                  onNavigateToDonations={() => setCurrentTab('doacoes')} 
+                  onNavigateToDonations={() => setCurrentTab('doacoes')}
+                  isVerifiedCreator={isVerifiedCreatorLoadout(gamification.data?.profile.loadout)}
                 />
               </motion.div>
             )}

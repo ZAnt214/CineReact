@@ -26,6 +26,8 @@ import GamificationBar from './GamificationBar.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileSurface from './profile/ProfileSurface.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
+import ProfileSocialLinks from './profile/ProfileSocialLinks.tsx';
+import { isVerifiedCreatorLoadout } from '../gamification/verifiedCreator.ts';
 import ProfileCosmeticsHub from './rewards/ProfileCosmeticsHub.tsx';
 import type { GamificationMeResponse, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
 import type { UserState } from '../types.ts';
@@ -133,6 +135,12 @@ export default function GamificationPage({
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-500/70 mb-1">CineReact Club</p>
               <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" align="start" className="w-full" />
+              {user.descricao && (
+                <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">{user.descricao}</p>
+              )}
+              {isVerifiedCreatorLoadout(profile?.loadout) && (
+                <ProfileSocialLinks links={user.socialLinks} size="sm" align="start" className="mt-3 max-w-md" />
+              )}
               <p className="text-amber-400 font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
                 <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-purple-400 font-bold uppercase tracking-wider">
