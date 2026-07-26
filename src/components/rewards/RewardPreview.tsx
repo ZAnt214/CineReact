@@ -113,8 +113,8 @@ const AVATAR_VISUALS: Record<
     Icon: Star,
   },
   atelier: {
-    gradient: 'from-amber-600 via-teal-600 to-violet-700',
-    accent: 'text-amber-50',
+    gradient: 'from-fuchsia-500 via-cyan-400 to-amber-400',
+    accent: 'text-white',
     Icon: Palette,
   },
 };
@@ -123,15 +123,29 @@ export function AvatarRewardVisual({
   visual,
   size = 'md',
   className = '',
+  lite = false,
 }: {
   visual: NonNullable<RewardItemDefinition['avatarVisual']>;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  lite?: boolean;
 }) {
   const cfg = AVATAR_VISUALS[visual];
   const s = SIZE_MAP[size];
   const Icon = cfg.Icon;
   const CustomIcon = cfg.CustomIcon;
+
+  if (lite) {
+    return (
+      <div
+        className={`relative rounded-full bg-gradient-to-br ${cfg.gradient} shadow-lg flex items-center justify-center overflow-hidden ${s.avatar} ${className}`}
+      >
+        <div className={`relative z-10 ${cfg.accent}`}>
+          {CustomIcon ? <CustomIcon className={s.inner} /> : Icon ? <Icon className={s.inner} strokeWidth={1.75} /> : null}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -159,10 +173,12 @@ export function RewardPreviewThumb({
   item,
   size = 'sm',
   locked = false,
+  lite = false,
 }: {
   item: RewardLike;
   size?: 'sm' | 'md' | 'lg';
   locked?: boolean;
+  lite?: boolean;
 }) {
   const s = SIZE_MAP[size];
   const isLocked = locked || item.owned === false;
@@ -171,16 +187,16 @@ export function RewardPreviewThumb({
 
   if (isLocked) {
     return (
-      <motion.div className={`${s.box} rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center shrink-0`}>
+      <div className={`${s.box} rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center shrink-0`}>
         <Lock className={`${s.icon} text-zinc-600`} />
-      </motion.div>
+      </div>
     );
   }
 
   switch (item.category) {
     case 'avatar':
       if (item.avatarVisual) {
-        return <AvatarRewardVisual visual={item.avatarVisual} size={size} />;
+        return <AvatarRewardVisual visual={item.avatarVisual} size={size} lite={lite} />;
       }
       return (
         <div className={`${s.box} rounded-full bg-zinc-800 flex items-center justify-center`}>
@@ -190,7 +206,7 @@ export function RewardPreviewThumb({
 
     case 'frame':
       return (
-        <PremiumFrameRing visualStyle={visual} size={size}>
+        <PremiumFrameRing visualStyle={visual} size={size} lite={lite}>
           <div className={`${size === 'sm' ? 'w-10 h-10' : size === 'lg' ? 'w-20 h-20' : 'w-14 h-14'} rounded-full bg-gradient-to-br ${styleCfg.gradient}`} />
         </PremiumFrameRing>
       );
@@ -198,11 +214,11 @@ export function RewardPreviewThumb({
     case 'background':
     case 'theme':
     case 'profile_card':
-      return <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" />;
+      return <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" lite={lite} />;
 
     case 'effect':
       return (
-        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" lite={lite}>
           <Zap className={`${s.icon} ${styleCfg.accent}`} />
         </PremiumRewardSurface>
       );
@@ -231,7 +247,7 @@ export function RewardPreviewThumb({
     case 'badge': {
       const BadgeIcon = BADGE_ICONS[item.id] || Medal;
       return (
-        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" lite={lite}>
           <BadgeIcon className={`${s.icon} ${styleCfg.accent}`} />
         </PremiumRewardSurface>
       );
@@ -240,7 +256,7 @@ export function RewardPreviewThumb({
     case 'reaction':
     case 'emoji':
       return (
-        <PremiumRewardSurface visualStyle={visual} size={size} rounded="2xl">
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="2xl" lite={lite}>
           <span className={size === 'sm' ? 'text-xl' : size === 'md' ? 'text-2xl' : 'text-4xl'}>
             {item.emojiChar || '✨'}
           </span>
@@ -249,7 +265,7 @@ export function RewardPreviewThumb({
 
     default:
       return (
-        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl">
+        <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" lite={lite}>
           <Sparkles className={`${s.icon} ${styleCfg.accent}`} />
         </PremiumRewardSurface>
       );

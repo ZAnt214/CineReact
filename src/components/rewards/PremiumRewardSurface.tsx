@@ -3,7 +3,8 @@ import { motion } from 'motion/react';
 import { getVisualStyle } from '../../data/rewardVisualStyles.ts';
 import type { RewardVisualStyle } from '../../types/gamification.ts';
 
-function StarField({ count = 6 }: { count?: number }) {
+function StarField({ count = 6, lite = false }: { count?: number; lite?: boolean }) {
+  if (lite) return null;
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
@@ -22,7 +23,8 @@ function StarField({ count = 6 }: { count?: number }) {
   );
 }
 
-function BubbleField({ count = 5 }: { count?: number }) {
+function BubbleField({ count = 5, lite = false }: { count?: number; lite?: boolean }) {
+  if (lite) return null;
   const colors = ['bg-pink-300/40', 'bg-sky-300/40', 'bg-fuchsia-300/40', 'bg-violet-300/30'];
   return (
     <>
@@ -44,7 +46,8 @@ function BubbleField({ count = 5 }: { count?: number }) {
   );
 }
 
-function SparkleField({ count = 4 }: { count?: number }) {
+function SparkleField({ count = 4, lite = false }: { count?: number; lite?: boolean }) {
+  if (lite) return null;
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
@@ -67,44 +70,37 @@ export function PremiumRewardSurface({
   size = 'md',
   rounded = 'xl',
   className = '',
+  lite = false,
   children,
 }: {
   visualStyle?: RewardVisualStyle;
   size?: 'sm' | 'md' | 'lg';
   rounded?: 'full' | 'xl' | '2xl';
   className?: string;
+  lite?: boolean;
   children?: React.ReactNode;
 }) {
   const style = getVisualStyle(visualStyle);
   const sizeClass = size === 'sm' ? 'w-12 h-12' : size === 'lg' ? 'w-24 h-24' : 'w-16 h-16';
   const roundClass = rounded === 'full' ? 'rounded-full' : rounded === '2xl' ? 'rounded-2xl' : 'rounded-xl';
-
   const useCssGradient = !!style.gradientCss;
+  const animated = style.animated && !lite;
+  const showShimmer = style.shimmer && !lite;
 
-  return (
-    <motion.div
-      className={`relative overflow-hidden ${sizeClass} ${roundClass} ${style.glow} ${className}`}
-      whileHover={{ scale: 1.04 }}
-      animate={
-        style.animated && useCssGradient
-          ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }
-          : undefined
+  const surfaceStyle: React.CSSProperties | undefined = useCssGradient
+    ? {
+        background: style.gradientCss,
+        backgroundSize: animated ? '200% 200%' : undefined,
       }
-      transition={style.animated ? { duration: 4, repeat: Infinity, ease: 'linear' } : undefined}
-      style={
-        useCssGradient
-          ? {
-              background: style.gradientCss,
-              backgroundSize: style.animated ? '200% 200%' : undefined,
-            }
-          : undefined
-      }
-    >
+    : undefined;
+
+  const inner = (
+    <>
       {!useCssGradient && (
         <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />
       )}
 
-      {style.shimmer && (
+      {showShimmer && (
         <motion.div
           className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0"
           animate={{ x: ['-100%', '100%'] }}
@@ -112,10 +108,10 @@ export function PremiumRewardSurface({
         />
       )}
 
-      {style.particles === 'stars' && <StarField />}
-      {style.particles === 'bubbles' && <BubbleField />}
-      {style.particles === 'sparkles' && <SparkleField />}
-      {style.particles === 'confetti' &&
+      {style.particles === 'stars' && <StarField lite={lite} />}
+      {style.particles === 'bubbles' && <BubbleField lite={lite} />}
+      {style.particles === 'sparkles' && <SparkleField lite={lite} />}
+      {style.particles === 'confetti' && !lite &&
         ['#ef4444', '#22c55e', '#3b82f6', '#f59e0b'].map((c, i) => (
           <motion.span
             key={c}
@@ -127,6 +123,33 @@ export function PremiumRewardSurface({
         ))}
 
       {children && <div className="relative z-10 w-full h-full flex items-center justify-center">{children}</div>}
+    </>
+  );
+
+  if (lite) {
+    return (
+      <div
+        className={`relative overflow-hidden ${sizeClass} ${roundClass} ${style.glow} ${className}`}
+        style={surfaceStyle}
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className={`relative overflow-hidden ${sizeClass} ${roundClass} ${style.glow} ${className}`}
+      whileHover={{ scale: 1.04 }}
+      animate={
+        animated && useCssGradient
+          ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }
+          : undefined
+      }
+      transition={animated ? { duration: 4, repeat: Infinity, ease: 'linear' } : undefined}
+      style={surfaceStyle}
+    >
+      {inner}
     </motion.div>
   );
 }
@@ -134,59 +157,73 @@ export function PremiumRewardSurface({
 export function PremiumFrameRing({
   visualStyle,
   size = 'md',
+  lite = false,
   children,
 }: {
   visualStyle?: RewardVisualStyle;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  lite?: boolean;
   children: React.ReactNode;
 }) {
   const style = getVisualStyle(visualStyle);
   const pad = size === 'sm' ? 'p-[3px]' : size === 'lg' ? 'p-[5px]' : size === 'xl' ? 'p-[6px]' : 'p-1';
-  const useRotatingBorder = style.animated && !!style.gradientCss;
+  const useRotatingBorder = style.animated && !!style.gradientCss && !lite;
 
-  const borderStyle: React.CSSProperties | undefined = useRotatingBorder
+  const borderStyle: React.CSSProperties | undefined = style.gradientCss
     ? {
         background: style.gradientCss,
-        backgroundSize: style.animated ? '220% 220%' : undefined,
+        backgroundSize: useRotatingBorder ? '220% 220%' : undefined,
       }
     : undefined;
 
+  const ringClass = `relative inline-flex rounded-full ${pad} ${useRotatingBorder ? '' : style.ring}`;
+
+  const inner = (
+    <div className="relative rounded-full bg-zinc-950 p-[2px] shadow-inner shadow-black/60">
+      {!lite && style.shimmer && (
+        <motion.div
+          className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/25 to-white/0 pointer-events-none z-10"
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
+        />
+      )}
+      {children}
+    </div>
+  );
+
+  if (lite || !style.animated) {
+    return (
+      <div className={ringClass} style={borderStyle}>
+        {inner}
+      </div>
+    );
+  }
+
   return (
     <motion.div
-      className={`relative inline-flex rounded-full ${pad} ${useRotatingBorder ? '' : style.ring}`}
+      className={ringClass}
       style={borderStyle}
       animate={
-        style.animated
-          ? useRotatingBorder
-            ? {
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                boxShadow: [
-                  '0 0 16px rgba(255,255,255,0.12)',
-                  '0 0 36px rgba(168,85,247,0.55)',
-                  '0 0 16px rgba(255,255,255,0.12)',
-                ],
-              }
-            : {
-                boxShadow: [
-                  '0 0 14px rgba(255,255,255,0.15)',
-                  '0 0 36px rgba(168,85,247,0.5)',
-                  '0 0 14px rgba(255,255,255,0.15)',
-                ],
-              }
-          : undefined
+        useRotatingBorder
+          ? {
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              boxShadow: [
+                '0 0 16px rgba(255,255,255,0.12)',
+                '0 0 36px rgba(168,85,247,0.55)',
+                '0 0 16px rgba(255,255,255,0.12)',
+              ],
+            }
+          : {
+              boxShadow: [
+                '0 0 14px rgba(255,255,255,0.15)',
+                '0 0 36px rgba(168,85,247,0.5)',
+                '0 0 14px rgba(255,255,255,0.15)',
+              ],
+            }
       }
       transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
     >
-      <div className="relative rounded-full bg-zinc-950 p-[2px] shadow-inner shadow-black/60">
-        {style.shimmer && (
-          <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/25 to-white/0 pointer-events-none z-10"
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
-          />
-        )}
-        {children}
-      </div>
+      {inner}
     </motion.div>
   );
 }
@@ -194,28 +231,22 @@ export function PremiumFrameRing({
 export function PremiumFullPreview({
   visualStyle,
   className = '',
+  lite = false,
 }: {
   visualStyle?: RewardVisualStyle;
   className?: string;
+  lite?: boolean;
 }) {
   const style = getVisualStyle(visualStyle);
+  const animated = style.animated && !lite;
 
-  return (
-    <motion.div
-      className={`relative w-full max-w-[260px] h-36 rounded-2xl border border-white/10 overflow-hidden ${className}`}
-      style={
-        style.gradientCss
-          ? { background: style.gradientCss, backgroundSize: style.animated ? '200% 200%' : undefined }
-          : undefined
-      }
-      animate={style.animated && style.gradientCss ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] } : undefined}
-      transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
-    >
-      {!style.gradientCss && <motion.div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />}
-      {style.particles === 'stars' && <StarField count={10} />}
-      {style.particles === 'bubbles' && <BubbleField count={8} />}
-      {style.particles === 'sparkles' && <SparkleField count={6} />}
-      {style.shimmer && (
+  const inner = (
+    <>
+      {!style.gradientCss && <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />}
+      {style.particles === 'stars' && <StarField count={10} lite={lite} />}
+      {style.particles === 'bubbles' && <BubbleField count={8} lite={lite} />}
+      {style.particles === 'sparkles' && <SparkleField count={6} lite={lite} />}
+      {!lite && style.shimmer && (
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
           animate={{ x: ['-100%', '200%'] }}
@@ -227,6 +258,32 @@ export function PremiumFullPreview({
           {style.label}
         </span>
       </div>
+    </>
+  );
+
+  if (lite) {
+    return (
+      <div
+        className={`relative w-full max-w-[260px] h-36 rounded-2xl border border-white/10 overflow-hidden ${className}`}
+        style={style.gradientCss ? { background: style.gradientCss } : undefined}
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className={`relative w-full max-w-[260px] h-36 rounded-2xl border border-white/10 overflow-hidden ${className}`}
+      style={
+        style.gradientCss
+          ? { background: style.gradientCss, backgroundSize: animated ? '200% 200%' : undefined }
+          : undefined
+      }
+      animate={animated && style.gradientCss ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] } : undefined}
+      transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+    >
+      {inner}
     </motion.div>
   );
 }

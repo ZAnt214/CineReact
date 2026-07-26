@@ -7,6 +7,7 @@ export interface ProfileSurfaceProps {
   profileDisplay?: PublicProfileDisplay | null;
   variant?: 'hero' | 'panel' | 'preview';
   themed?: boolean;
+  lite?: boolean;
   rounded?: string;
   className?: string;
   innerClassName?: string;
@@ -18,6 +19,7 @@ export default function ProfileSurface({
   profileDisplay,
   variant = 'preview',
   themed = true,
+  lite = false,
   rounded = 'rounded-3xl',
   className = '',
   innerClassName = '',
@@ -36,7 +38,7 @@ export default function ProfileSurface({
   if (!themed) return card;
 
   return (
-    <ProfileThemeScope loadout={loadout} profileDisplay={profileDisplay}>
+    <ProfileThemeScope loadout={loadout} profileDisplay={profileDisplay} variant={lite ? 'lite' : 'default'}>
       {card}
     </ProfileThemeScope>
   );
