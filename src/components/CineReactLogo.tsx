@@ -16,21 +16,54 @@ interface CineReactLogoProps {
   animated?: boolean;
   className?: string;
   heading?: boolean;
+  tagline?: string;
+  showTagline?: boolean;
 }
 
-function BrandMark({ sizeClass, heading }: { sizeClass: string; heading: boolean }) {
-  const className = `cine-brand ${sizeClass}`;
-  const text = (
+const DEFAULT_TAGLINE = 'Sua plataforma de reacts';
+
+function BrandMark({
+  sizeClass,
+  heading,
+  tagline,
+  showTagline,
+  align,
+}: {
+  sizeClass: string;
+  heading: boolean;
+  tagline: string;
+  showTagline: boolean;
+  align: 'left' | 'center';
+}) {
+  const stackClass = `cine-brand ${sizeClass} ${
+    align === 'center' ? 'cine-brand--center' : ''
+  }`;
+
+  const name = (
     <span className="cine-brand-name">
       Cine<span className="cine-brand-react">React</span>
     </span>
   );
 
+  const taglineEl = showTagline ? (
+    <span className="cine-brand-tagline">{tagline}</span>
+  ) : null;
+
   if (heading) {
-    return <h1 className={className}>{text}</h1>;
+    return (
+      <span className={stackClass}>
+        <h1 className="cine-brand-title">{name}</h1>
+        {taglineEl}
+      </span>
+    );
   }
 
-  return <div className={className}>{text}</div>;
+  return (
+    <span className={stackClass}>
+      <span className="cine-brand-title">{name}</span>
+      {taglineEl}
+    </span>
+  );
 }
 
 export default function CineReactLogo({
@@ -39,11 +72,21 @@ export default function CineReactLogo({
   animated = false,
   className = '',
   heading = false,
+  tagline = DEFAULT_TAGLINE,
+  showTagline = true,
 }: CineReactLogoProps) {
   const sizeClass = sizeStyles[size];
   const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto block w-fit' : ''} ${className}`;
 
-  const mark = <BrandMark sizeClass={sizeClass} heading={heading} />;
+  const mark = (
+    <BrandMark
+      sizeClass={sizeClass}
+      heading={heading}
+      tagline={tagline}
+      showTagline={showTagline}
+      align={align}
+    />
+  );
 
   if (animated) {
     return (

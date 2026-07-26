@@ -369,7 +369,7 @@ export default function Header({
                 onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
                 className="group focus:outline-none cursor-pointer py-1"
               >
-                <CineReactLogo size="sm" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+                <CineReactLogo size="sm" showTagline={false} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
               </button>
 
               {/* DESKTOP NAV */}
