@@ -234,7 +234,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div>
                 <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
                   user.isDonor 
-                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(212,132,92,0.3)] animate-pulse" 
+                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(123,140,255,0.3)] animate-pulse" 
                     : "text-white"
                 }`}>
                   {user.nome}

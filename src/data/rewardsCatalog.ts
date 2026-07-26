@@ -9,7 +9,7 @@ export const RARITY_STYLES: Record<RewardRarity, { border: string; bg: string; t
   incomum: { border: 'border-emerald-500/40', bg: 'bg-emerald-950/25', text: 'text-emerald-300', glow: 'shadow-[0_0_12px_rgba(16,185,129,0.12)]', label: 'Incomum' },
   raro: { border: 'border-blue-500/40', bg: 'bg-blue-950/30', text: 'text-blue-300', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]', label: 'Raro' },
   épico: { border: 'border-purple-500/50', bg: 'bg-purple-950/30', text: 'text-purple-300', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]', label: 'Épico' },
-  lendário: { border: 'border-cine-accent/60', bg: 'bg-cine-surface/30', text: 'text-cine-cream', glow: 'shadow-[0_0_25px_rgba(212,132,92,0.25)]', label: 'Lendário' },
+  lendário: { border: 'border-cine-accent/60', bg: 'bg-cine-surface/30', text: 'text-cine-cream', glow: 'shadow-[0_0_25px_rgba(123,140,255,0.25)]', label: 'Lendário' },
   mítico: { border: 'border-rose-500/60', bg: 'bg-rose-950/35', text: 'text-rose-300', glow: 'shadow-[0_0_30px_rgba(244,63,94,0.3)]', label: 'Mítico' },
   exclusivo: { border: 'border-cyan-400/70', bg: 'bg-gradient-to-br from-cyan-950/40 to-purple-950/40', text: 'text-cyan-200', glow: 'shadow-[0_0_35px_rgba(34,211,238,0.35)]', label: 'Exclusivo' },
 };
@@ -574,7 +574,7 @@ const SEASONAL: RewardItemDefinition[] = [
 
 export const REWARDS_CATALOG: RewardItemDefinition[] = [
   // Molduras
-  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante.', category: 'frame', rarity: 'comum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cine-accent/80 shadow-[0_0_20px_rgba(212,132,92,0.3)]' },
+  { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante.', category: 'frame', rarity: 'comum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cine-accent/80 shadow-[0_0_20px_rgba(123,140,255,0.3)]' },
   { id: 'frame-neon', name: 'Moldura Neon', description: 'Brilho cyberpunk.', category: 'frame', rarity: 'raro', cost: 200, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cyan-400/80 shadow-[0_0_25px_rgba(34,211,238,0.4)]', animated: true },
   { id: 'frame-royal', name: 'Moldura Real', description: 'Gradiente violeta premium.', category: 'frame', rarity: 'épico', cost: 400, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-purple-500/80', animated: true },
   { id: 'frame-critico', name: 'Moldura Crítico', description: 'Desbloqueada no nível Crítico.', category: 'frame', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Alcance o nível Crítico', previewClass: 'ring-2 ring-rose-500/70' },

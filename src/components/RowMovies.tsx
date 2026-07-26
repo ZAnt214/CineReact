@@ -156,7 +156,7 @@ export default function RowMovies({
           </h2>
         </div>
         {isEditorial && (
-          <p className="text-xs sm:text-sm font-extrabold font-bricolage leading-snug bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          <p className="text-xs sm:text-sm font-extrabold font-display leading-snug bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             Estes reacts foram escolhidos a dedo pela equipe CineReact.
           </p>
         )}
@@ -196,7 +196,7 @@ export default function RowMovies({
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-zinc-900/95 md:bg-zinc-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
-                    ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(212,132,92,0.18)] ring-1 ring-cine-accent/30' 
+                    ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(123,140,255,0.18)] ring-1 ring-cine-accent/30' 
                     : 'border border-zinc-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
                 }`}
               >
@@ -225,7 +225,7 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(212,132,92,0.45)] border border-cine-cream/90 font-bricolage tracking-wider leading-none">
+                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-zinc-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(123,140,255,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
                       <Sparkles className="w-3.5 h-3.5 fill-zinc-950 text-zinc-950 shrink-0" />
                       <span>Recomenda</span>
                     </span>
@@ -256,14 +256,14 @@ export default function RowMovies({
                           onChannelClick(react.canalNome);
                         }
                       }}
-                      className={`font-bold text-cine-accent-light font-bricolage truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
+                      className={`font-bold text-cine-accent-light font-display truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
                         onChannelClick ? 'hover:underline hover:text-cine-cream cursor-pointer' : ''
                       }`}
                       title={`Ver canal ${react.canalNome}`}
                     >
                       {react.canalNome}
                     </span>
-                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-bricolage font-medium tracking-wide shadow-xs">
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-display font-medium tracking-wide shadow-xs">
                       <Eye className="w-3.5 h-3.5 text-cine-accent-light shrink-0" />
                       <span>{formatViews(react.visualizacoes)}</span>
                     </div>

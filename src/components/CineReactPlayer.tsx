@@ -391,7 +391,7 @@ export default function CineReactPlayer({
               animate={{ scale: 1.15, opacity: 1 }}
               exit={{ scale: 1.6, opacity: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-cine-accent/90 backdrop-blur-md flex flex-col items-center justify-center text-black shadow-[0_0_40px_rgba(212,132,92,0.9)] border border-cine-cream/40"
+              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-cine-accent/90 backdrop-blur-md flex flex-col items-center justify-center text-black shadow-[0_0_40px_rgba(123,140,255,0.9)] border border-cine-cream/40"
             >
               {centerAnimation === 'play' && (
                 <Play className="w-10 h-10 fill-black ml-1" />
@@ -502,10 +502,10 @@ export default function CineReactPlayer({
               >
                 {/* PROGRESS TRACK FILL WITH GLOW */}
                 <div 
-                  className="h-full bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-cream rounded-full shadow-[0_0_15px_rgba(212,132,92,0.9)] relative"
+                  className="h-full bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-cream rounded-full shadow-[0_0_15px_rgba(123,140,255,0.9)] relative"
                   style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
                 >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(212,132,92,1)] scale-0 group-hover/timeline:scale-100 transition-transform" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(123,140,255,1)] scale-0 group-hover/timeline:scale-100 transition-transform" />
                 </div>
               </div>
 

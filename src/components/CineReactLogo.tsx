@@ -2,12 +2,15 @@ import { motion } from 'motion/react';
 
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-const sizeStyles: Record<CineReactLogoSize, { scale: string; showGlow: boolean }> = {
-  xs: { scale: 'text-[1rem]', showGlow: false },
-  sm: { scale: 'text-[1.15rem] sm:text-[1.3rem]', showGlow: false },
-  md: { scale: 'text-[1.45rem] sm:text-[1.7rem]', showGlow: false },
-  lg: { scale: 'text-[2.75rem] sm:text-[3.4rem]', showGlow: true },
-  xl: { scale: 'text-[3.4rem] xl:text-[4.2rem]', showGlow: true },
+const sizeStyles: Record<
+  CineReactLogoSize,
+  { scale: string; showGlow: boolean; ornate: boolean }
+> = {
+  xs: { scale: 'cine-lettermark--xs', showGlow: false, ornate: false },
+  sm: { scale: 'cine-lettermark--sm', showGlow: false, ornate: false },
+  md: { scale: 'cine-lettermark--md', showGlow: false, ornate: true },
+  lg: { scale: 'cine-lettermark--lg', showGlow: true, ornate: true },
+  xl: { scale: 'cine-lettermark--xl', showGlow: true, ornate: true },
 };
 
 interface CineReactLogoProps {
@@ -19,46 +22,78 @@ interface CineReactLogoProps {
   heading?: boolean;
 }
 
+function Perforations() {
+  return (
+    <div className="cine-lettermark-perfs" aria-hidden>
+      {Array.from({ length: 11 }).map((_, i) => (
+        <span key={i} className="cine-lettermark-perf" />
+      ))}
+    </div>
+  );
+}
+
+function Ornament() {
+  return (
+    <div className="cine-lettermark-ornament" aria-hidden>
+      <span className="cine-lettermark-line" />
+      <span className="cine-lettermark-gem">✦</span>
+      <span className="cine-lettermark-cine-top">Cine</span>
+      <span className="cine-lettermark-gem">✦</span>
+      <span className="cine-lettermark-line" />
+    </div>
+  );
+}
+
 function Lettermark({
   scale,
   showGlow,
+  ornate,
   heading,
   align,
 }: {
   scale: string;
   showGlow: boolean;
+  ornate: boolean;
   heading: boolean;
   align: 'left' | 'center';
 }) {
-  const labelClass = `cine-lettermark relative z-10 ${scale}`;
+  const frameClass = `cine-lettermark-frame ${scale} ${
+    align === 'center' ? 'cine-lettermark-frame--center' : ''
+  }`;
 
-  const inner = (
-    <>
-      <span className="cine-lettermark-cine">cine</span>
-      <span className="cine-lettermark-sep" aria-hidden />
-      <span className="cine-lettermark-react">React</span>
-    </>
-  );
-
-  return (
-    <div className={`relative inline-flex ${align === 'center' ? 'justify-center' : ''}`}>
-      {showGlow && (
-        <motion.div
-          className="absolute -inset-10 bg-cine-mint/8 blur-3xl rounded-full pointer-events-none"
-          animate={{ opacity: [0.25, 0.5, 0.25] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      )}
-
-      {heading ? (
-        <h1 className={labelClass}>{inner}</h1>
-      ) : (
-        <div className={labelClass} aria-hidden>
-          {inner}
-        </div>
-      )}
+  const stack = ornate ? (
+    <div className="cine-lettermark-stack">
+      <span className="cine-lettermark-react" data-text="React">
+        React
+      </span>
+    </div>
+  ) : (
+    <div className="cine-lettermark-inline">
+      <span className="cine-lettermark-cine-compact">Cine</span>
+      <span className="cine-lettermark-dot" aria-hidden />
+      <span className="cine-lettermark-react-compact">React</span>
     </div>
   );
+
+  const content = (
+    <div className={frameClass}>
+      {showGlow && <span className="cine-lettermark-aura" aria-hidden />}
+      {ornate && (
+        <>
+          <Perforations />
+          <Ornament />
+        </>
+      )}
+      {stack}
+      {ornate && <span className="cine-lettermark-rail" aria-hidden />}
+    </div>
+  );
+
+  if (heading) {
+    return <h1 className="cine-lettermark-root">{content}</h1>;
+  }
+
+  return <div className="cine-lettermark-root">{content}</div>;
 }
 
 export default function CineReactLogo({
@@ -73,7 +108,13 @@ export default function CineReactLogo({
   const glowEnabled = showGlow ?? styles.showGlow;
 
   const wordmark = (
-    <Lettermark scale={styles.scale} showGlow={glowEnabled} heading={heading} align={align} />
+    <Lettermark
+      scale={styles.scale}
+      showGlow={glowEnabled}
+      ornate={styles.ornate}
+      heading={heading}
+      align={align}
+    />
   );
 
   const wrapperClass = `select-none ${align === 'center' ? 'text-center' : 'text-left'} ${className}`;
@@ -81,9 +122,9 @@ export default function CineReactLogo({
   if (animated) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
         className={wrapperClass}
         aria-label="CineReact"
       >

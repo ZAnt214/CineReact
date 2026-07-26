@@ -1,64 +1,197 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --color-cine-bg: #0c1014;
-  --color-cine-surface: #141a21;
-  --color-cine-elevated: #1c242d;
-  --color-cine-border: #2d3744;
-  --color-cine-cream: #ede8e1;
-  --color-cine-muted: #8891a0;
-  --color-cine-accent: #d4845c;
-  --color-cine-accent-light: #e8a882;
-  --color-cine-accent-dark: #b5653f;
-  --color-cine-mint: #6eb5a8;
-  --color-cine-mint-muted: #4f8f84;
-  --color-cine-lilac: #6eb5a8;
-  --color-cine-lilac-muted: #4f8f84;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --color-cine-bg: #080a14;
+  --color-cine-surface: #0f1324;
+  --color-cine-elevated: #161b32;
+  --color-cine-border: #2a3158;
+  --color-cine-cream: #eaeaf4;
+  --color-cine-muted: #8b92b8;
+  --color-cine-accent: #7b8cff;
+  --color-cine-accent-light: #a5b4ff;
+  --color-cine-accent-dark: #5b6be0;
+  --color-cine-mint: #a78bfa;
+  --color-cine-mint-muted: #7c5fd4;
+  --color-cine-lilac: #c084fc;
+  --color-cine-lilac-muted: #9333ea;
 }
 
-.font-bricolage {
-  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+.font-display {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
 }
 
-.cine-lettermark {
-  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-}
-
-.cine-lettermark-cine {
-  font-weight: 300;
-  font-size: 0.78em;
-  letter-spacing: 0.16em;
-  text-transform: lowercase;
-  color: var(--color-cine-cream);
-  opacity: 0.9;
-}
-
-.cine-lettermark-sep {
+/* ── CineReact lettermark — cinema marquee, text only ── */
+.cine-lettermark-root {
   display: inline-block;
-  width: 1.5px;
-  height: 0.72em;
-  margin-inline: 0.38em;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, var(--color-cine-accent-light), var(--color-cine-mint));
-  opacity: 0.75;
-  transform: translateY(0.04em);
+}
+
+.cine-lettermark-frame {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.15rem 0.1rem 0.35rem;
+}
+
+.cine-lettermark-frame--center {
+  align-items: center;
+  margin-inline: auto;
+}
+
+.cine-lettermark-aura {
+  position: absolute;
+  inset: -30% -12%;
+  background: radial-gradient(ellipse at 50% 60%, rgba(123, 140, 255, 0.28) 0%, rgba(167, 139, 250, 0.12) 42%, transparent 72%);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cine-lettermark-perfs {
+  display: flex;
+  gap: 0.28em;
+  margin-bottom: 0.28em;
+  padding-left: 0.12em;
+  opacity: 0.55;
+}
+
+.cine-lettermark-perf {
+  width: 0.34em;
+  height: 0.34em;
+  border-radius: 1px;
+  background: linear-gradient(145deg, #a5b4ff, #7b8cff);
+  box-shadow: 0 0 6px rgba(123, 140, 255, 0.35);
+}
+
+.cine-lettermark-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  width: 100%;
+  margin-bottom: 0.1em;
+}
+
+.cine-lettermark-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(165, 180, 255, 0.55), transparent);
+}
+
+.cine-lettermark-gem {
+  font-size: 0.42em;
+  color: #c084fc;
+  text-shadow: 0 0 12px rgba(192, 132, 252, 0.65);
+  line-height: 1;
+}
+
+.cine-lettermark-cine-top {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.72em;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #d4d0f0;
+  text-shadow: 0 0 20px rgba(165, 180, 255, 0.25);
+  padding-inline: 0.1em;
+}
+
+.cine-lettermark-stack {
+  position: relative;
+  z-index: 1;
+  line-height: 0.88;
 }
 
 .cine-lettermark-react {
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  background: linear-gradient(118deg, #d4845c 0%, #e8a882 38%, #6eb5a8 100%);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 1em;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(118deg, #a5b4ff 0%, #7b8cff 35%, #a78bfa 68%, #c084fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 0 18px rgba(123, 140, 255, 0.45));
+  position: relative;
+}
+
+.cine-lettermark-react::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(118deg, #a5b4ff 0%, #7b8cff 35%, #a78bfa 68%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.35;
+  filter: blur(6px);
+  z-index: -1;
+}
+
+.cine-lettermark-rail {
+  display: block;
+  width: 92%;
+  height: 2px;
+  margin-top: 0.32em;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #5b6be0, #7b8cff 35%, #a78bfa 70%, transparent);
+  opacity: 0.75;
+  box-shadow: 0 0 14px rgba(123, 140, 255, 0.35);
+}
+
+/* Compact inline (xs / sm) */
+.cine-lettermark-inline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  line-height: 1;
+}
+
+.cine-lettermark-cine-compact {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #d4d0f0;
+}
+
+.cine-lettermark-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #7b8cff, #c084fc);
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
+  align-self: center;
+  transform: translateY(-0.05em);
+}
+
+.cine-lettermark-react-compact {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(110deg, #a5b4ff, #7b8cff 50%, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cine-lettermark--xs { font-size: 0.95rem; }
+.cine-lettermark--sm { font-size: 1.15rem; }
+.cine-lettermark--md { font-size: 1.55rem; }
+.cine-lettermark--lg { font-size: 2.85rem; }
+.cine-lettermark--xl { font-size: 3.5rem; }
+
+@media (min-width: 640px) {
+  .cine-lettermark--sm { font-size: 1.3rem; }
+  .cine-lettermark--md { font-size: 1.85rem; }
+  .cine-lettermark--lg { font-size: 3.35rem; }
+  .cine-lettermark--xl { font-size: 4.1rem; }
 }
 
 .font-righteous {
@@ -76,16 +209,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0c1014;
+  background: #080a14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #24303c;
+  background: #1e2548;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4845c;
+  background: #7b8cff;
 }
 
 /* Hide scrollbar completely for all horizontal-scrolling carousels */
@@ -129,8 +262,8 @@ video,
 }
 
 html, body, #root {
-  background-color: #0c1014;
-  color: #ede8e1;
+  background-color: #080a14;
+  color: #eaeaf4;
   font-family: var(--font-sans);
   overflow-x: hidden !important;
   width: 100%;
@@ -372,7 +505,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-atelier-beam {
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(212, 132, 92, 0.34) 0%, rgba(110, 181, 168, 0.14) 48%, transparent 72%);
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(123, 140, 255, 0.38) 0%, rgba(167, 139, 250, 0.16) 48%, transparent 72%);
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
@@ -386,10 +519,12 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-social-heading {
-  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  background: linear-gradient(92deg, #e8a882 0%, #d4845c 42%, #6eb5a8 100%);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.95em;
+  background: linear-gradient(92deg, #a5b4ff 0%, #7b8cff 40%, #c084fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
