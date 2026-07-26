@@ -3,6 +3,7 @@ import { CREATOR_FOLLOW_REWARDS, getRewardById, VERIFIED_PROFILE_BADGE_ID } from
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import { hasReward, migrateProfile } from './rewardsEngine.ts';
 import { isVerifiedCreatorLoadout } from './verifiedCreator.ts';
+import { ensureDemoCreatorProfile, isDemoCreatorEmail } from './demoCreator.ts';
 import type { PublicUserProfile } from '../types.ts';
 import { hasSocialLinks, sanitizeSocialLinks } from '../utils/socialLinks.ts';
 
@@ -43,6 +44,10 @@ export function findOfficialCreatorEmailForChannel(canalId: string, officialCrea
 
 export function getPublicUserProfile(email: string): PublicUserProfile | null {
   if (!email) return null;
+
+  if (isDemoCreatorEmail(email)) {
+    ensureDemoCreatorProfile();
+  }
 
   const account = localDb.findUsuarioByEmailSync(email);
   if (!account) return null;

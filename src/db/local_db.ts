@@ -5,7 +5,24 @@ import { Obra, ReactVideo, Comentario, ListaPersonalizada, Notificacao, UserAcco
 import { GamificationProfile } from '../types/gamification.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
+import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
+
+function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAccount): UserAccount {
+  const merged: UserAccount = { ...remote };
+
+  if (!local) return merged;
+
+  if (hasSocialLinks(local.socialLinks) && !hasSocialLinks(merged.socialLinks)) {
+    merged.socialLinks = local.socialLinks;
+  }
+
+  if (local.descricao?.trim() && !merged.descricao?.trim()) {
+    merged.descricao = local.descricao;
+  }
+
+  return merged;
+}
 
 const DB_PATH = path.join(process.env.NODE_ENV === 'production' ? '/tmp' : process.cwd(), 'db_cine_react.json');
 
@@ -263,7 +280,15 @@ export const localDb = {
         obraIds: l.obraIds || []
       }));
       dbCache.notificacoes = notificacoes || [];
-      dbCache.usuarios = usuarios || [];
+      const previousUsuarios = dbCache.usuarios || [];
+      const previousByEmail = new Map(
+        previousUsuarios.map((u) => [u.email.toLowerCase(), u])
+      );
+      dbCache.usuarios = (usuarios || []).map((remote: UserAccount) => {
+        const local = previousByEmail.get(remote.email.toLowerCase());
+        return mergeUsuarioFromRemote(local, remote);
+      });
+      saveDb(dbCache);
 
       console.log("[Supabase] Sincronização de volta para o cache concluída com sucesso!");
       return true;
@@ -400,7 +425,9 @@ export const localDb = {
             avatar: u.avatar,
             isAdmin: !!u.isAdmin,
             isDonor: !!u.isDonor,
-            continueWatching: u.continueWatching || []
+            continueWatching: u.continueWatching || [],
+            descricao: u.descricao || '',
+            socialLinks: u.socialLinks || {},
           }))
         );
         if (error) console.error("[Supabase Upload] Erro nos usuarios:", error);
@@ -891,6 +918,11 @@ export const localDb = {
     return dbCache.usuarios || [];
   },
 
+  replaceUsuarios: (usuarios: UserAccount[]) => {
+    dbCache.usuarios = usuarios;
+    saveDb(dbCache);
+  },
+
   addUsuario: async (usuario: Omit<UserAccount, 'id' | 'createdAt'>, forcedId?: string) => {
     if (!dbCache.usuarios) dbCache.usuarios = [];
     const novo: UserAccount = {
@@ -938,13 +970,15 @@ export const localDb = {
         if (!error && data) {
           if (!dbCache.usuarios) dbCache.usuarios = [];
           const idx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+          const localUser = idx >= 0 ? dbCache.usuarios[idx] : undefined;
+          const merged = mergeUsuarioFromRemote(localUser, data as UserAccount);
           if (idx >= 0) {
-            dbCache.usuarios[idx] = data;
+            dbCache.usuarios[idx] = merged;
           } else {
-            dbCache.usuarios.push(data);
+            dbCache.usuarios.push(merged);
           }
           saveDb(dbCache);
-          return data;
+          return merged;
         }
       } catch (err) {
         console.error("[Supabase] Erro ao buscar usuario por email:", err);
@@ -960,6 +994,19 @@ export const localDb = {
     return dbCache.usuarios.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
   },
 
+  updateUsuarioSync: (email: string, updates: Partial<UserAccount>) => {
+    if (!dbCache.usuarios) dbCache.usuarios = [];
+    const idx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+    if (idx < 0) return null;
+
+    dbCache.usuarios[idx] = {
+      ...dbCache.usuarios[idx],
+      ...updates,
+    };
+    saveDb(dbCache);
+    return dbCache.usuarios[idx];
+  },
+
   updateUsuario: async (email: string, updates: Partial<UserAccount>) => {
     if (!dbCache.usuarios) dbCache.usuarios = [];
     const idx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
@@ -972,10 +1019,18 @@ export const localDb = {
       };
       current = dbCache.usuarios[idx];
       saveDb(dbCache);
-    } else if (supabaseClient) {
+    } else {
       const dbUser = await localDb.findUsuarioByEmail(email);
       if (dbUser) {
-        current = { ...dbUser, ...updates };
+        const cacheIdx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+        if (cacheIdx >= 0) {
+          dbCache.usuarios[cacheIdx] = { ...dbCache.usuarios[cacheIdx], ...updates };
+          current = dbCache.usuarios[cacheIdx];
+        } else {
+          current = { ...dbUser, ...updates };
+          dbCache.usuarios.push(current);
+        }
+        saveDb(dbCache);
       }
     }
 
