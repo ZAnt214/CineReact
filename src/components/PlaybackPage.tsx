@@ -538,7 +538,7 @@ export default function PlaybackPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="cine-container pt-24 pb-20 min-h-screen bg-[#0f0f0f] w-full"
+      className="cine-container pt-24 pb-20 min-h-screen bg-[#0a0e14] w-full"
     >
       {/* GRID LAYOUT: 12 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -736,7 +736,7 @@ export default function PlaybackPage({
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
                       ? 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800' 
-                      : 'bg-[#ff0000] text-white font-black hover:bg-[#cc0000] shadow-lg shadow-cine-accent/20'
+                      : 'bg-[#22d3ee] text-white font-black hover:bg-[#0891b2] shadow-lg shadow-cine-accent/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}

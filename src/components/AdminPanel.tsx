@@ -696,7 +696,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <motion.div className="min-h-screen bg-[#0f0f0f] cine-container pt-24 pb-20 w-full space-y-8 text-white">
+    <motion.div className="min-h-screen bg-[#0a0e14] cine-container pt-24 pb-20 w-full space-y-8 text-white">
       
       {/* HEADER */}
       <div className="border-b border-neutral-800 pb-4 flex items-center justify-between">
@@ -812,7 +812,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogCanalSave}
                 disabled={savingCatalogCanal || !catalogCanalUrl.trim()}
-                className="px-4 py-3 rounded-xl bg-[#ff0000] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="px-4 py-3 rounded-xl bg-[#22d3ee] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogCanal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Salvar Canal
@@ -874,7 +874,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogVideoSave}
                 disabled={savingCatalogVideo || !catalogVideoUrl.trim()}
-                className="flex-1 px-4 py-3 rounded-xl bg-[#ff0000] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-xl bg-[#22d3ee] text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Adicionar ao Catálogo
@@ -1106,7 +1106,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 type="submit"
                 disabled={importingCanal || !canalUrl.trim()}
-                className="bg-[#ff0000] text-white font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
+                className="bg-[#22d3ee] text-white font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
               >
                 {importingCanal ? 'Importando...' : 'Importar'}
               </button>
@@ -1139,7 +1139,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleIntelligentImport}
                 disabled={importing || !importQuery.trim()}
-                className="bg-white hover:bg-[#cc0000] disabled:bg-neutral-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="bg-white hover:bg-[#0891b2] disabled:bg-neutral-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
@@ -1275,7 +1275,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingObra}
-                  className="w-full bg-white hover:bg-[#cc0000] disabled:bg-neutral-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
+                  className="w-full bg-white hover:bg-[#0891b2] disabled:bg-neutral-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
                 >
                   {submittingObra ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -1360,7 +1360,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-white hover:bg-[#cc0000] text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-4 rounded bg-white hover:bg-[#0891b2] text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>

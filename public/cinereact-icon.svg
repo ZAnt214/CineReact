@@ -1,11 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
-  <rect width="200" height="200" rx="40" fill="#0f0f0f"/>
-  <rect x="18" y="52" width="56" height="40" rx="10" fill="#FF0000"/>
-  <path d="M36 62v20l14-10-14-10Z" fill="#FFFFFF"/>
-  <rect x="82" y="48" width="100" height="64" rx="12" fill="#212121" stroke="#3f3f3f" stroke-width="1.5"/>
-  <text x="94" y="82" font-family="Roboto, Arial, sans-serif" font-weight="700" font-size="18" fill="#f1f1f1">Cine</text>
-  <text x="144" y="82" font-family="Roboto, Arial, sans-serif" font-weight="900" font-size="18" fill="#FF0000">React</text>
-  <rect x="94" y="92" width="76" height="3" rx="1.5" fill="#3f3f3f"/>
-  <rect x="94" y="92" width="34" height="3" rx="1.5" fill="#FF0000"/>
-  <circle cx="128" cy="93.5" r="3.5" fill="#FF0000"/>
+  <rect width="200" height="200" rx="40" fill="#0a0e14"/>
+  <circle cx="44" cy="88" r="7" fill="#22d3ee"/>
+  <circle cx="44" cy="88" r="14" stroke="#22d3ee" stroke-width="1.5" stroke-opacity="0.5" fill="none"/>
+  <circle cx="44" cy="88" r="21" stroke="#22d3ee" stroke-width="1.2" stroke-opacity="0.25" fill="none"/>
+  <text x="72" y="96" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="28" fill="#ffffff" letter-spacing="-1">Cine</text>
+  <text x="72" y="132" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="28" fill="#22d3ee" letter-spacing="-1">React</text>
+  <path d="M72 148 C82 148 82 144 92 144 C102 144 102 152 112 152 C122 152 122 144 132 144 C142 144 142 152 152 152 C162 152 162 144 172 144" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" fill="none"/>
 </svg>

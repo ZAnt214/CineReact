@@ -189,7 +189,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Carol e Rhay',
     creatorId: 'carol-e-rhay-canal',
     creatorName: 'Carol e Rhay',
-    creatorColors: { from: '#aaaaaa', to: '#f1f1f1', text: '#ede9fe' },
+    creatorColors: { from: '#7a8fa6', to: '#e8f4fc', text: '#ede9fe' },
   },
   {
     id: 'tag-squad-carol-rhay',

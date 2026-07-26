@@ -850,7 +850,7 @@ export default function Header({
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-[#cc0000] text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-[#0891b2] text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>

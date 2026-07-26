@@ -80,7 +80,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   holographic: {
     label: 'Holográfico',
     gradient: 'from-cyan-400 via-purple-400 to-pink-400',
-    gradientCss: 'linear-gradient(135deg, #22d3ee, #f1f1f1, #f472b6, #34d399, #22d3ee)',
+    gradientCss: 'linear-gradient(135deg, #22d3ee, #e8f4fc, #f472b6, #34d399, #22d3ee)',
     ring: 'ring-white/40 shadow-[0_0_35px_rgba(34,211,238,0.35)]',
     glow: 'shadow-[0_0_32px_rgba(168,85,247,0.35)]',
     accent: 'text-cyan-100',

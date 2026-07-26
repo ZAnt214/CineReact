@@ -249,7 +249,7 @@ export default function LunchTimePage({
             <button
               onClick={handleSortearEAssistir}
               disabled={!hasVideos}
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-[#cc0000] text-black font-black text-sm transition-all shadow-lg shadow-cine-accent/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-[#0891b2] text-black font-black text-sm transition-all shadow-lg shadow-cine-accent/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
             >
               <Sparkles className="w-4 h-4" />
               {sortearButtonLabel}

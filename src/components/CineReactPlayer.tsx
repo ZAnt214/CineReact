@@ -454,7 +454,7 @@ export default function CineReactPlayer({
                   onClick={() => setDualView(!dualView)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xl cursor-pointer ${
                     dualView 
-                      ? 'bg-[#ff0000] text-white border-cine-cream shadow-cine-accent/40 font-black' 
+                      ? 'bg-[#22d3ee] text-white border-cine-cream shadow-cine-accent/40 font-black' 
                       : 'bg-black/70 hover:bg-neutral-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
                   }`}
                   title="Modo Duplo (Vídeo + Obra)"
@@ -529,7 +529,7 @@ export default function CineReactPlayer({
                 {/* Play / Pause Toggle */}
                 <button
                   onClick={togglePlay}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-[#cc0000] text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-[#0891b2] text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
                   title={isPlaying ? 'Pausar (Espaço/K)' : 'Reproduzir (Espaço/K)'}
                 >
                   {isPlaying ? (
@@ -610,7 +610,7 @@ export default function CineReactPlayer({
                           onClick={() => changeSpeed(s)}
                           className={`text-xs font-mono px-3 py-1.5 rounded-lg text-left transition-colors cursor-pointer flex items-center justify-between ${
                             playbackSpeed === s
-                              ? 'bg-[#ff0000] text-white font-bold'
+                              ? 'bg-[#22d3ee] text-white font-bold'
                               : 'text-zinc-300 hover:bg-neutral-800 hover:text-white'
                           }`}
                         >

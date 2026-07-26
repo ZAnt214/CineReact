@@ -29,17 +29,17 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-[#0a0e14] text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
       {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent/15 via-cine-accent/5 to-transparent rounded-full blur-3xl opacity-70" />
         <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-mint/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#3f3f3f_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+        <div className="absolute inset-0 bg-[radial-gradient(#2a3a4f_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-cine-border/80 bg-[#0f0f0f]/95 max-md:backdrop-blur-none md:bg-[#0f0f0f]/80 md:backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-cine-border/80 bg-[#0a0e14]/95 max-md:backdrop-blur-none md:bg-[#0a0e14]/80 md:backdrop-blur-md sticky top-0">
         <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
@@ -53,7 +53,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#ff0000] text-white font-extrabold text-xs sm:text-sm hover:bg-[#cc0000] transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
+            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#22d3ee] text-white font-extrabold text-xs sm:text-sm hover:bg-[#0891b2] transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
           >
             <span>{isNavigating ? 'Abrindo...' : 'Acessar Plataforma'}</span>
             {isNavigating ? (
@@ -111,7 +111,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           <button
             onClick={onExplore}
             disabled={isNavigating}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#ff0000] text-white font-black text-base sm:text-lg hover:brightness-105 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#22d3ee] text-white font-black text-base sm:text-lg hover:brightness-105 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
           >
             <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
             {isNavigating ? (

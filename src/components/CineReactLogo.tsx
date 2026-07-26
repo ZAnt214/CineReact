@@ -2,12 +2,12 @@ import { motion } from 'motion/react';
 
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-const sizeStyles: Record<CineReactLogoSize, { scale: string; compact: boolean }> = {
-  xs: { scale: 'cine-brand--xs', compact: true },
-  sm: { scale: 'cine-brand--sm', compact: true },
-  md: { scale: 'cine-brand--md', compact: false },
-  lg: { scale: 'cine-brand--lg', compact: false },
-  xl: { scale: 'cine-brand--xl', compact: false },
+const sizeStyles: Record<CineReactLogoSize, string> = {
+  xs: 'cine-brand--xs',
+  sm: 'cine-brand--sm',
+  md: 'cine-brand--md',
+  lg: 'cine-brand--lg',
+  xl: 'cine-brand--xl',
 };
 
 interface CineReactLogoProps {
@@ -18,53 +18,55 @@ interface CineReactLogoProps {
   heading?: boolean;
 }
 
-function PlayMark() {
+function ReactionRipple() {
   return (
-    <span className="cine-brand-play" aria-hidden>
-      <svg viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="48" height="34" rx="9" fill="#FF0000" />
-        <path d="M20 10.5v13l11-6.5-11-6.5Z" fill="#FFFFFF" />
-      </svg>
-    </span>
+    <svg
+      className="cine-brand-ripple"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <circle cx="16" cy="16" r="4" fill="#22d3ee" />
+      <circle cx="16" cy="16" r="8" stroke="#22d3ee" strokeWidth="1.5" strokeOpacity="0.55" />
+      <circle cx="16" cy="16" r="12" stroke="#22d3ee" strokeWidth="1.2" strokeOpacity="0.3" />
+      <circle cx="16" cy="16" r="15" stroke="#22d3ee" strokeWidth="1" strokeOpacity="0.15" />
+    </svg>
   );
 }
 
-function Perforations() {
+function ReactionWave() {
   return (
-    <span className="cine-brand-perfs" aria-hidden>
-      {Array.from({ length: 9 }).map((_, i) => (
-        <span key={i} className="cine-brand-perf" />
-      ))}
-    </span>
+    <svg
+      className="cine-brand-wave"
+      viewBox="0 0 200 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <path
+        d="M0 6 C12 6 12 1 24 1 C36 1 36 11 48 11 C60 11 60 1 72 1 C84 1 84 11 96 11 C108 11 108 1 120 1 C132 1 132 11 144 11 C156 11 156 1 168 1 C180 1 180 6 200 6"
+        stroke="#22d3ee"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
-function BrandLockup({
-  scale,
-  compact,
-  heading,
-}: {
-  scale: string;
-  compact: boolean;
-  heading: boolean;
-}) {
-  const className = `cine-brand ${scale}`;
+function BrandMark({ sizeClass, heading }: { sizeClass: string; heading: boolean }) {
+  const className = `cine-brand ${sizeClass}`;
 
   const inner = (
     <span className="cine-brand-lockup">
-      <PlayMark />
-      <span className="cine-brand-panel">
-        {!compact && <Perforations />}
-        <span className="cine-brand-type">
-          <span className="cine-brand-cine">Cine</span>
-          <span className="cine-brand-react">React</span>
-        </span>
-        <span className="cine-brand-scrubber" aria-hidden>
-          <span className="cine-brand-scrubber-track" />
-          <span className="cine-brand-scrubber-fill" />
-          <span className="cine-brand-scrubber-head" />
+      <span className="cine-brand-row">
+        <ReactionRipple />
+        <span className="cine-brand-name">
+          Cine<span className="cine-brand-react">React</span>
         </span>
       </span>
+      <ReactionWave />
     </span>
   );
 
@@ -82,30 +84,28 @@ export default function CineReactLogo({
   className = '',
   heading = false,
 }: CineReactLogoProps) {
-  const styles = sizeStyles[size];
+  const sizeClass = sizeStyles[size];
   const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto block w-fit' : ''} ${className}`;
 
-  const lockup = (
-    <BrandLockup scale={styles.scale} compact={styles.compact} heading={heading} />
-  );
+  const mark = <BrandMark sizeClass={sizeClass} heading={heading} />;
 
   if (animated) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={wrapperClass}
         aria-label="CineReact"
       >
-        {lockup}
+        {mark}
       </motion.div>
     );
   }
 
   return (
     <div className={wrapperClass} aria-label="CineReact">
-      {lockup}
+      {mark}
     </div>
   );
 }

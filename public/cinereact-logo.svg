@@ -1,22 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100" width="1040" height="200">
-  <rect width="520" height="100" rx="12" fill="#0f0f0f"/>
-  <rect x="20" y="24" width="68" height="48" rx="12" fill="#FF0000"/>
-  <path d="M44 36v24l18-12-18-12Z" fill="#FFFFFF"/>
-  <rect x="100" y="22" width="300" height="56" rx="12" fill="#212121" stroke="#3f3f3f" stroke-width="1.5"/>
-  <g opacity="0.65">
-    <rect x="114" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="126" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="138" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="150" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="162" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="174" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="186" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="198" y="30" width="6" height="6" rx="1" fill="#909090"/>
-    <rect x="210" y="30" width="6" height="6" rx="1" fill="#909090"/>
-  </g>
-  <text x="114" y="58" font-family="Roboto, Arial, sans-serif" font-weight="700" font-size="28" fill="#f1f1f1">Cine</text>
-  <text x="196" y="58" font-family="Roboto, Arial, sans-serif" font-weight="900" font-size="28" fill="#FF0000">React</text>
-  <rect x="114" y="66" width="270" height="4" rx="2" fill="#3f3f3f"/>
-  <rect x="114" y="66" width="115" height="4" rx="2" fill="#FF0000"/>
-  <circle cx="229" cy="68" r="4" fill="#FF0000"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 88" width="880" height="176">
+  <rect width="440" height="88" rx="12" fill="#0a0e14"/>
+  <circle cx="36" cy="44" r="6" fill="#22d3ee"/>
+  <circle cx="36" cy="44" r="12" stroke="#22d3ee" stroke-width="1.5" stroke-opacity="0.55" fill="none"/>
+  <circle cx="36" cy="44" r="18" stroke="#22d3ee" stroke-width="1.2" stroke-opacity="0.3" fill="none"/>
+  <circle cx="36" cy="44" r="23" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.15" fill="none"/>
+  <text x="72" y="50" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="36" fill="#ffffff" letter-spacing="-1.5">Cine</text>
+  <text x="196" y="50" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="36" fill="#22d3ee" letter-spacing="-1.5">React</text>
+  <path d="M72 68 C88 68 88 62 104 62 C120 62 120 74 136 74 C152 74 152 62 168 62 C184 62 184 74 200 74 C216 74 216 62 232 62 C248 62 248 74 264 74 C280 74 280 62 296 62 C312 62 312 74 328 74 C344 74 344 62 360 62 C376 62 376 68 392 68" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" fill="none"/>
 </svg>
