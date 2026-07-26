@@ -718,6 +718,13 @@ export default function App() {
             setSearchQuery('');
             setCurrentTab('canal');
           }}
+          onSearch={handleSearchTriggered}
+          onSelectObra={(id) => {
+            setSelectedObraId(id);
+            setSelectedReactId(null);
+            const obra = obras.find((o) => o.id === id);
+            setCurrentTab(obra?.tipo === 'canal' ? 'canal' : 'obra');
+          }}
         />
       )}
 
@@ -735,16 +742,7 @@ export default function App() {
         }}
         user={user}
         setUser={setUser}
-        onSearch={handleSearchTriggered}
-        onSelectObra={(id) => {
-          setSelectedObraId(id);
-          setSelectedReactId(null);
-          const obra = obras.find(o => o.id === id);
-          setCurrentTab(obra?.tipo === 'canal' ? 'canal' : 'obra');
-        }}
         onOpenAuth={openAuthModal}
-        obras={obras}
-        reacts={reacts}
         gamificationData={gamification.data}
         onOpenGamification={() => {
           setCurrentTab('club');

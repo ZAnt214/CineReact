@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Play, User, Check, Menu, X, Youtube, Send, Heart, Sparkles, CreditCard, Download } from 'lucide-react';
-import { UserState, Notificacao, Obra, ReactVideo } from '../types.ts';
+import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
+import { UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
-import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
@@ -15,11 +14,7 @@ interface HeaderProps {
   setCurrentTab: (tab: string) => void;
   user: UserState;
   setUser: (user: UserState) => void;
-  onSearch: (results: Obra[], query: string) => void;
-  onSelectObra: (id: string) => void;
   onOpenAuth?: (mode: 'login' | 'register') => void;
-  obras?: Obra[];
-  reacts?: ReactVideo[];
   hasSideNav?: boolean;
   gamificationData?: GamificationMeResponse | null;
   onOpenGamification?: () => void;
@@ -30,79 +25,12 @@ export default function Header({
   setCurrentTab,
   user,
   setUser,
-  onSearch,
-  onSelectObra,
   onOpenAuth,
-  obras = [],
-  reacts = [],
   hasSideNav = false,
   gamificationData = null,
   onOpenGamification,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Obra[]>([]);
-  const [searching, setSearching] = useState(false);
-
-  // PWA App Installation States
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-    };
-  }, []);
-
-  const handleInstallApp = async () => {
-    if (deferredPrompt) {
-      try {
-        await deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice && choice.outcome === 'accepted') {
-          setDeferredPrompt(null);
-        }
-      } catch (err) {
-        console.log('Erro ao disparar prompt de instalação:', err);
-      }
-    } else {
-      // Direct native browser alert fallback for iOS / browsers without beforeinstallprompt event
-      alert('Para instalar o aplicativo no seu dispositivo, acesse as opções do navegador e selecione "Adicionar à Tela Inicial" ou "Instalar Aplicativo".');
-    }
-  };
-
-  // Helper to extract hashtags or tags matching the search query from video titles
-  const getMatchingHashtagsForObra = (obra: Obra, q: string): string[] => {
-    if (!q || !reacts || reacts.length === 0) return [];
-    const queryTerm = q.toLowerCase().trim().replace('#', '');
-    const obraReacts = reacts.filter(r => r.obraId === obra.id);
-    const matchedTags = new Set<string>();
-    
-    obraReacts.forEach(r => {
-      // Find all hashtag patterns in video titles
-      const hashtags = r.titulo.toLowerCase().match(/#\w+/g) || [];
-      hashtags.forEach(tag => {
-        const cleanTag = tag.replace('#', '');
-        if (cleanTag.includes(queryTerm) || queryTerm.includes(cleanTag)) {
-          matchedTags.add(tag);
-        }
-      });
-      
-      // Check if query matches channel name as a hashtag
-      const cleanChannelName = r.canalNome.toLowerCase().replace(/[^a-z0-9]+/g, '');
-      if (cleanChannelName.includes(queryTerm) && queryTerm.length >= 3) {
-        matchedTags.add(`#${cleanChannelName}`);
-      }
-    });
-    
-    return Array.from(matchedTags);
-  };
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notificacao[]>([]);
@@ -222,101 +150,6 @@ export default function Header({
     return () => clearInterval(interval);
   }, [user.email]);
 
-  // Instant search / autocomplete using the loaded `obras` or server fallback
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase().trim();
-    if (obras && obras.length > 0) {
-      const filtered = obras.filter(obra => {
-        const titleMatch = obra.titulo.toLowerCase().includes(query);
-        const tipoMatch = obra.tipo.toLowerCase().includes(query);
-        const genreMatch = obra.generos ? obra.generos.some(g => g.toLowerCase().includes(query)) : false;
-        const descMatch = obra.sinopse ? obra.sinopse.toLowerCase().includes(query) : false;
-        
-        const matchedTags = getMatchingHashtagsForObra(obra, query);
-        const hashtagMatch = matchedTags.length > 0;
-        
-        let videoMatch = false;
-        if (reacts && reacts.length > 0) {
-          const obraReacts = reacts.filter(r => r.obraId === obra.id);
-          videoMatch = obraReacts.some(r => 
-            r.titulo.toLowerCase().includes(query) || 
-            r.canalNome.toLowerCase().includes(query)
-          );
-        }
-
-        return titleMatch || tipoMatch || genreMatch || descMatch || hashtagMatch || videoMatch;
-      });
-      setSearchResults(filtered.slice(0, 8)); // limit to top 8 suggestions in dropdown
-    } else {
-      setSearching(true);
-      const timer = setTimeout(async () => {
-        try {
-          const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-          if (res.ok) {
-            const data = await res.json();
-            setSearchResults((data.obras || []).slice(0, 8));
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setSearching(false);
-        }
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [searchQuery, obras, reacts]);
-
-  const handleSearchSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!searchQuery.trim()) return;
-
-    let finalResults: Obra[] = [];
-    const query = searchQuery.toLowerCase().trim();
-    if (obras && obras.length > 0) {
-      finalResults = obras.filter(obra => {
-        const titleMatch = obra.titulo.toLowerCase().includes(query);
-        const tipoMatch = obra.tipo.toLowerCase().includes(query);
-        const genreMatch = obra.generos ? obra.generos.some(g => g.toLowerCase().includes(query)) : false;
-        const descMatch = obra.sinopse ? obra.sinopse.toLowerCase().includes(query) : false;
-        
-        const matchedTags = getMatchingHashtagsForObra(obra, query);
-        const hashtagMatch = matchedTags.length > 0;
-        
-        let videoMatch = false;
-        if (reacts && reacts.length > 0) {
-          const obraReacts = reacts.filter(r => r.obraId === obra.id);
-          videoMatch = obraReacts.some(r => 
-            r.titulo.toLowerCase().includes(query) || 
-            r.canalNome.toLowerCase().includes(query)
-          );
-        }
-
-        return titleMatch || tipoMatch || genreMatch || descMatch || hashtagMatch || videoMatch;
-      });
-      onSearch(finalResults, searchQuery);
-      setSearchOpen(false);
-    } else {
-      setSearching(true);
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-        if (res.ok) {
-          const data = await res.json();
-          onSearch(data.obras || [], searchQuery);
-          setSearchOpen(false);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setSearching(false);
-      }
-    }
-  };
-
   const markAsRead = async (id: string) => {
     try {
       await fetch(`/api/notificacoes/${id}/ler`, { method: 'POST' });
@@ -359,22 +192,20 @@ export default function Header({
       >
         <div className="cine-container w-full">
           <div className="flex min-h-16 items-center justify-between gap-4 py-1.5">
-            <div className="flex items-center gap-3 lg:gap-6 flex-shrink-0">
-              <SideNavToggleButton visible={hasSideNav} />
-
+            <div className="flex items-center gap-3 lg:gap-6 flex-1 min-w-0">
               <button 
                 id="logo-button"
-                onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }}
-                className="group focus:outline-none cursor-pointer py-1"
+                onClick={() => setCurrentTab('inicio')}
+                className="group focus:outline-none cursor-pointer py-1 shrink-0"
               >
                 <CineReactLogo size="sm" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
               </button>
 
               {/* DESKTOP NAV */}
-              <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400">
+              <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
                 <button 
                   id="nav-inicio"
-                  onClick={() => { setCurrentTab('inicio'); setSearchQuery(''); }} 
+                  onClick={() => setCurrentTab('inicio')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'inicio' 
                       ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
@@ -433,126 +264,8 @@ export default function Header({
               </nav>
             </div>
 
-            {/* MIDDLE SECTION: Search Bar & Download App button */}
-            <div className="flex-1 max-w-sm lg:max-w-lg mx-auto hidden sm:flex items-center gap-2 relative">
-              <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Search className="h-4 w-4 text-zinc-500" />
-                </div>
-                <input
-                  id="search-input"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
-                  placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-neutral-900/50 hover:bg-neutral-900/80 focus:bg-neutral-900 border border-neutral-800/80 focus:border-cine-accent/80 focus:ring-1 focus:ring-cine-accent/40 rounded-xl py-1.5 pl-9 pr-8 text-xs text-zinc-200 placeholder-zinc-500 outline-none transition-all duration-200"
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')} 
-                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* DOWNLOAD / INSTALL APP BUTTON NEXT TO SEARCH */}
-              <button
-                id="install-app-btn-desktop"
-                onClick={handleInstallApp}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cine-accent/10 hover:bg-cine-accent text-cine-accent-light hover:text-black border border-cine-accent/30 hover:border-cine-accent-light text-xs font-extrabold transition-all duration-200 cursor-pointer shadow-sm active:scale-95 shrink-0"
-                title="Instalar CineReact no seu celular ou computador"
-              >
-                <Download className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden lg:inline">Baixar App</span>
-              </button>
-
-              {/* FLOATING INSTANT SEARCH RESULTS */}
-              <AnimatePresence>
-                {searchQuery.trim() && searchResults.length > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="absolute left-0 right-0 top-11 bg-neutral-950/95 backdrop-blur-xl border border-neutral-900 rounded-xl shadow-2xl p-2.5 max-h-[380px] overflow-y-auto z-50 divide-y divide-neutral-900"
-                  >
-                    <div className="text-[10px] text-zinc-500 font-mono pb-2 px-2 uppercase tracking-wider flex justify-between items-center">
-                      <span>Sugestões</span>
-                      {searching && <span className="w-2.5 h-2.5 border border-cine-accent-light border-t-transparent rounded-full animate-spin" />}
-                    </div>
-                    <div className="py-1 space-y-1">
-                      {searchResults.map((obra) => (
-                        <button
-                          key={obra.id}
-                          onClick={() => {
-                            onSelectObra(obra.id);
-                            setSearchQuery('');
-                            setSearchResults([]);
-                          }}
-                          className="w-full flex items-center gap-3 p-2 hover:bg-neutral-900/50 rounded-lg transition-colors text-left group"
-                        >
-                          <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md shadow bg-neutral-900" />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-cine-accent-light transition-colors truncate leading-tight">{obra.titulo}</h4>
-                            <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[9px] uppercase font-mono px-1 rounded bg-neutral-800 text-zinc-400 font-medium">{obra.tipo}</span>
-                                <span className="text-[9px] text-zinc-500">{obra.ano}</span>
-                              </div>
-                              {(() => {
-                                const matchedTags = getMatchingHashtagsForObra(obra, searchQuery);
-                                if (matchedTags.length > 0) {
-                                  return (
-                                    <div className="flex gap-1 overflow-hidden max-w-[120px]">
-                                      {matchedTags.slice(0, 2).map((tag, idx) => (
-                                        <span key={idx} className="text-[9px] text-cine-accent-light font-semibold truncate bg-cine-accent/10 px-1 rounded border border-cine-accent/20">
-                                          {tag}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => handleSearchSubmit()}
-                      className="w-full text-center py-2 text-xs text-cine-accent-light font-bold hover:text-cine-cream transition-colors mt-1.5 pt-2 border-t border-neutral-900/60"
-                    >
-                      Ver todos os resultados
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* RIGHT SECTION: Controls */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-              
-              {/* MOBILE INSTALL APP BUTTON */}
-              <button
-                id="install-app-btn-mobile"
-                onClick={handleInstallApp}
-                className="p-2 text-cine-accent-light hover:text-cine-cream bg-cine-accent/10 hover:bg-cine-accent/20 border border-cine-accent/30 rounded-lg sm:hidden transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                title="Baixar Aplicativo"
-              >
-                <Download className="w-4.5 h-4.5" />
-              </button>
-
-              {/* MOBILE SEARCH TRIGGER */}
-              <button 
-                id="search-toggle"
-                onClick={() => setSearchOpen(!searchOpen)} 
-                className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-900/50 sm:hidden transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </button>
 
               {/* BELL */}
               <div className="relative">
@@ -690,6 +403,8 @@ export default function Header({
                 />
               )}
 
+              <SideNavToggleButton visible={hasSideNav} />
+
               {/* USER PROFILE */}
               <div className="relative">
                 <button 
@@ -722,65 +437,6 @@ export default function Header({
           </div>
         </div>
 
-        {/* RESPONSIVE MOBILE SEARCH BAR */}
-        <AnimatePresence>
-          {searchOpen && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="sm:hidden bg-neutral-950 border-b border-neutral-900 px-4 py-3"
-            >
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Search className="h-4 w-4 text-zinc-500" />
-                </div>
-                <input
-                  id="search-input-mobile"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
-                  placeholder="Pesquisar canais, filmes, animes..."
-                  className="w-full bg-neutral-900/80 border border-neutral-800 rounded-xl py-2 pl-9 pr-8 text-xs text-zinc-200 outline-none focus:border-cine-accent"
-                  autoFocus
-                />
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSearchOpen(false);
-                  }} 
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-500"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {searchQuery.trim() && searchResults.length > 0 && (
-                <div className="bg-neutral-950/95 rounded-xl border border-neutral-900 mt-2 p-2 max-h-60 overflow-y-auto divide-y divide-neutral-900 shadow-xl">
-                  {searchResults.map((obra) => (
-                    <button
-                      key={obra.id}
-                      onClick={() => {
-                        onSelectObra(obra.id);
-                        setSearchQuery('');
-                        setSearchResults([]);
-                        setSearchOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-neutral-900 rounded-lg text-left"
-                    >
-                      <OptimizedImage src={obra.poster} alt={obra.titulo} containerClassName="w-8 h-11 flex-shrink-0" className="w-8 h-11 object-cover rounded-md" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-semibold text-white truncate">{obra.titulo}</h4>
-                        <span className="text-[10px] text-zinc-500">{obra.ano}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
       </header>
 
