@@ -696,7 +696,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <motion.div className="min-h-screen bg-[#0f0d14] cine-container pt-24 pb-20 w-full space-y-8 text-white">
+    <motion.div className="min-h-screen bg-[#0c1014] cine-container pt-24 pb-20 w-full space-y-8 text-white">
       
       {/* HEADER */}
       <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">

@@ -1,60 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@300;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
-  --color-cine-bg: #0f0d14;
-  --color-cine-surface: #17141f;
-  --color-cine-elevated: #211c2a;
-  --color-cine-border: #3a3248;
-  --color-cine-cream: #f3ece4;
-  --color-cine-muted: #9d92a8;
-  --color-cine-accent: #e9a882;
-  --color-cine-accent-light: #f5c9a8;
-  --color-cine-accent-dark: #c9784f;
-  --color-cine-lilac: #c4a8e0;
-  --color-cine-lilac-muted: #9a7fb8;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --color-cine-bg: #0c1014;
+  --color-cine-surface: #141a21;
+  --color-cine-elevated: #1c242d;
+  --color-cine-border: #2d3744;
+  --color-cine-cream: #ede8e1;
+  --color-cine-muted: #8891a0;
+  --color-cine-accent: #d4845c;
+  --color-cine-accent-light: #e8a882;
+  --color-cine-accent-dark: #b5653f;
+  --color-cine-mint: #6eb5a8;
+  --color-cine-mint-muted: #4f8f84;
+  --color-cine-lilac: #6eb5a8;
+  --color-cine-lilac-muted: #4f8f84;
 }
 
-.font-syne {
-  font-family: 'Syne', 'Inter', system-ui, sans-serif;
+.font-bricolage {
+  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
 }
 
 .cine-lettermark {
-  font-family: 'Syne', 'Inter', system-ui, sans-serif;
-  line-height: 0.92;
+  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  line-height: 1;
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.06em;
+  align-items: center;
+  gap: 0;
 }
 
 .cine-lettermark-cine {
   font-weight: 300;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  font-size: 0.62em;
+  font-size: 0.78em;
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
   color: var(--color-cine-cream);
-  opacity: 0.95;
-  transform: translateY(-0.06em);
+  opacity: 0.9;
+}
+
+.cine-lettermark-sep {
+  display: inline-block;
+  width: 1.5px;
+  height: 0.72em;
+  margin-inline: 0.38em;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--color-cine-accent-light), var(--color-cine-mint));
+  opacity: 0.75;
+  transform: translateY(0.04em);
 }
 
 .cine-lettermark-react {
   font-weight: 800;
-  letter-spacing: -0.04em;
-  background: linear-gradient(108deg, #e9a882 0%, #f5c9a8 42%, #c4a8e0 100%);
+  letter-spacing: -0.035em;
+  background: linear-gradient(118deg, #d4845c 0%, #e8a882 38%, #6eb5a8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.cine-lettermark-rule {
-  display: block;
-  height: 2px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, transparent 0%, #e9a882 18%, #c4a8e0 82%, transparent 100%);
-  opacity: 0.85;
 }
 
 .font-righteous {
@@ -72,16 +76,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f0d14;
+  background: #0c1014;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2436;
+  background: #24303c;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e9a882;
+  background: #d4845c;
 }
 
 /* Hide scrollbar completely for all horizontal-scrolling carousels */
@@ -125,8 +129,8 @@ video,
 }
 
 html, body, #root {
-  background-color: #0f0d14;
-  color: #f3ece4;
+  background-color: #0c1014;
+  color: #ede8e1;
   font-family: var(--font-sans);
   overflow-x: hidden !important;
   width: 100%;
@@ -368,7 +372,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-atelier-beam {
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(233, 168, 130, 0.38) 0%, rgba(196, 168, 224, 0.12) 45%, transparent 72%);
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(212, 132, 92, 0.34) 0%, rgba(110, 181, 168, 0.14) 48%, transparent 72%);
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
@@ -382,10 +386,10 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-social-heading {
-  font-family: 'Syne', system-ui, sans-serif;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  background: linear-gradient(92deg, #f5c9a8 0%, #e9a882 42%, #c4a8e0 100%);
+  letter-spacing: 0.02em;
+  background: linear-gradient(92deg, #e8a882 0%, #d4845c 42%, #6eb5a8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

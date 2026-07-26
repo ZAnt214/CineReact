@@ -234,7 +234,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 <motion.div
-                  className="absolute bottom-20 -left-16 w-40 h-40 bg-cine-lilac/5 rounded-full blur-2xl pointer-events-none"
+                  className="absolute bottom-20 -left-16 w-40 h-40 bg-cine-mint/5 rounded-full blur-2xl pointer-events-none"
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 />

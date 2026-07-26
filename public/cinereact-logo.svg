@@ -1,21 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="1040" height="240">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" width="960" height="200">
   <defs>
     <linearGradient id="reactGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#e9a882" />
-      <stop offset="45%" stop-color="#f5c9a8" />
-      <stop offset="100%" stop-color="#c4a8e0" />
+      <stop offset="0%" stop-color="#d4845c" />
+      <stop offset="40%" stop-color="#e8a882" />
+      <stop offset="100%" stop-color="#6eb5a8" />
     </linearGradient>
-    <linearGradient id="ruleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#e9a882" stop-opacity="0" />
-      <stop offset="20%" stop-color="#e9a882" />
-      <stop offset="80%" stop-color="#c4a8e0" />
-      <stop offset="100%" stop-color="#c4a8e0" stop-opacity="0" />
+    <linearGradient id="sepGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8a882" />
+      <stop offset="100%" stop-color="#6eb5a8" />
     </linearGradient>
   </defs>
 
-  <rect width="520" height="120" rx="16" fill="#0f0d14"/>
+  <rect width="480" height="100" rx="14" fill="#0c1014"/>
 
-  <text x="32" y="62" font-family="'Syne', sans-serif" font-weight="300" font-size="22" fill="#f3ece4" letter-spacing="12">CINE</text>
-  <text x="168" y="68" font-family="'Syne', sans-serif" font-weight="800" font-size="52" fill="url(#reactGrad)" letter-spacing="-1">React</text>
-  <rect x="32" y="82" width="360" height="3" rx="1.5" fill="url(#ruleGrad)" opacity="0.85"/>
+  <text x="28" y="62" font-family="'Bricolage Grotesque', sans-serif" font-weight="300" font-size="28" fill="#ede8e1" letter-spacing="6" opacity="0.9">cine</text>
+  <rect x="118" y="30" width="2.5" height="36" rx="1.25" fill="url(#sepGrad)" opacity="0.8"/>
+  <text x="136" y="66" font-family="'Bricolage Grotesque', sans-serif" font-weight="800" font-size="48" fill="url(#reactGrad)" letter-spacing="-1">React</text>
 </svg>
