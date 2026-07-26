@@ -112,7 +112,7 @@ export function PremiumRewardSurface({
       {style.particles === 'bubbles' && <BubbleField lite={lite} />}
       {style.particles === 'sparkles' && <SparkleField lite={lite} />}
       {style.particles === 'confetti' && !lite &&
-        ['#ef4444', '#22c55e', '#3b82f6', '#a8a29e'].map((c, i) => (
+        ['#ef4444', '#22c55e', '#3b82f6', '#9d92a8'].map((c, i) => (
           <motion.span
             key={c}
             className="absolute w-1 h-1 rounded-sm"

@@ -92,7 +92,7 @@ function PremiumVideoShelf({
     <div className="space-y-4 pt-4 border-t border-zinc-900">
       <div className="flex items-center justify-between">
         <h3 className="text-md md:text-lg font-black text-white tracking-tight flex items-center gap-2">
-          <span className="w-1 h-5 bg-stone-400 rounded-full" />
+          <span className="w-1 h-5 bg-cine-accent rounded-full" />
           {title}
         </h3>
         <span className="text-xs text-zinc-500 font-mono tracking-wider">{videos.length} {videos.length === 1 ? 'VÍDEO' : 'VÍDEOS'}</span>
@@ -105,7 +105,7 @@ function PremiumVideoShelf({
             whileHover={{ y: -4, scale: 1.01 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => onSelect(video.id)}
-            className="flex-shrink-0 w-[240px] md:w-[290px] bg-zinc-900/10 backdrop-blur-md border border-zinc-850 hover:border-stone-400/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
+            className="flex-shrink-0 w-[240px] md:w-[290px] bg-zinc-900/10 backdrop-blur-md border border-zinc-850 hover:border-cine-accent/30 rounded-xl overflow-hidden cursor-pointer group flex flex-col snap-start"
           >
             {/* Thumbnail */}
             <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
@@ -120,7 +120,7 @@ function PremiumVideoShelf({
                 {video.duracao}
               </span>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-stone-300 to-stone-400 flex items-center justify-center shadow-lg shadow-stone-400/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cine-accent-light to-cine-accent flex items-center justify-center shadow-lg shadow-cine-accent/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
                   <Play className="w-5 h-5 fill-black text-black ml-0.5" />
                 </div>
               </div>
@@ -129,7 +129,7 @@ function PremiumVideoShelf({
             {/* Video Meta Info */}
             <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
               <div>
-                <h4 className="text-xs md:text-sm font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-stone-300 transition-colors mb-1">
+                <h4 className="text-xs md:text-sm font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-cine-accent-light transition-colors mb-1">
                   {video.titulo}
                 </h4>
                 <p className="text-[11px] text-zinc-400 font-medium tracking-wide">{video.canalNome}</p>
@@ -441,7 +441,7 @@ export default function PlaybackPage({
     }
     return (
       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <Sparkles className="w-12 h-12 text-stone-400 mb-3 animate-pulse" />
+        <Sparkles className="w-12 h-12 text-cine-accent mb-3 animate-pulse" />
         <div className="text-white font-bold text-lg">Vídeo de React não encontrado</div>
         <p className="text-zinc-500 text-xs mt-1">O link pode estar quebrado ou o conteúdo foi removido.</p>
       </div>
@@ -524,8 +524,8 @@ export default function PlaybackPage({
   // Avatar Gradient styling based on channel name
   const getAvatarColor = (name: string) => {
     const colors = [
-      'from-stone-300 to-stone-500 shadow-[0_0_12px_rgba(168,162,158,0.2)]',
-      'from-stone-400 to-stone-600 shadow-[0_0_12px_rgba(168,162,158,0.2)]',
+      'from-cine-accent-light to-cine-accent-dark shadow-[0_0_12px_rgba(233,168,130,0.2)]',
+      'from-cine-accent to-cine-accent-dark shadow-[0_0_12px_rgba(233,168,130,0.2)]',
     ];
     let sum = 0;
     for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
@@ -538,7 +538,7 @@ export default function PlaybackPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="cine-container pt-24 pb-20 min-h-screen bg-[#141210] w-full"
+      className="cine-container pt-24 pb-20 min-h-screen bg-[#0f0d14] w-full"
     >
       {/* GRID LAYOUT: 12 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -547,9 +547,9 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-6 transition-all duration-300`}>
           
           {/* HIGH-END CINEMATIC GOLDEN BORDER PLAYER FRAME */}
-          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-stone-300/60 via-stone-300/80 to-stone-500/60 hover:from-stone-200 hover:via-stone-200 hover:to-stone-400 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(168,162,158,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(168,162,158,0.45)] transition-all duration-500">
+          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(233,168,130,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(233,168,130,0.45)] transition-all duration-500">
             {/* Ambient Backlight Glow behind Player */}
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-stone-400/25 via-stone-300/20 to-stone-500/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cine-accent/25 via-cine-accent-light/20 to-cine-accent-dark/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
 
             <div className="relative w-full bg-black rounded-[22px] overflow-hidden aspect-video">
               <iframe 
@@ -591,20 +591,20 @@ export default function PlaybackPage({
                     <div className="relative z-10 flex flex-col items-center gap-4 text-center px-4">
                       <div className="relative flex items-center justify-center">
                         {/* Outer Pulsing Aura */}
-                        <div className="absolute w-20 h-20 rounded-full bg-stone-400/20 animate-ping" />
+                        <div className="absolute w-20 h-20 rounded-full bg-cine-accent/20 animate-ping" />
                         
                         {/* Spinning Amber Border Ring */}
-                        <div className="w-16 h-16 rounded-full border-2 border-stone-400/20 border-t-stone-300 border-r-stone-300 animate-spin shadow-[0_0_20px_rgba(168,162,158,0.3)]" />
+                        <div className="w-16 h-16 rounded-full border-2 border-cine-accent/20 border-t-cine-accent-light border-r-cine-accent-light animate-spin shadow-[0_0_20px_rgba(233,168,130,0.3)]" />
                         
                         {/* Central Icon */}
-                        <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-stone-400/40 flex items-center justify-center shadow-lg">
-                          <Play className="w-5 h-5 fill-stone-300 text-stone-300 ml-0.5 animate-pulse" />
+                        <div className="absolute w-12 h-12 rounded-full bg-zinc-900/90 border border-cine-accent/40 flex items-center justify-center shadow-lg">
+                          <Play className="w-5 h-5 fill-cine-accent-light text-cine-accent-light ml-0.5 animate-pulse" />
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-400/10 border border-stone-400/30 text-stone-300 text-xs font-black uppercase tracking-widest shadow-md backdrop-blur-md">
-                          <Sparkles className="w-3.5 h-3.5 text-stone-300 animate-spin" />
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-xs font-black uppercase tracking-widest shadow-md backdrop-blur-md">
+                          <Sparkles className="w-3.5 h-3.5 text-cine-accent-light animate-spin" />
                           Carregando React...
                         </div>
                         <p className="text-xs text-zinc-300 font-bold max-w-sm line-clamp-1 drop-shadow-md">
@@ -615,7 +615,7 @@ export default function PlaybackPage({
 
                     {/* Bottom Loading Bar */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900/80 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-stone-300 via-stone-300 to-stone-400 animate-[pulse_1.5s_infinite] w-full" />
+                      <div className="h-full bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent animate-[pulse_1.5s_infinite] w-full" />
                     </div>
                   </motion.div>
                 )}
@@ -624,7 +624,7 @@ export default function PlaybackPage({
               {/* THEATER MODE QUICK TOGGLE OVERLAY */}
               <button
                 onClick={() => setIsTheaterMode(!isTheaterMode)}
-                className="hidden sm:flex absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-stone-300 hover:text-stone-200 border border-stone-400/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
+                className="hidden sm:flex absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-cine-accent-light hover:text-cine-cream border border-cine-accent/40 backdrop-blur-md text-xs font-bold transition-all shadow-lg items-center gap-1.5 cursor-pointer opacity-0 group-hover/player:opacity-100"
                 title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}
               >
                 <Tv className="w-4 h-4" />
@@ -644,8 +644,8 @@ export default function PlaybackPage({
               <div className="flex items-center gap-2 flex-wrap">
                 {activeObra && (
                   <>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-stone-400/10 text-stone-300 border border-stone-400/20 shadow-sm shadow-stone-400/5">
-                      <Sparkles className="w-3 h-3 text-stone-300" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-cine-accent/10 text-cine-accent-light border border-cine-accent/20 shadow-sm shadow-cine-accent/5">
+                      <Sparkles className="w-3 h-3 text-cine-accent-light" />
                       {activeObra.tipo === 'canal' 
                         ? 'Reação em Destaque' 
                         : activeObra.tipo === 'serie' 
@@ -713,7 +713,7 @@ export default function PlaybackPage({
                 <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-1.5">
                     <h3 
-                      className="font-black text-white text-sm md:text-base cursor-pointer hover:text-stone-300 transition-colors leading-none"
+                      className="font-black text-white text-sm md:text-base cursor-pointer hover:text-cine-accent-light transition-colors leading-none"
                       onClick={() => {
                         const cId = channelObra?.id || activeReact.canalId;
                         if (cId) onGoToCanal(cId);
@@ -721,7 +721,7 @@ export default function PlaybackPage({
                     >
                       {activeReact.canalNome}
                     </h3>
-                    <span className="w-3.5 h-3.5 rounded-full bg-stone-400/10 text-stone-300 flex items-center justify-center border border-stone-400/20" title="Criador verificado">
+                    <span className="w-3.5 h-3.5 rounded-full bg-cine-accent/10 text-cine-accent-light flex items-center justify-center border border-cine-accent/20" title="Criador verificado">
                       <Check className="w-2 h-2 stroke-[3]" />
                     </span>
                   </div>
@@ -736,7 +736,7 @@ export default function PlaybackPage({
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
                       ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-850 hover:text-white border border-zinc-800' 
-                      : 'bg-gradient-to-r from-stone-300 to-stone-400 text-black font-black hover:from-stone-200 hover:to-stone-300 shadow-lg shadow-stone-400/20'
+                      : 'bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black hover:from-cine-cream hover:to-cine-accent-light shadow-lg shadow-cine-accent/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}
@@ -751,12 +751,12 @@ export default function PlaybackPage({
                   onClick={handleToggleVideoLike}
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     videoLiked
-                      ? 'bg-stone-400/20 border-stone-400/40 text-stone-200 shadow-md shadow-stone-400/10'
+                      ? 'bg-cine-accent/20 border-cine-accent/40 text-cine-cream shadow-md shadow-cine-accent/10'
                       : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
                   }`}
                   title={videoLiked ? "Remover curtida do vídeo" : "Gostei deste vídeo"}
                 >
-                  <ThumbsUp className={`w-4 h-4 transition-transform duration-300 ${videoLiked ? 'fill-stone-300 text-stone-300 scale-110' : 'text-zinc-400'}`} />
+                  <ThumbsUp className={`w-4 h-4 transition-transform duration-300 ${videoLiked ? 'fill-cine-accent-light text-cine-accent-light scale-110' : 'text-zinc-400'}`} />
                   <span>{videoLiked ? 'Gostei' : 'Curtir'} ({formatViews(videoLikesCount)})</span>
                 </motion.button>
 
@@ -766,11 +766,11 @@ export default function PlaybackPage({
                   onClick={handleToggleFavorite}
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     isFavorited
-                      ? 'bg-stone-400/20 border-stone-400/40 text-stone-200 shadow-md shadow-stone-400/10'
+                      ? 'bg-cine-accent/20 border-cine-accent/40 text-cine-cream shadow-md shadow-cine-accent/10'
                       : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-stone-300 text-stone-300 scale-110' : 'text-zinc-400'}`} />
+                  <Heart className={`w-4 h-4 transition-transform duration-300 ${isFavorited ? 'fill-cine-accent-light text-cine-accent-light scale-110' : 'text-zinc-400'}`} />
                   {isFavorited ? 'Favoritado' : 'Favoritar'}
                 </motion.button>
 
@@ -792,9 +792,9 @@ export default function PlaybackPage({
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-950 text-white border border-stone-400/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
+                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-950 text-white border border-cine-accent/30 text-[11px] py-1.5 px-3.5 rounded-lg whitespace-nowrap shadow-xl flex items-center gap-1.5 font-bold tracking-wide z-50"
                       >
-                        <Check className="w-3.5 h-3.5 text-stone-300" />
+                        <Check className="w-3.5 h-3.5 text-cine-accent-light" />
                         Link copiado!
                       </motion.div>
                     )}
@@ -805,7 +805,7 @@ export default function PlaybackPage({
                   href={`https://www.youtube.com/watch?v=${activeReact.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 bg-stone-400/10 hover:bg-stone-400/20 text-stone-300 px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border border-stone-400/25 cursor-pointer shadow-md shadow-stone-400/5 hover:text-stone-200"
+                  className="flex items-center gap-2 bg-cine-accent/10 hover:bg-cine-accent/20 text-cine-accent-light px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all border border-cine-accent/25 cursor-pointer shadow-md shadow-cine-accent/5 hover:text-cine-cream"
                 >
                   <ExternalLink className="w-4 h-4" />
                   YouTube
@@ -817,7 +817,7 @@ export default function PlaybackPage({
             <div className="bg-zinc-900/30 backdrop-blur-md p-5 md:p-6 rounded-2xl space-y-4 shadow-xl">
               <div className="flex items-center justify-between pb-1">
                 <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                  <Info className="w-4 h-4 text-stone-300" />
+                  <Info className="w-4 h-4 text-cine-accent-light" />
                   Informações sobre o vídeo
                 </h3>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">DETALHES</span>
@@ -826,35 +826,35 @@ export default function PlaybackPage({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 text-xs">
                 <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <ThumbsUp className="w-3.5 h-3.5 text-stone-300" /> Curtidas CineReact
+                    <ThumbsUp className="w-3.5 h-3.5 text-cine-accent-light" /> Curtidas CineReact
                   </span>
                   <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(videoLikesCount)} curtidas</span>
                 </div>
 
                 <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <Eye className="w-3.5 h-3.5 text-stone-300" /> Visualizações
+                    <Eye className="w-3.5 h-3.5 text-cine-accent-light" /> Visualizações
                   </span>
                   <span className="text-white font-bold font-mono text-sm block pt-0.5">{formatViews(activeReact.visualizacoes)} views</span>
                 </div>
 
                 <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-stone-300" /> Duração
+                    <Clock className="w-3.5 h-3.5 text-cine-accent-light" /> Duração
                   </span>
                   <span className="text-white font-bold font-mono text-xs block pt-0.5">{activeReact.duracao || 'N/A'}</span>
                 </div>
 
                 <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                   <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-stone-300" /> Criador / Canal
+                    <User className="w-3.5 h-3.5 text-cine-accent-light" /> Criador / Canal
                   </span>
                   <span 
                     onClick={() => {
                       const cId = channelObra?.id || activeReact.canalId;
                       if (cId) onGoToCanal(cId);
                     }} 
-                    className="text-stone-300 font-bold text-xs hover:underline cursor-pointer truncate block pt-0.5"
+                    className="text-cine-accent-light font-bold text-xs hover:underline cursor-pointer truncate block pt-0.5"
                   >
                     {activeReact.canalNome}
                   </span>
@@ -864,7 +864,7 @@ export default function PlaybackPage({
                   <>
                     <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                       <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Film className="w-3.5 h-3.5 text-stone-300" /> Categoria
+                        <Film className="w-3.5 h-3.5 text-cine-accent-light" /> Categoria
                       </span>
                       <span className="text-zinc-200 font-bold text-xs capitalize block pt-0.5">
                         {activeObra.tipo === 'serie' ? 'Série' : activeObra.tipo === 'jogo' ? 'Jogo' : activeObra.tipo === 'canal' ? 'Canal de React' : activeObra.tipo}
@@ -873,11 +873,11 @@ export default function PlaybackPage({
 
                     <div className="bg-zinc-950/50 p-3.5 rounded-xl space-y-1 hover:bg-zinc-950/70 transition-colors">
                       <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-stone-300" /> Coleção / Obra
+                        <Layers className="w-3.5 h-3.5 text-cine-accent-light" /> Coleção / Obra
                       </span>
                       <span 
                         onClick={() => onGoToObra(activeObra.id)} 
-                        className="text-stone-300 font-bold text-xs hover:underline cursor-pointer line-clamp-1 block pt-0.5"
+                        className="text-cine-accent-light font-bold text-xs hover:underline cursor-pointer line-clamp-1 block pt-0.5"
                       >
                         {activeObra.titulo}
                       </span>
@@ -941,13 +941,13 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'} space-y-5 transition-all duration-300`}>
           <div className="border-b border-zinc-900 pb-3">
             <h3 className="font-black text-white text-md uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-stone-300 animate-pulse" />
+              <Sparkles className="w-4 h-4 text-cine-accent-light animate-pulse" />
               Recomendações
             </h3>
             <p className="text-[10px] text-zinc-500 mt-1 tracking-wide">Vídeos semelhantes baseados no seu gosto</p>
           </div>
           
-          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800 hover:scrollbar-thumb-stone-400/20">
+          <div className="flex flex-col gap-3.5 lg:max-h-[120vh] lg:overflow-y-auto pr-1 lg:scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-800 hover:scrollbar-thumb-cine-accent/20">
             {!loadDeferredSections ? (
               <SidebarSkeleton />
             ) : (
@@ -976,11 +976,11 @@ export default function PlaybackPage({
 
                   {/* Meta details */}
                   <div className="flex flex-col flex-1 overflow-hidden justify-between py-0.5">
-                    <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-stone-300 transition-colors">
+                    <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-cine-accent-light transition-colors">
                       {react.titulo}
                     </h4>
                     <div className="space-y-0.5 mt-1">
-                      <p className="text-[11px] text-zinc-400 font-semibold truncate hover:text-stone-200" title={react.canalNome}>
+                      <p className="text-[11px] text-zinc-400 font-semibold truncate hover:text-cine-cream" title={react.canalNome}>
                         {react.canalNome}
                       </p>
                       <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">

@@ -35,7 +35,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <div className={`relative overflow-hidden bg-zinc-950 select-none ${containerClassName || 'w-full h-full'}`}>
       {/* Dark Dominant Placeholder Gradient (prevents white flicker) */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-tr from-zinc-950 via-zinc-900 to-stone-900/20 animate-pulse pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-zinc-950 via-zinc-900 to-cine-surface/20 animate-pulse pointer-events-none z-0" />
       )}
 
       <img

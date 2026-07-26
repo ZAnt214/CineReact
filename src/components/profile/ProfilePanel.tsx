@@ -52,32 +52,32 @@ function NavRow({
       onClick={onClick}
       className={`group flex items-center gap-3 w-full px-3 py-3 rounded-xl border text-left transition-colors cursor-pointer ${
         active
-          ? 'bg-stone-400/10 border-stone-400/25'
+          ? 'bg-cine-accent/10 border-cine-accent/25'
           : item.accent
-            ? 'border-stone-400/20 bg-stone-900/15 hover:bg-stone-900/25'
+            ? 'border-cine-accent/20 bg-cine-surface/15 hover:bg-cine-surface/25'
             : 'border-transparent hover:border-zinc-800/80 hover:bg-zinc-900/40'
       }`}
     >
       <span
         className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${
           active
-            ? 'bg-stone-400/15 text-stone-300'
+            ? 'bg-cine-accent/15 text-cine-accent-light'
             : item.accent
-              ? 'bg-stone-400/10 text-stone-300'
+              ? 'bg-cine-accent/10 text-cine-accent-light'
               : 'bg-zinc-900/80 text-zinc-500 group-hover:text-zinc-300'
         }`}
       >
         <Icon className="w-4 h-4" />
       </span>
       <span className="flex-1 min-w-0">
-        <span className={`block text-sm font-semibold truncate ${active ? 'text-stone-100' : 'text-zinc-100'}`}>
+        <span className={`block text-sm font-semibold truncate ${active ? 'text-cine-cream' : 'text-zinc-100'}`}>
           {item.label}
         </span>
         <span className="block text-[11px] text-zinc-500 truncate mt-0.5">{item.description}</span>
       </span>
       <ChevronRight
         className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-          active ? 'text-stone-300' : 'text-zinc-600 group-hover:text-zinc-400'
+          active ? 'text-cine-accent-light' : 'text-zinc-600 group-hover:text-zinc-400'
         }`}
       />
     </button>
@@ -169,7 +169,7 @@ export default function ProfilePanel({
             <button
               type="button"
               onClick={() => { onClose(); onOpenAuth?.('login'); }}
-              className="w-full py-2.5 rounded-xl bg-stone-400 hover:bg-stone-300 text-black font-bold text-sm cursor-pointer transition-colors"
+              className="w-full py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-bold text-sm cursor-pointer transition-colors"
             >
               Entrar
             </button>
@@ -232,14 +232,14 @@ export default function ProfilePanel({
 
                 <div className="flex flex-wrap justify-center gap-2 mt-5 w-full pt-1 border-t border-zinc-800/50">
                   {user.isAdmin && (
-                    <span className="px-2.5 py-1 rounded-md bg-stone-400/10 text-stone-300 border border-stone-400/20 text-[10px] font-bold uppercase tracking-wide">
+                    <span className="px-2.5 py-1 rounded-md bg-cine-accent/10 text-cine-accent-light border border-cine-accent/20 text-[10px] font-bold uppercase tracking-wide">
                       Admin
                     </span>
                   )}
                   <span
                     className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${
                       user.isDonor
-                        ? 'bg-stone-400/10 text-stone-200 border-stone-400/25'
+                        ? 'bg-cine-accent/10 text-cine-cream border-cine-accent/25'
                         : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'
                     }`}
                   >
@@ -252,12 +252,12 @@ export default function ProfilePanel({
               {profile && (
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/30 px-3 py-3 text-center">
-                    <Sparkles className="w-4 h-4 text-stone-300 mx-auto mb-1" />
+                    <Sparkles className="w-4 h-4 text-cine-accent-light mx-auto mb-1" />
                     <p className="text-sm font-bold text-white">{profile.spotlight}</p>
                     <p className="text-[9px] text-zinc-500 uppercase tracking-wide">Spotlight</p>
                   </div>
                   <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/30 px-3 py-3 text-center">
-                    <Flame className="w-4 h-4 text-stone-400 mx-auto mb-1" />
+                    <Flame className="w-4 h-4 text-cine-accent mx-auto mb-1" />
                     <p className="text-sm font-bold text-white">{profile.currentStreak}</p>
                     <p className="text-[9px] text-zinc-500 uppercase tracking-wide">Sequência</p>
                   </div>
@@ -274,7 +274,7 @@ export default function ProfilePanel({
                 <button
                   type="button"
                   onClick={() => go('club', onOpenGamification)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-stone-400/10 hover:bg-stone-400/15 border border-stone-400/20 text-stone-200 text-xs font-bold cursor-pointer transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-cine-accent/10 hover:bg-cine-accent/15 border border-cine-accent/20 text-cine-cream text-xs font-bold cursor-pointer transition-colors"
                 >
                   <Palette className="w-4 h-4" />
                   Personalizar perfil
@@ -284,14 +284,14 @@ export default function ProfilePanel({
                   onClick={() => go('doacoes')}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold cursor-pointer transition-colors"
                 >
-                  <Heart className="w-4 h-4 text-stone-300" />
+                  <Heart className="w-4 h-4 text-cine-accent-light" />
                   {user.isDonor ? 'Apoiar novamente' : 'Seja apoiador VIP'}
                 </button>
                 {user.isAdmin && (
                   <button
                     type="button"
                     onClick={() => go('admin')}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-stone-400/25 text-stone-200 text-xs font-semibold cursor-pointer hover:bg-stone-400/10 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-cine-accent/25 text-cine-cream text-xs font-semibold cursor-pointer hover:bg-cine-accent/10 transition-colors"
                   >
                     <ShieldAlert className="w-4 h-4" />
                     Administrar
@@ -332,7 +332,7 @@ export default function ProfilePanel({
 
               <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/20 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-stone-400/80 flex items-center gap-1.5 mb-1">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-cine-accent/80 flex items-center gap-1.5 mb-1">
                     <Youtube className="w-3.5 h-3.5" />
                     Criadores
                   </p>

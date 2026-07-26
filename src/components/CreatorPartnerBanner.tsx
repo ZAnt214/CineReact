@@ -15,19 +15,19 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-stone-300/25 bg-zinc-950/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
+        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent-light/25 bg-zinc-950/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
         <motion.div
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-stone-300 to-transparent"
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cine-accent-light to-transparent"
           aria-hidden="true"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         />
 
         <motion.div
-          className="absolute -top-12 -right-12 w-32 h-32 bg-stone-400/10 rounded-full blur-2xl pointer-events-none"
+          className="absolute -top-12 -right-12 w-32 h-32 bg-cine-accent/10 rounded-full blur-2xl pointer-events-none"
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
@@ -43,13 +43,13 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             onClick={onClick}
             className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.03] cursor-pointer"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stone-400/25 bg-stone-400/10 sm:h-11 sm:w-11 group-hover:border-stone-300/40 group-hover:bg-stone-300/15 transition-colors">
-              <Youtube className="h-5 w-5 text-stone-300 transition-colors" aria-hidden="true" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cine-accent/25 bg-cine-accent/10 sm:h-11 sm:w-11 group-hover:border-cine-accent-light/40 group-hover:bg-cine-accent-light/15 transition-colors">
+              <Youtube className="h-5 w-5 text-cine-accent-light transition-colors" aria-hidden="true" />
             </span>
 
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <span className="truncate text-xs font-black uppercase tracking-[0.12em] text-stone-300 sm:text-sm">
+                <span className="truncate text-xs font-black uppercase tracking-[0.12em] text-cine-accent-light sm:text-sm">
                   <span className="sm:hidden">Para Criadores</span>
                   <span className="hidden sm:inline">Programa de Criadores Parceiros</span>
                 </span>
@@ -59,7 +59,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
               </p>
             </span>
 
-            <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-400 hover:bg-stone-300 text-black font-extrabold text-xs transition-all shadow-md shadow-stone-400/20 group-hover:scale-105 shrink-0">
+            <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 group-hover:scale-105 shrink-0">
               <span>Saiba Mais</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </span>
@@ -69,7 +69,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             <button
               type="button"
               onClick={onClick}
-              className="sm:hidden px-3 py-1.5 rounded-xl bg-stone-400 hover:bg-stone-300 text-black font-extrabold text-xs transition-all shadow-md shadow-stone-400/20 active:scale-95 cursor-pointer whitespace-nowrap"
+              className="sm:hidden px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 active:scale-95 cursor-pointer whitespace-nowrap"
             >
               Ver
             </button>
