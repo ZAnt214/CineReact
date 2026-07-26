@@ -78,14 +78,10 @@ function PremiumVideoShelf({
   title, 
   videos, 
   onSelect,
-  formatViews,
-  getFriendlyDate
 }: { 
   title: string; 
   videos: ReactVideo[]; 
   onSelect: (id: string) => void;
-  formatViews: (v: number) => string;
-  getFriendlyDate: (d: string) => string;
 }) {
   if (videos.length === 0) return null;
 
@@ -136,8 +132,7 @@ function PremiumVideoShelf({
                 <p className="text-[11px] text-zinc-400 font-medium tracking-wide">{video.canalNome}</p>
               </div>
               
-              <div className="pt-2 border-t border-neutral-900/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
-                <span>{formatViews(video.visualizacoes)} visualizações</span>
+              <div className="pt-2 border-t border-neutral-900/80 flex items-center justify-end text-[10px] text-zinc-500 font-mono">
                 <span className="text-zinc-500/40 tracking-widest font-black">CINE</span>
               </div>
             </div>
@@ -912,8 +907,6 @@ export default function PlaybackPage({
                   title={`Mais Reacts de "${activeObra?.titulo || 'este conteúdo'}"`}
                   videos={reactsDestaObra}
                   onSelect={(id) => setActiveReactId(id)}
-                  formatViews={formatViews}
-                  getFriendlyDate={getFriendlyDate}
                 />
 
                 {/* Section 2: Mais vídeos deste criador */}
@@ -921,8 +914,6 @@ export default function PlaybackPage({
                   title={`Mais Vídeos de ${activeReact.canalNome}`}
                   videos={reactsDesteCriador}
                   onSelect={(id) => setActiveReactId(id)}
-                  formatViews={formatViews}
-                  getFriendlyDate={getFriendlyDate}
                 />
 
                 {/* Section 3: Reacts semelhantes (based on same category type) */}
@@ -930,8 +921,6 @@ export default function PlaybackPage({
                   title={`Reacts de outros ${activeObra?.tipo === 'filme' ? 'Filmes' : activeObra?.tipo === 'serie' ? 'Séries' : activeObra?.tipo === 'jogo' ? 'Jogos' : 'Animes'}`}
                   videos={reactsSemelhantes}
                   onSelect={(id) => setActiveReactId(id)}
-                  formatViews={formatViews}
-                  getFriendlyDate={getFriendlyDate}
                 />
               </>
             )}
@@ -980,13 +969,10 @@ export default function PlaybackPage({
                     <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-cine-accent-light transition-colors">
                       {react.titulo}
                     </h4>
-                    <div className="space-y-0.5 mt-1">
+                    <div className="mt-1">
                       <p className="text-[11px] text-zinc-400 font-semibold truncate hover:text-cine-cream" title={react.canalNome}>
                         {react.canalNome}
                       </p>
-                      <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
-                        <span>{formatViews(react.visualizacoes)} views</span>
-                      </div>
                     </div>
                   </div>
                 </motion.div>

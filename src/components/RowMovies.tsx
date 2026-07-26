@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Play, Eye, Clock, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Clock, Sparkles } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
 
@@ -126,15 +126,6 @@ export default function RowMovies({
 
   if (reacts.length === 0) return null;
 
-  const formatViews = (views: number) => {
-    if (views >= 1000000) {
-      return (views / 1000000).toFixed(1).replace('.', ',') + 'M views';
-    }
-    if (views >= 1000) {
-      return (views / 1000).toFixed(0) + ' mil views';
-    }
-    return views + ' views';
-  };
 
   return (
     <div className="catalog-row space-y-3.5 relative w-full min-w-0 group/row">
@@ -248,7 +239,7 @@ export default function RowMovies({
                     {react.titulo}
                   </h3>
                   
-                  <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-neutral-800/60 min-w-0">
+                  <div className="flex items-center pt-2.5 border-t border-neutral-800/60 min-w-0">
                     <span 
                       onClick={(e) => {
                         if (onChannelClick) {
@@ -263,10 +254,6 @@ export default function RowMovies({
                     >
                       {react.canalNome}
                     </span>
-                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800/70 text-zinc-300 rounded-full border border-zinc-700/50 text-[11px] font-display font-medium tracking-wide shadow-xs">
-                      <Eye className="w-3.5 h-3.5 text-cine-accent-light shrink-0" />
-                      <span>{formatViews(react.visualizacoes)}</span>
-                    </div>
                   </div>
                 </div>
               </div>

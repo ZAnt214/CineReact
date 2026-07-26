@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Film, Gamepad2, Tv, Clapperboard, ArrowLeft, Search, Hash, Play, Eye, Clock, Sparkles, Filter, X } from 'lucide-react';
+import { Film, Gamepad2, Tv, Clapperboard, ArrowLeft, Search, Hash, Play, Clock, Sparkles, Filter, X } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -374,8 +374,7 @@ export default function CategoryPage({
                     </h3>
                   </div>
 
-                  {/* Channel & Stats */}
-                  <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+                  <div className="pt-2 border-t border-neutral-800/80">
                     <span
                       onClick={(e) => {
                         if (onChannelClick) {
@@ -383,16 +382,11 @@ export default function CategoryPage({
                           onChannelClick(react.canalNome);
                         }
                       }}
-                      className={`font-bold text-cine-accent-light truncate max-w-[140px] ${
+                      className={`text-[11px] font-bold text-cine-accent-light truncate block ${
                         onChannelClick ? 'hover:underline hover:text-cine-cream cursor-pointer' : ''
                       }`}
                     >
                       {react.canalNome}
-                    </span>
-
-                    <span className="flex items-center gap-1 text-zinc-500 shrink-0">
-                      <Eye className="w-3 h-3" />
-                      <span>{react.visualizacoes > 0 ? react.visualizacoes.toLocaleString('pt-BR') : 'React'}</span>
                     </span>
                   </div>
                 </div>

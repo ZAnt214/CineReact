@@ -28,7 +28,7 @@ import { Obra, ReactVideo, UserState } from './types.ts';
 import { hasSocialLinks } from './utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
+import { Play, X, ExternalLink, Calendar, Compass, Clock } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -472,15 +472,6 @@ export default function App() {
     });
   }, [searchQuery, reacts, obras]);
 
-  const formatViews = (views: number) => {
-    if (views >= 1000000) {
-      return (views / 1000000).toFixed(1).replace('.', ',') + 'M de views';
-    }
-    if (views >= 1000) {
-      return (views / 1000).toFixed(0) + ' mil views';
-    }
-    return views + ' views';
-  };
 
   // Helper shuffle function (Fisher-Yates)
   const shuffleArray = useCallback(<T,>(arr: T[]): T[] => {
@@ -829,15 +820,12 @@ export default function App() {
                                   <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
                                     {react.titulo}
                                   </h3>
-                                  <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2">
-                                    <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
-                                      {react.canalNome}
-                                      <span className="w-1.5 h-1.5 bg-cine-accent-light rounded-full inline-block animate-pulse" />
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500 shrink-0">
-                                      <Eye className="w-3.5 h-3.5" /> {formatViews(react.visualizacoes)}
-                                    </span>
-                                  </div>
+                <div className="flex items-center text-[11px] text-zinc-400 pt-2">
+                  <span className="font-semibold text-zinc-300 truncate max-w-full flex items-center gap-1">
+                    {react.canalNome}
+                    <span className="w-1.5 h-1.5 bg-cine-accent-light rounded-full inline-block animate-pulse" />
+                  </span>
+                </div>
                                 </div>
                               </motion.div>
                             );
