@@ -41,7 +41,12 @@ function BrandMark({
 
   const name = (
     <span className="cine-brand-name">
-      Cine<span className="cine-brand-react">React</span>
+      <span className="cine-brand-cine">Cine</span>
+      <span className="cine-brand-connector" aria-hidden="true">
+        <span className="cine-brand-connector-ring" />
+        <span className="cine-brand-connector-core" />
+      </span>
+      <span className="cine-brand-react">React</span>
     </span>
   );
 
@@ -49,10 +54,21 @@ function BrandMark({
     <span className="cine-brand-tagline">{tagline}</span>
   ) : null;
 
+  const titleBlock = (
+    <>
+      {heading ? (
+        <h1 className="cine-brand-title">{name}</h1>
+      ) : (
+        <span className="cine-brand-title">{name}</span>
+      )}
+      <span className="cine-brand-rule" aria-hidden="true" />
+    </>
+  );
+
   if (heading) {
     return (
       <span className={stackClass}>
-        <h1 className="cine-brand-title">{name}</h1>
+        {titleBlock}
         {taglineEl}
       </span>
     );
@@ -60,7 +76,7 @@ function BrandMark({
 
   return (
     <span className={stackClass}>
-      <span className="cine-brand-title">{name}</span>
+      {titleBlock}
       {taglineEl}
     </span>
   );
@@ -93,7 +109,7 @@ export default function CineReactLogo({
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
         className={wrapperClass}
         aria-label="CineReact"
       >
