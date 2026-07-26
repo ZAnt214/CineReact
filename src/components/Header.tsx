@@ -122,6 +122,33 @@ export default function Header({
     }
   }, [user.email]);
 
+  useEffect(() => {
+    if (!showProfileMenu || typeof document === 'undefined') return;
+
+    const { body, documentElement } = document;
+    const scrollY = window.scrollY;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyWidth = body.style.width;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+
+    return () => {
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [showProfileMenu]);
+
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -767,7 +794,7 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-y-auto flex flex-col bg-zinc-950"
+            className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain flex flex-col bg-zinc-950 touch-pan-y"
           >
             <ProfilePanel
               user={user}

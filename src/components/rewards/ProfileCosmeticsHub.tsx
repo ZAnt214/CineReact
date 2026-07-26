@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import {
   CATEGORY_LABELS, CATEGORY_INFO, RARITY_ORDER, RARITY_STYLES,
-  CREATOR_PROGRAM_ART_BUNDLE_ID,
+  CREATOR_PROGRAM_ART_BUNDLE_ID, VERIFIED_PROFILE_BADGE_ID,
 } from '../../data/rewardsCatalog.ts';
 import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import RewardObtainInfo from './RewardObtainInfo.tsx';
@@ -86,6 +86,7 @@ export default function ProfileCosmeticsHub({
 
   const handleItemClick = (item: InventoryItemView) => {
     if (!item.owned) return;
+    if (item.id === VERIFIED_PROFILE_BADGE_ID && isEquipped(loadout, item)) return;
     setPendingItem(item);
   };
 
@@ -121,7 +122,7 @@ export default function ProfileCosmeticsHub({
             <ProfileNameRow name={user.nome} loadout={loadout} nameSize="md" align="center" className="w-full" />
             {loadout.badges.length > 0 && (
               <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
-                {loadout.badges.map((id) => {
+                {loadout.badges.filter((id) => id !== VERIFIED_PROFILE_BADGE_ID).map((id) => {
                   const b = inventory.find((i) => i.id === id);
                   return b ? (
                     <span key={id} title={b.name}>

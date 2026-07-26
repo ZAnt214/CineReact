@@ -272,6 +272,12 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   --profile-theme-scrim: rgb(9, 9, 11);
 }
 
+.profile-themed-scope-fullscreen .profile-surface-gradient,
+.profile-themed-scope-fullscreen .profile-surface-shimmer::after,
+.profile-themed-scope-fullscreen .profile-atelier-beam {
+  animation: none !important;
+}
+
 .profile-theme-scrim {
   background: var(--profile-theme-scrim);
 }

@@ -37,9 +37,9 @@ export default function ProfileThemeScope({
 
   const isFullscreen = variant === 'fullscreen';
   const isLite = variant === 'lite';
-  const isAtelier = display.themeVisualStyle === 'atelier' && !isLite;
-  const useAnimation = themeStyle?.animated && !isLite;
-  const useShimmer = themeStyle?.shimmer && !isLite;
+  const isAtelier = display.themeVisualStyle === 'atelier' && !isLite && !isFullscreen;
+  const useAnimation = themeStyle?.animated && !isLite && !isFullscreen;
+  const useShimmer = themeStyle?.shimmer && !isLite && !isFullscreen;
 
   return (
     <ProfileThemeContext.Provider value={tone}>

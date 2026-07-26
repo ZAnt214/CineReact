@@ -48,8 +48,23 @@ export function migrateProfile(profile: GamificationProfile): GamificationProfil
   if (!profile.stats.creatorWatchCounts) profile.stats.creatorWatchCounts = {};
 
   migrateCreatorProgramArtRewards(profile);
+  ensureVerifiedBadgeEquipped(profile);
 
   return profile;
+}
+
+function ensureVerifiedBadgeEquipped(profile: GamificationProfile): void {
+  if (!hasReward(profile, VERIFIED_PROFILE_BADGE_ID)) return;
+
+  const others = profile.loadout.badges.filter((id) => id !== VERIFIED_PROFILE_BADGE_ID);
+  if (!profile.loadout.badges.includes(VERIFIED_PROFILE_BADGE_ID)) {
+    profile.loadout.badges = [VERIFIED_PROFILE_BADGE_ID, ...others].slice(0, 2);
+    return;
+  }
+
+  if (profile.loadout.badges[0] !== VERIFIED_PROFILE_BADGE_ID) {
+    profile.loadout.badges = [VERIFIED_PROFILE_BADGE_ID, ...others].slice(0, 2);
+  }
 }
 
 function migrateCreatorProgramArtRewards(profile: GamificationProfile): void {
@@ -221,7 +236,13 @@ export function equipReward(
 
   if (Array.isArray(current)) {
     if (current.includes(itemId)) {
+      if (itemId === VERIFIED_PROFILE_BADGE_ID) {
+        return { success: true };
+      }
       profile.loadout[key] = current.filter((id) => id !== itemId) as never;
+    } else if (itemId === VERIFIED_PROFILE_BADGE_ID) {
+      const without = current.filter((id) => id !== itemId);
+      profile.loadout[key] = [itemId, ...without].slice(0, slot.max) as never;
     } else {
       profile.loadout[key] = [...current, itemId].slice(-slot.max) as never;
     }
@@ -246,6 +267,9 @@ export function unequipReward(
   migrateProfile(profile);
   const item = getRewardById(itemId);
   if (!item) return { success: false, error: 'Item não encontrado.' };
+  if (itemId === VERIFIED_PROFILE_BADGE_ID) {
+    return { success: false, error: 'O selo de perfil verificado permanece sempre ativo.' };
+  }
 
   const slot = LOADOUT_SLOTS[item.category as keyof typeof LOADOUT_SLOTS];
   if (!slot) return { success: false, error: 'Categoria não disponível.' };
