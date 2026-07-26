@@ -702,11 +702,18 @@ export default function App() {
       {catalogActive && (
         <SideNavHub
           currentTab={currentTab}
+          selectedCanalId={selectedObraId}
           setCurrentTab={(tab) => {
             setCurrentTab(tab);
             setSelectedObraId(null);
             setSelectedReactId(null);
             setSearchQuery('');
+          }}
+          onSelectCanal={(canalId) => {
+            setSelectedObraId(canalId);
+            setSelectedReactId(null);
+            setSearchQuery('');
+            setCurrentTab('canal');
           }}
         />
       )}

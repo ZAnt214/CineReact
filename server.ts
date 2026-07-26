@@ -9,7 +9,7 @@ import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts"
 import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
 import { VERIFIED_PROFILE_BADGE_ID } from "./src/data/rewardsCatalog.ts";
 import { ensureDemoCreatorProfile } from "./src/gamification/demoCreator.ts";
-import { listPlatformCreators } from "./src/gamification/platformCreators.ts";
+import { listVideoCreators } from "./src/gamification/platformCreators.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import { serializeUserState } from "./src/utils/userState.ts";
@@ -2742,7 +2742,7 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 // Perfil público de usuário (cosméticos + redes para criadores verificados)
 app.get("/api/criadores", (_req, res) => {
   try {
-    const creators = listPlatformCreators();
+    const creators = listVideoCreators();
     res.json({ success: true, creators });
   } catch (error) {
     console.error("Erro ao listar criadores:", error);

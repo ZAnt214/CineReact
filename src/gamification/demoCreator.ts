@@ -1,5 +1,5 @@
 import { localDb } from '../db/local_db.ts';
-import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
+import { DEMO_CREATOR_AVATAR, DEMO_CREATOR_EMAIL, DEMO_CREATOR_NAME } from '../constants/demoCreator.ts';
 import {
   CREATOR_PROGRAM_ART_ITEM_IDS,
   VERIFIED_PROFILE_BADGE_ID,
@@ -11,8 +11,7 @@ import type { UserAccount } from '../types.ts';
 export { DEMO_CREATOR_EMAIL };
 export const DEMO_CREATOR_ID = 'demo-creator-luna-atelie';
 
-const DEMO_AVATAR =
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256&auto=format&fit=crop';
+const DEMO_AVATAR = DEMO_CREATOR_AVATAR;
 
 const DEMO_SOCIAL_LINKS = {
   instagram: 'https://instagram.com/cinereact',
@@ -76,7 +75,7 @@ export function ensureDemoCreatorProfile(): void {
   const demoUser: UserAccount = {
     id: DEMO_CREATOR_ID,
     email: DEMO_CREATOR_EMAIL,
-    username: 'Luna Ateliê',
+    username: DEMO_CREATOR_NAME,
     password: 'demo-not-login',
     createdAt: existing?.createdAt || new Date().toISOString(),
     avatar: DEMO_AVATAR,
