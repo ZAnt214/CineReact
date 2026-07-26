@@ -6,8 +6,10 @@ import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
 import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
-import { migrateProfile } from "./src/gamification/rewardsEngine.ts";
-import { resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
+import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
+import { VERIFIED_PROFILE_BADGE_ID } from "./src/data/rewardsCatalog.ts";
+import { ensureDemoCreatorProfile } from "./src/gamification/demoCreator.ts";
+import { listPlatformCreators } from "./src/gamification/platformCreators.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import { serializeUserState } from "./src/utils/userState.ts";
@@ -2738,6 +2740,16 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 });
 
 // Perfil público de usuário (cosméticos + redes para criadores verificados)
+app.get("/api/criadores", (_req, res) => {
+  try {
+    const creators = listPlatformCreators();
+    res.json({ success: true, creators });
+  } catch (error) {
+    console.error("Erro ao listar criadores:", error);
+    res.status(500).json({ error: "Erro interno ao listar criadores." });
+  }
+});
+
 app.get("/api/usuario/public/:email", (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email || "");
@@ -2792,7 +2804,10 @@ app.post("/api/usuario/update", async (req, res) => {
     if (socialLinks !== undefined) {
       const gamification = localDb.getGamificationProfile(email);
       migrateProfile(gamification);
-      if (isVerifiedCreatorLoadout(gamification.loadout)) {
+      const canEditSocialLinks =
+        isVerifiedCreatorLoadout(gamification.loadout) ||
+        hasReward(gamification, VERIFIED_PROFILE_BADGE_ID);
+      if (canEditSocialLinks) {
         updates.socialLinks = {
           ...sanitizeSocialLinks(existingUser.socialLinks),
           ...sanitizeSocialLinks(socialLinks),
@@ -3046,12 +3061,15 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
+
+    ensureDemoCreatorProfile();
     
     // Inicialização da sincronização com Supabase se ativo
     if (localDb.isSupabaseActive()) {
       console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
       localDb.syncFromSupabase()
         .then(success => {
+          ensureDemoCreatorProfile();
           if (success) {
             console.log("[Supabase] Sincronização inicial na inicialização concluída!");
           } else {

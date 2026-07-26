@@ -13,16 +13,18 @@ import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
-import SideNavHub, { resetSideNavOnLeave } from './components/SideNavHub.tsx';
+import SideNavHub, { resetSideNavOnLeave, parseCreatorProfileTab } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import GamificationPage from './components/GamificationPage.tsx';
+import CreatorProfilePage from './components/CreatorProfilePage.tsx';
 import GamificationRewardToast from './components/GamificationRewardToast.tsx';
 import { useGamification } from './hooks/useGamification.ts';
 import { isVerifiedCreatorLoadout } from './gamification/verifiedCreator.ts';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
+import { hasSocialLinks } from './utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { Film, Play, X, ExternalLink, Calendar, Eye, Compass, Clock } from 'lucide-react';
@@ -250,8 +252,15 @@ export default function App() {
       }
 
       if (userData && userData.success && userData.user) {
-        // Sync user state with server
-        setUser(userData.user);
+        const serverUser = userData.user as UserState;
+        const mergedUser: UserState = {
+          ...serverUser,
+          socialLinks: hasSocialLinks(serverUser.socialLinks)
+            ? serverUser.socialLinks
+            : user.socialLinks,
+          descricao: serverUser.descricao?.trim() ? serverUser.descricao : user.descricao,
+        };
+        setUser(mergedUser);
         
         // Sync continue watching with server
         if (Array.isArray(userData.user.continueWatching)) {
@@ -1261,6 +1270,21 @@ export default function App() {
                   onRedeemCode={gamification.redeemCode}
                   onLoadLeaderboard={gamification.loadLeaderboard}
                   leaderboards={gamification.leaderboards}
+                />
+              </motion.div>
+            )}
+
+            {parseCreatorProfileTab(currentTab) && (
+              <motion.div
+                key={`creator-profile-${parseCreatorProfileTab(currentTab)}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <CreatorProfilePage
+                  creatorEmail={parseCreatorProfileTab(currentTab)!}
+                  onBack={() => setCurrentTab('inicio')}
                 />
               </motion.div>
             )}
