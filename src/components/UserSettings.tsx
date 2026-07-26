@@ -1,25 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload, Palette } from 'lucide-react';
-import { UserState } from '../types.ts';
+import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload, Palette, Link2, BadgeCheck } from 'lucide-react';
+import { UserState, CreatorSocialLinks } from '../types.ts';
 import { motion } from 'motion/react';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
+import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
 
 interface UserSettingsProps {
   user: UserState;
   onUpdateUser: (newUser: UserState) => void;
   onNavigateToDonations: () => void;
+  isVerifiedCreator?: boolean;
 }
 
-export default function UserSettings({ user, onUpdateUser, onNavigateToDonations }: UserSettingsProps) {
+export default function UserSettings({ user, onUpdateUser, onNavigateToDonations, isVerifiedCreator = false }: UserSettingsProps) {
   const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
   const [descricao, setDescricao] = useState(user.descricao || '');
+  const [socialLinks, setSocialLinks] = useState<CreatorSocialLinks>({
+    instagram: user.socialLinks?.instagram || '',
+    youtube: user.socialLinks?.youtube || '',
+    x: user.socialLinks?.x || '',
+    twitch: user.socialLinks?.twitch || '',
+  });
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     setAvatarUrl(user.avatar || '');
     setDescricao(user.descricao || '');
-  }, [user.avatar, user.descricao]);
+    setSocialLinks({
+      instagram: user.socialLinks?.instagram || '',
+      youtube: user.socialLinks?.youtube || '',
+      x: user.socialLinks?.x || '',
+      twitch: user.socialLinks?.twitch || '',
+    });
+  }, [user.avatar, user.descricao, user.socialLinks]);
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -105,6 +119,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           email: user.email,
           avatar: avatarUrl,
           descricao: descricao,
+          socialLinks: isVerifiedCreator ? socialLinks : undefined,
           password: newPassword || undefined
         })
       });
@@ -351,22 +366,60 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               </div>
 
               {/* Field: Biografia / Descrição do Perfil */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                  Biografia / Descrição do Perfil
-                </label>
+              <div className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/20 via-zinc-950/40 to-fuchsia-950/15 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-cyan-400" />
+                  <label className="text-[10px] font-mono text-cyan-300/90 uppercase tracking-wider">
+                    Biografia do perfil
+                  </label>
+                </div>
+                <p className="text-[10px] text-zinc-500 leading-relaxed">
+                  Esta descrição aparece na aba do seu perfil para outros usuários verem.
+                </p>
                 <textarea
                   placeholder="Escreva uma breve biografia sobre você para exibir no seu perfil (máx. 180 caracteres)..."
                   maxLength={180}
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={3}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-cyan-500/50 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
                 />
                 <div className="flex justify-end text-[9px] text-zinc-600 font-mono">
                   {descricao.length}/180 caracteres
                 </div>
               </div>
+
+              {isVerifiedCreator && (
+                <div className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/25 via-zinc-950/40 to-cyan-950/20 p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <BadgeCheck className="w-4 h-4 text-cyan-300 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] font-mono text-cyan-300/90 uppercase tracking-wider flex items-center gap-1.5">
+                        <Link2 className="w-3 h-3" /> Redes sociais do criador
+                      </p>
+                      <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">
+                        Links exibidos no seu perfil público. Use @usuario ou cole a URL completa.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+                      <div key={key} className="space-y-1.5">
+                        <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+                          {label}
+                        </label>
+                        <input
+                          type="text"
+                          value={socialLinks[key] || ''}
+                          onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
+                          placeholder={placeholder}
+                          className="w-full bg-zinc-950 border border-zinc-800 focus:border-fuchsia-500/40 rounded-lg px-3 py-2 text-xs text-white outline-none transition-colors"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Password Divider */}
               <div className="relative py-2 flex items-center">

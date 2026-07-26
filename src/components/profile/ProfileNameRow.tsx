@@ -54,6 +54,16 @@ export default function ProfileNameRow({
 
   return (
     <div className={`flex flex-col w-full min-w-0 gap-3 ${alignClass} ${className}`}>
+      {display.verifiedBadge && (
+        <ProfileVerifiedSeal
+          name={display.verifiedBadge.name}
+          description={display.verifiedBadge.description}
+          size={sealSize}
+          align={align}
+          className="w-full"
+        />
+      )}
+
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         {isDonor ? (
           <span className={`${nameClass} bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
@@ -87,16 +97,6 @@ export default function ProfileNameRow({
             </p>
           )}
         </div>
-      )}
-
-      {display.verifiedBadge && (
-        <ProfileVerifiedSeal
-          name={display.verifiedBadge.name}
-          description={display.verifiedBadge.description}
-          size={sealSize}
-          align={align}
-          className="w-full"
-        />
       )}
 
       {display.tags.length > 0 && (

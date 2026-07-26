@@ -989,7 +989,8 @@ export const localDb = {
         isAdmin: !!current.isAdmin,
         isDonor: !!current.isDonor,
         continueWatching: current.continueWatching || [],
-        descricao: current.descricao || ""
+        descricao: current.descricao || "",
+        socialLinks: current.socialLinks || {}
       }).eq('email', email);
       if (error) {
         console.error("[Supabase Async] Erro ao atualizar usuario:", error);

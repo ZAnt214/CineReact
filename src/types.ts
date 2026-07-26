@@ -59,6 +59,10 @@ export interface ContinueWatchingItem {
   updatedAt: number;
 }
 
+import type { CreatorSocialLinks } from './utils/socialLinks.ts';
+
+export type { CreatorSocialLinks };
+
 export interface UserState {
   isLoggedIn: boolean;
   nome: string;
@@ -68,6 +72,7 @@ export interface UserState {
   isDonor?: boolean;
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
+  socialLinks?: CreatorSocialLinks;
 }
 
 export interface Notificacao {
@@ -92,5 +97,6 @@ export interface UserAccount {
   isDonor?: boolean;
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
+  socialLinks?: CreatorSocialLinks;
 }
 

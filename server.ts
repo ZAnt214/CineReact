@@ -7,7 +7,8 @@ import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileFo
 import { resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
-import { ReactVideo, UserAccount, Obra } from "./src/types.ts";
+import { serializeUserState } from "./src/utils/userState.ts";
+import { sanitizeSocialLinks } from "./src/utils/socialLinks.ts";
 
 dotenv.config();
 
@@ -2442,16 +2443,7 @@ app.post("/api/cadastro", async (req, res) => {
       success: true,
       requiresVerification,
       email: novoUsuario.email,
-      user: requiresVerification ? null : {
-        isLoggedIn: true,
-        nome: novoUsuario.username,
-        email: novoUsuario.email,
-        avatar: novoUsuario.avatar,
-        isAdmin: novoUsuario.isAdmin || false,
-        isDonor: novoUsuario.isDonor || false,
-        continueWatching: [],
-        descricao: ""
-      }
+      user: requiresVerification ? null : serializeUserState(novoUsuario)
     });
   } catch (error: any) {
     console.error("Erro no cadastro de usuário:", error);
@@ -2488,16 +2480,7 @@ app.post("/api/login", async (req, res) => {
       }
       return res.json({
         success: true,
-        user: {
-          isLoggedIn: true,
-          nome: dbAdmin.username || "Mateus Vinícius",
-          email: "mateusvini.t10@gmail.com",
-          avatar: dbAdmin.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: true,
-          isDonor: dbAdmin.isDonor || false,
-          continueWatching: dbAdmin.continueWatching || [],
-          descricao: dbAdmin.descricao || ""
-        }
+        user: serializeUserState(dbAdmin, { isAdmin: true }),
       });
     }
 
@@ -2540,16 +2523,9 @@ app.post("/api/login", async (req, res) => {
 
       return res.json({
         success: true,
-        user: {
-          isLoggedIn: true,
-          nome: user.username,
-          email: user.email,
-          avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+        user: serializeUserState(user, {
           isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-          isDonor: user.isDonor || false,
-          continueWatching: user.continueWatching || [],
-          descricao: user.descricao || ""
-        }
+        }),
       });
     } else {
       const user = await localDb.findUsuarioByEmail(cleanEmail);
@@ -2563,16 +2539,9 @@ app.post("/api/login", async (req, res) => {
 
       res.json({
         success: true,
-        user: {
-          isLoggedIn: true,
-          nome: user.username,
-          email: user.email,
-          avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+        user: serializeUserState(user, {
           isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-          isDonor: user.isDonor || false,
-          continueWatching: user.continueWatching || [],
-          descricao: user.descricao || ""
-        }
+        }),
       });
     }
   } catch (error) {
@@ -2622,16 +2591,7 @@ app.post("/api/verificar-codigo", async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
-      }
+      user: serializeUserState(user),
     });
   } catch (error: any) {
     console.error("Erro ao verificar código OTP:", error);
@@ -2708,16 +2668,7 @@ app.get("/api/usuario/me", async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
-      }
+      user: serializeUserState(user),
     });
   } catch (error) {
     console.error("Erro ao obter perfil do usuário:", error);
@@ -2782,7 +2733,7 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 // Atualizar perfil do usuário (Avatar, Descricao & Senha)
 app.post("/api/usuario/update", async (req, res) => {
   try {
-    const { email, avatar, descricao, password } = req.body;
+    const { email, avatar, descricao, password, socialLinks } = req.body;
     if (!email) {
       return res.status(400).json({ error: "E-mail é obrigatório para identificação." });
     }
@@ -2791,6 +2742,7 @@ app.post("/api/usuario/update", async (req, res) => {
     if (avatar !== undefined) updates.avatar = avatar;
     if (descricao !== undefined) updates.descricao = descricao;
     if (password) updates.password = password;
+    if (socialLinks !== undefined) updates.socialLinks = sanitizeSocialLinks(socialLinks);
 
     const user = await localDb.updateUsuario(email, updates);
     if (!user) {
@@ -2799,16 +2751,7 @@ app.post("/api/usuario/update", async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
-      }
+      user: serializeUserState(user),
     });
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
@@ -2837,15 +2780,7 @@ app.post("/api/usuario/donate", async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: true,
-        continueWatching: user.continueWatching || []
-      }
+      user: serializeUserState(user, { isDonor: true }),
     });
   } catch (error) {
     console.error("Erro ao processar doação:", error);
