@@ -22,13 +22,13 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       <button
         type="button"
         onClick={onClick}
-        className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-stone-400/30 transition-all cursor-pointer group"
+        className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-cine-accent/30 transition-all cursor-pointer group"
       >
         <div className="flex flex-col items-end min-w-[72px]">
-          <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400/80">{tier}</span>
+          <span className="text-[9px] font-mono uppercase tracking-widest text-cine-accent/80">{tier}</span>
           <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
             <motion.div
-              className="h-full bg-gradient-to-r from-stone-500 to-stone-300"
+              className="h-full bg-gradient-to-r from-cine-accent-dark to-cine-accent-light"
               initial={{ width: 0 }}
               animate={{ width: `${progress.percent}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -36,12 +36,12 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
           </div>
         </div>
         {profile.currentStreak > 0 && (
-          <span className="flex items-center gap-0.5 text-stone-400 text-xs font-bold">
+          <span className="flex items-center gap-0.5 text-cine-accent text-xs font-bold">
             <Flame className="w-3.5 h-3.5" />
             {profile.currentStreak}
           </span>
         )}
-        <span className="flex items-center gap-1 text-stone-200 text-xs font-bold">
+        <span className="flex items-center gap-1 text-cine-cream text-xs font-bold">
           <Sparkles className="w-3.5 h-3.5" />
           {profile.spotlight}
         </span>
@@ -58,12 +58,12 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Índice de Influência</p>
-          <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-stone-100 to-stone-400">
+          <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cine-cream to-cine-accent">
             {tier}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black text-stone-300">{profile.influenceIndex}</p>
+          <p className="text-2xl font-black text-cine-accent-light">{profile.influenceIndex}</p>
           <p className="text-[10px] text-zinc-500">influência</p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       </div>
       <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden mb-3">
         <motion.div
-          className="h-full bg-gradient-to-r from-stone-500 via-stone-300 to-stone-200 shadow-[0_0_12px_rgba(168,162,158,0.4)]"
+          className="h-full bg-gradient-to-r from-cine-accent-dark via-cine-accent-light to-cine-cream shadow-[0_0_12px_rgba(233,168,130,0.4)]"
           initial={{ width: 0 }}
           animate={{ width: `${progress.percent}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}
@@ -83,12 +83,12 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
 
       <div className="flex items-center gap-4 text-xs">
         {profile.currentStreak > 0 && (
-          <span className="flex items-center gap-1.5 text-stone-400 font-bold">
+          <span className="flex items-center gap-1.5 text-cine-accent font-bold">
             <Flame className="w-4 h-4" />
             {profile.currentStreak} dias
           </span>
         )}
-        <span className="flex items-center gap-1.5 text-stone-200 font-bold">
+        <span className="flex items-center gap-1.5 text-cine-cream font-bold">
           <Sparkles className="w-4 h-4" />
           {profile.spotlight} Spotlight
         </span>

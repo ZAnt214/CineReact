@@ -694,7 +694,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`min-h-screen bg-[#141210] text-white flex flex-col font-sans selection:bg-stone-400/40 selection:text-stone-50 w-full max-w-none overflow-x-hidden relative ${
+      className={`min-h-screen bg-[#0f0d14] text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden relative ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -774,8 +774,8 @@ export default function App() {
               >
                 <div>
                   <h1 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-                    <Compass className="text-stone-300 w-7 h-7" />
-                    Resultados para: <span className="text-stone-200 font-bold">"{searchQuery}"</span>
+                    <Compass className="text-cine-accent-light w-7 h-7" />
+                    Resultados para: <span className="text-cine-cream font-bold">"{searchQuery}"</span>
                   </h1>
                   <p className="text-xs text-zinc-500 mt-1">Busca inteligente de reacts de filmes, séries, animes, jogos e canais</p>
                 </div>
@@ -791,7 +791,7 @@ export default function App() {
                     {matchingReacts.length > 0 && (
                       <div className="space-y-4">
                         <h2 className="text-lg font-bold text-white uppercase tracking-wider border-b border-zinc-800 pb-2 flex items-center gap-2 font-sans">
-                          <span className="w-2.5 h-2.5 bg-stone-300 rounded-full inline-block animate-pulse" />
+                          <span className="w-2.5 h-2.5 bg-cine-accent-light rounded-full inline-block animate-pulse" />
                           Vídeos Encontrados ({matchingReacts.length})
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
@@ -804,7 +804,7 @@ export default function App() {
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
                                 style={{ touchAction: 'pan-y pinch-zoom' }}
-                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-stone-400/40 hover:shadow-stone-400/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
+                                className="bg-zinc-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-zinc-850 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
                               >
                                 <div className="relative h-36 md:h-44 w-full overflow-hidden bg-zinc-950">
                                   <OptimizedImage
@@ -813,27 +813,27 @@ export default function App() {
                                     className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-300"
                                   />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-stone-400/90 shadow-stone-400/30 text-black font-bold">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-cine-accent/90 shadow-cine-accent/30 text-black font-bold">
                                       <Play className="w-6 h-6 fill-current ml-0.5" />
                                     </div>
                                   </div>
                                   <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs text-[10px] font-mono px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-1 border border-zinc-700/50">
-                                    <Clock className="w-3 h-3 text-stone-300" /> {react.duracao}
+                                    <Clock className="w-3 h-3 text-cine-accent-light" /> {react.duracao}
                                   </span>
                                   {associatedObra && (
-                                    <span className="absolute top-2 left-2 bg-stone-400 text-black font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
+                                    <span className="absolute top-2 left-2 bg-cine-accent text-black font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
                                       {associatedObra.titulo}
                                     </span>
                                   )}
                                 </div>
                                 <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
-                                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-stone-300 transition-colors">
+                                  <h3 className="text-xs md:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
                                     {react.titulo}
                                   </h3>
                                   <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2">
                                     <span className="font-semibold text-zinc-300 truncate max-w-[150px] flex items-center gap-1">
                                       {react.canalNome}
-                                      <span className="w-1.5 h-1.5 bg-stone-300 rounded-full inline-block animate-pulse" />
+                                      <span className="w-1.5 h-1.5 bg-cine-accent-light rounded-full inline-block animate-pulse" />
                                     </span>
                                     <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500 shrink-0">
                                       <Eye className="w-3.5 h-3.5" /> {formatViews(react.visualizacoes)}
@@ -862,19 +862,19 @@ export default function App() {
                                 setSelectedReactId(null);
                                 setCurrentTab('obra');
                               }}
-                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-stone-400/40 hover:shadow-lg hover:shadow-stone-400/5 transition-all cursor-pointer group"
+                              className="bg-zinc-900/20 backdrop-blur-md rounded-xl overflow-hidden border border-zinc-850 hover:border-cine-accent/40 hover:shadow-lg hover:shadow-cine-accent/5 transition-all cursor-pointer group"
                             >
                               <div className="aspect-3/4 relative overflow-hidden bg-zinc-950">
                                 <OptimizedImage src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <div className="w-12 h-12 bg-stone-400 text-black rounded-full flex items-center justify-center shadow-lg font-bold">
+                                  <div className="w-12 h-12 bg-cine-accent text-black rounded-full flex items-center justify-center shadow-lg font-bold">
                                     <Play className="w-6 h-6 fill-black text-black ml-0.5" />
                                   </div>
                                 </div>
                               </div>
                               <div className="p-3 text-center space-y-1">
                                 <span className="text-[9px] uppercase font-mono bg-zinc-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400">{obra.tipo}</span>
-                                <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-stone-300 transition-colors pt-1">{obra.titulo}</h4>
+                                <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight group-hover:text-cine-accent-light transition-colors pt-1">{obra.titulo}</h4>
                                 <span className="text-[10px] text-zinc-500">{obra.ano}</span>
                               </div>
                             </div>
@@ -902,7 +902,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-stone-300 to-stone-400 text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1159,7 +1159,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Canal não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-stone-300 to-stone-400 text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1190,7 +1190,7 @@ export default function App() {
                 className="cine-container pt-24 pb-20 w-full min-h-screen w-full flex-1"
               >
                 <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
-                  <span className="w-2.5 h-6 bg-gradient-to-b from-stone-200 to-stone-400 rounded" />
+                  <span className="w-2.5 h-6 bg-gradient-to-b from-cine-cream to-cine-accent rounded" />
                   Canais Seguidos
                 </h2>
                 {canaisSeguidos.length === 0 ? (
@@ -1204,10 +1204,10 @@ export default function App() {
                       const canal = obras.find(o => o.tipo === 'canal' && o.titulo.includes(nome));
                       if (!canal) return null;
                       return (
-                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-stone-400/30 shadow-md">
-                           <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-stone-400/30" />
+                         <div key={nome} onClick={() => { setSelectedObraId(canal.id); setCurrentTab('canal'); }} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:bg-zinc-900 transition-all border border-zinc-850 hover:border-cine-accent/30 shadow-md">
+                           <img src={canal.poster} className="w-16 h-16 rounded-full object-cover ring-2 ring-cine-accent/30" />
                            <div>
-                             <h3 className="text-base font-bold text-white hover:text-stone-300 transition-colors">{nome}</h3>
+                             <h3 className="text-base font-bold text-white hover:text-cine-accent-light transition-colors">{nome}</h3>
                              <p className="text-zinc-500 text-xs mt-0.5 font-mono">Visualizar canal do criador</p>
                            </div>
                          </div>
@@ -1371,7 +1371,7 @@ export default function App() {
                     return (
                       <motion.div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Categoria do canal não encontrada</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-stone-300 to-stone-400 text-black font-black rounded hover:brightness-110 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black rounded hover:brightness-110 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </motion.div>
@@ -1440,7 +1440,7 @@ export default function App() {
                 setCurrentTab('configuracoes');
                 window.scrollTo(0, 0);
               }}
-              className="text-stone-300 hover:text-stone-200 font-bold transition-colors underline cursor-pointer"
+              className="text-cine-accent-light hover:text-cine-cream font-bold transition-colors underline cursor-pointer"
             >
               Preferências
             </button>
@@ -1450,20 +1450,20 @@ export default function App() {
                 setCurrentTab('landing');
                 window.scrollTo(0, 0);
               }}
-              className="text-stone-300 hover:text-stone-200 font-bold transition-colors underline cursor-pointer"
+              className="text-cine-accent-light hover:text-cine-cream font-bold transition-colors underline cursor-pointer"
             >
               Página Institucional
             </button>
             <span>•</span>
             <span>Dúvidas e suporte: 
-              <a href="mailto:atendimentocinereact@gmail.com" className="text-stone-300 hover:text-stone-200 font-bold transition-colors underline ml-1">
+              <a href="mailto:atendimentocinereact@gmail.com" className="text-cine-accent-light hover:text-cine-cream font-bold transition-colors underline ml-1">
                 atendimentocinereact@gmail.com
               </a>
             </span>
             <span>•</span>
             <button 
               onClick={() => setShowCreatorPartnerModal(true)}
-              className="text-stone-300 hover:text-stone-200 font-bold transition-colors underline cursor-pointer"
+              className="text-cine-accent-light hover:text-cine-cream font-bold transition-colors underline cursor-pointer"
             >
               Seja um Criador Parceiro
             </button>
@@ -1530,12 +1530,12 @@ export default function App() {
               className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800/80 rounded-2xl p-8 shadow-2xl overflow-hidden text-zinc-300 z-10"
             >
               {/* Visual element decorator */}
-              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-stone-300 via-stone-300 to-stone-500" />
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent-dark" />
               
               {/* Top Icon */}
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-stone-400/10 border border-stone-400/20 flex items-center justify-center shadow-lg shadow-stone-400/5">
-                  <Film className="w-8 h-8 text-stone-300 stroke-[2]" />
+                <div className="w-16 h-16 rounded-2xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center shadow-lg shadow-cine-accent/5">
+                  <Film className="w-8 h-8 text-cine-accent-light stroke-[2]" />
                 </div>
               </div>
 
@@ -1561,7 +1561,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-stone-400/20 hover:shadow-stone-400/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>

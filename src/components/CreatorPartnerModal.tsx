@@ -186,7 +186,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
             className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-zinc-950 text-zinc-300"
           >
             <motion.div
-              className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-stone-300 via-stone-300 to-stone-500"
+              className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-accent-dark"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -202,7 +202,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
             </button>
 
             <motion.div
-              className="absolute top-4 left-4 z-20 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-400/10 border border-stone-400/25 text-stone-300 text-[10px] font-bold uppercase tracking-wider"
+              className="absolute top-4 left-4 z-20 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cine-accent/10 border border-cine-accent/25 text-cine-accent-light text-[10px] font-bold uppercase tracking-wider"
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.15 }}
@@ -229,12 +229,12 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 className="lg:col-span-2 flex flex-col justify-between p-6 sm:p-8 pt-16 sm:pt-20 lg:pt-8 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-b lg:border-b-0 lg:border-r border-zinc-800/80 relative overflow-hidden"
               >
                 <motion.div
-                  className="absolute -top-24 -right-24 w-56 h-56 bg-stone-400/10 rounded-full blur-3xl pointer-events-none"
+                  className="absolute -top-24 -right-24 w-56 h-56 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none"
                   animate={{ opacity: [0.4, 0.7, 0.4] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 <motion.div
-                  className="absolute bottom-20 -left-16 w-40 h-40 bg-stone-500/5 rounded-full blur-2xl pointer-events-none"
+                  className="absolute bottom-20 -left-16 w-40 h-40 bg-cine-lilac/5 rounded-full blur-2xl pointer-events-none"
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 />
@@ -260,8 +260,8 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   <ul className="space-y-3">
                     {partnerBenefits.map(({ icon: Icon, title, text }) => (
                       <li key={title} className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-stone-400/10 border border-stone-400/20">
-                          <Icon className="w-4 h-4 text-stone-300" />
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cine-accent/10 border border-cine-accent/20">
+                          <Icon className="w-4 h-4 text-cine-accent-light" />
                         </span>
                         <span>
                           <span className="block text-sm font-bold text-white">{title}</span>
@@ -272,8 +272,8 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                   </ul>
 
                   <div className="hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-400/10 border border-stone-400/20">
-                      <Youtube className="w-5 h-5 text-stone-300" />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cine-accent/10 border border-cine-accent/20">
+                      <Youtube className="w-5 h-5 text-cine-accent-light" />
                     </span>
                     <p className="text-xs text-zinc-400 leading-relaxed">
                       <strong className="text-zinc-200 font-bold">100% das views</strong> são contabilizadas no seu canal do YouTube.
@@ -283,7 +283,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
 
                 <a
                   href={mailtoHref}
-                  className="relative z-10 mt-8 hidden lg:flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-stone-400 hover:bg-stone-300 text-black font-extrabold text-sm transition-all shadow-lg shadow-stone-400/25 active:scale-[0.98] cursor-pointer"
+                  className="relative z-10 mt-8 hidden lg:flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-sm transition-all shadow-lg shadow-cine-accent/25 active:scale-[0.98] cursor-pointer"
                 >
                   Quero ser Parceiro
                   <ArrowRight className="w-4 h-4" />
@@ -299,7 +299,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 className="lg:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] space-y-8"
               >
                 <div className="lg:hidden pt-10">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-400/10 border border-stone-400/20 text-stone-300 text-[10px] font-bold tracking-wider uppercase mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold tracking-wider uppercase mb-4">
                     <Sparkles className="w-3 h-3" />
                     Programa de Parceiros
                   </div>
@@ -311,7 +311,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight"
                   >
                     Evolua seu canal no{' '}
-                    <span className="bg-gradient-to-r from-stone-200 via-stone-200 to-stone-400 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent">
                       CineReact
                     </span>
                   </h1>
@@ -321,16 +321,16 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 </header>
 
                 {/* Highlight card */}
-                <div className="relative overflow-hidden rounded-2xl border border-stone-400/30 bg-gradient-to-br from-stone-400/10 via-zinc-900/80 to-zinc-950 p-5 sm:p-6">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-stone-400/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="relative overflow-hidden rounded-2xl border border-cine-accent/30 bg-gradient-to-br from-cine-accent/10 via-zinc-900/80 to-zinc-950 p-5 sm:p-6">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cine-accent/10 rounded-full blur-2xl pointer-events-none" />
                   <motion.div
                     className="relative flex flex-col sm:flex-row sm:items-center gap-4"
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-stone-400/15 border border-stone-400/30">
-                      <TrendingUp className="w-6 h-6 text-stone-300" />
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cine-accent/15 border border-cine-accent/30">
+                      <TrendingUp className="w-6 h-6 text-cine-accent-light" />
                     </span>
                     <motion.div
                       initial={{ opacity: 0, x: -8 }}
@@ -340,7 +340,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                       <p className="text-sm font-bold text-white">Por que ser parceiro agora?</p>
                       <p className="text-xs sm:text-sm text-zinc-400 mt-1 leading-relaxed">
                         Toda visualização, curtida e engajamento no CineReact é{' '}
-                        <strong className="text-stone-200 font-bold">contabilizado diretamente no seu YouTube</strong>,
+                        <strong className="text-cine-cream font-bold">contabilizado diretamente no seu YouTube</strong>,
                         aumentando métricas e audiência sem nenhum custo.
                       </p>
                     </motion.div>
@@ -353,7 +353,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wide">
                       Em breve para parceiros
                     </h3>
-                    <span className="text-[10px] font-bold bg-zinc-900 text-stone-300 px-2.5 py-1 rounded-full border border-stone-400/30 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold bg-zinc-900 text-cine-accent-light px-2.5 py-1 rounded-full border border-cine-accent/30 uppercase tracking-wider">
                       Em desenvolvimento
                     </span>
                   </div>
@@ -365,10 +365,10 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 + index * 0.05 }}
-                        className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-stone-400/30 hover:bg-zinc-900/80 transition-all duration-200"
+                        className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-cine-accent/30 hover:bg-zinc-900/80 transition-all duration-200"
                       >
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-stone-400/10 border border-stone-400/20 mb-3 group-hover:bg-stone-400/15 transition-colors">
-                          <Icon className="w-4 h-4 text-stone-300" />
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cine-accent/10 border border-cine-accent/20 mb-3 group-hover:bg-cine-accent/15 transition-colors">
+                          <Icon className="w-4 h-4 text-cine-accent-light" />
                         </span>
                         <p className="text-sm font-bold text-white">{title}</p>
                         <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{text}</p>
@@ -388,7 +388,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                         key={number}
                         className="relative p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80"
                       >
-                        <span className="text-2xl font-black text-stone-400/30 leading-none">{number}</span>
+                        <span className="text-2xl font-black text-cine-accent/30 leading-none">{number}</span>
                         <p className="text-sm font-bold text-white mt-2">{title}</p>
                         <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{text}</p>
                       </div>
@@ -399,10 +399,10 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                 {/* Footer CTA */}
                 <footer className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-zinc-800/80">
                   <div className="flex items-center gap-2.5 text-xs text-zinc-500">
-                    <Mail className="w-4 h-4 text-stone-300 shrink-0" />
+                    <Mail className="w-4 h-4 text-cine-accent-light shrink-0" />
                     <span>
                       Fale conosco:{' '}
-                      <strong className="text-stone-200 font-mono font-bold">{EMAIL}</strong>
+                      <strong className="text-cine-cream font-mono font-bold">{EMAIL}</strong>
                     </span>
                   </div>
 
@@ -420,7 +420,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     </button>
                     <a
                       href={mailtoHref}
-                      className="px-5 py-2.5 rounded-xl bg-stone-400 hover:bg-stone-300 text-black font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-stone-400/25 active:scale-[0.98] w-full sm:w-auto cursor-pointer whitespace-nowrap"
+                      className="px-5 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-cine-accent/25 active:scale-[0.98] w-full sm:w-auto cursor-pointer whitespace-nowrap"
                     >
                       Quero ser Parceiro
                       <ArrowRight className="w-3.5 h-3.5" />

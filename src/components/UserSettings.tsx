@@ -151,7 +151,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
         {/* Header Section */}
         <div>
           <h1 className="text-3xl font-black text-white uppercase tracking-wider flex items-center gap-3">
-            <Shield className="w-8 h-8 text-stone-300" />
+            <Shield className="w-8 h-8 text-cine-accent-light" />
             {user.isLoggedIn ? 'Configurações de Conta' : 'Preferências'}
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
@@ -163,7 +163,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
 
         <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
           <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-            <Palette className="text-stone-300 w-4 h-4" /> Aparência e Desempenho
+            <Palette className="text-cine-accent-light w-4 h-4" /> Aparência e Desempenho
           </h2>
 
           <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
@@ -183,7 +183,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                 persistBlurEffects(next);
               }}
               className={`relative shrink-0 w-12 h-7 rounded-full transition-colors cursor-pointer ${
-                blurEffectsEnabled ? 'bg-stone-400' : 'bg-zinc-700'
+                blurEffectsEnabled ? 'bg-cine-accent' : 'bg-zinc-700'
               }`}
             >
               <span
@@ -210,7 +210,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="relative group">
                 {/* Glowing Aura if Donor */}
                 {user.isDonor && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-stone-300 via-stone-300 to-stone-200 blur-md opacity-75 animate-pulse" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cine-accent-light via-cine-accent-light to-cine-cream blur-md opacity-75 animate-pulse" />
                 )}
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center mx-auto">
                   {avatarUrl ? (
@@ -234,7 +234,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div>
                 <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
                   user.isDonor 
-                    ? "bg-gradient-to-r from-stone-200 via-stone-200 to-stone-400 bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(168,162,158,0.3)] animate-pulse" 
+                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(233,168,130,0.3)] animate-pulse" 
                     : "text-white"
                 }`}>
                   {user.nome}
@@ -248,11 +248,11 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
               
               {user.isDonor ? (
-                <div className="bg-gradient-to-r from-stone-900/40 via-stone-900/30 to-stone-900/40 border border-stone-400/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-stone-400/10 blur-xl rounded-full" />
+                <div className="bg-gradient-to-r from-cine-surface/40 via-cine-surface/30 to-cine-surface/40 border border-cine-accent/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-cine-accent/10 blur-xl rounded-full" />
                   
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-400/10 border border-stone-400/30 text-stone-300 text-[10px] font-extrabold uppercase tracking-widest">
-                    <Sparkles className="w-3 h-3 text-stone-300 animate-spin-slow" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-[10px] font-extrabold uppercase tracking-widest">
+                    <Sparkles className="w-3 h-3 text-cine-accent-light animate-spin-slow" />
                     APOIADOR VIP
                   </div>
                   <p className="text-[11px] text-zinc-400 leading-normal">
@@ -269,9 +269,9 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   </p>
                   <button
                     onClick={onNavigateToDonations}
-                    className="w-full bg-stone-400/15 hover:bg-stone-400/25 border border-stone-400/20 hover:border-stone-400/40 text-stone-300 text-[11px] font-bold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full bg-cine-accent/15 hover:bg-cine-accent/25 border border-cine-accent/20 hover:border-cine-accent/40 text-cine-accent-light text-[11px] font-bold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Heart className="w-3.5 h-3.5 text-stone-300 fill-stone-300/20" /> Seja um Apoiador
+                    <Heart className="w-3.5 h-3.5 text-cine-accent-light fill-cine-accent-light/20" /> Seja um Apoiador
                   </button>
                 </div>
               )}
@@ -282,7 +282,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
           {/* Right Panel: Settings Form */}
           <div className="md:col-span-7 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
             <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-              <User className="text-stone-300 w-4 h-4" /> Editar Informações
+              <User className="text-cine-accent-light w-4 h-4" /> Editar Informações
             </h2>
 
             {errorMsg && (
@@ -314,7 +314,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-xl p-6 text-center transition-all relative ${
                     dragActive 
-                      ? 'border-stone-400 bg-stone-400/5' 
+                      ? 'border-cine-accent bg-cine-accent/5' 
                       : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40'
                   }`}
                 >
@@ -331,7 +331,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs font-bold text-zinc-300">
-                        Arraste sua foto aqui ou <span className="text-stone-300 hover:underline">escolha um arquivo</span>
+                        Arraste sua foto aqui ou <span className="text-cine-accent-light hover:underline">escolha um arquivo</span>
                       </p>
                       <p className="text-[10px] text-zinc-500">
                         Formatos suportados: PNG, JPG, JPEG ou WEBP (Max. 2.5MB)
@@ -440,7 +440,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Sua nova senha secreta"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-stone-400 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                     placeholder="Repita a nova senha"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-stone-400 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-cine-accent rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -466,7 +466,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-stone-400/20"
+                className="w-full bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

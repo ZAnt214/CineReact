@@ -685,7 +685,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   if (!user.isAdmin) {
     return (
       <div className="min-h-screen cine-container pt-24 pb-20 w-full text-center flex flex-col items-center justify-center">
-        <AlertCircle className="w-16 h-16 text-stone-300 mb-4 animate-pulse" />
+        <AlertCircle className="w-16 h-16 text-cine-accent-light mb-4 animate-pulse" />
         <h2 className="text-xl font-bold mb-2">Acesso Negado</h2>
         <p className="text-zinc-500 max-w-md text-xs leading-relaxed">
           Este painel administrativo é restrito para administradores credenciados do CineReact.
@@ -696,13 +696,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <motion.div className="min-h-screen bg-[#141210] cine-container pt-24 pb-20 w-full space-y-8 text-white">
+    <motion.div className="min-h-screen bg-[#0f0d14] cine-container pt-24 pb-20 w-full space-y-8 text-white">
       
       {/* HEADER */}
       <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-            <Settings className="text-stone-300 w-8 h-8" />
+            <Settings className="text-cine-accent-light w-8 h-8" />
             Painel do Administrador
           </h1>
           <p className="text-xs text-zinc-500 mt-1">Gerencie catálogo, criadores, usuários e integrações</p>
@@ -741,7 +741,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === id
-                ? 'bg-stone-400 text-black shadow-lg shadow-stone-400/20'
+                ? 'bg-cine-accent text-black shadow-lg shadow-cine-accent/20'
                 : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
@@ -749,7 +749,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             {label}
             {badge ? (
               <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
-                activeTab === id ? 'bg-black/20 text-black' : 'bg-stone-400/20 text-stone-300'
+                activeTab === id ? 'bg-black/20 text-black' : 'bg-cine-accent/20 text-cine-accent-light'
               }`}>
                 {badge}
               </span>
@@ -760,28 +760,28 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
       {loading && (
         <div className="flex items-center justify-center gap-3 py-12 text-zinc-500">
-          <Loader2 className="w-5 h-5 animate-spin text-stone-300" />
+          <Loader2 className="w-5 h-5 animate-spin text-cine-accent-light" />
           <span className="text-sm">Carregando dados do painel...</span>
         </div>
       )}
 
       {!loading && activeTab === 'catalogo' && (
         <motion.div className="space-y-8">
-          <motion.div className="bg-gradient-to-br from-stone-400/10 via-zinc-900/40 to-zinc-950 p-6 rounded-2xl border border-stone-400/20 space-y-3">
+          <motion.div className="bg-gradient-to-br from-cine-accent/10 via-zinc-900/40 to-zinc-950 p-6 rounded-2xl border border-cine-accent/20 space-y-3">
             <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <Link2 className="w-5 h-5 text-stone-300" />
+              <Link2 className="w-5 h-5 text-cine-accent-light" />
               Catálogo por Link
             </h2>
             <p className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
               Cole o link do canal ou do vídeo do YouTube. O sistema carrega automaticamente nome, foto, descrição e thumbnail
-              <strong className="text-stone-200"> sem depender da API do YouTube</strong>. Tudo é salvo no banco e sincronizado com o Supabase quando configurado.
+              <strong className="text-cine-cream"> sem depender da API do YouTube</strong>. Tudo é salvo no banco e sincronizado com o Supabase quando configurado.
             </p>
             {supabaseStatus?.active ? (
               <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-950/40 border border-green-500/30 px-2.5 py-1 rounded-full">
                 <Database className="w-3 h-3" /> Supabase ativo
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-300 bg-stone-900/40 border border-stone-400/30 px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-cine-accent-light bg-cine-surface/40 border border-cine-accent/30 px-2.5 py-1 rounded-full">
                 <AlertCircle className="w-3 h-3" /> Supabase não configurado — salvando localmente
               </span>
             )}
@@ -789,7 +789,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
           {/* CANAL */}
           <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-300 flex items-center gap-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Youtube className="w-4 h-4" />
               Adicionar Canal
             </h3>
@@ -799,7 +799,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={catalogCanalUrl}
                 onChange={(e) => { setCatalogCanalUrl(e.target.value); setCatalogCanalPreview(null); }}
                 placeholder="https://youtube.com/@nome-do-canal"
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-stone-400"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               />
               <button
                 onClick={handleCatalogCanalPreview}
@@ -812,7 +812,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogCanalSave}
                 disabled={savingCatalogCanal || !catalogCanalUrl.trim()}
-                className="px-4 py-3 rounded-xl bg-gradient-to-r from-stone-300 to-stone-400 text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="px-4 py-3 rounded-xl bg-gradient-to-r from-cine-accent-light to-cine-accent text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogCanal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Salvar Canal
@@ -822,7 +822,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             {catalogCanalPreview && (
               <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
                 {catalogCanalPreview.poster && (
-                  <img src={catalogCanalPreview.poster} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-stone-400/30 shrink-0" />
+                  <img src={catalogCanalPreview.poster} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-cine-accent/30 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-bold text-lg">{catalogCanalPreview.titulo}</p>
@@ -830,7 +830,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
                     <span>Fonte: {catalogCanalPreview.source}</span>
                     {catalogCanalPreview.channelId && <span>ID: {catalogCanalPreview.channelId}</span>}
-                    {catalogCanalPreview.alreadyExists && <span className="text-stone-300">Já existe — será atualizado</span>}
+                    {catalogCanalPreview.alreadyExists && <span className="text-cine-accent-light">Já existe — será atualizado</span>}
                   </div>
                 </div>
               </motion.div>
@@ -839,7 +839,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
           {/* VÍDEO */}
           <motion.div className="bg-zinc-900/30 backdrop-blur-md p-6 rounded-2xl border border-zinc-800 space-y-5">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-300 flex items-center gap-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Film className="w-4 h-4" />
               Adicionar Vídeo
             </h3>
@@ -849,12 +849,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={catalogVideoUrl}
                 onChange={(e) => { setCatalogVideoUrl(e.target.value); setCatalogVideoPreview(null); }}
                 placeholder="https://youtube.com/watch?v=..."
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-stone-400"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               />
               <select
                 value={catalogVideoObraId}
                 onChange={(e) => setCatalogVideoObraId(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-stone-400"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
               >
                 <option value="">Detectar canal automaticamente</option>
                 {obras.filter(o => o.tipo === 'canal').map(canal => (
@@ -874,7 +874,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               <button
                 onClick={handleCatalogVideoSave}
                 disabled={savingCatalogVideo || !catalogVideoUrl.trim()}
-                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-stone-300 to-stone-400 text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-cine-accent-light to-cine-accent text-black text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {savingCatalogVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Adicionar ao Catálogo
@@ -888,13 +888,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-bold line-clamp-2">{catalogVideoPreview.titulo}</p>
-                  <p className="text-xs text-stone-200 mt-1">{catalogVideoPreview.canalNome}</p>
+                  <p className="text-xs text-cine-cream mt-1">{catalogVideoPreview.canalNome}</p>
                   <p className="text-xs text-zinc-500 mt-2">
                     Categoria: <strong className="text-zinc-300">{catalogVideoPreview.obraTitulo || 'Será criada automaticamente'}</strong>
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
                     <span>ID: {catalogVideoPreview.id}</span>
-                    {catalogVideoPreview.alreadyExists && <span className="text-stone-300">Já existe — será atualizado</span>}
+                    {catalogVideoPreview.alreadyExists && <span className="text-cine-accent-light">Já existe — será atualizado</span>}
                   </div>
                 </div>
               </motion.div>
@@ -907,14 +907,14 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-stone-300">
+            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-cine-accent-light">
               <Database className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-black text-white uppercase tracking-wider">Integração Supabase</h2>
                 {loadingSupabaseStatus ? (
-                  <span className="w-3 h-3 border-2 border-stone-400/30 border-t-stone-400 rounded-full animate-spin" />
+                  <span className="w-3 h-3 border-2 border-cine-accent/30 border-t-cine-accent rounded-full animate-spin" />
                 ) : supabaseStatus?.active ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">
                     Conectado
@@ -948,7 +948,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleSyncSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-stone-400/30 text-stone-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-cine-accent/30 text-cine-accent-light text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   {syncingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Server className="w-3.5 h-3.5" />}
                   Importar do Supabase
@@ -957,7 +957,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleMigrateSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-stone-400 hover:bg-stone-300 disabled:opacity-50 text-black font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-stone-400/20"
+                  className="px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light disabled:opacity-50 text-black font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cine-accent/20"
                 >
                   {migratingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
                   Exportar Local para Supabase
@@ -996,7 +996,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             className="flex items-center justify-between w-full text-zinc-400 hover:text-white transition-colors text-xs font-bold"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-stone-300" />
+              <Sparkles className="w-4 h-4 text-cine-accent-light" />
               Como configurar as tabelas e chaves no Supabase?
             </span>
             {showSqlInstructions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -1017,7 +1017,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div>SUPABASE_URL = "https://seu-projeto.supabase.co"</div>
                   <div>SUPABASE_ANON_KEY = "sua-anon-key-secreta"</div>
                 </div>
-                <p className="text-[10px] text-stone-300/80">
+                <p className="text-[10px] text-cine-accent-light/80">
                   * Após salvar as chaves, a reinicialização do servidor é automática e a integração com o Supabase ficará ativa imediatamente!
                 </p>
               </div>
@@ -1052,8 +1052,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
       {!loading && activeTab === 'criadores' && (
         <div className="space-y-6">
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-stone-400/20 space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-300 flex items-center gap-2">
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Inbox className="w-4 h-4" />
               Solicitações de Criadores ({solicitacoes.length})
             </h2>
@@ -1072,7 +1072,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       <button
                         onClick={() => handleApproveSolicitacao(notif)}
                         disabled={processingSolicitacao === notif.id}
-                        className="flex-1 px-3 py-2 rounded-lg bg-stone-400 hover:bg-stone-300 text-black text-xs font-bold disabled:opacity-50 cursor-pointer"
+                        className="flex-1 px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-black text-xs font-bold disabled:opacity-50 cursor-pointer"
                       >
                         {processingSolicitacao === notif.id ? 'Importando...' : 'Aprovar e Importar'}
                       </button>
@@ -1090,9 +1090,9 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             )}
           </div>
 
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-stone-400/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-300 flex items-center gap-2">
-              <Youtube className="w-4 h-4 text-stone-300" />
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
+              <Youtube className="w-4 h-4 text-cine-accent-light" />
               Importar Canal do YouTube
             </h2>
             <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
@@ -1101,12 +1101,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={canalUrl}
                 onChange={(e) => setCanalUrl(e.target.value)}
                 placeholder="ex: @casimiro ou link do canal..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-stone-400"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-cine-accent"
               />
               <button
                 type="submit"
                 disabled={importingCanal || !canalUrl.trim()}
-                className="bg-gradient-to-r from-stone-300 to-stone-400 text-black font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
+                className="bg-gradient-to-r from-cine-accent-light to-cine-accent text-black font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
               >
                 {importingCanal ? 'Importando...' : 'Importar'}
               </button>
@@ -1119,8 +1119,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       <div className="space-y-8">
           
           {/* GEMINI INTELLIGENT DISCOVERY (EASY CADASTRO!) */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-stone-400/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-300 flex items-center gap-2">
+          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin-slow" />
               Descoberta e Cadastro Inteligente (Gemini AI)
             </h2>
@@ -1134,12 +1134,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={importQuery}
                 onChange={(e) => setImportQuery(e.target.value)}
                 placeholder="ex: Inception, Deadpool 3, Elden Ring, Naruto..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-stone-400"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-cine-accent"
               />
               <button
                 onClick={handleIntelligentImport}
                 disabled={importing || !importQuery.trim()}
-                className="bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-stone-400/20"
+                className="bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
@@ -1149,7 +1149,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* MANUAL CADASTRO */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4 shadow-md">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Plus className="text-stone-300 w-5 h-5" />
+              <Plus className="text-cine-accent-light w-5 h-5" />
               Cadastrar Obra Manualmente
             </h2>
 
@@ -1162,7 +1162,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={obraId}
                   onChange={(e) => setObraId(e.target.value)}
                   placeholder="interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1174,7 +1174,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1183,7 +1183,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as any)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 >
                   <option value="filme">Filme</option>
                   <option value="serie">Série</option>
@@ -1199,7 +1199,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   required
                   value={ano}
                   onChange={(e) => setAno(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1211,7 +1211,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={generos}
                   onChange={(e) => setGeneros(e.target.value)}
                   placeholder="Ficção, Ação, Aventura"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1223,7 +1223,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={sinopse}
                   onChange={(e) => setSinopse(e.target.value)}
                   placeholder="Escreva a sinopse oficial aqui..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1234,7 +1234,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={banner}
                   onChange={(e) => setBanner(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1245,7 +1245,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={poster}
                   onChange={(e) => setPoster(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1256,7 +1256,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={trailerUrl}
                   onChange={(e) => setTrailerUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -1266,7 +1266,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   id="destacado"
                   checked={destacado}
                   onChange={(e) => setDestacado(e.target.checked)}
-                  className="w-4 h-4 rounded text-stone-400 accent-stone-400"
+                  className="w-4 h-4 rounded text-cine-accent accent-cine-accent"
                 />
                 <label htmlFor="destacado" className="text-zinc-300 font-semibold cursor-pointer">Destacar obra no Banner principal da Home Page</label>
               </div>
@@ -1275,7 +1275,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingObra}
-                  className="w-full bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 disabled:bg-zinc-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-stone-400/10"
+                  className="w-full bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light disabled:bg-zinc-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
                 >
                   {submittingObra ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -1287,7 +1287,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* OBRAS CATALOG LIST */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Film className="text-stone-300 w-5 h-5" />
+              <Film className="text-cine-accent-light w-5 h-5" />
               Obras Cadastradas ({obras.length})
             </h2>
 
@@ -1299,7 +1299,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     <div>
                       <h4 className="font-bold text-white">{o.titulo}</h4>
                       <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-500 font-mono">
-                        <span className="uppercase text-stone-300 font-bold">{o.tipo}</span>
+                        <span className="uppercase text-cine-accent-light font-bold">{o.tipo}</span>
                         <span>{o.ano}</span>
                       </div>
                     </div>
@@ -1315,7 +1315,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     </button>
                     <button
                       onClick={() => onSelectObra(o.id)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-stone-300"
+                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-cine-accent-light"
                       title="Ver Página"
                     >
                       <Film className="w-3.5 h-3.5" />
@@ -1336,7 +1336,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* GERENCIAR CINEREACT RECOMENDA */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Sparkles className="text-stone-300 w-5 h-5 animate-pulse" />
+              <Sparkles className="text-cine-accent-light w-5 h-5 animate-pulse" />
               CineReact Recomenda (Escolha dos Editores)
             </h2>
             <p className="text-xs text-zinc-400">
@@ -1344,8 +1344,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             </p>
 
             {/* ADD RECOMMENDED VIDEO BY LINK */}
-            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-stone-400/5 rounded-lg border border-stone-400/20">
-              <label className="block text-stone-300 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-cine-accent/5 rounded-lg border border-cine-accent/20">
+              <label className="block text-cine-accent-light font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 Adicionar Destaque por Link do YouTube
               </label>
@@ -1355,12 +1355,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={recomendadoLink}
                   onChange={(e) => setRecomendadoLink(e.target.value)}
                   placeholder="Cole o link do vídeo (ex: https://www.youtube.com/watch?v=...)"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-stone-400 text-white"
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-gradient-to-r from-stone-300 to-stone-400 hover:from-stone-200 hover:to-stone-300 text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-4 rounded bg-gradient-to-r from-cine-accent-light to-cine-accent hover:from-cine-cream hover:to-cine-accent-light text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>
@@ -1386,7 +1386,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={reactSearch}
                   onChange={(e) => setReactSearch(e.target.value)}
                   placeholder="Digite o título do vídeo..."
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-stone-400 text-white"
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
               </div>
 
@@ -1410,8 +1410,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                         disabled={togglingId === r.id}
                         className={`flex-shrink-0 px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${
                           r.isRecomendado 
-                            ? 'bg-stone-500/20 text-stone-300 border border-stone-400/30 hover:bg-stone-500/40' 
-                            : 'bg-stone-400 text-black hover:bg-stone-300'
+                            ? 'bg-cine-accent-dark/20 text-cine-accent-light border border-cine-accent/30 hover:bg-cine-accent-dark/40' 
+                            : 'bg-cine-accent text-black hover:bg-cine-accent-light'
                         }`}
                       >
                         {r.isRecomendado ? 'Remover Destaque' : 'Adicionar Destaque'}
@@ -1464,7 +1464,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* USER MANAGEMENT (VIP STATUS ACTIVATOR) */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Users className="text-stone-300 w-5 h-5" />
+              <Users className="text-cine-accent-light w-5 h-5" />
               Usuários Registrados ({usuarios.length})
             </h2>
 
@@ -1497,7 +1497,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div key={u.email} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`font-bold ${u.isDonor ? 'bg-gradient-to-r from-stone-200 via-stone-200 to-stone-400 bg-clip-text text-transparent font-extrabold' : 'text-zinc-300'}`}>
+                        <span className={`font-bold ${u.isDonor ? 'bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-extrabold' : 'text-zinc-300'}`}>
                           {u.username}
                         </span>
                         {u.isAdmin && (
@@ -1511,7 +1511,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       onClick={handleToggleVIP}
                       className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                         u.isDonor 
-                          ? 'bg-stone-400/15 border border-stone-400/20 text-stone-300 hover:bg-stone-400/30' 
+                          ? 'bg-cine-accent/15 border border-cine-accent/20 text-cine-accent-light hover:bg-cine-accent/30' 
                           : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -1526,7 +1526,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* LATEST COMMENTS */}
           <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <MessageSquare className="text-stone-300 w-5 h-5" />
+              <MessageSquare className="text-cine-accent-light w-5 h-5" />
               Últimos Comentários ({comentarios.length})
             </h2>
 
@@ -1549,7 +1549,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div className="flex items-center justify-between text-[9px] text-zinc-500 font-mono">
                     <span className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map(st => (
-                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-stone-300 text-stone-300' : 'text-zinc-800'}`} />
+                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-cine-accent-light text-cine-accent-light' : 'text-zinc-800'}`} />
                       ))}
                     </span>
                     <span>{new Date(c.criadoEm).toLocaleDateString('pt-BR')}</span>
@@ -1591,11 +1591,11 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Título</label>
-                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400" />
+                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Tipo</label>
-                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400">
+                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent">
                     <option value="filme">Filme</option>
                     <option value="serie">Série</option>
                     <option value="anime">Anime</option>
@@ -1605,23 +1605,23 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-zinc-400 mb-1">Sinopse</label>
-                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400" />
+                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Ano</label>
-                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400" />
+                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div>
                   <label className="block text-zinc-400 mb-1">Gêneros (vírgula)</label>
-                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-stone-400" />
+                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
                 </div>
                 <div className="md:col-span-2 flex items-center gap-2">
-                  <input type="checkbox" id="edit-destacado" checked={!!editingObra.destacado} onChange={(e) => setEditingObra({ ...editingObra, destacado: e.target.checked })} className="accent-stone-400" />
+                  <input type="checkbox" id="edit-destacado" checked={!!editingObra.destacado} onChange={(e) => setEditingObra({ ...editingObra, destacado: e.target.checked })} className="accent-cine-accent" />
                   <label htmlFor="edit-destacado" className="text-zinc-300">Destacar na Home</label>
                 </div>
                 <div className="md:col-span-2 flex gap-2">
                   <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
-                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-stone-400 text-black font-black disabled:opacity-50 cursor-pointer">
+                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-cine-accent text-black font-black disabled:opacity-50 cursor-pointer">
                     {savingObra ? 'Salvando...' : 'Salvar Alterações'}
                   </button>
                 </div>

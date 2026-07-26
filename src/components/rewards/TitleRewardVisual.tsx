@@ -8,9 +8,9 @@ const RARITY_BORDER: Record<string, string> = {
   incomum: 'from-sky-400 to-cyan-500',
   raro: 'from-violet-400 to-purple-500',
   épico: 'from-fuchsia-400 to-purple-600',
-  lendário: 'from-stone-200 to-stone-400',
+  lendário: 'from-cine-cream to-cine-accent',
   mítico: 'from-cyan-400 via-purple-400 to-pink-400',
-  exclusivo: 'from-rose-400 via-stone-200 to-violet-500',
+  exclusivo: 'from-rose-400 via-cine-cream to-violet-500',
 };
 
 const RARITY_TEXT: Record<string, string> = {
@@ -18,7 +18,7 @@ const RARITY_TEXT: Record<string, string> = {
   incomum: 'text-sky-200',
   raro: 'text-violet-200',
   épico: 'text-fuchsia-200',
-  lendário: 'text-stone-50',
+  lendário: 'text-cine-cream',
   mítico: 'text-cyan-100',
   exclusivo: 'text-rose-100',
 };
@@ -56,7 +56,7 @@ export default function TitleRewardVisual({
       title={name}
     >
       <span className={`self-stretch rounded-full bg-gradient-to-b ${border} ${s.bar} shrink-0 ${style.glow}`} />
-      <Award className={`${s.icon} text-stone-300/80 shrink-0`} strokeWidth={2.25} />
+      <Award className={`${s.icon} text-cine-accent-light/80 shrink-0`} strokeWidth={2.25} />
       <span className={`font-semibold uppercase tracking-[0.14em] whitespace-nowrap ${s.text} ${textColor}`}>
         {name}
       </span>
