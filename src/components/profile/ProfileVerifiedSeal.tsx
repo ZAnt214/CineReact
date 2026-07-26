@@ -11,7 +11,7 @@ export interface ProfileVerifiedSealProps {
 
 export default function ProfileVerifiedSeal({
   name = 'Perfil Verificado Oficial',
-  description = 'Criador credenciado com arte oficial no Programa de Criadores CineReact.',
+  description = 'Este é um perfil verificado oficial do criador na plataforma CineReact.',
   size = 'md',
   align = 'center',
   className = '',
