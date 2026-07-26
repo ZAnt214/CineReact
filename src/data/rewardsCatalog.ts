@@ -430,7 +430,7 @@ export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
   {
     id: VERIFIED_PROFILE_BADGE_ID,
     name: 'Perfil Verificado Oficial',
-    description: 'Selo de autenticidade para criadores com arte oficial credenciada no CineReact.',
+    description: 'Este é um perfil verificado oficial do criador na plataforma CineReact.',
     category: 'badge',
     rarity: 'exclusivo',
     cost: 0,
