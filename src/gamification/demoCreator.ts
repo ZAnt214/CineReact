@@ -1,4 +1,5 @@
 import { localDb } from '../db/local_db.ts';
+import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
 import {
   CREATOR_PROGRAM_ART_ITEM_IDS,
   VERIFIED_PROFILE_BADGE_ID,
@@ -7,7 +8,7 @@ import { migrateProfile } from './rewardsEngine.ts';
 import type { GamificationProfile } from '../types/gamification.ts';
 import type { UserAccount } from '../types.ts';
 
-export const DEMO_CREATOR_EMAIL = 'criador-demo@cinereact.app';
+export { DEMO_CREATOR_EMAIL };
 export const DEMO_CREATOR_ID = 'demo-creator-luna-atelie';
 
 const DEMO_AVATAR =
@@ -51,7 +52,7 @@ function buildDemoGamificationProfile(): GamificationProfile {
     stats: {
       commentsCount: 128,
       reactsWatched: 340,
-      creatorsDiscovered: 18,
+      creatorsDiscovered: [],
       listsCreated: 6,
       sharesCount: 24,
       totalWatchTimeMinutes: 4200,
