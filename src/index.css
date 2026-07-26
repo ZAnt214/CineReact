@@ -334,3 +334,13 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   contain-intrinsic-size: auto 220px;
 }
 
+.profile-social-heading {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: linear-gradient(92deg, #f0abfc 0%, #67e8f9 48%, #fcd34d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+

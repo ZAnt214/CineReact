@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Youtube, Twitch, ExternalLink } from 'lucide-react';
+import { Instagram, Youtube, Twitch, ArrowUpRight } from 'lucide-react';
 import type { CreatorSocialLinks } from '../../types.ts';
 import { hasSocialLinks, SOCIAL_PLATFORMS, type SocialPlatform } from '../../utils/socialLinks.ts';
 
@@ -15,43 +15,33 @@ const PLATFORM_STYLES: Record<
   {
     Icon: React.ElementType;
     label: string;
-    gradient: string;
-    border: string;
+    accent: string;
     iconClass: string;
-    glow: string;
   }
 > = {
   instagram: {
     Icon: Instagram,
     label: 'Instagram',
-    gradient: 'from-fuchsia-500/20 via-pink-500/15 to-orange-500/20',
-    border: 'border-fuchsia-400/35',
+    accent: 'from-fuchsia-400 via-pink-400 to-fuchsia-500',
     iconClass: 'text-fuchsia-300',
-    glow: 'group-hover:shadow-[0_0_20px_rgba(217,70,239,0.18)]',
   },
   youtube: {
     Icon: Youtube,
     label: 'YouTube',
-    gradient: 'from-red-500/20 via-rose-500/15 to-orange-500/15',
-    border: 'border-red-400/35',
-    iconClass: 'text-red-300',
-    glow: 'group-hover:shadow-[0_0_20px_rgba(248,113,113,0.18)]',
+    accent: 'from-amber-400 via-orange-400 to-amber-500',
+    iconClass: 'text-amber-300',
   },
   x: {
     Icon: XBrandIcon,
     label: 'X',
-    gradient: 'from-zinc-400/15 via-zinc-300/10 to-zinc-500/15',
-    border: 'border-zinc-400/30',
-    iconClass: 'text-zinc-200',
-    glow: 'group-hover:shadow-[0_0_20px_rgba(161,161,170,0.15)]',
+    accent: 'from-cyan-300 via-sky-300 to-cyan-400',
+    iconClass: 'text-cyan-200',
   },
   twitch: {
     Icon: Twitch,
     label: 'Twitch',
-    gradient: 'from-violet-500/20 via-purple-500/15 to-fuchsia-500/15',
-    border: 'border-violet-400/35',
+    accent: 'from-violet-400 via-fuchsia-400 to-violet-500',
     iconClass: 'text-violet-300',
-    glow: 'group-hover:shadow-[0_0_20px_rgba(167,139,250,0.18)]',
   },
 };
 
@@ -71,30 +61,30 @@ function getHandle(url: string, platform: SocialPlatform): string {
       const at = parsed.pathname.match(/@([^/]+)/);
       if (at) return `@${at[1]}`;
     }
-    return segment.replace(/^@/, '') || parsed.hostname;
+    const handle = segment.replace(/^@/, '') || parsed.hostname;
+    return handle.startsWith('@') ? handle : `@${handle}`;
   } catch {
-    return url.replace(/^@/, '');
+    const raw = url.replace(/^@/, '');
+    return raw.startsWith('@') ? raw : `@${raw}`;
   }
 }
 
 const SIZE_CONFIG = {
   sm: {
-    grid: 'grid-cols-2 gap-2',
-    card: 'h-[76px] px-2.5 py-2.5',
-    iconWrap: 'w-7 h-7',
+    strip: 'h-10 px-3 gap-2.5',
     icon: 'w-3.5 h-3.5',
-    label: 'text-[7px]',
-    handle: 'text-[10px]',
-    external: 'w-2 h-2 top-1.5 right-1.5',
+    platform: 'text-[9px] w-[4.25rem]',
+    handle: 'text-[11px]',
+    arrow: 'w-3.5 h-3.5',
+    heading: 'text-sm',
   },
   md: {
-    grid: 'grid-cols-2 gap-2.5',
-    card: 'h-[84px] px-3 py-3',
-    iconWrap: 'w-8 h-8',
+    strip: 'h-11 px-3.5 gap-3',
     icon: 'w-4 h-4',
-    label: 'text-[8px]',
-    handle: 'text-[11px]',
-    external: 'w-2.5 h-2.5 top-2 right-2',
+    platform: 'text-[10px] w-[4.75rem]',
+    handle: 'text-xs',
+    arrow: 'w-4 h-4',
+    heading: 'text-base',
   },
 } as const;
 
@@ -109,27 +99,21 @@ export default function ProfileSocialLinks({
   const isCenter = align === 'center';
   const cfg = SIZE_CONFIG[size];
   const activePlatforms = SOCIAL_PLATFORMS.filter(({ key }) => links?.[key]?.trim());
-  const count = activePlatforms.length;
-  const gridClass =
-    count === 1
-      ? 'grid-cols-1'
-      : count === 3
-        ? 'grid-cols-2 [&>a:last-child]:col-span-2 [&>a:last-child]:max-w-[calc(50%-0.3125rem)] [&>a:last-child]:justify-self-center'
-        : cfg.grid;
 
   return (
     <div
-      className={`flex flex-col gap-2.5 w-full max-w-sm ${isCenter ? 'mx-auto' : ''} ${className}`}
+      className={`flex w-full max-w-sm flex-col gap-2 ${isCenter ? 'mx-auto' : ''} ${className}`}
     >
-      <p
-        className={`text-[9px] font-mono uppercase tracking-[0.2em] text-cyan-400/70 ${
-          isCenter ? 'text-center' : 'text-left'
-        }`}
-      >
-        Redes do criador
-      </p>
+      <div className={isCenter ? 'text-center' : 'text-left'}>
+        <p className={`profile-social-heading ${cfg.heading} leading-tight`}>
+          Onde me encontrar
+        </p>
+        <p className="mt-0.5 text-[10px] text-cyan-200/45 font-medium tracking-wide">
+          Minhas redes oficiais
+        </p>
+      </div>
 
-      <div className={`grid w-full ${gridClass}`}>
+      <div className="flex w-full flex-col gap-1.5">
         {activePlatforms.map(({ key }) => {
           const href = links![key]!;
           const style = PLATFORM_STYLES[key];
@@ -143,27 +127,29 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border bg-gradient-to-br ${style.gradient} ${style.border} backdrop-blur-sm transition-all hover:scale-[1.01] ${style.glow} ${cfg.card}`}
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-fuchsia-500/10 bg-zinc-950/75 backdrop-blur-sm transition-all hover:border-cyan-400/25 hover:bg-zinc-900/80 hover:shadow-[0_0_18px_rgba(34,211,238,0.08)] ${cfg.strip}`}
             >
               <span
-                className={`flex shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-zinc-950/50 ${cfg.iconWrap}`}
-              >
+                className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${style.accent} opacity-80`}
+                aria-hidden
+              />
+
+              <span className="ml-1 flex shrink-0 items-center justify-center">
                 <Icon className={`${cfg.icon} ${style.iconClass}`} />
               </span>
 
-              <span className="flex w-full min-w-0 flex-col items-center gap-0.5 px-1 text-center">
-                <span
-                  className={`w-full truncate font-bold uppercase tracking-[0.14em] profile-text-muted ${cfg.label}`}
-                >
-                  {style.label}
-                </span>
-                <span className={`w-full truncate font-semibold profile-text ${cfg.handle}`}>
-                  {handle}
-                </span>
+              <span
+                className={`shrink-0 font-semibold uppercase tracking-[0.12em] text-cyan-200/55 ${cfg.platform}`}
+              >
+                {style.label}
               </span>
 
-              <ExternalLink
-                className={`absolute opacity-0 transition-opacity group-hover:opacity-60 profile-text-muted ${cfg.external}`}
+              <span className={`min-w-0 flex-1 truncate font-medium text-zinc-100 ${cfg.handle}`}>
+                {handle}
+              </span>
+
+              <ArrowUpRight
+                className={`shrink-0 text-cyan-300/35 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-200/80 ${cfg.arrow}`}
               />
             </a>
           );
