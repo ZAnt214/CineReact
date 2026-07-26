@@ -49,71 +49,50 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
   const isDemo = creatorEmail.toLowerCase() === DEMO_CREATOR_EMAIL.toLowerCase();
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="relative overflow-hidden border-b border-fuchsia-500/10 bg-gradient-to-br from-fuchsia-950/40 via-zinc-950 to-cyan-950/30">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(217,70,239,0.12),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.08),transparent_55%)]" />
+    <div className="cine-container pt-24 pb-16 min-h-screen">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors mb-8 cursor-pointer"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Voltar
+      </button>
 
-        <div className="relative cine-container pt-24 pb-10">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors mb-8 cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </button>
+      {isDemo && (
+        <div className="max-w-2xl mb-8 flex items-start gap-3 rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-4 py-3">
+          <Sparkles className="w-4 h-4 text-fuchsia-300 shrink-0 mt-0.5" />
+          <p className="text-sm text-zinc-300 leading-relaxed">
+            <span className="font-bold text-fuchsia-200">Perfil demonstrativo.</span>{' '}
+            Exemplo de como criadores de vídeo verificados aparecem na plataforma.
+          </p>
+        </div>
+      )}
 
-          {isDemo && (
-            <div className="max-w-3xl mb-6 flex items-start gap-3 rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/10 px-4 py-3 backdrop-blur-sm">
-              <Sparkles className="w-5 h-5 text-fuchsia-300 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-fuchsia-100">Perfil demonstrativo</p>
-                <p className="text-xs text-fuchsia-100/75 mt-1 leading-relaxed">
-                  Veja como o perfil de um criador de vídeo verificado oficial aparece na plataforma — selo, cosméticos Ateliê Visionário, bio e redes sociais.
-                </p>
-              </div>
-            </div>
-          )}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
+          <Loader2 className="w-7 h-7 animate-spin mb-3 text-amber-400" />
+          <p className="text-sm">Carregando perfil...</p>
+        </div>
+      )}
 
-          {!loading && profile && (
-            <div className="max-w-3xl">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-fuchsia-300/70 mb-3">
-                Criador verificado
-              </p>
-              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">{profile.nome}</h1>
-            </div>
+      {!loading && error && (
+        <div className="max-w-xl rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-8 text-center">
+          <p className="text-red-300 text-sm">{error}</p>
+        </div>
+      )}
+
+      {!loading && profile && (
+        <div className="max-w-2xl space-y-4">
+          <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
+          {profile.isVerifiedCreator && (
+            <p className="flex items-center gap-2 text-xs text-zinc-500 pt-1">
+              <BadgeCheck className="w-3.5 h-3.5 text-cyan-400" />
+              Criador verificado oficial na CineReact
+            </p>
           )}
         </div>
-      </div>
-
-      <div className="cine-container py-8 md:py-10">
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-            <Loader2 className="w-8 h-8 animate-spin mb-3 text-amber-400" />
-            <p className="text-sm">Carregando perfil...</p>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="max-w-xl mx-auto rounded-2xl border border-red-500/20 bg-red-500/5 px-6 py-10 text-center">
-            <p className="text-red-300 text-sm">{error}</p>
-          </div>
-        )}
-
-        {!loading && profile && (
-          <div className="max-w-3xl mx-auto space-y-6">
-            <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
-
-            {profile.isVerifiedCreator && (
-              <div className="flex items-center justify-center gap-2 text-xs text-zinc-500 pt-2">
-                <BadgeCheck className="w-4 h-4 text-cyan-400" />
-                Criador verificado oficial na plataforma CineReact
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
