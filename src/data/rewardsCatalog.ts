@@ -351,6 +351,8 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
 
 /** Coleção completa concedida a criadores que produziram arte do Programa de Criadores */
 export const CREATOR_PROGRAM_ART_BUNDLE_ID = 'creator-program-art';
+export const VERIFIED_PROFILE_BADGE_ID = 'badge-perfil-verificado-oficial';
+export const LEGACY_CREATOR_PROGRAM_TAG_ID = 'tag-arte-programa-criadores';
 
 export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
   {
@@ -426,18 +428,16 @@ export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
     visualStyle: 'atelier',
   },
   {
-    id: 'tag-arte-programa-criadores',
-    name: 'Arte Oficial',
-    description: 'Tag exclusiva de quem criou arte para o Programa de Criadores CineReact.',
-    category: 'tag',
+    id: VERIFIED_PROFILE_BADGE_ID,
+    name: 'Perfil Verificado Oficial',
+    description: 'Selo de autenticidade para criadores com arte oficial credenciada no CineReact.',
+    category: 'badge',
     rarity: 'exclusivo',
     cost: 0,
     unlockMethod: 'creator_program_art',
     obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
     bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
     limited: true,
-    creatorName: 'Programa de Criadores',
-    creatorColors: { from: '#e879f9', to: '#22d3ee', text: '#fdf4ff' },
     visualStyle: 'atelier',
   },
 ];

@@ -3,6 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
+import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export interface ProfileNameRowProps {
@@ -13,6 +14,7 @@ export interface ProfileNameRowProps {
   timestamp?: string;
   donorBadgeSize?: 'sm' | 'md';
   nameSize?: 'sm' | 'md' | 'lg';
+  align?: 'center' | 'start';
   className?: string;
 }
 
@@ -24,12 +26,17 @@ export default function ProfileNameRow({
   timestamp,
   donorBadgeSize = 'sm',
   nameSize = 'sm',
+  align = 'center',
   className = '',
 }: ProfileNameRowProps) {
   const display = useMemo(
     () => profileDisplay || resolvePublicProfileDisplay(loadout),
     [profileDisplay, loadout]
   );
+
+  const isCenter = align === 'center';
+  const alignClass = isCenter ? 'items-center text-center' : 'items-start text-left';
+  const rowJustify = isCenter ? 'justify-center' : 'justify-start';
 
   const donorClass =
     donorBadgeSize === 'md'
@@ -43,14 +50,16 @@ export default function ProfileNameRow({
         ? 'text-sm font-bold profile-text'
         : 'text-xs font-bold profile-text';
 
+  const sealSize = nameSize === 'lg' ? 'md' : 'sm';
+
   return (
-    <div className={`min-w-0 space-y-1 ${className}`}>
-      <div className="flex items-center gap-2 flex-wrap">
+    <div className={`flex flex-col w-full min-w-0 gap-3 ${alignClass} ${className}`}>
+      <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         {isDonor ? (
-          <span className={`${nameClass} bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] flex items-center gap-1.5`}>
+          <span className={`${nameClass} bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
             {name}
             <span
-              className={`rounded bg-gradient-to-r from-amber-500 to-yellow-400 uppercase font-black text-black tracking-widest flex items-center gap-0.5 ${donorClass}`}
+              className={`rounded bg-gradient-to-r from-amber-500 to-yellow-400 uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}
             >
               <Sparkles className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
             </span>
@@ -60,41 +69,48 @@ export default function ProfileNameRow({
         )}
 
         {timestamp && (
-          <span className="text-[10px] profile-text-muted font-mono">{timestamp}</span>
+          <span className="text-[10px] profile-text-muted font-mono shrink-0">{timestamp}</span>
         )}
       </div>
 
-      {(display.title || display.tags.length > 0) && (
-        <div className="flex flex-col items-center gap-1.5 w-full">
-          {display.title && (
-            <div className="flex flex-col items-center gap-1">
-              <TitleRewardVisual
-                name={display.title.name}
-                rarity={display.title.rarity}
-                item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
-                size="sm"
-              />
-              {display.title.description && (
-                <p className="text-[10px] profile-text-muted italic text-center max-w-[220px] leading-snug">
-                  {display.title.description}
-                </p>
-              )}
-            </div>
+      {display.title && (
+        <div className={`flex flex-col gap-1 w-full ${alignClass}`}>
+          <TitleRewardVisual
+            name={display.title.name}
+            rarity={display.title.rarity}
+            item={{ id: display.title.id, rarity: display.title.rarity, category: 'title' }}
+            size={nameSize === 'lg' ? 'md' : 'sm'}
+          />
+          {display.title.description && (
+            <p className={`text-[10px] profile-text-muted italic leading-snug max-w-[280px] ${isCenter ? 'mx-auto' : ''}`}>
+              {display.title.description}
+            </p>
           )}
-          {display.tags.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-1.5">
-              {display.tags.map((tag) => (
-                <CreatorTagVisual
-                  key={tag.id}
-                  id={tag.id}
-                  name={tag.name}
-                  creatorName={tag.creatorName}
-                  creatorColors={tag.creatorColors}
-                  size="sm"
-                />
-              ))}
-            </div>
-          )}
+        </div>
+      )}
+
+      {display.verifiedBadge && (
+        <ProfileVerifiedSeal
+          name={display.verifiedBadge.name}
+          description={display.verifiedBadge.description}
+          size={sealSize}
+          align={align}
+          className="w-full"
+        />
+      )}
+
+      {display.tags.length > 0 && (
+        <div className={`flex flex-wrap gap-1.5 w-full ${rowJustify}`}>
+          {display.tags.map((tag) => (
+            <CreatorTagVisual
+              key={tag.id}
+              id={tag.id}
+              name={tag.name}
+              creatorName={tag.creatorName}
+              creatorColors={tag.creatorColors}
+              size="sm"
+            />
+          ))}
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@ import {
   CREATOR_FOLLOW_REWARDS,
   CREATOR_PROGRAM_ART_BUNDLE_ID,
   CREATOR_PROGRAM_ART_ITEM_IDS,
+  LEGACY_CREATOR_PROGRAM_TAG_ID,
+  VERIFIED_PROFILE_BADGE_ID,
   getRewardById,
   PROMO_CODES,
   REWARDS_CATALOG,
@@ -45,7 +47,28 @@ export function migrateProfile(profile: GamificationProfile): GamificationProfil
   if (!profile.redeemedCodes) profile.redeemedCodes = [];
   if (!profile.stats.creatorWatchCounts) profile.stats.creatorWatchCounts = {};
 
+  migrateCreatorProgramArtRewards(profile);
+
   return profile;
+}
+
+function migrateCreatorProgramArtRewards(profile: GamificationProfile): void {
+  const tagIdx = profile.loadout.tags.indexOf(LEGACY_CREATOR_PROGRAM_TAG_ID);
+  if (tagIdx !== -1) {
+    profile.loadout.tags = profile.loadout.tags.filter((id) => id !== LEGACY_CREATOR_PROGRAM_TAG_ID);
+  }
+
+  const hadTag = profile.inventory.some((e) => e.itemId === LEGACY_CREATOR_PROGRAM_TAG_ID);
+  if (hadTag && !hasReward(profile, VERIFIED_PROFILE_BADGE_ID)) {
+    const tagEntry = profile.inventory.find((e) => e.itemId === LEGACY_CREATOR_PROGRAM_TAG_ID);
+    profile.inventory = profile.inventory.filter((e) => e.itemId !== LEGACY_CREATOR_PROGRAM_TAG_ID);
+    profile.inventory.push({
+      itemId: VERIFIED_PROFILE_BADGE_ID,
+      unlockedAt: tagEntry?.unlockedAt || new Date().toISOString(),
+      unlockMethod: 'creator_program_art',
+      unlockSource: 'migrated_from_creator_tag',
+    });
+  }
 }
 
 export function hasReward(profile: GamificationProfile, itemId: string): boolean {
@@ -142,12 +165,14 @@ export function equipCreatorProgramArtSet(profile: GamificationProfile): void {
 
   if (hasReward(profile, 'badge-atelie-visionario')) {
     const badges = profile.loadout.badges.filter((id) => id !== 'badge-atelie-visionario');
-    profile.loadout.badges = ['badge-atelie-visionario', ...badges].slice(0, 2);
-  }
-
-  if (hasReward(profile, 'tag-arte-programa-criadores')) {
-    const tags = profile.loadout.tags.filter((id) => id !== 'tag-arte-programa-criadores');
-    profile.loadout.tags = ['tag-arte-programa-criadores', ...tags].slice(0, 3);
+    const withoutVerified = badges.filter((id) => id !== VERIFIED_PROFILE_BADGE_ID);
+    const next = hasReward(profile, VERIFIED_PROFILE_BADGE_ID)
+      ? [VERIFIED_PROFILE_BADGE_ID, 'badge-atelie-visionario', ...withoutVerified]
+      : ['badge-atelie-visionario', ...badges];
+    profile.loadout.badges = next.slice(0, 2);
+  } else if (hasReward(profile, VERIFIED_PROFILE_BADGE_ID)) {
+    const badges = profile.loadout.badges.filter((id) => id !== VERIFIED_PROFILE_BADGE_ID);
+    profile.loadout.badges = [VERIFIED_PROFILE_BADGE_ID, ...badges].slice(0, 2);
   }
 
   profile.updatedAt = new Date().toISOString();

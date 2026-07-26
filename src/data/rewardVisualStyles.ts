@@ -295,7 +295,8 @@ const ITEM_VISUAL_MAP: Record<string, RewardVisualStyle> = {
   'effect-rainbow-aura': 'rainbow', 'frame-rainbow': 'rainbow',
   'theme-atelie-visionario': 'atelier', 'frame-atelie-visionario': 'atelier',
   'title-artista-oficial': 'atelier', 'badge-atelie-visionario': 'atelier',
-  'avatar-atelie-visionario': 'atelier', 'tag-arte-programa-criadores': 'atelier',
+  'avatar-atelie-visionario': 'atelier',
+  'badge-perfil-verificado-oficial': 'atelier',
 };
 
 export function formatObtainText(
