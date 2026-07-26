@@ -5,6 +5,7 @@ import type { ProfileLoadout } from '../types/gamification.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import PlaybackSkeleton from './PlaybackSkeleton.tsx';
 import OptimizedImage from './OptimizedImage.tsx';
+import CineReactLogo from './CineReactLogo.tsx';
 
 // Lazy loading for heavy comment section component
 const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
@@ -632,8 +633,8 @@ export default function PlaybackPage({
               </button>
 
               {/* MINIMALIST NEUTRAL CINEREACT WATERMARK (BOTTOM-LEFT) */}
-              <div className="absolute bottom-3 left-3.5 z-10 pointer-events-none text-zinc-400/80 font-mono text-[10px] font-bold tracking-widest uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] opacity-70 group-hover/player:opacity-95 transition-opacity duration-300 select-none">
-                cinereact
+              <div className="absolute bottom-3 left-3.5 z-10 pointer-events-none opacity-70 group-hover/player:opacity-95 transition-opacity duration-300 select-none drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                <CineReactLogo size="xs" />
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
   <rect width="200" height="200" rx="40" fill="#0a0e14"/>
-  <text x="24" y="108" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="32" fill="#ffffff" letter-spacing="-1">Cine</text>
-  <text x="24" y="148" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="32" fill="#22d3ee" letter-spacing="-1">React</text>
+  <text x="100" y="82" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="30" fill="#ffffff" letter-spacing="-1">Cine</text>
+  <text x="100" y="118" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="30" fill="#22d3ee" letter-spacing="-1">React</text>
+  <text x="100" y="148" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="500" font-size="8" fill="#7a8fa6" letter-spacing="1.4">SUA PLATAFORMA DE REACTS</text>
 </svg>

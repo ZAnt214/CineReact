@@ -3,6 +3,7 @@ import { Play, Eye, Clock, ArrowLeft } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface ObraPageProps {
   obra: Obra;
@@ -133,8 +134,8 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
                     <Eye className="w-3.5 h-3.5 text-zinc-500" /> {formatViews(react.visualizacoes)}
                   </span>
                 </div>
-                <div className="flex items-center text-[10px] text-zinc-500/40 font-mono tracking-wider">
-                  <span>CineReact</span>
+                <div className="flex items-center opacity-60">
+                  <CineReactLogo size="xs" />
                 </div>
               </div>
             </div>

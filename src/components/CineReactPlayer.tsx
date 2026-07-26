@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface CineReactPlayerProps {
   video: ReactVideo;
@@ -422,14 +423,8 @@ export default function CineReactPlayer({
           }`}>
             {/* LEFT: CINE REACT BRAND BADGE & TITLE */}
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="flex items-center gap-2 bg-black/80 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-cine-accent/40 shadow-xl shrink-0">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cine-accent-light opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cine-accent"></span>
-                </span>
-                <span className="text-xs font-black tracking-widest uppercase bg-gradient-to-r from-cine-cream via-cine-cream to-cine-cream bg-clip-text text-transparent font-mono">
-                  CINEREACT PLAYER
-                </span>
+              <div className="bg-black/80 backdrop-blur-xl px-2.5 py-1 rounded-xl border border-cine-accent/40 shadow-xl shrink-0">
+                <CineReactLogo size="xs" className="pointer-events-none" />
               </div>
 
               <div className="truncate">
