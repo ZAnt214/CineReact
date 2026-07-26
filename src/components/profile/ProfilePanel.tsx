@@ -194,6 +194,7 @@ export default function ProfilePanel({
                   size="xl"
                   loadout={loadout}
                   donorBadge={!!user.isDonor}
+                  lite
                   className="mb-4"
                 />
 
@@ -223,7 +224,7 @@ export default function ProfilePanel({
                   <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
                     {badgeItems.map((b) => (
                       <span key={b.id} title={b.name}>
-                        <RewardPreviewThumb item={b} size="sm" />
+                        <RewardPreviewThumb item={b} size="sm" lite />
                       </span>
                     ))}
                   </div>
