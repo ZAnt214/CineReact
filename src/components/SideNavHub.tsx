@@ -22,6 +22,7 @@ import {
 } from '../utils/videoCreatorsList.ts';
 import type { Obra, ReactVideo } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
+import SearchBar from './SearchBar.tsx';
 
 export const SIDE_NAV_ITEMS = [
   { id: 'inicio', label: 'Início', icon: Home },
@@ -51,6 +52,8 @@ interface SideNavHubProps {
   reacts?: ReactVideo[];
   setCurrentTab: (tab: string) => void;
   onSelectCanal: (canalId: string) => void;
+  onSearch: (results: Obra[], query: string) => void;
+  onSelectObra: (id: string) => void;
 }
 
 function CreatorAvatar({
@@ -133,6 +136,8 @@ function SideNavHub({
   reacts = [],
   setCurrentTab,
   onSelectCanal,
+  onSearch,
+  onSelectObra,
 }: SideNavHubProps) {
   const { isSideNavOpen, closeSideNav } = useSideNavStore();
   const [creatorsExpanded, setCreatorsExpanded] = React.useState(true);
@@ -196,18 +201,29 @@ function SideNavHub({
         className="fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-neutral-950 border-r border-neutral-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden"
         aria-label="Menu principal"
       >
-        <div className="h-16 shrink-0 border-b border-neutral-800/60 flex items-center justify-between px-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cine-accent/80">
-            Navegação
-          </span>
-          <button
-            type="button"
-            onClick={closeSideNav}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-neutral-900 transition-colors cursor-pointer"
-            aria-label="Fechar menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        <div className="shrink-0 border-b border-neutral-800/60 px-4 py-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cine-accent/80">
+              Navegação
+            </span>
+            <button
+              type="button"
+              onClick={closeSideNav}
+              className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-neutral-900 transition-colors cursor-pointer"
+              aria-label="Fechar menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <SearchBar
+            obras={obras}
+            reacts={reacts}
+            onSearch={onSearch}
+            onSelectObra={onSelectObra}
+            onAfterSelect={closeSideNav}
+            inputId="side-nav-search-input"
+          />
         </div>
 
         <nav className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden py-3 px-3 space-y-1">
