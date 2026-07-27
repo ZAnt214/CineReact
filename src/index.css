@@ -5,22 +5,22 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Plus Jakarta Sans", "Sora", ui-sans-serif, system-ui, sans-serif;
-  /* Vivid Nightfall — 10002b · 240046 · 3c096c · 5a189a · 7b2cbf · 9d4edd · c77dff · e0aaff */
-  --color-cine-bg: #10002b;
-  --color-cine-surface: #240046;
-  --color-cine-elevated: #3c096c;
-  --color-cine-border: #5a189a;
-  --color-cine-cream: #f5ebff;
-  --color-cine-muted: #c77dff;
-  --color-cine-accent: #7b2cbf;
-  --color-cine-accent-light: #e0aaff;
+  /* Vivid Nightfall — papéis distribuídos para visual aconchegante */
+  --color-cine-bg: #10002b;           /* 1 — noite profunda (fundo) */
+  --color-cine-surface: #240046;      /* 2 — índigo (painéis, header) */
+  --color-cine-elevated: #3c096c;     /* 3 — violeta (cards elevados) */
+  --color-cine-border: #5a189a;       /* 4 — roxo real (bordas sutis) */
+  --color-cine-accent: #7b2cbf;       /* 5 — ametista (CTAs, logo) */
+  --color-cine-recomenda: #9d4edd;    /* 6 — lavanda vívida (Recomenda) */
+  --color-cine-lilac: #c77dff;        /* 7 — orquídea (destaques suaves) */
+  --color-cine-accent-light: #e0aaff; /* 8 — lavanda pálida (brilho aconchegante) */
   --color-cine-accent-dark: #5a189a;
+  --color-cine-cream: #f5ebff;
+  --color-cine-muted: #a898c4;
   --color-cine-mint: #9d4edd;
   --color-cine-mint-muted: #7b2cbf;
-  --color-cine-lilac: #c77dff;
   --color-cine-lilac-muted: #5a189a;
   --color-cine-brand: #7b2cbf;
-  --color-cine-recomenda: #9d4edd;
   --color-cine-recomenda-muted: #7b2cbf;
 }
 
@@ -63,7 +63,7 @@
 
 .cine-brand-react {
   font-weight: 700;
-  color: var(--color-cine-accent);
+  color: var(--color-cine-recomenda);
   letter-spacing: 0.04em;
 }
 
@@ -78,7 +78,7 @@
   font-weight: 400;
   font-size: 0.44em;
   letter-spacing: 0.02em;
-  color: #a1a1aa;
+  color: var(--color-cine-muted);
   white-space: nowrap;
   text-align: justify;
   text-align-last: justify;
@@ -133,7 +133,7 @@
   font-size: 0.8125rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  color: var(--color-cine-accent);
+  color: var(--color-cine-lilac);
   max-width: 42rem;
 }
 
@@ -155,11 +155,11 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ffffff;
-  background: var(--color-cine-accent);
-  border: 1px solid rgba(173, 215, 246, 0.65);
+  background: var(--color-cine-recomenda);
+  border: 1px solid rgba(224, 170, 255, 0.45);
   border-radius: 0.3rem;
   line-height: 1;
-  box-shadow: 0 2px 8px rgba(123, 44, 191, 0.35);
+  box-shadow: 0 2px 8px rgba(157, 78, 221, 0.35);
 }
 
 @media (min-width: 640px) {
@@ -172,12 +172,12 @@
 
 .cine-recomenda-card {
   position: relative;
-  background: linear-gradient(180deg, #1e0b38 0%, #120024 100%);
-  border: 1px solid rgba(123, 44, 191, 0.38);
+  background: linear-gradient(180deg, #2a0a4a 0%, #1a0038 100%);
+  border: 1px solid rgba(157, 78, 221, 0.32);
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.06) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.04) inset,
     0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 24px rgba(123, 44, 191, 0.1);
+    0 0 20px rgba(157, 78, 221, 0.08);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
@@ -188,18 +188,18 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--color-cine-accent);
+  background: var(--color-cine-recomenda);
   opacity: 0.95;
   z-index: 20;
   pointer-events: none;
 }
 
 .cine-recomenda-card:hover {
-  border-color: rgba(123, 44, 191, 0.62);
+  border-color: rgba(199, 125, 255, 0.45);
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.12) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.08) inset,
     0 16px 40px rgba(0, 0, 0, 0.5),
-    0 0 32px rgba(123, 44, 191, 0.18);
+    0 0 28px rgba(157, 78, 221, 0.14);
 }
 
 .cine-recomenda-thumb::after {
@@ -216,14 +216,14 @@
 }
 
 .cine-recomenda-body {
-  background: linear-gradient(180deg, rgba(30, 11, 56, 0.98) 0%, rgba(18, 0, 36, 1) 100%);
-  border-top: 1px solid rgba(123, 44, 191, 0.14);
+  background: linear-gradient(180deg, rgba(36, 0, 70, 0.98) 0%, rgba(26, 0, 56, 1) 100%);
+  border-top: 1px solid rgba(157, 78, 221, 0.18);
 }
 
 .cine-recomenda-creator {
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 600;
-  color: var(--color-cine-accent);
+  color: var(--color-cine-lilac);
   letter-spacing: 0.01em;
 }
 
@@ -321,11 +321,11 @@ html, body, #root {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 92% 58% at 50% -12%, rgba(123, 44, 191, 0.34) 0%, transparent 58%),
-    radial-gradient(ellipse 48% 42% at 96% 18%, rgba(157, 78, 221, 0.16) 0%, transparent 54%),
-    radial-gradient(ellipse 44% 40% at 4% 78%, rgba(90, 24, 154, 0.22) 0%, transparent 52%),
-    radial-gradient(ellipse 72% 48% at 50% 108%, rgba(36, 0, 70, 0.9) 0%, transparent 62%),
-    linear-gradient(168deg, #0a001c 0%, #10002b 36%, #160033 68%, #10002b 100%);
+    radial-gradient(ellipse 80% 48% at 50% -6%, rgba(157, 78, 221, 0.11) 0%, transparent 56%),
+    radial-gradient(ellipse 38% 34% at 98% 22%, rgba(224, 170, 255, 0.07) 0%, transparent 52%),
+    radial-gradient(ellipse 40% 36% at 2% 72%, rgba(60, 9, 108, 0.13) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 42% at 50% 108%, rgba(36, 0, 70, 0.65) 0%, transparent 58%),
+    linear-gradient(175deg, #10002b 0%, #1a0038 42%, #240046 52%, #10002b 100%);
 }
 
 .cine-site-bg::after {
@@ -334,10 +334,10 @@ html, body, #root {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.28;
-  background-image: radial-gradient(rgba(199, 125, 255, 0.22) 0.55px, transparent 0.55px);
-  background-size: 26px 26px;
-  mask-image: radial-gradient(ellipse 88% 72% at 50% 42%, black 18%, transparent 80%);
+  opacity: 0.16;
+  background-image: radial-gradient(rgba(224, 170, 255, 0.18) 0.5px, transparent 0.5px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 86% 70% at 50% 40%, black 15%, transparent 82%);
 }
 
 .cine-site-bg > * {
@@ -401,10 +401,10 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 /* Standard catalog cards — polished but distinct from CineReact Recomenda */
 .catalog-card-standard {
   position: relative;
-  background: linear-gradient(180deg, #1a0930 0%, #110022 100%);
-  border: 1px solid rgba(90, 24, 154, 0.45);
+  background: linear-gradient(180deg, #240046 0%, #1a0038 100%);
+  border: 1px solid rgba(60, 9, 108, 0.55);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.03) inset,
     0 10px 28px rgba(0, 0, 0, 0.42);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -422,11 +422,11 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .catalog-card-standard:hover {
-  border-color: rgba(123, 44, 191, 0.35);
+  border-color: rgba(199, 125, 255, 0.32);
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.06) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.05) inset,
     0 14px 36px rgba(0, 0, 0, 0.48),
-    0 0 22px rgba(123, 44, 191, 0.08);
+    0 0 18px rgba(90, 24, 154, 0.1);
 }
 
 .catalog-card-standard-thumb::after {
@@ -443,8 +443,15 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .catalog-card-standard-body {
-  background: linear-gradient(180deg, rgba(26, 9, 48, 0.98) 0%, rgba(17, 0, 34, 1) 100%);
-  border-top: 1px solid rgba(90, 24, 154, 0.35);
+  background: linear-gradient(180deg, rgba(36, 0, 70, 0.96) 0%, rgba(26, 0, 56, 1) 100%);
+  border-top: 1px solid rgba(60, 9, 108, 0.4);
+}
+
+/* Painéis aconchegantes — superfície índigo com borda suave */
+.cine-cozy-panel {
+  background: color-mix(in srgb, var(--color-cine-surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-cine-border) 22%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 /* Mobile: native momentum scroll + snap like streaming apps */
@@ -637,31 +644,31 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .cosmetics-hub-card--creator-program {
-  border-color: rgba(123, 44, 191, 0.28) !important;
-  background: linear-gradient(180deg, rgba(123, 44, 191, 0.06) 0%, rgba(16, 0, 43, 0.95) 42%);
+  border-color: rgba(157, 78, 221, 0.28) !important;
+  background: linear-gradient(180deg, rgba(60, 9, 108, 0.35) 0%, rgba(36, 0, 70, 0.92) 42%);
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.08) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.06) inset,
     0 8px 24px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(123, 44, 191, 0.06);
+    0 0 16px rgba(157, 78, 221, 0.06);
 }
 
 .cosmetics-hub-card--creator-program:hover {
-  border-color: rgba(123, 44, 191, 0.45) !important;
+  border-color: rgba(199, 125, 255, 0.4) !important;
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.12) inset,
+    0 0 0 1px rgba(224, 170, 255, 0.1) inset,
     0 12px 30px rgba(0, 0, 0, 0.4),
-    0 0 28px rgba(123, 44, 191, 0.12);
+    0 0 22px rgba(157, 78, 221, 0.1);
 }
 
 .verified-creator-seal {
   box-shadow:
-    0 0 0 1px rgba(123, 44, 191, 0.12) inset,
-    0 0 24px rgba(123, 44, 191, 0.2),
+    0 0 0 1px rgba(224, 170, 255, 0.1) inset,
+    0 0 20px rgba(157, 78, 221, 0.16),
     0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .verified-creator-seal-icon {
-  box-shadow: 0 0 12px rgba(123, 44, 191, 0.35);
+  box-shadow: 0 0 12px rgba(199, 125, 255, 0.3);
 }
 
 .creator-tag-visual {

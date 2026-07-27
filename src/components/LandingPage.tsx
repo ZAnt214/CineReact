@@ -32,8 +32,9 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
     <div className="cine-site-bg min-h-screen text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
       {/* Accent glows layered on global canvas */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[520px] bg-gradient-to-b from-cine-accent/20 via-cine-mint/8 to-transparent rounded-full blur-3xl opacity-80" />
-        <div className="absolute top-1/4 -right-32 w-[420px] h-[420px] bg-cine-lilac/10 rounded-full blur-3xl" />
+        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[880px] h-[480px] bg-gradient-to-b from-cine-recomenda/14 via-cine-accent-light/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 -left-24 w-[380px] h-[380px] bg-cine-elevated/12 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-28 w-[360px] h-[360px] bg-cine-accent-light/8 rounded-full blur-3xl" />
       </div>
 
       {/* HEADER / BRAND BAR */}
@@ -84,7 +85,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto font-sans"
         >
           A plataforma para quem ama vídeos de reação a{' '}
-          <span className="text-cine-accent">
+          <span className="text-cine-lilac">
             filmes, séries, animes e games.
           </span>
         </motion.h1>
@@ -143,7 +144,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* KEY BENEFITS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-cine-border/20">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Por que usar o CineReact?
@@ -154,61 +155,49 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Benefit 1 */}
-          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-lilac/30 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-cine-elevated/50 border border-cine-border/30 flex items-center justify-center text-cine-lilac mb-5 group-hover:scale-110 transition-transform">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Descubra novos criadores
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-white mb-2">Descubra novos criadores</h3>
+              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
                 Encontre novos canais de reação com facilidade e apoie criadores independentes da comunidade.
               </p>
             </div>
           </div>
 
-          {/* Benefit 2 */}
-          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-recomenda/30 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-cine-surface/80 border border-cine-border/25 flex items-center justify-center text-cine-recomenda mb-5 group-hover:scale-110 transition-transform">
                 <Tv className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Encontre seus favoritos
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-white mb-2">Encontre seus favoritos</h3>
+              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
                 Encontre reações aos seus filmes, séries, animes e games favoritos organizados em coleções completas.
               </p>
             </div>
           </div>
 
-          {/* Benefit 3 */}
-          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-accent/25 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-cine-border/20 border border-cine-border/30 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
                 <BookmarkCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Organize seus conteúdos
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-white mb-2">Organize seus conteúdos</h3>
+              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
                 Crie suas próprias listas de reprodução e salve tudo aquilo que você pretende assistir mais tarde.
               </p>
             </div>
           </div>
 
-          {/* Benefit 4 */}
-          <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/80 hover:border-cine-accent/40 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-accent-light/25 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-cine-accent/15 border border-cine-accent/25 flex items-center justify-center text-cine-accent mb-5 group-hover:scale-110 transition-transform">
                 <Compass className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Navegação simples e intuitiva
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-white mb-2">Navegação simples e intuitiva</h3>
+              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
                 Desfrute de uma interface fluida no estilo dos principais serviços de streaming do mercado.
               </p>
             </div>
@@ -217,7 +206,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-900/80">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-cine-border/20">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Como Funciona
@@ -229,8 +218,8 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Step 1 */}
-          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
-            <span className="text-4xl font-black text-cine-accent/30 mb-3 block">01</span>
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-recomenda/40 mb-3 block">01</span>
             <h3 className="text-lg font-bold text-white mb-2">Organização em Catálogo</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
               O CineReact identifica e categoriza vídeos públicos de reação do YouTube, agrupando-os por obras, temporadas e episódios.
@@ -238,8 +227,8 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Step 2 */}
-          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
-            <span className="text-4xl font-black text-cine-accent/30 mb-3 block">02</span>
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-lilac/40 mb-3 block">02</span>
             <h3 className="text-lg font-bold text-white mb-2">Player Oficial do YouTube</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Os vídeos são exibidos por meio do player incorporado oficial. 100% das visualizações e métricas vão para o canal do YouTube do criador.
@@ -247,8 +236,8 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           </div>
 
           {/* Step 3 */}
-          <div className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/60 relative">
-            <span className="text-4xl font-black text-cine-accent/30 mb-3 block">03</span>
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-accent-light/45 mb-3 block">03</span>
             <h3 className="text-lg font-bold text-white mb-2">Comunidade e Interação</h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Acompanhe novidades, descubra novos canais e interaja com outros fãs apaixonados por reagir aos melhores momentos do entretenimento.
@@ -259,8 +248,8 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
       {/* SECONDARY CTA BANNER */}
       <section className="relative z-10 cine-container w-full py-12 my-8">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border border-cine-accent/30 text-center relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="p-8 sm:p-12 rounded-3xl cine-cozy-panel border-cine-border/30 text-center relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cine-accent-light/10 rounded-full blur-3xl pointer-events-none" />
           
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight relative z-10">
             Pronto para encontrar suas reações favoritas?
@@ -286,7 +275,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 border-t border-neutral-900 bg-neutral-950 py-12 mt-12 text-zinc-400">
+      <footer className="relative z-10 border-t border-cine-border/25 bg-cine-surface/40 py-12 mt-12 text-cine-muted">
         <div className="cine-container w-full space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}

@@ -208,8 +208,8 @@ export default function Header({
                   onClick={() => setCurrentTab('inicio')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'inicio' 
-                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
+                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
+                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
                   }`}
                 >
                   Início
@@ -219,8 +219,8 @@ export default function Header({
                   onClick={() => setCurrentTab('canais')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'canais' 
-                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
+                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
+                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
                   }`}
                 >
                   Canais Seguidos
@@ -230,8 +230,8 @@ export default function Header({
                   onClick={() => setCurrentTab('minha-lista')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'minha-lista' 
-                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
+                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
+                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
                   }`}
                 >
                   Minha Lista
