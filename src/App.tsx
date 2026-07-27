@@ -964,7 +964,7 @@ export default function App() {
 
                   {recomendadosReacts.length > 0 && (
                     <RowMovies 
-                      title="CineReact Recomenda" 
+                      title="CineReact Recomendado" 
                       reacts={recomendadosReacts} 
                       obras={obras}
                       progressMap={progressMap}
