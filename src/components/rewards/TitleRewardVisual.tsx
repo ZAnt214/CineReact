@@ -19,7 +19,7 @@ const RARITY_TEXT: Record<string, string> = {
   raro: 'text-violet-200',
   épico: 'text-fuchsia-200',
   lendário: 'text-cine-cream',
-  mítico: 'text-cyan-100',
+  mítico: 'text-cine-accent-light',
   exclusivo: 'text-rose-100',
 };
 

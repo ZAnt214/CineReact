@@ -106,7 +106,7 @@ function CreatorNavRow({
       <div className="relative shrink-0">
         <CreatorAvatar src={creator.poster} />
         {creator.isVerified && (
-          <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3 h-3 text-cyan-400 bg-neutral-950 rounded-full" />
+          <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3 h-3 text-cine-accent bg-neutral-950 rounded-full" />
         )}
       </div>
 

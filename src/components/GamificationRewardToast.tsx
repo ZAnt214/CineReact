@@ -68,7 +68,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
               {reward!.unlockedItems?.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 p-1.5 rounded-lg bg-cyan-950/30 border border-cyan-500/15"
+                  className="flex items-center gap-2 p-1.5 rounded-lg bg-cine-accent/10 border border-cine-accent/20"
                 >
                   <RewardPreviewThumb item={item} size="sm" />
                   <div className="min-w-0 flex-1">

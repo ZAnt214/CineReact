@@ -34,8 +34,8 @@ const PLATFORM_STYLES: Record<
   x: {
     Icon: XBrandIcon,
     label: 'X',
-    accent: 'from-cyan-300 via-sky-300 to-cyan-400',
-    iconClass: 'text-cyan-200',
+    accent: 'from-cine-accent-light via-cine-accent to-cine-accent-dark',
+    iconClass: 'text-cine-accent-light',
   },
   twitch: {
     Icon: Twitch,
@@ -108,7 +108,7 @@ export default function ProfileSocialLinks({
         <p className={`profile-social-heading ${cfg.heading} leading-tight`}>
           Onde me encontrar
         </p>
-        <p className="mt-0.5 text-[10px] text-cyan-200/45 font-medium tracking-wide">
+        <p className="mt-0.5 text-[10px] text-cine-accent/45 font-medium tracking-wide">
           Minhas redes oficiais
         </p>
       </div>
@@ -127,7 +127,7 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-fuchsia-500/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cyan-400/25 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(34,211,238,0.08)] ${cfg.strip}`}
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-cine-accent/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(255,200,0,0.1)] ${cfg.strip}`}
             >
               <span
                 className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${style.accent} opacity-80`}
@@ -139,7 +139,7 @@ export default function ProfileSocialLinks({
               </span>
 
               <span
-                className={`shrink-0 font-semibold uppercase tracking-[0.12em] text-cyan-200/55 ${cfg.platform}`}
+                className={`shrink-0 font-semibold uppercase tracking-[0.12em] text-cine-accent/55 ${cfg.platform}`}
               >
                 {style.label}
               </span>
@@ -149,7 +149,7 @@ export default function ProfileSocialLinks({
               </span>
 
               <ArrowUpRight
-                className={`shrink-0 text-cyan-300/35 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-200/80 ${cfg.arrow}`}
+                className={`shrink-0 text-cine-accent/35 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cine-accent-light/80 ${cfg.arrow}`}
               />
             </a>
           );
