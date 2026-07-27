@@ -187,7 +187,7 @@ export default function RowMovies({
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
-                    ? 'border border-cine-recomenda/60 shadow-[0_0_18px_rgba(255,237,0,0.22)] ring-1 ring-cine-recomenda/30' 
+                    ? 'border border-cine-recomenda/60 shadow-[0_0_18px_rgba(212,175,55,0.22)] ring-1 ring-cine-recomenda/30' 
                     : 'border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
                 }`}
               >
@@ -225,7 +225,7 @@ export default function RowMovies({
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
-                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_10px_rgba(255,237,0,0.75)]' : 'bg-cine-accent-light'}`} 
+                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_10px_rgba(212,175,55,0.75)]' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>
