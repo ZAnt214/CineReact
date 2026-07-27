@@ -25,7 +25,7 @@ export default function ProfileVerifiedSeal({
       title={description}
     >
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full border border-cine-accent/45 bg-cine-accent/10 text-cine-accent-light shadow-[0_0_20px_rgba(255,200,0,0.15)] ${
+        className={`inline-flex items-center gap-1.5 rounded-full border border-cine-accent/45 bg-cine-accent/10 text-cine-brand shadow-[0_0_20px_rgba(255,184,0,0.18)] ${
           isMd ? 'px-3 py-1.5' : 'px-2 py-1'
         }`}
       >

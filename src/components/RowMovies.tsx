@@ -228,7 +228,7 @@ export default function RowMovies({
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
-                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_14px_rgba(255,200,0,0.85)]' : 'bg-cine-accent-light'}`} 
+                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_14px_rgba(255,184,0,0.85)]' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>
@@ -256,7 +256,7 @@ export default function RowMovies({
                       className={`truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
                         isEditorial
                           ? `cine-recomenda-creator ${onChannelClick ? 'hover:underline cursor-pointer' : ''}`
-                          : `font-bold text-cine-accent font-sans ${onChannelClick ? 'hover:underline hover:text-cine-accent-light cursor-pointer' : ''}`
+                          : `font-bold text-cine-brand font-sans ${onChannelClick ? 'hover:underline hover:text-cine-accent-light cursor-pointer' : ''}`
                       }`}
                       title={`Ver canal ${react.canalNome}`}
                     >
