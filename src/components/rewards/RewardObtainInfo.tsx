@@ -107,7 +107,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
                 <span className="ml-2 text-rose-400 font-bold">· Edição limitada</span>
               )}
               {item.seasonalEvent && (
-                <span className="ml-2 text-purple-400">· Evento sazonal</span>
+                <span className="ml-2 text-cine-accent-light">· Evento sazonal</span>
               )}
             </p>
           )}

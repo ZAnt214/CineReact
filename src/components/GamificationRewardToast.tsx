@@ -29,7 +29,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
           className="fixed z-[200] left-3 right-3 bottom-3 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[min(100%,18rem)] pointer-events-none"
         >
           <div className="relative overflow-hidden rounded-xl border border-cine-accent/25 bg-neutral-950/95 backdrop-blur-xl shadow-lg shadow-black/40 p-3 sm:p-3.5 pointer-events-auto max-h-[min(70vh,20rem)] flex flex-col">
-            <div className="absolute inset-0 bg-gradient-to-br from-cine-accent-light/8 via-transparent to-purple-500/5 pointer-events-none" />
+            <motion.div className="absolute inset-0 bg-gradient-to-br from-cine-accent-light/8 via-transparent to-cine-accent/5 pointer-events-none" />
             <button
               type="button"
               onClick={onClose}
@@ -56,7 +56,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
                   </span>
                 )}
                 {reward!.spotlight > 0 && (
-                  <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-md bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold flex items-center gap-1">
                     <Sparkles className="w-2.5 h-2.5" />
                     +{reward!.spotlight}
                   </span>

@@ -15,7 +15,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="creator-partner-banner fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent/35 bg-neutral-950/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(123,44,191,0.12)]"
+        className="creator-partner-banner fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent/35 bg-neutral-950/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(255, 106, 0,0.12)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
@@ -45,7 +45,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             onClick={onClick}
             className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.04] cursor-pointer"
           >
-            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(123,44,191,0.18)]">
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(255, 106, 0,0.18)]">
               <Youtube className="h-5 w-5 text-cine-accent-light transition-colors relative z-10" aria-hidden="true" />
               <BadgeCheck className="absolute -bottom-1 -right-1 h-4 w-4 text-cine-accent bg-neutral-950 rounded-full border border-cine-accent/40" />
             </span>
