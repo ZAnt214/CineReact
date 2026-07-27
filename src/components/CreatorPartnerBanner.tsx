@@ -45,7 +45,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             onClick={onClick}
             className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.04] cursor-pointer"
           >
-            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(201, 162, 39,0.18)]">
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(56, 189, 248,0.18)]">
               <Youtube className="h-5 w-5 text-cine-accent-light transition-colors relative z-10" aria-hidden="true" />
               <BadgeCheck className="absolute -bottom-1 -right-1 h-4 w-4 text-cine-accent bg-neutral-950 rounded-full border border-cine-accent/40" />
             </span>
