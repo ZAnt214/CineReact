@@ -32,10 +32,10 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
     <div className="min-h-screen bg-cine-bg text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
       {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent-dark/35 via-cine-accent/12 to-transparent rounded-full blur-3xl opacity-80" />
-        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-accent-dark/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/15 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#5c3018_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent/15 via-cine-accent/5 to-transparent rounded-full blur-3xl opacity-70" />
+        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-mint/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(#3f3f46_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
       </div>
 
       {/* HEADER / BRAND BAR */}
