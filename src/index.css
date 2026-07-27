@@ -5,23 +5,28 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Plus Jakarta Sans", "Sora", ui-sans-serif, system-ui, sans-serif;
-  /* Base cinza neutro + acentos ciano nos destaques */
+  /* Base cinza neutro + candy azul vívido nos Recomendados */
   --color-cine-bg: #111113;
   --color-cine-surface: #18181b;
   --color-cine-elevated: #27272a;
   --color-cine-border: #3f3f46;
+  --color-cine-card-deep: #141416;
+  --color-cine-thumb: #111113;
   --color-cine-cream: #fafafa;
   --color-cine-muted: #a1a1aa;
-  --color-cine-accent: #38bdf8;
-  --color-cine-accent-light: #7dd3fc;
-  --color-cine-accent-dark: #0ea5e9;
-  --color-cine-brand: #38bdf8;
-  --color-cine-recomenda: #22d3ee;
-  --color-cine-recomenda-muted: #0891b2;
+  --color-cine-accent: #00d4ff;
+  --color-cine-accent-light: #66ffff;
+  --color-cine-accent-dark: #0099ff;
+  --color-cine-brand: #00d4ff;
+  --color-cine-recomenda: #00e5ff;
+  --color-cine-recomenda-muted: #00a8e8;
+  --color-cine-candy: #00e5ff;
+  --color-cine-candy-light: #7fffff;
+  --color-cine-candy-dark: #0088ff;
   --color-cine-lilac: #d4d4d8;
   --color-cine-lilac-muted: #71717a;
-  --color-cine-mint: #38bdf8;
-  --color-cine-mint-muted: #0ea5e9;
+  --color-cine-mint: #00d4ff;
+  --color-cine-mint-muted: #0099ff;
 }
 
 .font-display {
@@ -133,7 +138,7 @@
   font-size: 0.8125rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  color: #7dd3fc;
+  color: #7fffff;
   max-width: 42rem;
 }
 
@@ -162,21 +167,21 @@
   color: #ffffff;
   background: linear-gradient(
     180deg,
-    #bae6fd 0%,
-    #7dd3fc 28%,
-    #38bdf8 62%,
-    #0ea5e9 100%
+    #7fffff 0%,
+    #00e5ff 30%,
+    #00c8ff 65%,
+    #0099ff 100%
   );
-  border: 1px solid rgba(224, 242, 254, 0.95);
-  border-bottom-color: rgba(2, 132, 199, 0.85);
+  border: 1px solid rgba(179, 255, 255, 0.95);
+  border-bottom-color: rgba(0, 136, 255, 0.9);
   border-radius: 0.45rem;
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(12, 74, 110, 0.28);
+  text-shadow: 0 1px 0 rgba(0, 60, 120, 0.35);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 -1px 0 rgba(14, 165, 233, 0.35) inset,
-    0 4px 14px rgba(56, 189, 248, 0.42),
-    0 0 18px rgba(125, 211, 252, 0.28);
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 -1px 0 rgba(0, 136, 255, 0.45) inset,
+    0 4px 16px rgba(0, 229, 255, 0.55),
+    0 0 22px rgba(0, 212, 255, 0.45);
 }
 
 .cine-recomenda-tag::before {
@@ -219,17 +224,16 @@
 .cine-recomenda-card {
   position: relative;
   background: linear-gradient(
-    165deg,
-    rgba(56, 189, 248, 0.09) 0%,
-    rgba(28, 28, 31, 0.98) 24%,
-    #141416 100%
+    180deg,
+    var(--color-cine-surface) 0%,
+    var(--color-cine-card-deep) 100%
   );
-  border: 1px solid rgba(125, 211, 252, 0.38);
+  border: 1.5px solid rgba(0, 229, 255, 0.62);
   box-shadow:
-    0 0 0 1px rgba(186, 230, 253, 0.07) inset,
+    0 0 0 1px rgba(127, 255, 255, 0.12) inset,
     0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 24px rgba(56, 189, 248, 0.14),
-    0 0 48px rgba(34, 211, 238, 0.07);
+    0 0 28px rgba(0, 229, 255, 0.28),
+    0 0 56px rgba(0, 200, 255, 0.14);
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
@@ -242,11 +246,13 @@
   height: 3px;
   background: linear-gradient(
     90deg,
-    #0ea5e9 0%,
-    #38bdf8 25%,
-    #bae6fd 50%,
-    #38bdf8 75%,
-    #0ea5e9 100%
+    #0099ff 0%,
+    #00c8ff 20%,
+    #00e5ff 40%,
+    #7fffff 50%,
+    #00e5ff 60%,
+    #00c8ff 80%,
+    #0099ff 100%
   );
   background-size: 200% 100%;
   animation: cine-recomenda-shine 5s ease-in-out infinite;
@@ -260,19 +266,19 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: radial-gradient(ellipse 90% 60% at 50% -20%, rgba(125, 211, 252, 0.14) 0%, transparent 62%);
+  background: radial-gradient(ellipse 90% 60% at 50% -20%, rgba(0, 229, 255, 0.28) 0%, transparent 62%);
   pointer-events: none;
   z-index: 0;
   animation: cine-recomenda-glow-pulse 4s ease-in-out infinite;
 }
 
 .cine-recomenda-card:hover {
-  border-color: rgba(186, 230, 253, 0.55);
+  border-color: rgba(127, 255, 255, 0.85);
   box-shadow:
-    0 0 0 1px rgba(125, 211, 252, 0.16) inset,
+    0 0 0 1px rgba(0, 229, 255, 0.22) inset,
     0 18px 44px rgba(0, 0, 0, 0.52),
-    0 0 36px rgba(56, 189, 248, 0.26),
-    0 0 64px rgba(34, 211, 238, 0.14);
+    0 0 44px rgba(0, 229, 255, 0.42),
+    0 0 72px rgba(0, 200, 255, 0.22);
 }
 
 .cine-recomenda-thumb {
@@ -281,8 +287,8 @@
 }
 
 .cine-recomenda-progress {
-  background: linear-gradient(90deg, #0ea5e9, #38bdf8, #7dd3fc);
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.85);
+  background: linear-gradient(90deg, #0099ff, #00e5ff, #7fffff);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.95);
 }
 
 .cine-recomenda-title {
@@ -290,11 +296,11 @@
 }
 
 .group\/card:hover .cine-recomenda-title {
-  color: #bae6fd;
+  color: #7fffff;
 }
 
 .cine-recomenda-footer {
-  border-top: 1px solid rgba(125, 211, 252, 0.22);
+  border-top: 1px solid rgba(0, 229, 255, 0.28);
 }
 
 .cine-recomenda-thumb::after {
@@ -303,8 +309,8 @@
   inset: 0;
   z-index: 5;
   background:
-    radial-gradient(ellipse 72% 58% at 0% 0%, rgba(186, 230, 253, 0.2) 0%, transparent 56%),
-    radial-gradient(ellipse 48% 42% at 100% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 52%),
+    radial-gradient(ellipse 72% 58% at 0% 0%, rgba(0, 229, 255, 0.32) 0%, transparent 56%),
+    radial-gradient(ellipse 48% 42% at 100% 0%, rgba(0, 200, 255, 0.2) 0%, transparent 52%),
     linear-gradient(
       180deg,
       transparent 45%,
@@ -319,26 +325,26 @@
   z-index: 1;
   background: linear-gradient(
     180deg,
-    rgba(22, 28, 38, 0.98) 0%,
-    rgba(16, 18, 24, 1) 100%
+    var(--color-cine-surface) 0%,
+    var(--color-cine-card-deep) 100%
   );
-  border-top: 1px solid rgba(125, 211, 252, 0.22);
+  border-top: 1px solid rgba(0, 229, 255, 0.28);
 }
 
 .cine-recomenda-play-btn {
-  background: linear-gradient(180deg, #bae6fd 0%, #38bdf8 55%, #0ea5e9 100%);
-  border: 1px solid rgba(224, 242, 254, 0.85);
+  background: linear-gradient(180deg, #7fffff 0%, #00e5ff 50%, #0099ff 100%);
+  border: 1px solid rgba(179, 255, 255, 0.9);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 6px 20px rgba(56, 189, 248, 0.45),
-    0 0 24px rgba(125, 211, 252, 0.25);
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 6px 22px rgba(0, 229, 255, 0.55),
+    0 0 28px rgba(0, 212, 255, 0.4);
 }
 
 .cine-recomenda-duration {
-  background: rgba(17, 17, 19, 0.88);
-  color: #7dd3fc;
-  border: 1px solid rgba(125, 211, 252, 0.45);
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.18);
+  background: rgba(17, 17, 19, 0.9);
+  color: #66ffff;
+  border: 1px solid rgba(0, 229, 255, 0.55);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -351,12 +357,12 @@
 .cine-recomenda-creator {
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 600;
-  color: #7dd3fc;
+  color: #7fffff;
   letter-spacing: 0.01em;
 }
 
 .cine-recomenda-creator:hover {
-  color: #bae6fd;
+  color: #7fffff;
 }
 
 /* Custom scrollbar for a premium look, universally styled to prevent default system glitches */
@@ -451,7 +457,7 @@ html, body, #root {
   background:
     radial-gradient(ellipse 80% 50% at 50% -8%, rgba(255, 255, 255, 0.04) 0%, transparent 58%),
     radial-gradient(ellipse 50% 40% at 50% 108%, rgba(0, 0, 0, 0.45) 0%, transparent 60%),
-    linear-gradient(180deg, #111113 0%, #141416 48%, #111113 100%);
+    linear-gradient(180deg, var(--color-cine-bg) 0%, var(--color-cine-bg) 48%, var(--color-cine-bg) 100%);
 }
 
 .cine-site-bg::after {
@@ -524,13 +530,33 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   -webkit-user-drag: none;
 }
 
-/* Standard catalog cards — polished but distinct from CineReact Recomenda */
+/* Base compartilhada — fundo unificado em todos os cards de vídeo */
+.catalog-card-thumb {
+  background-color: var(--color-cine-thumb);
+}
+
+.catalog-card-progress-track {
+  background: color-mix(in srgb, var(--color-cine-thumb) 88%, black 12%);
+}
+
+.catalog-card-duration {
+  background: color-mix(in srgb, var(--color-cine-thumb) 92%, transparent);
+  color: var(--color-cine-cream);
+  border: 1px solid color-mix(in srgb, var(--color-cine-border) 70%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Standard catalog cards — polidos, tom cinza idêntico ao fundo do site */
 .catalog-card-standard {
   position: relative;
-  background: linear-gradient(180deg, #1c1c1f 0%, #141416 100%);
-  border: 1px solid rgba(63, 63, 70, 0.85);
+  background: linear-gradient(
+    180deg,
+    var(--color-cine-surface) 0%,
+    var(--color-cine-card-deep) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-cine-border) 72%, transparent);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.025) inset,
     0 10px 28px rgba(0, 0, 0, 0.42);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -542,35 +568,40 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
   z-index: 15;
   pointer-events: none;
 }
 
 .catalog-card-standard:hover {
-  border-color: rgba(113, 113, 122, 0.55);
+  border-color: color-mix(in srgb, var(--color-cine-border) 100%, white 18%);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
     0 14px 36px rgba(0, 0, 0, 0.48),
-    0 0 0 transparent;
+    0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .catalog-card-standard-thumb::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 5;
   background: linear-gradient(
     180deg,
     transparent 50%,
-    rgba(24, 24, 27, 0.3) 78%,
-    rgba(17, 17, 19, 0.84) 100%
+    color-mix(in srgb, var(--color-cine-surface) 35%, transparent) 78%,
+    color-mix(in srgb, var(--color-cine-card-deep) 95%, transparent) 100%
   );
   pointer-events: none;
 }
 
 .catalog-card-standard-body {
-  background: linear-gradient(180deg, rgba(28, 28, 31, 0.98) 0%, rgba(20, 20, 22, 1) 100%);
-  border-top: 1px solid rgba(63, 63, 70, 0.5);
+  background: linear-gradient(
+    180deg,
+    var(--color-cine-surface) 0%,
+    var(--color-cine-card-deep) 100%
+  );
+  border-top: 1px solid color-mix(in srgb, var(--color-cine-border) 55%, transparent);
 }
 
 /* Painéis neutros */

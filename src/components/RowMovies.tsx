@@ -191,7 +191,7 @@ export default function RowMovies({
                 className={cardClass}
               >
                 {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
-                <div className={`relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0 ${isEditorial ? 'cine-recomenda-thumb' : 'catalog-card-standard-thumb'}`}>
+                <div className={`relative aspect-video w-full overflow-hidden shrink-0 catalog-card-thumb ${isEditorial ? 'cine-recomenda-thumb' : 'catalog-card-standard-thumb'}`}>
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
@@ -211,9 +211,9 @@ export default function RowMovies({
                   <span className={`absolute bottom-2.5 right-2.5 z-20 h-6.5 px-2.5 inline-flex items-center gap-1 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold rounded-lg leading-none ${
                     isEditorial
                       ? 'cine-recomenda-duration'
-                      : 'bg-black/85 text-zinc-200 border border-zinc-700/60 shadow-md'
+                      : 'catalog-card-duration shadow-md'
                   }`}>
-                    <Clock className={`w-3 h-3 shrink-0 ${isEditorial ? 'text-sky-300' : 'text-cine-accent-light'}`} />
+                    <Clock className={`w-3 h-3 shrink-0 ${isEditorial ? 'text-cyan-200' : 'text-cine-accent-light'}`} />
                     <span>{react.duracao}</span>
                   </span>
 
@@ -226,7 +226,7 @@ export default function RowMovies({
 
                   {/* Progress Bar */}
                   {progressMap && progressMap[react.id] !== undefined && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
+                    <div className="absolute bottom-0 left-0 right-0 h-[4px] catalog-card-progress-track">
                       <div 
                         className={`h-full rounded-r-xs ${isEditorial ? 'cine-recomenda-progress' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
