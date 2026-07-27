@@ -245,7 +245,7 @@ export default function RowMovies({
                     {react.titulo}
                   </h3>
                   
-                  <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'border-t border-cine-accent/20' : 'border-t border-neutral-800/60'}`}>
+                  <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'border-t border-cine-recomenda/20' : 'border-t border-cine-border/25'}`}>
                     <span 
                       onClick={(e) => {
                         if (onChannelClick) {
@@ -256,7 +256,7 @@ export default function RowMovies({
                       className={`truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
                         isEditorial
                           ? `cine-recomenda-creator ${onChannelClick ? 'hover:underline cursor-pointer' : ''}`
-                          : `font-bold text-cine-accent font-sans ${onChannelClick ? 'hover:underline hover:text-cine-accent-light cursor-pointer' : ''}`
+                          : `font-semibold text-cine-lilac font-sans ${onChannelClick ? 'hover:underline hover:text-cine-accent-light cursor-pointer' : ''}`
                       }`}
                       title={`Ver canal ${react.canalNome}`}
                     >
