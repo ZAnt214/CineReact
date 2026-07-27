@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Play, Clock, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Clock } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
 
@@ -147,7 +147,7 @@ export default function RowMovies({
           </h2>
         </div>
         {isEditorial && (
-          <p className="text-xs sm:text-sm font-extrabold font-display leading-snug text-cine-cream">
+          <p className="cine-recomenda-desc">
             Estes reacts foram escolhidos a dedo pela equipe CineReact.
           </p>
         )}
@@ -187,7 +187,7 @@ export default function RowMovies({
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
                   isEditorial 
-                    ? 'border-2 border-cine-accent/80 shadow-[0_0_20px_rgba(255,255,255,0.18)] ring-1 ring-cine-accent/30' 
+                    ? 'border border-cine-recomenda/55 shadow-[0_0_16px_rgba(250,204,21,0.12)] ring-1 ring-cine-recomenda/20' 
                     : 'border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
                 }`}
               >
@@ -202,9 +202,9 @@ export default function RowMovies({
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-accent text-black' : 'bg-cine-accent text-white'
+                      isEditorial ? 'bg-cine-recomenda text-neutral-950' : 'bg-cine-accent text-white'
                     }`}>
-                      <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-black" />
+                      <Play className={`w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 ${isEditorial ? 'text-neutral-950' : 'text-white'}`} />
                     </div>
                   </div>
 
@@ -216,9 +216,8 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-cine-accent text-white font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-md border border-cine-accent/80 font-display tracking-wider leading-none">
-                      <Sparkles className="w-3.5 h-3.5 fill-neutral-950 text-neutral-950 shrink-0" />
-                      <span>Recomenda</span>
+                    <span className="cine-recomenda-tag absolute top-2.5 left-2.5 z-10">
+                      Recomenda
                     </span>
                   )}
 
@@ -226,7 +225,7 @@ export default function RowMovies({
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
-                        className="h-full bg-cine-accent-light rounded-r-xs shadow-[0_0_10px_rgba(251,191,36,0.9)]" 
+                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>

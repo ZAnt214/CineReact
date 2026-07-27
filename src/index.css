@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&family=Sora:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&family=Sora:wght@600;700;800&family=Source+Serif+4:ital,wght@0,400;0,500;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -20,6 +20,8 @@
   --color-cine-lilac: #818cf8;
   --color-cine-lilac-muted: #6366f1;
   --color-cine-brand: #3b82f6;
+  --color-cine-recomenda: #facc15;
+  --color-cine-recomenda-muted: #eab308;
 }
 
 .font-display {
@@ -115,6 +117,50 @@
 
 .font-bungee {
   font-family: 'Bungee', cursive, sans-serif;
+}
+
+/* CineReact Recomenda — editorial row */
+.cine-recomenda-desc {
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  letter-spacing: 0.012em;
+  color: #facc15;
+  max-width: 42rem;
+}
+
+@media (min-width: 640px) {
+  .cine-recomenda-desc {
+    font-size: 0.9375rem;
+  }
+}
+
+.cine-recomenda-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.5rem;
+  padding: 0 0.55rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #facc15;
+  background: rgba(9, 9, 11, 0.88);
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  border-radius: 0.25rem;
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 640px) {
+  .cine-recomenda-tag {
+    height: 1.625rem;
+    padding: 0 0.625rem;
+    font-size: 0.625rem;
+  }
 }
 
 /* Custom scrollbar for a premium look, universally styled to prevent default system glitches */
