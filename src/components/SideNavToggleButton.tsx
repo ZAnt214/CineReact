@@ -1,7 +1,6 @@
 import React from 'react';
 import { Menu } from 'lucide-react';
 import { useSideNavStore, sideNavStore } from '../hooks/useSideNavStore.ts';
-import { useIsMobile } from '../hooks/useIsMobile.ts';
 
 interface SideNavToggleButtonProps {
   visible: boolean;
@@ -9,7 +8,6 @@ interface SideNavToggleButtonProps {
 
 export default function SideNavToggleButton({ visible }: SideNavToggleButtonProps) {
   const { isSideNavOpen } = useSideNavStore();
-  const isMobile = useIsMobile();
 
   if (!visible) return null;
 
@@ -18,22 +16,15 @@ export default function SideNavToggleButton({ visible }: SideNavToggleButtonProp
   return (
     <button
       type="button"
-      onPointerDown={
-        isMobile
-          ? (e) => {
-              e.preventDefault();
-              toggle();
-            }
-          : undefined
-      }
-      onClick={isMobile ? undefined : toggle}
-      className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+      onClick={toggle}
+      className={`relative z-[60] p-2 rounded-xl border transition-colors cursor-pointer touch-manipulation ${
         isSideNavOpen
           ? 'bg-cine-accent/10 border-cine-accent/30 text-cine-accent-light'
           : 'bg-neutral-900/60 border-neutral-800 text-zinc-400 hover:text-white hover:border-zinc-700'
       }`}
       aria-label={isSideNavOpen ? 'Fechar menu' : 'Abrir menu'}
       aria-expanded={isSideNavOpen}
+      aria-controls="side-nav-panel"
     >
       <Menu className="w-5 h-5" />
     </button>

@@ -182,7 +182,7 @@ export default function RowMovies({
             const associatedObra = obras.find(o => o.id === react.obraId);
             const cardClass = isEditorial
               ? 'cine-recomenda-card catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all'
-              : `catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10`;
+              : 'catalog-card-standard catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all';
 
             return (
               <div
@@ -191,7 +191,7 @@ export default function RowMovies({
                 className={cardClass}
               >
                 {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
-                <div className={`relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0 ${isEditorial ? 'cine-recomenda-thumb' : ''}`}>
+                <div className={`relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0 ${isEditorial ? 'cine-recomenda-thumb' : 'catalog-card-standard-thumb'}`}>
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
@@ -236,7 +236,7 @@ export default function RowMovies({
                 </div>
 
                 {/* CARD BODY */}
-                <div className={`p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 ${isEditorial ? 'cine-recomenda-body' : 'bg-gradient-to-b from-neutral-900/50 to-neutral-900/80'}`}>
+                <div className={`p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 ${isEditorial ? 'cine-recomenda-body' : 'catalog-card-standard-body'}`}>
                   <h3 className={`text-sm sm:text-base md:text-lg font-bold line-clamp-2 leading-snug transition-colors min-h-[2.5rem] sm:min-h-[2.75rem] ${
                     isEditorial
                       ? 'text-zinc-100 group-hover/card:text-cine-accent'

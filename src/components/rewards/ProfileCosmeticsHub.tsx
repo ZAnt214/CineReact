@@ -230,7 +230,7 @@ export default function ProfileCosmeticsHub({
               key={item.id}
               className={`cosmetics-hub-card group relative flex flex-col rounded-2xl border overflow-hidden transition-colors ${
                 equipped ? 'ring-2 ring-cine-accent/50 border-cine-accent/40' : style.border
-              } ${!item.owned ? 'opacity-75' : 'cursor-pointer hover:border-zinc-700'}`}
+              } ${item.bundleId === CREATOR_PROGRAM_ART_BUNDLE_ID ? 'cosmetics-hub-card--creator-program' : ''} ${!item.owned ? 'opacity-75' : 'cursor-pointer hover:border-zinc-700'}`}
               onClick={() => item.owned && handleItemClick(item)}
               onKeyDown={(e) => e.key === 'Enter' && item.owned && handleItemClick(item)}
               role={item.owned ? 'button' : undefined}

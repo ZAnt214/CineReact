@@ -115,8 +115,8 @@ const AVATAR_VISUALS: Record<
     Icon: Star,
   },
   atelier: {
-    gradient: 'from-fuchsia-500 via-cyan-400 to-cine-accent-light',
-    accent: 'text-white',
+    gradient: 'from-cine-accent-dark via-cine-accent to-cine-accent-light',
+    accent: 'text-cine-cream',
     Icon: Palette,
   },
 };

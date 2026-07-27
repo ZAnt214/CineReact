@@ -358,6 +358,55 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   -webkit-user-drag: none;
 }
 
+/* Standard catalog cards — polished but distinct from CineReact Recomenda */
+.catalog-card-standard {
+  position: relative;
+  background: linear-gradient(180deg, #161618 0%, #0e0e10 100%);
+  border: 1px solid rgba(63, 63, 70, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 10px 28px rgba(0, 0, 0, 0.42);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.catalog-card-standard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  z-index: 15;
+  pointer-events: none;
+}
+
+.catalog-card-standard:hover {
+  border-color: rgba(255, 200, 0, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.06) inset,
+    0 14px 36px rgba(0, 0, 0, 0.48),
+    0 0 22px rgba(255, 200, 0, 0.08);
+}
+
+.catalog-card-standard-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 50%,
+    rgba(9, 9, 11, 0.25) 78%,
+    rgba(9, 9, 11, 0.75) 100%
+  );
+  pointer-events: none;
+}
+
+.catalog-card-standard-body {
+  background: linear-gradient(180deg, rgba(22, 22, 24, 0.98) 0%, rgba(14, 14, 16, 1) 100%);
+  border-top: 1px solid rgba(63, 63, 70, 0.45);
+}
+
 /* Mobile: native momentum scroll + snap like streaming apps */
 @media (pointer: coarse) {
   .catalog-carousel {
@@ -545,6 +594,48 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 .cosmetics-hub-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 220px;
+}
+
+.cosmetics-hub-card--creator-program {
+  border-color: rgba(255, 200, 0, 0.28) !important;
+  background: linear-gradient(180deg, rgba(255, 200, 0, 0.06) 0%, rgba(9, 9, 11, 0.95) 42%);
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(255, 200, 0, 0.06);
+}
+
+.cosmetics-hub-card--creator-program:hover {
+  border-color: rgba(255, 200, 0, 0.45) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
+    0 12px 30px rgba(0, 0, 0, 0.4),
+    0 0 28px rgba(255, 200, 0, 0.12);
+}
+
+.verified-creator-seal {
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
+    0 0 24px rgba(255, 200, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.verified-creator-seal-icon {
+  box-shadow: 0 0 12px rgba(255, 200, 0, 0.35);
+}
+
+.creator-tag-visual {
+  backdrop-filter: blur(8px);
+}
+
+.creator-partner-banner {
+  isolation: isolate;
+}
+
+.creator-partner-banner-glow {
+  background:
+    radial-gradient(ellipse 80% 120% at 0% 50%, rgba(255, 200, 0, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 100% at 100% 0%, rgba(255, 225, 74, 0.1) 0%, transparent 50%);
 }
 
 .profile-social-heading {
