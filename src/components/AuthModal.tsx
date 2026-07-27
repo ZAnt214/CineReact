@@ -384,7 +384,7 @@ export default function AuthModal({
                       onClick={() => switchMode('login')}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         mode === 'login'
-                          ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
+                          ? 'bg-cine-accent text-white shadow-md shadow-cine-accent/20'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -396,7 +396,7 @@ export default function AuthModal({
                       onClick={() => switchMode('register')}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         mode === 'register'
-                          ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
+                          ? 'bg-cine-accent text-white shadow-md shadow-cine-accent/20'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -586,7 +586,7 @@ export default function AuthModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-white hover:bg-cine-accent-dark disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
+                      className="w-full bg-white hover:bg-cine-accent-dark hover:text-white disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
                     >
                       {loading ? (
                         <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

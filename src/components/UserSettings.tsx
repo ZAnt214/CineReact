@@ -466,7 +466,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-white hover:bg-cine-accent-dark disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="w-full bg-white hover:bg-cine-accent-dark hover:text-white disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

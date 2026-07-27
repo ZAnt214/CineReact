@@ -15,7 +15,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="creator-partner-banner fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent/35 bg-neutral-950/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(255,200,0,0.12)]"
+        className="creator-partner-banner fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent/35 bg-neutral-950/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(38,103,255,0.12)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
@@ -45,7 +45,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             onClick={onClick}
             className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.04] cursor-pointer"
           >
-            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(255,200,0,0.18)]">
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(38,103,255,0.18)]">
               <Youtube className="h-5 w-5 text-cine-accent-light transition-colors relative z-10" aria-hidden="true" />
               <BadgeCheck className="absolute -bottom-1 -right-1 h-4 w-4 text-cine-accent bg-neutral-950 rounded-full border border-cine-accent/40" />
             </span>
@@ -66,7 +66,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
               </p>
             </span>
 
-            <span className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-lg shadow-cine-accent/25 group-hover:scale-[1.03] shrink-0">
+            <span className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-extrabold text-xs transition-all shadow-lg shadow-cine-accent/25 group-hover:scale-[1.03] shrink-0">
               <span>Saiba Mais</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </span>
@@ -76,7 +76,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
             <button
               type="button"
               onClick={onClick}
-              className="sm:hidden px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 active:scale-95 cursor-pointer whitespace-nowrap"
+              className="sm:hidden px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 active:scale-95 cursor-pointer whitespace-nowrap"
             >
               Ver
             </button>

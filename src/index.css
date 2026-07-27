@@ -5,23 +5,23 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Plus Jakarta Sans", "Sora", ui-sans-serif, system-ui, sans-serif;
-  /* Radiant vivid gold interface */
-  --color-cine-bg: #09090b;
-  --color-cine-surface: #18181b;
-  --color-cine-elevated: #27272a;
-  --color-cine-border: #3f3f46;
-  --color-cine-cream: #fafafa;
-  --color-cine-muted: #a1a1aa;
-  --color-cine-accent: #ffc800;
-  --color-cine-accent-light: #ffe14a;
-  --color-cine-accent-dark: #e6a800;
-  --color-cine-mint: #ffc800;
-  --color-cine-mint-muted: #e6a800;
-  --color-cine-lilac: #ffb300;
-  --color-cine-lilac-muted: #cc8800;
-  --color-cine-brand: #ffc800;
-  --color-cine-recomenda: #ffc800;
-  --color-cine-recomenda-muted: #e6a800;
+  /* Coolors palette — add7f6 · 87bfff · 3f8efc · 2667ff · 3b28cc */
+  --color-cine-bg: #07080f;
+  --color-cine-surface: #0e1018;
+  --color-cine-elevated: #161a28;
+  --color-cine-border: #2a3148;
+  --color-cine-cream: #f0f6ff;
+  --color-cine-muted: #94a3b8;
+  --color-cine-accent: #2667ff;
+  --color-cine-accent-light: #add7f6;
+  --color-cine-accent-dark: #3b28cc;
+  --color-cine-mint: #3f8efc;
+  --color-cine-mint-muted: #2667ff;
+  --color-cine-lilac: #87bfff;
+  --color-cine-lilac-muted: #3b28cc;
+  --color-cine-brand: #2667ff;
+  --color-cine-recomenda: #3f8efc;
+  --color-cine-recomenda-muted: #2667ff;
 }
 
 .font-display {
@@ -154,12 +154,12 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #09090b;
+  color: #ffffff;
   background: var(--color-cine-accent);
-  border: 1px solid rgba(255, 225, 74, 0.65);
+  border: 1px solid rgba(173, 215, 246, 0.65);
   border-radius: 0.3rem;
   line-height: 1;
-  box-shadow: 0 2px 8px rgba(255, 200, 0, 0.35);
+  box-shadow: 0 2px 8px rgba(38, 103, 255, 0.35);
 }
 
 @media (min-width: 640px) {
@@ -173,11 +173,11 @@
 .cine-recomenda-card {
   position: relative;
   background: linear-gradient(180deg, #141414 0%, #0c0c0e 100%);
-  border: 1px solid rgba(255, 200, 0, 0.38);
+  border: 1px solid rgba(38, 103, 255, 0.38);
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.06) inset,
+    0 0 0 1px rgba(38, 103, 255, 0.06) inset,
     0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 24px rgba(255, 200, 0, 0.1);
+    0 0 24px rgba(38, 103, 255, 0.1);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
@@ -195,11 +195,11 @@
 }
 
 .cine-recomenda-card:hover {
-  border-color: rgba(255, 200, 0, 0.62);
+  border-color: rgba(38, 103, 255, 0.62);
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
+    0 0 0 1px rgba(38, 103, 255, 0.12) inset,
     0 16px 40px rgba(0, 0, 0, 0.5),
-    0 0 32px rgba(255, 200, 0, 0.18);
+    0 0 32px rgba(38, 103, 255, 0.18);
 }
 
 .cine-recomenda-thumb::after {
@@ -217,7 +217,7 @@
 
 .cine-recomenda-body {
   background: linear-gradient(180deg, rgba(20, 20, 22, 0.98) 0%, rgba(12, 12, 14, 1) 100%);
-  border-top: 1px solid rgba(255, 200, 0, 0.14);
+  border-top: 1px solid rgba(38, 103, 255, 0.14);
 }
 
 .cine-recomenda-creator {
@@ -238,7 +238,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #07080f;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -291,7 +291,7 @@ video,
 }
 
 html, body, #root {
-  background-color: #09090b;
+  background-color: #07080f;
   color: #fafafa;
   font-family: var(--font-sans);
   overflow-x: hidden !important;
@@ -382,11 +382,11 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .catalog-card-standard:hover {
-  border-color: rgba(255, 200, 0, 0.35);
+  border-color: rgba(38, 103, 255, 0.35);
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.06) inset,
+    0 0 0 1px rgba(38, 103, 255, 0.06) inset,
     0 14px 36px rgba(0, 0, 0, 0.48),
-    0 0 22px rgba(255, 200, 0, 0.08);
+    0 0 22px rgba(38, 103, 255, 0.08);
 }
 
 .catalog-card-standard-thumb::after {
@@ -583,7 +583,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-atelier-beam {
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(255, 200, 0, 0.32) 0%, rgba(255, 200, 0, 0.1) 48%, transparent 72%);
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(38, 103, 255, 0.32) 0%, rgba(63, 142, 252, 0.1) 48%, transparent 72%);
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
@@ -597,31 +597,31 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .cosmetics-hub-card--creator-program {
-  border-color: rgba(255, 200, 0, 0.28) !important;
-  background: linear-gradient(180deg, rgba(255, 200, 0, 0.06) 0%, rgba(9, 9, 11, 0.95) 42%);
+  border-color: rgba(38, 103, 255, 0.28) !important;
+  background: linear-gradient(180deg, rgba(38, 103, 255, 0.06) 0%, rgba(7, 8, 15, 0.95) 42%);
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.08) inset,
+    0 0 0 1px rgba(38, 103, 255, 0.08) inset,
     0 8px 24px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(255, 200, 0, 0.06);
+    0 0 20px rgba(38, 103, 255, 0.06);
 }
 
 .cosmetics-hub-card--creator-program:hover {
-  border-color: rgba(255, 200, 0, 0.45) !important;
+  border-color: rgba(38, 103, 255, 0.45) !important;
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
+    0 0 0 1px rgba(38, 103, 255, 0.12) inset,
     0 12px 30px rgba(0, 0, 0, 0.4),
-    0 0 28px rgba(255, 200, 0, 0.12);
+    0 0 28px rgba(38, 103, 255, 0.12);
 }
 
 .verified-creator-seal {
   box-shadow:
-    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
-    0 0 24px rgba(255, 200, 0, 0.2),
+    0 0 0 1px rgba(38, 103, 255, 0.12) inset,
+    0 0 24px rgba(38, 103, 255, 0.2),
     0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .verified-creator-seal-icon {
-  box-shadow: 0 0 12px rgba(255, 200, 0, 0.35);
+  box-shadow: 0 0 12px rgba(38, 103, 255, 0.35);
 }
 
 .creator-tag-visual {
@@ -634,8 +634,8 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 
 .creator-partner-banner-glow {
   background:
-    radial-gradient(ellipse 80% 120% at 0% 50%, rgba(255, 200, 0, 0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 100% at 100% 0%, rgba(255, 225, 74, 0.1) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 120% at 0% 50%, rgba(38, 103, 255, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 100% at 100% 0%, rgba(135, 191, 255, 0.1) 0%, transparent 50%);
 }
 
 .profile-social-heading {

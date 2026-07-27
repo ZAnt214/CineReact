@@ -741,7 +741,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === id
-                ? 'bg-cine-accent text-black shadow-lg shadow-cine-accent/20'
+                ? 'bg-cine-accent text-white shadow-lg shadow-cine-accent/20'
                 : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
             }`}
           >
@@ -957,7 +957,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleMigrateSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light disabled:opacity-50 text-black font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cine-accent/20"
+                  className="px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light disabled:opacity-50 text-white font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cine-accent/20"
                 >
                   {migratingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
                   Exportar Local para Supabase
@@ -1072,7 +1072,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       <button
                         onClick={() => handleApproveSolicitacao(notif)}
                         disabled={processingSolicitacao === notif.id}
-                        className="flex-1 px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-black text-xs font-bold disabled:opacity-50 cursor-pointer"
+                        className="flex-1 px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
                       >
                         {processingSolicitacao === notif.id ? 'Importando...' : 'Aprovar e Importar'}
                       </button>
@@ -1360,7 +1360,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-white hover:bg-cine-accent-dark text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-4 rounded bg-white hover:bg-cine-accent-dark text-white font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>
@@ -1411,7 +1411,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                         className={`flex-shrink-0 px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${
                           r.isRecomendado 
                             ? 'bg-cine-accent-dark/20 text-cine-accent-light border border-cine-accent/30 hover:bg-cine-accent-dark/40' 
-                            : 'bg-cine-accent text-black hover:bg-cine-accent-light'
+                            : 'bg-cine-accent text-white hover:bg-cine-accent-light'
                         }`}
                       >
                         {r.isRecomendado ? 'Remover Destaque' : 'Adicionar Destaque'}
@@ -1621,7 +1621,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </div>
                 <div className="md:col-span-2 flex gap-2">
                   <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
-                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-cine-accent text-black font-black disabled:opacity-50 cursor-pointer">
+                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-cine-accent text-white font-black disabled:opacity-50 cursor-pointer">
                     {savingObra ? 'Salvando...' : 'Salvar Alterações'}
                   </button>
                 </div>

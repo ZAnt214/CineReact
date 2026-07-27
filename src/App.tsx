@@ -803,7 +803,7 @@ export default function App() {
                                     className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-300"
                                   />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-cine-accent/90 shadow-cine-accent/30 text-black font-bold">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg bg-cine-accent/90 shadow-cine-accent/30 text-white font-bold">
                                       <Play className="w-6 h-6 fill-current ml-0.5" />
                                     </div>
                                   </div>
@@ -811,7 +811,7 @@ export default function App() {
                                     <Clock className="w-3 h-3 text-cine-accent-light" /> {react.duracao}
                                   </span>
                                   {associatedObra && (
-                                    <span className="absolute top-2 left-2 bg-cine-accent text-black font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
+                                    <span className="absolute top-2 left-2 bg-cine-accent text-white font-black text-[9px] uppercase px-2 py-0.5 rounded shadow tracking-wide">
                                       {associatedObra.titulo}
                                     </span>
                                   )}
@@ -854,7 +854,7 @@ export default function App() {
                               <div className="aspect-3/4 relative overflow-hidden bg-neutral-950">
                                 <OptimizedImage src={obra.poster} alt={obra.titulo} className="w-full h-full object-cover group-hover:scale-102 transition-all duration-350" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <div className="w-12 h-12 bg-cine-accent text-black rounded-full flex items-center justify-center shadow-lg font-bold">
+                                  <div className="w-12 h-12 bg-cine-accent text-white rounded-full flex items-center justify-center shadow-lg font-bold">
                                     <Play className="w-6 h-6 fill-black text-black ml-0.5" />
                                   </div>
                                 </div>
@@ -1546,7 +1546,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-cine-accent-dark text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-cine-accent-dark text-white font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>
