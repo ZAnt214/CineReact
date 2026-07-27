@@ -72,8 +72,8 @@ function PopcornIcon({ className }: { className?: string }) {
       <path d="M10 32h28l-3 10H13l-3-10z" fill="currentColor" opacity="0.85" />
       <path d="M14 32V18c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx="18" cy="14" r="3" fill="#fde68a" />
-      <circle cx="24" cy="10" r="3.5" fill="#e8f4fc" />
-      <circle cx="30" cy="14" r="3" fill="#e8f4fc" />
+      <circle cx="24" cy="10" r="3.5" fill="#fafafa" />
+      <circle cx="30" cy="14" r="3" fill="#fafafa" />
       <circle cx="21" cy="18" r="2.5" fill="#fef3c7" />
       <circle cx="27" cy="17" r="2.5" fill="#fde68a" />
     </svg>

@@ -116,7 +116,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black font-bold text-sm cursor-pointer disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-cine-accent text-white hover:bg-cine-accent-dark font-bold text-sm cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Salvando...' : saved ? 'Salvo!' : 'Salvar personalização'}

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
-  <rect width="200" height="200" rx="40" fill="#0a0e14"/>
-  <text x="100" y="86" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="600" font-size="30" fill="#e8f4fc" letter-spacing="-0.9">Cine</text>
-  <text x="100" y="122" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="700" font-size="30" fill="#22d3ee" letter-spacing="-1">React</text>
-  <text x="100" y="150" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="8" fill="#7a8fa6" letter-spacing="0.15">Sua plataforma de reacts</text>
+  <rect width="200" height="200" rx="40" fill="#09090b"/>
+  <text x="100" y="86" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="600" font-size="30" fill="#fafafa" letter-spacing="-0.9">Cine</text>
+  <text x="100" y="122" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="700" font-size="30" fill="#3b82f6" letter-spacing="-1">React</text>
+  <text x="100" y="150" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="8" fill="#a1a1aa" letter-spacing="0.15">Sua plataforma de reacts</text>
 </svg>

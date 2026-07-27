@@ -343,7 +343,7 @@ function RewardCard({
                 : item.owned
                 ? 'bg-cine-accent/15 text-cine-cream border border-cine-accent/30 hover:bg-cine-accent/25'
                 : item.cost > 0
-                ? 'bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black'
+                ? 'bg-cine-accent text-white hover:bg-cine-accent-dark'
                 : 'bg-neutral-900 text-zinc-500 border border-neutral-800'
             }`}
             disabled={!item.owned && item.cost === 0 && item.unlockMethod !== 'shop'}

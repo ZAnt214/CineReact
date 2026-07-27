@@ -686,7 +686,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`min-h-screen bg-[#0a0e14] text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden relative ${
+      className={`min-h-screen bg-cine-bg text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden relative ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -889,7 +889,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Conteúdo não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#22d3ee] text-white font-black rounded hover:brightness-105 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-cine-accent text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1146,7 +1146,7 @@ export default function App() {
                     return (
                       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Canal não encontrado</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#22d3ee] text-white font-black rounded hover:brightness-105 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-cine-accent text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </div>
@@ -1177,7 +1177,7 @@ export default function App() {
                 className="cine-container pt-24 pb-20 w-full min-h-screen w-full flex-1"
               >
                 <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
-                  <span className="w-2.5 h-6 bg-gradient-to-b from-cine-cream to-cine-accent rounded" />
+                  <span className="w-2.5 h-6 bg-cine-accent rounded" />
                   Canais Seguidos
                 </h2>
                 {canaisSeguidos.length === 0 ? (
@@ -1358,7 +1358,7 @@ export default function App() {
                     return (
                       <motion.div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <div className="text-white font-bold text-lg">Categoria do canal não encontrada</div>
-                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-[#22d3ee] text-white font-black rounded hover:brightness-105 transition-all text-xs">
+                        <button onClick={() => setCurrentTab('inicio')} className="mt-4 px-4 py-2 bg-cine-accent text-white font-black rounded hover:brightness-105 transition-all text-xs">
                           Voltar ao Início
                         </button>
                       </motion.div>
@@ -1546,7 +1546,7 @@ export default function App() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-[#0891b2] text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
+                  className="w-full sm:w-auto min-w-[160px] bg-white hover:bg-cine-accent-dark text-black font-black py-3 px-6 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 hover:shadow-cine-accent/30 cursor-pointer active:scale-[0.98]"
                 >
                   Entendi
                 </button>

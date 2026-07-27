@@ -443,7 +443,7 @@ function MissionCard({
       </div>
       <div className="h-1.5 bg-neutral-800 rounded-full overflow-hidden mb-1">
         <motion.div
-          className={`h-full rounded-full ${done ? 'bg-emerald-500' : 'bg-gradient-to-r from-cine-accent-dark to-cine-accent-light'}`}
+          className={`h-full rounded-full ${done ? 'bg-emerald-500' : 'bg-cine-accent'}`}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.6 }}

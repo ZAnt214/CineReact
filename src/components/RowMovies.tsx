@@ -147,7 +147,7 @@ export default function RowMovies({
           </h2>
         </div>
         {isEditorial && (
-          <p className="text-xs sm:text-sm font-extrabold font-display leading-snug bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          <p className="text-xs sm:text-sm font-extrabold font-display leading-snug text-cine-cream">
             Estes reacts foram escolhidos a dedo pela equipe CineReact.
           </p>
         )}
@@ -202,7 +202,7 @@ export default function RowMovies({
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-accent text-black' : 'bg-[#22d3ee] text-white'
+                      isEditorial ? 'bg-cine-accent text-black' : 'bg-cine-accent text-white'
                     }`}>
                       <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-black" />
                     </div>
@@ -216,7 +216,7 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent text-neutral-950 font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-[0_0_12px_rgba(255,255,255,0.45)] border border-cine-cream/90 font-display tracking-wider leading-none">
+                    <span className="absolute top-2.5 left-2.5 z-10 h-6.5 px-2.5 inline-flex items-center gap-1 bg-cine-accent text-white font-bold text-[10px] sm:text-[11px] uppercase rounded-lg shadow-md border border-cine-accent/80 font-display tracking-wider leading-none">
                       <Sparkles className="w-3.5 h-3.5 fill-neutral-950 text-neutral-950 shrink-0" />
                       <span>Recomenda</span>
                     </span>

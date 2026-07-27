@@ -210,7 +210,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="relative group">
                 {/* Glowing Aura if Donor */}
                 {user.isDonor && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cine-accent-light via-cine-accent-light to-cine-cream blur-md opacity-75 animate-pulse" />
+                  <div className="absolute -inset-1 rounded-full border-2 border-cine-accent/50" />
                 )}
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-neutral-800 bg-neutral-950 flex items-center justify-center mx-auto">
                   {avatarUrl ? (
@@ -234,7 +234,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div>
                 <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
                   user.isDonor 
-                    ? "bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(255,255,255,0.3)] animate-pulse" 
+                    ? "text-cine-accent font-black" 
                     : "text-white"
                 }`}>
                   {user.nome}
@@ -248,7 +248,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
               
               {user.isDonor ? (
-                <div className="bg-gradient-to-r from-cine-surface/40 via-cine-surface/30 to-cine-surface/40 border border-cine-accent/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
+                <div className="bg-cine-surface/50 border border-cine-accent/30 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-16 h-16 bg-cine-accent/10 blur-xl rounded-full" />
                   
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-[10px] font-extrabold uppercase tracking-widest">
@@ -366,10 +366,10 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               </div>
 
               {/* Field: Biografia / Descrição do Perfil */}
-              <div className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/20 via-neutral-950/40 to-fuchsia-950/15 p-4 space-y-2">
+              <div className="rounded-xl border border-cine-accent/20 bg-cine-surface/40 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-cyan-400" />
-                  <label className="text-[10px] font-mono text-cyan-300/90 uppercase tracking-wider">
+                  <User className="w-4 h-4 text-cine-accent" />
+                  <label className="text-[10px] font-mono text-cine-accent-light uppercase tracking-wider">
                     Biografia do perfil
                   </label>
                 </div>
@@ -382,7 +382,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={3}
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-cyan-500/50 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-cine-accent/50 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
                 />
                 <div className="flex justify-end text-[9px] text-zinc-600 font-mono">
                   {descricao.length}/180 caracteres
@@ -390,11 +390,11 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               </div>
 
               {isVerifiedCreator && (
-                <div className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/25 via-neutral-950/40 to-cyan-950/20 p-4 space-y-3">
+                <div className="rounded-xl border border-cine-accent/25 bg-cine-surface/40 p-4 space-y-3">
                   <div className="flex items-start gap-2">
-                    <BadgeCheck className="w-4 h-4 text-cyan-300 shrink-0 mt-0.5" />
+                    <BadgeCheck className="w-4 h-4 text-cine-accent shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-[10px] font-mono text-cyan-300/90 uppercase tracking-wider flex items-center gap-1.5">
+                      <p className="text-[10px] font-mono text-cine-accent-light uppercase tracking-wider flex items-center gap-1.5">
                         <Link2 className="w-3 h-3" /> Redes sociais do criador
                       </p>
                       <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">
@@ -466,7 +466,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-white hover:bg-[#0891b2] disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
+                className="w-full bg-white hover:bg-cine-accent-dark disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

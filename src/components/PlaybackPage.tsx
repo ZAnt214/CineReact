@@ -534,7 +534,7 @@ export default function PlaybackPage({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="cine-container pt-24 pb-20 min-h-screen bg-[#0a0e14] w-full"
+      className="cine-container pt-24 pb-20 min-h-screen bg-cine-bg w-full"
     >
       {/* GRID LAYOUT: 12 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -543,10 +543,7 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-6 transition-all duration-300`}>
           
           {/* HIGH-END CINEMATIC GOLDEN BORDER PLAYER FRAME */}
-          <div className="relative group/player rounded-3xl p-[2px] bg-gradient-to-tr from-cine-accent-light/60 via-cine-accent-light/80 to-cine-accent-dark/60 hover:from-cine-cream hover:via-cine-cream hover:to-cine-accent shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_40px_rgba(255,255,255,0.25)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_65px_rgba(255,255,255,0.45)] transition-all duration-500">
-            {/* Ambient Backlight Glow behind Player */}
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cine-accent/25 via-cine-accent-light/20 to-cine-accent-dark/25 blur-xl opacity-75 group-hover/player:opacity-100 transition-opacity pointer-events-none -z-10" />
-
+          <div className="relative group/player rounded-3xl border border-cine-border/80 hover:border-cine-accent/40 shadow-xl transition-all duration-300">
             <div className="relative w-full bg-black rounded-[22px] overflow-hidden aspect-video">
               <iframe 
                 key={activeReact.id}
@@ -732,7 +729,7 @@ export default function PlaybackPage({
                   className={`ml-3 px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer ${
                     isFollowing 
                       ? 'bg-neutral-900 text-zinc-400 hover:bg-neutral-800 hover:text-white border border-neutral-800' 
-                      : 'bg-[#22d3ee] text-white font-black hover:bg-[#0891b2] shadow-lg shadow-cine-accent/20'
+                      : 'bg-cine-accent text-white font-black hover:bg-cine-accent-dark shadow-lg shadow-cine-accent/20'
                   }`}
                 >
                   {isFollowing ? 'Inscrito' : 'Seguir'}

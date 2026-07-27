@@ -28,7 +28,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
           <span className="text-[9px] font-mono uppercase tracking-widest text-cine-accent/80">{tier}</span>
           <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden mt-0.5">
             <motion.div
-              className="h-full bg-gradient-to-r from-cine-accent-dark to-cine-accent-light"
+              className="h-full bg-cine-accent"
               initial={{ width: 0 }}
               animate={{ width: `${progress.percent}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -58,7 +58,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Índice de Influência</p>
-          <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cine-cream to-cine-accent">
+          <p className="text-lg font-black text-cine-accent">
             {tier}
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
       </div>
       <div className="h-2 bg-neutral-800/80 rounded-full overflow-hidden mb-3">
         <motion.div
-          className="h-full bg-gradient-to-r from-cine-accent-dark via-cine-accent-light to-cine-cream shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+          className="h-full bg-cine-accent"
           initial={{ width: 0 }}
           animate={{ width: `${progress.percent}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}

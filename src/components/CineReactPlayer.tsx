@@ -449,7 +449,7 @@ export default function CineReactPlayer({
                   onClick={() => setDualView(!dualView)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xl cursor-pointer ${
                     dualView 
-                      ? 'bg-[#22d3ee] text-white border-cine-cream shadow-cine-accent/40 font-black' 
+                      ? 'bg-cine-accent text-white border-cine-cream shadow-cine-accent/40 font-black' 
                       : 'bg-black/70 hover:bg-neutral-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
                   }`}
                   title="Modo Duplo (Vídeo + Obra)"
@@ -497,7 +497,7 @@ export default function CineReactPlayer({
               >
                 {/* PROGRESS TRACK FILL WITH GLOW */}
                 <div 
-                  className="h-full bg-gradient-to-r from-cine-accent-light via-cine-accent-light to-cine-cream rounded-full shadow-[0_0_15px_rgba(255,255,255,0.9)] relative"
+                  className="h-full bg-cine-accent rounded-full relative"
                   style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
                 >
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,1)] scale-0 group-hover/timeline:scale-100 transition-transform" />
@@ -524,7 +524,7 @@ export default function CineReactPlayer({
                 {/* Play / Pause Toggle */}
                 <button
                   onClick={togglePlay}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-[#0891b2] text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-cine-accent-dark text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
                   title={isPlaying ? 'Pausar (Espaço/K)' : 'Reproduzir (Espaço/K)'}
                 >
                   {isPlaying ? (
@@ -605,7 +605,7 @@ export default function CineReactPlayer({
                           onClick={() => changeSpeed(s)}
                           className={`text-xs font-mono px-3 py-1.5 rounded-lg text-left transition-colors cursor-pointer flex items-center justify-between ${
                             playbackSpeed === s
-                              ? 'bg-[#22d3ee] text-white font-bold'
+                              ? 'bg-cine-accent text-white font-bold'
                               : 'text-zinc-300 hover:bg-neutral-800 hover:text-white'
                           }`}
                         >

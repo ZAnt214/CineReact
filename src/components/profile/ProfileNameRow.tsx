@@ -66,7 +66,7 @@ export default function ProfileNameRow({
 
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         {isDonor ? (
-          <span className={`${nameClass} bg-gradient-to-r from-cine-cream via-cine-cream to-cine-cream bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
+          <span className={`${nameClass} text-cine-cream font-extrabold inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
             {name}
             <span
               className={`rounded bg-white-light uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}

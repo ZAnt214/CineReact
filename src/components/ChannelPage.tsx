@@ -135,7 +135,7 @@ export default function ChannelPage({
           
           {/* Avatar with Ring */}
           <div className="relative group shrink-0">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-cine-cream via-cine-accent-light to-cine-accent blur-sm opacity-70 group-hover:opacity-100 transition duration-500" />
+            <div className="absolute -inset-1 rounded-full border-2 border-cine-accent/40 group-hover:border-cine-accent/70 transition duration-500" />
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-neutral-950 bg-neutral-900 overflow-hidden shadow-2xl">
               <OptimizedImage 
                 src={canal.poster} 
@@ -200,7 +200,7 @@ export default function ChannelPage({
                 className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 shadow-xl cursor-pointer ${
                   isFollowing 
                     ? 'bg-neutral-900 hover:bg-red-500/20 text-zinc-200 hover:text-red-400 border border-zinc-700 hover:border-red-500/50' 
-                    : 'bg-gradient-to-r from-cine-cream via-cine-accent-light to-cine-accent text-black hover:scale-105 active:scale-95 shadow-cine-accent/25'
+                    : 'bg-cine-accent text-white hover:bg-cine-accent-dark hover:scale-105 active:scale-95 shadow-cine-accent/20'
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isFollowing ? 'fill-red-500 text-red-500' : 'fill-black text-black'}`} />
@@ -217,7 +217,7 @@ export default function ChannelPage({
                         <div 
                           key={i} 
                           title={seg.username}
-                          className="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-950 bg-gradient-to-br from-cine-cream to-cine-accent text-black flex items-center justify-center text-[10px] font-black font-mono select-none"
+                          className="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-950 bg-cine-accent text-white flex items-center justify-center text-[10px] font-black font-mono select-none"
                         >
                           {seg.avatar ? (
                             <img src={seg.avatar} alt={seg.username} className="h-full w-full object-cover rounded-full" referrerPolicy="no-referrer" />
@@ -307,7 +307,7 @@ export default function ChannelPage({
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cine-cream to-cine-cream flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                  <div className="w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
                     <Play className="w-5 h-5 fill-black text-black ml-0.5" />
                   </div>
                 </div>
