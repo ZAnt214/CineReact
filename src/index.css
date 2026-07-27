@@ -148,18 +148,18 @@
   align-items: center;
   justify-content: center;
   height: 1.5rem;
-  padding: 0 0.55rem;
+  padding: 0 0.6rem;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-cine-accent);
-  background: rgba(9, 9, 11, 0.88);
-  border: 1px solid rgba(255, 200, 0, 0.58);
-  border-radius: 0.25rem;
+  color: #09090b;
+  background: var(--color-cine-accent);
+  border: 1px solid rgba(255, 225, 74, 0.65);
+  border-radius: 0.3rem;
   line-height: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(255, 200, 0, 0.35);
 }
 
 @media (min-width: 640px) {
@@ -168,6 +168,67 @@
     padding: 0 0.625rem;
     font-size: 0.625rem;
   }
+}
+
+.cine-recomenda-card {
+  position: relative;
+  background: linear-gradient(180deg, #141414 0%, #0c0c0e 100%);
+  border: 1px solid rgba(255, 200, 0, 0.38);
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.06) inset,
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(255, 200, 0, 0.1);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.cine-recomenda-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-cine-accent);
+  opacity: 0.95;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.cine-recomenda-card:hover {
+  border-color: rgba(255, 200, 0, 0.62);
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 0, 0.12) inset,
+    0 16px 40px rgba(0, 0, 0, 0.5),
+    0 0 32px rgba(255, 200, 0, 0.18);
+}
+
+.cine-recomenda-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 45%,
+    rgba(9, 9, 11, 0.35) 72%,
+    rgba(9, 9, 11, 0.88) 100%
+  );
+  pointer-events: none;
+}
+
+.cine-recomenda-body {
+  background: linear-gradient(180deg, rgba(20, 20, 22, 0.98) 0%, rgba(12, 12, 14, 1) 100%);
+  border-top: 1px solid rgba(255, 200, 0, 0.14);
+}
+
+.cine-recomenda-creator {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--color-cine-accent);
+  letter-spacing: 0.01em;
+}
+
+.cine-recomenda-creator:hover {
+  color: var(--color-cine-accent-light);
 }
 
 /* Custom scrollbar for a premium look, universally styled to prevent default system glitches */
