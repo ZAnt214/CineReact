@@ -172,7 +172,7 @@
 
 .cine-recomenda-card {
   position: relative;
-  background: linear-gradient(180deg, #141414 0%, #0c0c0e 100%);
+  background: linear-gradient(180deg, #1e0b38 0%, #120024 100%);
   border: 1px solid rgba(123, 44, 191, 0.38);
   box-shadow:
     0 0 0 1px rgba(123, 44, 191, 0.06) inset,
@@ -210,13 +210,13 @@
     180deg,
     transparent 45%,
     rgba(9, 9, 11, 0.35) 72%,
-    rgba(9, 9, 11, 0.88) 100%
+    rgba(16, 0, 43, 0.88) 100%
   );
   pointer-events: none;
 }
 
 .cine-recomenda-body {
-  background: linear-gradient(180deg, rgba(20, 20, 22, 0.98) 0%, rgba(12, 12, 14, 1) 100%);
+  background: linear-gradient(180deg, rgba(30, 11, 56, 0.98) 0%, rgba(18, 0, 36, 1) 100%);
   border-top: 1px solid rgba(123, 44, 191, 0.14);
 }
 
@@ -238,11 +238,11 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #10002b;
+  background: var(--color-cine-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: var(--color-cine-elevated);
   border-radius: 9999px;
 }
 
@@ -291,7 +291,7 @@ video,
 }
 
 html, body, #root {
-  background-color: #10002b;
+  background-color: var(--color-cine-bg);
   color: #fafafa;
   font-family: var(--font-sans);
   overflow-x: hidden !important;
@@ -303,6 +303,46 @@ html, body, #root {
   padding: 0;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Atmospheric site canvas — depth + subtle grid aligned to Vivid Nightfall */
+.cine-site-bg {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-cine-bg);
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+.cine-site-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 92% 58% at 50% -12%, rgba(123, 44, 191, 0.34) 0%, transparent 58%),
+    radial-gradient(ellipse 48% 42% at 96% 18%, rgba(157, 78, 221, 0.16) 0%, transparent 54%),
+    radial-gradient(ellipse 44% 40% at 4% 78%, rgba(90, 24, 154, 0.22) 0%, transparent 52%),
+    radial-gradient(ellipse 72% 48% at 50% 108%, rgba(36, 0, 70, 0.9) 0%, transparent 62%),
+    linear-gradient(168deg, #0a001c 0%, #10002b 36%, #160033 68%, #10002b 100%);
+}
+
+.cine-site-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: radial-gradient(rgba(199, 125, 255, 0.22) 0.55px, transparent 0.55px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 88% 72% at 50% 42%, black 18%, transparent 80%);
+}
+
+.cine-site-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
 .cine-container {
@@ -361,8 +401,8 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 /* Standard catalog cards — polished but distinct from CineReact Recomenda */
 .catalog-card-standard {
   position: relative;
-  background: linear-gradient(180deg, #161618 0%, #0e0e10 100%);
-  border: 1px solid rgba(63, 63, 70, 0.75);
+  background: linear-gradient(180deg, #1a0930 0%, #110022 100%);
+  border: 1px solid rgba(90, 24, 154, 0.45);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 10px 28px rgba(0, 0, 0, 0.42);
@@ -376,7 +416,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.14), transparent);
   z-index: 15;
   pointer-events: none;
 }
@@ -396,15 +436,15 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   background: linear-gradient(
     180deg,
     transparent 50%,
-    rgba(9, 9, 11, 0.25) 78%,
-    rgba(9, 9, 11, 0.75) 100%
+    rgba(16, 0, 43, 0.28) 78%,
+    rgba(16, 0, 43, 0.82) 100%
   );
   pointer-events: none;
 }
 
 .catalog-card-standard-body {
-  background: linear-gradient(180deg, rgba(22, 22, 24, 0.98) 0%, rgba(14, 14, 16, 1) 100%);
-  border-top: 1px solid rgba(63, 63, 70, 0.45);
+  background: linear-gradient(180deg, rgba(26, 9, 48, 0.98) 0%, rgba(17, 0, 34, 1) 100%);
+  border-top: 1px solid rgba(90, 24, 154, 0.35);
 }
 
 /* Mobile: native momentum scroll + snap like streaming apps */

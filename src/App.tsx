@@ -686,7 +686,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`min-h-screen bg-cine-bg text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden relative ${
+      className={`cine-site-bg min-h-screen text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}

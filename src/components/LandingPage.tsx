@@ -29,17 +29,15 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-cine-bg text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
-      {/* Background Decorative Gradients & Grid Glow (No media thumbnails or posters) */}
+    <div className="cine-site-bg min-h-screen text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
+      {/* Accent glows layered on global canvas */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-cine-accent/15 via-cine-accent/5 to-transparent rounded-full blur-3xl opacity-70" />
-        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-cine-mint/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 -right-40 w-96 h-96 bg-cine-accent/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#3f3f46_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[520px] bg-gradient-to-b from-cine-accent/20 via-cine-mint/8 to-transparent rounded-full blur-3xl opacity-80" />
+        <div className="absolute top-1/4 -right-32 w-[420px] h-[420px] bg-cine-lilac/10 rounded-full blur-3xl" />
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-cine-border/80 bg-cine-bg/95 max-md:backdrop-blur-none md:bg-cine-bg/80 md:backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-cine-border/50 bg-cine-surface/75 max-md:backdrop-blur-none md:bg-cine-surface/55 md:backdrop-blur-md sticky top-0">
         <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
