@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, Youtube, X } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Sparkles, X, Youtube } from 'lucide-react';
 
 interface CreatorPartnerBannerProps {
   onClick: () => void;
@@ -15,10 +15,12 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent-light/25 bg-neutral-950/95 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.65)]"
+        className="creator-partner-banner fixed right-3 left-3 z-[100] mx-auto w-auto max-w-4xl overflow-hidden rounded-2xl border border-cine-accent/35 bg-neutral-950/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(255,200,0,0.12)]"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         aria-label="Programa de Criadores Parceiros"
       >
+        <div className="creator-partner-banner-glow absolute inset-0 pointer-events-none" aria-hidden="true" />
+
         <motion.div
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cine-accent-light to-transparent"
           aria-hidden="true"
@@ -27,13 +29,13 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         />
 
         <motion.div
-          className="absolute -top-12 -right-12 w-32 h-32 bg-cine-accent/10 rounded-full blur-2xl pointer-events-none"
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          className="absolute -top-16 -right-10 w-40 h-40 bg-cine-accent/15 rounded-full blur-3xl pointer-events-none"
+          animate={{ opacity: [0.25, 0.55, 0.25] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
 
         <motion.div
-          className="flex items-center gap-2.5 p-2.5 sm:gap-4 sm:p-3"
+          className="relative flex items-center gap-2.5 p-2.5 sm:gap-4 sm:p-3.5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -41,25 +43,30 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
           <button
             type="button"
             onClick={onClick}
-            className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.03] cursor-pointer"
+            className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.04] cursor-pointer"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cine-accent/25 bg-cine-accent/10 sm:h-11 sm:w-11 group-hover:border-cine-accent-light/40 group-hover:bg-cine-accent-light/15 transition-colors">
-              <Youtube className="h-5 w-5 text-cine-accent-light transition-colors" aria-hidden="true" />
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(255,200,0,0.18)]">
+              <Youtube className="h-5 w-5 text-cine-accent-light transition-colors relative z-10" aria-hidden="true" />
+              <BadgeCheck className="absolute -bottom-1 -right-1 h-4 w-4 text-cine-accent bg-neutral-950 rounded-full border border-cine-accent/40" />
             </span>
 
             <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2">
-                <span className="truncate text-xs font-black uppercase tracking-[0.12em] text-cine-accent-light sm:text-sm">
+              <span className="flex items-center gap-2 flex-wrap">
+                <span className="truncate text-xs font-black uppercase tracking-[0.14em] text-cine-accent-light sm:text-sm">
                   <span className="sm:hidden">Para Criadores</span>
                   <span className="hidden sm:inline">Programa de Criadores Parceiros</span>
                 </span>
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-cine-accent/30 bg-cine-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-cine-accent-light">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  Verificado
+                </span>
               </span>
-              <p className="mt-0.5 truncate text-xs text-zinc-400">
-                Destaque, selo verificado e ferramentas exclusivas para o seu canal.
+              <p className="mt-1 truncate text-xs text-zinc-400 sm:text-[13px]">
+                Destaque premium, selo verificado e ferramentas exclusivas para o seu canal.
               </p>
             </span>
 
-            <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 group-hover:scale-105 shrink-0">
+            <span className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all shadow-lg shadow-cine-accent/25 group-hover:scale-[1.03] shrink-0">
               <span>Saiba Mais</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </span>

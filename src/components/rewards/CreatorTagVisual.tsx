@@ -40,30 +40,48 @@ export default function CreatorTagVisual({
   const displayName = creatorName || name.replace(/^(Fã|Comunidade|Squad|VIP)\s*/i, '');
 
   const sizes = {
-    sm: { pad: 'px-2 py-0.5', tier: 'text-[7px]', name: 'text-[8px]', icon: 'w-2.5 h-2.5' },
-    md: { pad: 'px-2.5 py-1', tier: 'text-[8px]', name: 'text-[9px]', icon: 'w-3 h-3' },
-    lg: { pad: 'px-3 py-1.5', tier: 'text-[9px]', name: 'text-[11px]', icon: 'w-3.5 h-3.5' },
+    sm: { pad: 'px-2 py-0.5', tier: 'text-[7px]', name: 'text-[8px]', icon: 'w-2.5 h-2.5', iconBox: 'w-4 h-4' },
+    md: { pad: 'px-2.5 py-1', tier: 'text-[8px]', name: 'text-[9px]', icon: 'w-3 h-3', iconBox: 'w-5 h-5' },
+    lg: { pad: 'px-3 py-1.5', tier: 'text-[9px]', name: 'text-[11px]', icon: 'w-3.5 h-3.5', iconBox: 'w-6 h-6' },
   };
   const s = sizes[size];
 
-  const from = creatorColors?.from || '#9d92a8';
-  const to = creatorColors?.to || '#9d92a8';
+  const from = creatorColors?.from || '#ffc800';
+  const to = creatorColors?.to || '#ffe14a';
+  const accentText = creatorColors?.text || '#fffbeb';
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-neutral-950/55 overflow-hidden ${s.pad} ${className}`}
+      className={`creator-tag-visual inline-flex items-center gap-1.5 rounded-lg border overflow-hidden ${s.pad} ${className}`}
       title={name}
-      style={{ boxShadow: `inset 2px 0 0 0 ${from}` }}
+      style={{
+        borderColor: `${from}55`,
+        background: `linear-gradient(135deg, ${from}18 0%, rgba(9, 9, 11, 0.92) 55%, ${to}12 100%)`,
+        boxShadow: `inset 0 1px 0 ${from}30, 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 18px ${from}18`,
+      }}
     >
       <span
-        className="inline-flex items-center justify-center rounded-md shrink-0"
-        style={{ background: `linear-gradient(135deg, ${from}33, ${to}22)` }}
+        className={`inline-flex items-center justify-center rounded-md shrink-0 ${s.iconBox}`}
+        style={{
+          background: `linear-gradient(145deg, ${from}55, ${to}35)`,
+          boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 12px ${from}40`,
+        }}
       >
-        <TierIcon className={`${s.icon} m-0.5`} style={{ color: from }} strokeWidth={2.25} />
+        <TierIcon className={s.icon} style={{ color: accentText }} strokeWidth={2.35} />
       </span>
       <span className="flex flex-col leading-none min-w-0">
-        <span className={`font-bold uppercase tracking-[0.1em] text-zinc-500 ${s.tier}`}>{tierCfg.label}</span>
-        <span className={`font-medium text-zinc-200 truncate max-w-[5rem] ${s.name}`}>{displayName}</span>
+        <span
+          className={`font-black uppercase tracking-[0.14em] ${s.tier}`}
+          style={{ color: `${from}cc` }}
+        >
+          {tierCfg.label}
+        </span>
+        <span
+          className={`font-semibold truncate max-w-[5.5rem] ${s.name}`}
+          style={{ color: accentText }}
+        >
+          {displayName}
+        </span>
       </span>
     </span>
   );

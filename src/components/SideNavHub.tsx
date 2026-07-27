@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Home,
@@ -97,7 +97,7 @@ function CreatorNavRow({
         isActive
           ? 'bg-neutral-900 text-white'
           : 'text-zinc-400 hover:bg-neutral-900/50 hover:text-zinc-200'
-      } ${creator.isDemo ? 'border border-fuchsia-500/20 bg-fuchsia-500/5' : ''}`}
+      } ${creator.isDemo ? 'border border-cine-accent/25 bg-cine-accent/5' : ''}`}
     >
       {isActive && (
         <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-cine-accent-light rounded-full" />
@@ -115,7 +115,7 @@ function CreatorNavRow({
           {creator.nome}
         </p>
         {creator.isDemo ? (
-          <p className="text-[10px] text-fuchsia-400/90 truncate mt-0.5 flex items-center gap-1">
+          <p className="text-[10px] text-cine-accent/90 truncate mt-0.5 flex items-center gap-1">
             <Sparkles className="w-2.5 h-2.5 shrink-0" />
             Exemplo verificado
           </p>
@@ -141,6 +141,13 @@ function SideNavHub({
 }: SideNavHubProps) {
   const { isSideNavOpen, closeSideNav } = useSideNavStore();
   const [creatorsExpanded, setCreatorsExpanded] = React.useState(true);
+  const openedAtRef = useRef(0);
+
+  useEffect(() => {
+    if (isSideNavOpen) {
+      openedAtRef.current = Date.now();
+    }
+  }, [isSideNavOpen]);
 
   const creators = useMemo(
     () => buildVideoCreatorsNavList(obras, reacts),
@@ -193,11 +200,15 @@ function SideNavHub({
       <button
         type="button"
         className="fixed inset-0 z-[94] bg-black/60 md:bg-black/40"
-        onClick={closeSideNav}
+        onClick={() => {
+          if (Date.now() - openedAtRef.current < 320) return;
+          closeSideNav();
+        }}
         aria-label="Fechar menu"
       />
 
       <aside
+        id="side-nav-panel"
         className="fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-neutral-950 border-r border-neutral-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden"
         aria-label="Menu principal"
       >
