@@ -180,19 +180,18 @@ export default function RowMovies({
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
+            const cardClass = isEditorial
+              ? 'cine-recomenda-card catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all'
+              : `catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10`;
 
             return (
               <div
                 key={react.id}
                 onClick={() => handleCardClick(react.id, react.obraId)}
-                className={`catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 bg-neutral-900/95 md:bg-neutral-900/60 md:backdrop-blur-md rounded-2xl overflow-hidden shadow-xl md:hover:shadow-2xl md:hover:-translate-y-0.5 md:transition-all cursor-pointer group/card flex flex-col h-full select-none ${
-                  isEditorial 
-                    ? 'border border-cine-recomenda/70 shadow-[0_0_22px_rgba(255,200,0,0.32)] ring-1 ring-cine-recomenda/40' 
-                    : 'border border-neutral-800/80 hover:border-cine-accent/60 hover:shadow-cine-accent/10'
-                }`}
+                className={cardClass}
               >
                 {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
-                <div className="relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0">
+                <div className={`relative aspect-video w-full overflow-hidden bg-neutral-950 shrink-0 ${isEditorial ? 'cine-recomenda-thumb' : ''}`}>
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
@@ -209,8 +208,12 @@ export default function RowMovies({
                   </div>
 
                   {/* Duration Badge */}
-                  <span className="absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 bg-black/85 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold text-zinc-200 rounded-lg border border-zinc-700/60 shadow-md leading-none">
-                    <Clock className="w-3 h-3 text-cine-accent-light shrink-0" />
+                  <span className={`absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold rounded-lg shadow-md leading-none ${
+                    isEditorial
+                      ? 'bg-neutral-950/90 text-cine-accent border border-cine-accent/35'
+                      : 'bg-black/85 text-zinc-200 border border-zinc-700/60'
+                  }`}>
+                    <Clock className={`w-3 h-3 shrink-0 ${isEditorial ? 'text-cine-accent' : 'text-cine-accent-light'}`} />
                     <span>{react.duracao}</span>
                   </span>
 
@@ -233,12 +236,16 @@ export default function RowMovies({
                 </div>
 
                 {/* CARD BODY */}
-                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 bg-gradient-to-b from-neutral-900/50 to-neutral-900/80">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors min-h-[2.5rem] sm:min-h-[2.75rem]">
+                <div className={`p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 ${isEditorial ? 'cine-recomenda-body' : 'bg-gradient-to-b from-neutral-900/50 to-neutral-900/80'}`}>
+                  <h3 className={`text-sm sm:text-base md:text-lg font-bold line-clamp-2 leading-snug transition-colors min-h-[2.5rem] sm:min-h-[2.75rem] ${
+                    isEditorial
+                      ? 'text-zinc-100 group-hover/card:text-cine-accent'
+                      : 'text-white group-hover/card:text-cine-accent-light'
+                  }`}>
                     {react.titulo}
                   </h3>
                   
-                  <div className="flex items-center pt-2.5 border-t border-neutral-800/60 min-w-0">
+                  <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'border-t border-cine-accent/20' : 'border-t border-neutral-800/60'}`}>
                     <span 
                       onClick={(e) => {
                         if (onChannelClick) {
@@ -246,8 +253,10 @@ export default function RowMovies({
                           onChannelClick(react.canalNome);
                         }
                       }}
-                      className={`font-bold text-cine-accent-light font-display truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
-                        onChannelClick ? 'hover:underline hover:text-cine-cream cursor-pointer' : ''
+                      className={`truncate min-w-0 flex-1 text-xs sm:text-sm leading-tight ${
+                        isEditorial
+                          ? `cine-recomenda-creator ${onChannelClick ? 'hover:underline cursor-pointer' : ''}`
+                          : `font-bold text-cine-accent font-sans ${onChannelClick ? 'hover:underline hover:text-cine-accent-light cursor-pointer' : ''}`
                       }`}
                       title={`Ver canal ${react.canalNome}`}
                     >
