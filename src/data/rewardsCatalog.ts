@@ -124,7 +124,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Janela da Rua',
     creatorId: 'janela-da-rua-canal',
     creatorName: 'Janela da Rua',
-    creatorColors: { from: '#2563eb', to: '#60a5fa', text: '#dbeafe' },
+    creatorColors: { from: '#ca8a04', to: '#fde047', text: '#fefce8' },
   },
   {
     id: 'tag-vip-janela-da-rua',
@@ -280,7 +280,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#2563eb', to: '#3b82f6', text: '#eff6ff' },
+    creatorColors: { from: '#ca8a04', to: '#facc15', text: '#fefce8' },
   },
   {
     id: 'tag-squad-nat-vic-mv',
@@ -293,7 +293,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Assista 5 reações de Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#1d4ed8', to: '#60a5fa', text: '#dbeafe' },
+    creatorColors: { from: '#a16207', to: '#fde047', text: '#fef9c3' },
   },
   {
     id: 'tag-fan-biana-clips',
