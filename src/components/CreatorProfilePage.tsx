@@ -60,8 +60,8 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       </button>
 
       {isDemo && (
-        <div className="max-w-2xl mb-8 flex items-start gap-3 rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-4 py-3">
-          <Sparkles className="w-4 h-4 text-fuchsia-300 shrink-0 mt-0.5" />
+        <div className="max-w-2xl mb-8 flex items-start gap-3 rounded-xl border border-cine-accent/25 bg-cine-accent/5 px-4 py-3">
+          <Sparkles className="w-4 h-4 text-cine-accent shrink-0 mt-0.5" />
           <p className="text-sm text-zinc-300 leading-relaxed">
             <span className="font-bold text-fuchsia-200">Perfil demonstrativo.</span>{' '}
             Exemplo de como criadores de vídeo verificados aparecem na plataforma.
@@ -87,7 +87,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
           <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
           {profile.isVerifiedCreator && (
             <p className="flex items-center gap-2 text-xs text-zinc-500 pt-1">
-              <BadgeCheck className="w-3.5 h-3.5 text-cyan-400" />
+              <BadgeCheck className="w-3.5 h-3.5 text-cine-accent" />
               Criador verificado oficial na CineReact
             </p>
           )}

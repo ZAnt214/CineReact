@@ -172,8 +172,8 @@ export default function ChannelPage({
 
               {!loadingOfficialProfile && officialProfile && (
                 <div className="mt-6 max-w-2xl">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-400/70 mb-2 flex items-center gap-1.5">
-                    <BadgeCheck className="w-3.5 h-3.5 text-cyan-300" />
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-cine-accent/70 mb-2 flex items-center gap-1.5">
+                    <BadgeCheck className="w-3.5 h-3.5 text-cine-accent" />
                     Perfil oficial na CineReact
                   </p>
                   <PublicCreatorProfile profile={officialProfile} size="sm" align="start" />

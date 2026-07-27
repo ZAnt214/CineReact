@@ -413,7 +413,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                           value={socialLinks[key] || ''}
                           onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
                           placeholder={placeholder}
-                          className="w-full bg-neutral-950 border border-neutral-800 focus:border-fuchsia-500/40 rounded-lg px-3 py-2 text-xs text-white outline-none transition-colors"
+                          className="w-full bg-neutral-950 border border-neutral-800 focus:border-cine-accent/40 rounded-lg px-3 py-2 text-xs text-white outline-none transition-colors"
                         />
                       </div>
                     ))}
