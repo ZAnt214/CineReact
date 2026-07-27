@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;600;700&family=Sora:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&family=Sora:wght@600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-display: "Outfit", "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Sora", ui-sans-serif, system-ui, sans-serif;
   /* Cyan dark interface */
   --color-cine-bg: #0a0e14;
   --color-cine-surface: #121a24;
@@ -26,14 +26,13 @@
   font-family: 'Sora', 'Inter', system-ui, sans-serif;
 }
 
-/* CineReact — letreiro Lumina (acolhedor + profissional) */
+/* CineReact — letreiro limpo */
 .cine-brand {
   display: inline-grid;
   grid-template-columns: minmax(0, max-content);
   width: max-content;
   max-width: 100%;
   line-height: 1;
-  gap: 0.34em;
 }
 
 .cine-brand--center {
@@ -49,91 +48,37 @@
 }
 
 .cine-brand-name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.14em;
-  white-space: nowrap;
-  font-family: 'Outfit', 'Sora', system-ui, sans-serif;
+  display: block;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1;
-}
-
-.cine-brand-cine {
-  color: #f4f9ff;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.032em;
+  color: #e8f4fc;
+  white-space: nowrap;
 }
 
 .cine-brand-react {
   font-weight: 700;
-  letter-spacing: -0.045em;
-  background: linear-gradient(118deg, #c8f6ff 0%, #5eead4 38%, #22d3ee 72%, #0891b2 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.22));
-}
-
-.cine-brand-connector {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 0.42em;
-  height: 0.42em;
-  margin: 0 0.04em;
-  flex-shrink: 0;
-  translate: 0 -0.06em;
-}
-
-.cine-brand-connector-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(103, 232, 249, 0.45);
-  opacity: 0.85;
-}
-
-.cine-brand-connector-core {
-  width: 38%;
-  height: 38%;
-  border-radius: 999px;
-  background: linear-gradient(145deg, #a5f3fc, #22d3ee);
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.55);
-}
-
-.cine-brand-rule {
-  display: block;
-  width: 100%;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(34, 211, 238, 0.05) 0%,
-    rgba(34, 211, 238, 0.55) 22%,
-    rgba(94, 234, 212, 0.75) 50%,
-    rgba(34, 211, 238, 0.55) 78%,
-    rgba(34, 211, 238, 0.05) 100%
-  );
-  opacity: 0.9;
+  color: #22d3ee;
+  letter-spacing: -0.038em;
 }
 
 .cine-brand-tagline {
   display: block;
   width: 100%;
+  margin-top: 0.3em;
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 400;
-  font-style: normal;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: #8fa3b8;
+  font-size: 0.44em;
+  letter-spacing: 0.01em;
+  color: #7a8fa6;
   white-space: nowrap;
-  text-align: inherit;
+  text-align: justify;
+  text-align-last: justify;
 }
 
 .cine-brand--center .cine-brand-tagline {
   text-align: center;
+  text-align-last: center;
 }
 
 .cine-brand--xs { font-size: 1rem; }
@@ -144,23 +89,17 @@
 
 .cine-brand--xs .cine-brand-tagline,
 .cine-brand--sm .cine-brand-tagline {
-  font-size: 0.5em;
-  margin-top: 0.08em;
+  font-size: 0.48em;
+  margin-top: 0.34em;
 }
 
 .cine-brand--md .cine-brand-tagline {
-  font-size: 0.46em;
+  font-size: 0.42em;
 }
 
 .cine-brand--lg .cine-brand-tagline,
 .cine-brand--xl .cine-brand-tagline {
-  font-size: 0.4em;
-}
-
-.cine-brand--xs .cine-brand-connector,
-.cine-brand--sm .cine-brand-connector {
-  width: 0.36em;
-  height: 0.36em;
+  font-size: 0.38em;
 }
 
 @media (min-width: 640px) {
