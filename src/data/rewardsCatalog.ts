@@ -9,9 +9,9 @@ export const RARITY_STYLES: Record<RewardRarity, { border: string; bg: string; t
   incomum: { border: 'border-emerald-500/40', bg: 'bg-emerald-950/25', text: 'text-emerald-300', glow: 'shadow-[0_0_12px_rgba(16,185,129,0.12)]', label: 'Incomum' },
   raro: { border: 'border-blue-500/40', bg: 'bg-blue-950/30', text: 'text-blue-300', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]', label: 'Raro' },
   épico: { border: 'border-purple-500/50', bg: 'bg-purple-950/30', text: 'text-purple-300', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]', label: 'Épico' },
-  lendário: { border: 'border-cine-accent/60', bg: 'bg-cine-surface/30', text: 'text-cine-cream', glow: 'shadow-[0_0_25px_rgba(255, 106, 0,0.28)]', label: 'Lendário' },
+  lendário: { border: 'border-cine-accent/60', bg: 'bg-cine-surface/30', text: 'text-cine-cream', glow: 'shadow-[0_0_25px_rgba(201, 162, 39,0.28)]', label: 'Lendário' },
   mítico: { border: 'border-rose-500/60', bg: 'bg-rose-950/35', text: 'text-rose-300', glow: 'shadow-[0_0_30px_rgba(244,63,94,0.3)]', label: 'Mítico' },
-  exclusivo: { border: 'border-cine-accent/70', bg: 'bg-cine-surface/50', text: 'text-cine-accent-light', glow: 'shadow-[0_0_35px_rgba(255, 106, 0,0.35)]', label: 'Exclusivo' },
+  exclusivo: { border: 'border-cine-accent/70', bg: 'bg-cine-surface/50', text: 'text-cine-accent-light', glow: 'shadow-[0_0_35px_rgba(201, 162, 39,0.35)]', label: 'Exclusivo' },
 };
 
 export const CATEGORY_LABELS: Record<string, string> = {
@@ -124,7 +124,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Janela da Rua',
     creatorId: 'janela-da-rua-canal',
     creatorName: 'Janela da Rua',
-    creatorColors: { from: '#e55a00', to: '#ff9a3d', text: '#f5ebff' },
+    creatorColors: { from: '#9a7b18', to: '#e4c04d', text: '#fff8e8' },
   },
   {
     id: 'tag-vip-janela-da-rua',
@@ -254,7 +254,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Sim Sou Lives',
     creatorId: 'sim-sou-lives-canal',
     creatorName: 'Sim Sou Lives',
-    creatorColors: { from: '#ff6a00', to: '#ff6a00', text: '#f5ebff' },
+    creatorColors: { from: '#c9a227', to: '#c9a227', text: '#fff8e8' },
   },
   {
     id: 'tag-squad-sim-sou-lives',
@@ -267,7 +267,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Assista 5 reações de Sim Sou Lives',
     creatorId: 'sim-sou-lives-canal',
     creatorName: 'Sim Sou Lives',
-    creatorColors: { from: '#ff6a00', to: '#d4d4d8', text: '#f5ebff' },
+    creatorColors: { from: '#c9a227', to: '#d4d4d8', text: '#fff8e8' },
   },
   {
     id: 'tag-fan-nat-vic-mv',
@@ -280,7 +280,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#ff6a00', to: '#ff6a00', text: '#f5ebff' },
+    creatorColors: { from: '#c9a227', to: '#c9a227', text: '#fff8e8' },
   },
   {
     id: 'tag-squad-nat-vic-mv',
@@ -293,7 +293,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Assista 5 reações de Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#ff6a00', to: '#d4d4d8', text: '#f5ebff' },
+    creatorColors: { from: '#c9a227', to: '#d4d4d8', text: '#fff8e8' },
   },
   {
     id: 'tag-fan-biana-clips',
@@ -381,7 +381,7 @@ export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
     obtainHint: 'Concedido a criadores que produziram arte oficial do Programa de Criadores',
     bundleId: CREATOR_PROGRAM_ART_BUNDLE_ID,
     limited: true,
-    previewClass: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(255, 106, 0,0.45)]',
+    previewClass: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(201, 162, 39,0.45)]',
     animated: true,
     visualStyle: 'atelier',
   },
@@ -575,7 +575,7 @@ const SEASONAL: RewardItemDefinition[] = [
 export const REWARDS_CATALOG: RewardItemDefinition[] = [
   // Molduras
   { id: 'frame-amber', name: 'Moldura Âmbar', description: 'Borda dourada elegante.', category: 'frame', rarity: 'comum', cost: 100, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cine-accent/80 shadow-[0_0_20px_rgba(255,255,255,0.3)]' },
-  { id: 'frame-neon', name: 'Moldura Neon', description: 'Brilho cyberpunk.', category: 'frame', rarity: 'raro', cost: 200, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cine-accent/80 shadow-[0_0_25px_rgba(255, 106, 0,0.4)]', animated: true },
+  { id: 'frame-neon', name: 'Moldura Neon', description: 'Brilho cyberpunk.', category: 'frame', rarity: 'raro', cost: 200, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-cine-accent/80 shadow-[0_0_25px_rgba(201, 162, 39,0.4)]', animated: true },
   { id: 'frame-royal', name: 'Moldura Real', description: 'Gradiente violeta premium.', category: 'frame', rarity: 'épico', cost: 400, unlockMethod: 'shop', obtainHint: 'Loja Spotlight', previewClass: 'ring-2 ring-purple-500/80', animated: true },
   { id: 'frame-critico', name: 'Moldura Crítico', description: 'Desbloqueada no nível Crítico.', category: 'frame', rarity: 'raro', cost: 0, unlockMethod: 'level', obtainHint: 'Alcance o nível Crítico', previewClass: 'ring-2 ring-rose-500/70' },
   { id: 'frame-influencer', name: 'Moldura Influenciador', description: 'Para membros influentes.', category: 'frame', rarity: 'épico', cost: 0, unlockMethod: 'level', obtainHint: 'Nível Influenciador', previewClass: 'ring-2 ring-cine-accent-light shadow-[0_0_35px_rgba(251,191,36,0.5)]', animated: true },

@@ -186,8 +186,8 @@ export default function Header({
       <header 
         className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
-            ? 'bg-neutral-950/92 max-md:backdrop-blur-none md:bg-neutral-950/88 md:backdrop-blur-md border-b border-neutral-800/80 shadow-lg shadow-black/30' 
-            : 'bg-neutral-950/70 max-md:backdrop-blur-none md:bg-neutral-950/45 md:backdrop-blur-sm border-b border-neutral-800/40'
+            ? 'bg-cine-bg/92 max-md:backdrop-blur-none md:bg-cine-bg/88 md:backdrop-blur-md border-b border-cine-border/70 shadow-lg shadow-black/30' 
+            : 'bg-cine-bg/72 max-md:backdrop-blur-none md:bg-cine-bg/50 md:backdrop-blur-sm border-b border-cine-border/45'
         }`}
       >
         <div className="cine-container w-full">
@@ -281,7 +281,7 @@ export default function Header({
                 >
                   <Bell className="w-4.5 h-4.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cine-accent-light rounded-full ring-2 ring-neutral-950 animate-pulse" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cine-accent-light rounded-full ring-2 ring-cine-bg animate-pulse" />
                   )}
                 </button>
 
@@ -292,7 +292,7 @@ export default function Header({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 12, scale: 0.97 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="fixed md:absolute top-[4.5rem] md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-neutral-950/98 backdrop-blur-2xl border border-neutral-900/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-neutral-900/60"
+                      className="fixed md:absolute top-[4.5rem] md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-cine-surface/98 backdrop-blur-2xl border border-cine-border/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-cine-border/50"
                     >
                       <div className="px-4 py-3.5 flex justify-between items-center bg-neutral-900/20">
                         <div className="flex items-center gap-2">

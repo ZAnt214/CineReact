@@ -36,7 +36,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-neutral-800/80 bg-neutral-950/90 max-md:backdrop-blur-none md:bg-neutral-950/75 md:backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-cine-border/60 bg-cine-bg/92 max-md:backdrop-blur-none md:bg-cine-bg/80 md:backdrop-blur-md sticky top-0">
         <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
@@ -259,7 +259,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
             <button
               onClick={onExplore}
               disabled={isNavigating}
-              className="px-8 py-4 rounded-2xl bg-white text-black font-black text-base hover:brightness-105 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
+              className="px-8 py-4 rounded-2xl bg-cine-accent text-cine-bg font-black text-base hover:bg-cine-accent-light transition-all shadow-xl shadow-cine-accent/25 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
             >
               <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
               {isNavigating ? (
@@ -273,7 +273,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 border-t border-neutral-800/80 bg-neutral-950/80 py-12 mt-12 text-zinc-500">
+      <footer className="relative z-10 border-t border-cine-border/60 bg-cine-bg/85 py-12 mt-12 text-cine-muted">
         <div className="cine-container w-full space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}
@@ -331,7 +331,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl text-zinc-300 z-10"
+              className="relative w-full max-w-2xl bg-cine-surface border border-cine-border rounded-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl text-zinc-300 z-10"
             >
               <button 
                 onClick={() => setActiveModal(null)}

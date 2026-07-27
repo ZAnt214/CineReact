@@ -1418,7 +1418,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-neutral-950 border-t border-neutral-900 py-10 text-center text-xs text-zinc-500 font-mono space-y-4 pb-12 w-full">
+      <footer className="bg-cine-bg border-t border-cine-border py-10 text-center text-xs text-cine-muted font-mono space-y-4 pb-12 w-full">
         <div className="cine-container space-y-3">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
