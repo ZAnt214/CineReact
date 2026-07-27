@@ -586,7 +586,7 @@ export default function AuthModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-white hover:bg-[#0891b2] disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
+                      className="w-full bg-white hover:bg-cine-accent-dark disabled:opacity-50 text-black font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer active:scale-[0.99]"
                     >
                       {loading ? (
                         <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

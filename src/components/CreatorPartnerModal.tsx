@@ -311,7 +311,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight"
                   >
                     Evolua seu canal no{' '}
-                    <span className="bg-gradient-to-r from-cine-cream via-cine-cream to-cine-accent bg-clip-text text-transparent">
+                    <span className="text-cine-accent">
                       CineReact
                     </span>
                   </h1>

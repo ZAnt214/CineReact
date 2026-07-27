@@ -278,7 +278,7 @@ export default function ProfileCosmeticsHub({
                     disabled={item.cost === 0 && item.unlockMethod === 'shop'}
                     className={`mt-auto w-full py-1.5 rounded-lg text-[10px] font-bold cursor-pointer flex items-center justify-center gap-1 ${
                       item.cost > 0
-                        ? 'bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black'
+                        ? 'bg-cine-accent text-white hover:bg-cine-accent-dark'
                         : 'bg-neutral-900 text-zinc-500 border border-neutral-800'
                     }`}
                   >
@@ -365,7 +365,7 @@ export default function ProfileCosmeticsHub({
                   type="button"
                   onClick={confirmEquip}
                   disabled={acting}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cine-accent-dark to-cine-accent text-black text-sm font-bold cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-cine-accent text-white hover:bg-cine-accent-dark text-sm font-bold cursor-pointer disabled:opacity-50"
                 >
                   {acting ? 'Aplicando...' : pendingEquipped ? 'Remover' : 'Equipar'}
                 </button>

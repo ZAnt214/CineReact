@@ -28,7 +28,7 @@ const PLATFORM_STYLES: Record<
   youtube: {
     Icon: Youtube,
     label: 'YouTube',
-    accent: 'from-cine-cream via-cine-accent to-cine-accent',
+    accent: 'from-cine-accent-light to-cine-accent',
     iconClass: 'text-cine-cream',
   },
   x: {
