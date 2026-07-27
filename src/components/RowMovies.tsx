@@ -219,8 +219,8 @@ export default function RowMovies({
 
                   {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
-                    <span className="cine-recomenda-tag absolute top-2.5 left-2.5 z-10">
-                      <span className="relative z-[1]">Recomenda</span>
+                    <span className="cine-recomenda-tag">
+                      <span className="cine-recomenda-tag-label">Recomenda</span>
                     </span>
                   )}
 
