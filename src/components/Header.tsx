@@ -186,8 +186,8 @@ export default function Header({
       <header 
         className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
-            ? 'bg-neutral-950 max-md:backdrop-blur-none md:bg-neutral-950/90 md:backdrop-blur-md border-b border-neutral-900/80 shadow-lg shadow-black/30' 
-            : 'bg-neutral-950/95 max-md:backdrop-blur-none md:bg-neutral-950/40 md:backdrop-blur-sm border-b border-transparent'
+            ? 'bg-cine-surface/92 max-md:backdrop-blur-none md:bg-cine-surface/88 md:backdrop-blur-md border-b border-cine-border/40 shadow-lg shadow-black/30' 
+            : 'bg-cine-bg/70 max-md:backdrop-blur-none md:bg-cine-bg/45 md:backdrop-blur-sm border-b border-cine-border/20'
         }`}
       >
         <div className="cine-container w-full">
