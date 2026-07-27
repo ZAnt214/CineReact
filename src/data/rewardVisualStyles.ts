@@ -220,9 +220,9 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
     label: 'Ateliê Visionário',
     gradient: 'from-cine-accent-dark via-cine-accent to-cine-accent-light',
     gradientCss:
-      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(255, 200, 0, 0.55) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(255, 225, 74, 0.35) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(230, 168, 0, 0.4) 0%, transparent 46%), linear-gradient(152deg, #3d2e00 0%, #1a1500 42%, #09090b 100%)',
-    ring: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(255,200,0,0.45)]',
-    glow: 'shadow-[0_0_32px_rgba(255,200,0,0.35)]',
+      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(38, 103, 255, 0.55) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(135, 191, 255, 0.35) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(59, 40, 204, 0.4) 0%, transparent 46%), linear-gradient(152deg, #1a1248 0%, #0c1020 42%, #07080f 100%)',
+    ring: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(38,103,255,0.45)]',
+    glow: 'shadow-[0_0_32px_rgba(38,103,255,0.35)]',
     accent: 'text-cine-cream',
     animated: true,
     shimmer: true,

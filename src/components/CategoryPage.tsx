@@ -258,7 +258,7 @@ export default function CategoryPage({
             onClick={() => setSelectedHashtag(null)}
             className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
               selectedHashtag === null
-                ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
+                ? 'bg-cine-accent text-white shadow-md shadow-cine-accent/20'
                 : 'bg-neutral-900 hover:bg-neutral-800 text-zinc-300 border border-neutral-800'
             }`}
           >
@@ -274,7 +274,7 @@ export default function CategoryPage({
                 onClick={() => setSelectedHashtag(isActive ? null : tag)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
                   isActive
-                    ? 'bg-cine-accent text-black shadow-md shadow-cine-accent/20'
+                    ? 'bg-cine-accent text-white shadow-md shadow-cine-accent/20'
                     : 'bg-neutral-900 hover:bg-neutral-800 text-zinc-300 border border-neutral-800'
                 }`}
               >
@@ -298,7 +298,7 @@ export default function CategoryPage({
               setSelectedHashtag(null);
               setSearchQuery('');
             }}
-            className="px-4 py-2 rounded-xl bg-cine-accent text-black font-extrabold text-xs hover:bg-cine-accent-light transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-cine-accent text-white font-extrabold text-xs hover:bg-cine-accent-light transition-colors cursor-pointer"
           >
             Limpar Filtros
           </button>
@@ -327,7 +327,7 @@ export default function CategoryPage({
 
                   {/* Play Overlay Button */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-cine-accent text-black flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-full bg-cine-accent text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
                       <Play className="w-6 h-6 fill-black ml-0.5" />
                     </div>
                   </div>

@@ -201,9 +201,9 @@ export default function RowMovies({
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-recomenda text-neutral-950' : 'bg-cine-accent text-white'
+                      isEditorial ? 'bg-cine-recomenda text-white' : 'bg-cine-accent text-white'
                     }`}>
-                      <Play className={`w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 ${isEditorial ? 'text-neutral-950' : 'text-white'}`} />
+                      <Play className={`w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 ${isEditorial ? 'text-white' : 'text-white'}`} />
                     </div>
                   </div>
 
@@ -228,7 +228,7 @@ export default function RowMovies({
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
-                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_14px_rgba(255,200,0,0.85)]' : 'bg-cine-accent-light'}`} 
+                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_14px_rgba(38,103,255,0.85)]' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>

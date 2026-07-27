@@ -392,7 +392,7 @@ export default function CineReactPlayer({
               animate={{ scale: 1.15, opacity: 1 }}
               exit={{ scale: 1.6, opacity: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-cine-accent/90 backdrop-blur-md flex flex-col items-center justify-center text-black shadow-[0_0_40px_rgba(255,255,255,0.9)] border border-cine-cream/40"
+              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-cine-accent/90 backdrop-blur-md flex flex-col items-center justify-center text-white shadow-[0_0_40px_rgba(255,255,255,0.9)] border border-cine-cream/40"
             >
               {centerAnimation === 'play' && (
                 <Play className="w-10 h-10 fill-black ml-1" />
@@ -524,7 +524,7 @@ export default function CineReactPlayer({
                 {/* Play / Pause Toggle */}
                 <button
                   onClick={togglePlay}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-cine-accent-dark text-black shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-cine-accent-dark text-white shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
                   title={isPlaying ? 'Pausar (Espaço/K)' : 'Reproduzir (Espaço/K)'}
                 >
                   {isPlaying ? (

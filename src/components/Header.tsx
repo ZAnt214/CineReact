@@ -244,7 +244,7 @@ export default function Header({
                   className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
                     currentTab === 'doacoes' 
                       ? 'bg-cine-accent/15 text-cine-accent-light border-cine-accent/30 shadow-lg shadow-cine-surface/10' 
-                      : 'border-neutral-800 bg-neutral-900/40 text-cine-accent-light hover:bg-cine-accent hover:text-black hover:border-cine-accent-light'
+                      : 'border-neutral-800 bg-neutral-900/40 text-cine-accent-light hover:bg-cine-accent hover:text-white hover:border-cine-accent-light'
                   }`}
                 >
                   <Heart className="w-3 h-3 fill-current" />
@@ -256,7 +256,7 @@ export default function Header({
                   <button 
                     id="nav-admin"
                     onClick={() => setCurrentTab('admin')} 
-                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-cine-accent/30 text-cine-accent-light bg-cine-accent/10 hover:bg-cine-accent hover:text-black hover:border-cine-accent-light cursor-pointer`}
+                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-cine-accent/30 text-cine-accent-light bg-cine-accent/10 hover:bg-cine-accent hover:text-white hover:border-cine-accent-light cursor-pointer`}
                   >
                     Painel Admin
                   </button>
@@ -504,7 +504,7 @@ export default function Header({
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-cine-accent-dark text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-cine-accent-dark text-white font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>

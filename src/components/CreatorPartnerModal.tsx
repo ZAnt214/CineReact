@@ -283,7 +283,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
 
                 <a
                   href={mailtoHref}
-                  className="relative z-10 mt-8 hidden lg:flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-sm transition-all shadow-lg shadow-cine-accent/25 active:scale-[0.98] cursor-pointer"
+                  className="relative z-10 mt-8 hidden lg:flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-extrabold text-sm transition-all shadow-lg shadow-cine-accent/25 active:scale-[0.98] cursor-pointer"
                 >
                   Quero ser Parceiro
                   <ArrowRight className="w-4 h-4" />
@@ -420,7 +420,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
                     </button>
                     <a
                       href={mailtoHref}
-                      className="px-5 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-cine-accent/25 active:scale-[0.98] w-full sm:w-auto cursor-pointer whitespace-nowrap"
+                      className="px-5 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-cine-accent/25 active:scale-[0.98] w-full sm:w-auto cursor-pointer whitespace-nowrap"
                     >
                       Quero ser Parceiro
                       <ArrowRight className="w-3.5 h-3.5" />

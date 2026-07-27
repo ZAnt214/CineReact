@@ -169,7 +169,7 @@ export default function ProfilePanel({
             <button
               type="button"
               onClick={() => { onClose(); onOpenAuth?.('login'); }}
-              className="w-full py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-black font-bold text-sm cursor-pointer transition-colors"
+              className="w-full py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-bold text-sm cursor-pointer transition-colors"
             >
               Entrar
             </button>
