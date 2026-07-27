@@ -93,7 +93,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
           {profile.spotlight} Spotlight
         </span>
         {profile.featuredInfluencer && (
-          <span className="flex items-center gap-1 text-purple-400 font-bold ml-auto">
+          <span className="flex items-center gap-1 text-cine-accent-light font-bold ml-auto">
             <Zap className="w-3.5 h-3.5" />
             Influente
           </span>

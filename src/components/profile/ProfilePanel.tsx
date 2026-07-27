@@ -262,7 +262,7 @@ export default function ProfilePanel({
                     <p className="text-[9px] text-zinc-500 uppercase tracking-wide">Sequência</p>
                   </div>
                   <div className="rounded-xl border border-neutral-800/70 bg-neutral-900/30 px-3 py-3 text-center">
-                    <Zap className="w-4 h-4 text-violet-400 mx-auto mb-1" />
+                    <Zap className="w-4 h-4 text-cine-accent-light mx-auto mb-1" />
                     <p className="text-sm font-bold text-white">{profile.xp}</p>
                     <p className="text-[9px] text-zinc-500 uppercase tracking-wide">XP</p>
                   </div>

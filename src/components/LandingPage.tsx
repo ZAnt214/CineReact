@@ -30,15 +30,13 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
 
   return (
     <div className="cine-site-bg min-h-screen text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
-      {/* Accent glows layered on global canvas */}
+      {/* Leve profundidade monocromática */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[880px] h-[480px] bg-gradient-to-b from-cine-recomenda/14 via-cine-accent-light/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 -left-24 w-[380px] h-[380px] bg-cine-elevated/12 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-28 w-[360px] h-[360px] bg-cine-accent-light/8 rounded-full blur-3xl" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-gradient-to-b from-white/[0.03] to-transparent rounded-full blur-3xl" />
       </div>
 
       {/* HEADER / BRAND BAR */}
-      <header className="relative z-10 border-b border-cine-border/50 bg-cine-surface/75 max-md:backdrop-blur-none md:bg-cine-surface/55 md:backdrop-blur-md sticky top-0">
+      <header className="relative z-10 border-b border-neutral-800/80 bg-neutral-950/90 max-md:backdrop-blur-none md:bg-neutral-950/75 md:backdrop-blur-md sticky top-0">
         <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <button 
@@ -85,7 +83,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto font-sans"
         >
           A plataforma para quem ama vídeos de reação a{' '}
-          <span className="text-cine-lilac">
+          <span className="text-cine-accent">
             filmes, séries, animes e games.
           </span>
         </motion.h1>
@@ -144,7 +142,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* KEY BENEFITS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-cine-border/20">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-800/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Por que usar o CineReact?
@@ -155,49 +153,49 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-lilac/30 transition-all group flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-elevated/50 border border-cine-border/30 flex items-center justify-center text-cine-lilac mb-5 group-hover:scale-110 transition-transform">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <motion.div>
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Descubra novos criadores</h3>
-              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
                 Encontre novos canais de reação com facilidade e apoie criadores independentes da comunidade.
               </p>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-recomenda/30 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-surface/80 border border-cine-border/25 flex items-center justify-center text-cine-recomenda mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
                 <Tv className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Encontre seus favoritos</h3>
-              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
                 Encontre reações aos seus filmes, séries, animes e games favoritos organizados em coleções completas.
               </p>
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-accent/25 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-border/20 border border-cine-border/30 flex items-center justify-center text-cine-accent-light mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
                 <BookmarkCheck className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Organize seus conteúdos</h3>
-              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
                 Crie suas próprias listas de reprodução e salve tudo aquilo que você pretende assistir mais tarde.
               </p>
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-cine-accent-light/25 transition-all group flex flex-col justify-between">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-cine-accent/15 border border-cine-accent/25 flex items-center justify-center text-cine-accent mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
                 <Compass className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Navegação simples e intuitiva</h3>
-              <p className="text-xs sm:text-sm text-cine-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
                 Desfrute de uma interface fluida no estilo dos principais serviços de streaming do mercado.
               </p>
             </div>
@@ -206,7 +204,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="relative z-10 cine-container w-full py-16 border-t border-cine-border/20">
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-800/80">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Como Funciona
@@ -261,7 +259,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
             <button
               onClick={onExplore}
               disabled={isNavigating}
-              className="px-8 py-4 rounded-2xl bg-white-light text-black font-black text-base hover:brightness-105 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
+              className="px-8 py-4 rounded-2xl bg-white text-black font-black text-base hover:brightness-105 transition-all shadow-xl shadow-cine-accent/20 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
             >
               <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
               {isNavigating ? (
@@ -275,7 +273,7 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 border-t border-cine-border/25 bg-cine-surface/40 py-12 mt-12 text-cine-muted">
+      <footer className="relative z-10 border-t border-neutral-800/80 bg-neutral-950/80 py-12 mt-12 text-zinc-500">
         <div className="cine-container w-full space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Logo */}

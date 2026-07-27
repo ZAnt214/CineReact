@@ -143,7 +143,7 @@ export default function GamificationPage({
               )}
               <p className="text-cine-accent-light font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
-                <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-purple-400 font-bold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-cine-accent-light font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" /> Acesso Antecipado
                 </span>
               )}
@@ -432,13 +432,13 @@ function MissionCard({
         <div>
           <div className="flex items-center gap-2">
             <h4 className="font-bold text-sm text-white">{title}</h4>
-            {weekly && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">SEMANAL</span>}
+            {weekly && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cine-accent/15 text-cine-accent-light font-mono">SEMANAL</span>}
           </div>
           <p className="text-[11px] text-zinc-500 mt-0.5">{description}</p>
         </div>
         <div className="text-right shrink-0">
           <p className="text-[10px] text-cine-accent-light font-bold">+{xp} XP</p>
-          <p className="text-[10px] text-purple-400 font-bold">+{spotlight}</p>
+          <p className="text-[10px] text-cine-accent-light font-bold">+{spotlight}</p>
         </div>
       </div>
       <div className="h-1.5 bg-neutral-800 rounded-full overflow-hidden mb-1">

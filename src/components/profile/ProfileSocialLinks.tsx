@@ -40,8 +40,8 @@ const PLATFORM_STYLES: Record<
   twitch: {
     Icon: Twitch,
     label: 'Twitch',
-    accent: 'from-violet-400 via-fuchsia-400 to-violet-500',
-    iconClass: 'text-violet-300',
+    accent: 'from-zinc-500 via-zinc-400 to-zinc-500',
+    iconClass: 'text-zinc-300',
   },
 };
 
@@ -127,7 +127,7 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-cine-accent/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(123,44,191,0.1)] ${cfg.strip}`}
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-cine-accent/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(255, 106, 0,0.1)] ${cfg.strip}`}
             >
               <span
                 className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${style.accent} opacity-80`}

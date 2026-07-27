@@ -186,8 +186,8 @@ export default function Header({
       <header 
         className={`fixed top-0 left-0 right-0 z-50 max-md:transition-none md:transition-all md:duration-300 ${
           scrolled 
-            ? 'bg-cine-surface/92 max-md:backdrop-blur-none md:bg-cine-surface/88 md:backdrop-blur-md border-b border-cine-border/40 shadow-lg shadow-black/30' 
-            : 'bg-cine-bg/70 max-md:backdrop-blur-none md:bg-cine-bg/45 md:backdrop-blur-sm border-b border-cine-border/20'
+            ? 'bg-neutral-950/92 max-md:backdrop-blur-none md:bg-neutral-950/88 md:backdrop-blur-md border-b border-neutral-800/80 shadow-lg shadow-black/30' 
+            : 'bg-neutral-950/70 max-md:backdrop-blur-none md:bg-neutral-950/45 md:backdrop-blur-sm border-b border-neutral-800/40'
         }`}
       >
         <div className="cine-container w-full">
@@ -208,8 +208,8 @@ export default function Header({
                   onClick={() => setCurrentTab('inicio')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'inicio' 
-                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
-                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Início
@@ -219,8 +219,8 @@ export default function Header({
                   onClick={() => setCurrentTab('canais')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'canais' 
-                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
-                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Canais Seguidos
@@ -230,8 +230,8 @@ export default function Header({
                   onClick={() => setCurrentTab('minha-lista')} 
                   className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
                     currentTab === 'minha-lista' 
-                      ? 'text-white bg-cine-elevated/50 shadow-sm border border-cine-border/35' 
-                      : 'hover:text-cine-accent-light hover:bg-cine-surface/40'
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
                   }`}
                 >
                   Minha Lista
@@ -504,7 +504,7 @@ export default function Header({
                 {errorMsg && <p className="text-red-400 font-bold text-[11px]">{errorMsg}</p>}
                 {successMsg && <p className="text-emerald-400 font-bold text-[11px]">{successMsg}</p>}
 
-                <button type="submit" disabled={loading} className="w-full bg-white hover:bg-cine-accent-dark text-white font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-cine-accent hover:bg-cine-accent-dark text-white font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cine-accent/20 cursor-pointer">
                   {loading ? 'Sincronizando...' : 'Enviar Solicitação Oficial'}
                 </button>
               </form>
