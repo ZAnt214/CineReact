@@ -46,9 +46,9 @@ export default function CreatorTagVisual({
   };
   const s = sizes[size];
 
-  const from = creatorColors?.from || '#2667ff';
-  const to = creatorColors?.to || '#add7f6';
-  const accentText = creatorColors?.text || '#f0f6ff';
+  const from = creatorColors?.from || '#7b2cbf';
+  const to = creatorColors?.to || '#e0aaff';
+  const accentText = creatorColors?.text || '#f5ebff';
 
   return (
     <span
