@@ -191,7 +191,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   forest: {
     label: 'Floresta',
     gradient: 'from-green-900 via-emerald-950 to-neutral-950',
-    gradientCss: 'linear-gradient(145deg, #14532d, #064e3b, #09090b)',
+    gradientCss: 'linear-gradient(145deg, #14532d, #064e3b, #080a0f)',
     ring: 'ring-emerald-500/50 shadow-[0_0_20px_rgba(34,197,94,0.3)]',
     glow: 'shadow-[0_0_18px_rgba(22,163,74,0.25)]',
     accent: 'text-emerald-300',
@@ -201,7 +201,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   slate: {
     label: 'Grafite',
     gradient: 'from-neutral-800 via-neutral-900 to-neutral-950',
-    gradientCss: 'linear-gradient(145deg, #52525b, #27272a, #09090b)',
+    gradientCss: 'linear-gradient(145deg, #52525b, #171d29, #080a0f)',
     ring: 'ring-zinc-400/50 shadow-[0_0_18px_rgba(161,161,170,0.25)]',
     glow: 'shadow-[0_0_16px_rgba(113,113,122,0.2)]',
     accent: 'text-zinc-300',
@@ -220,9 +220,9 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
     label: 'Ateliê Visionário',
     gradient: 'from-cine-accent-dark via-cine-accent to-cine-accent-light',
     gradientCss:
-      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(255, 106, 0, 0.55) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(199, 125, 255, 0.35) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(90, 24, 154, 0.4) 0%, transparent 46%), linear-gradient(152deg, #3c096c 0%, #240046 42%, #09090b 100%)',
-    ring: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(255, 106, 0,0.45)]',
-    glow: 'shadow-[0_0_32px_rgba(255, 106, 0,0.35)]',
+      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(201, 162, 39, 0.45) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(42, 55, 80, 0.35) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(23, 29, 41, 0.5) 0%, transparent 46%), linear-gradient(152deg, #171d29 0%, #0f131a 42%, #080a0f 100%)',
+    ring: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(201, 162, 39,0.45)]',
+    glow: 'shadow-[0_0_32px_rgba(201, 162, 39,0.35)]',
     accent: 'text-cine-cream',
     animated: true,
     shimmer: true,
