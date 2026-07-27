@@ -1,22 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512">
-  <defs>
-    <linearGradient id="reactGradIcon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#c8f6ff"/>
-      <stop offset="40%" stop-color="#5eead4"/>
-      <stop offset="75%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#0891b2"/>
-    </linearGradient>
-    <linearGradient id="ruleGradIcon" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.08"/>
-      <stop offset="50%" stop-color="#5eead4" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.08"/>
-    </linearGradient>
-  </defs>
-  <rect width="200" height="200" rx="44" fill="#0a0e14"/>
-  <text x="100" y="78" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-weight="500" font-size="28" fill="#f4f9ff" letter-spacing="-0.8">Cine</text>
-  <circle cx="100" cy="92" r="7" fill="none" stroke="#67e8f9" stroke-opacity="0.45" stroke-width="1.2"/>
-  <circle cx="100" cy="92" r="2.5" fill="url(#reactGradIcon)"/>
-  <text x="100" y="118" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-weight="700" font-size="28" fill="url(#reactGradIcon)" letter-spacing="-1">React</text>
-  <rect x="44" y="128" width="112" height="2" rx="1" fill="url(#ruleGradIcon)"/>
-  <text x="100" y="148" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="8" fill="#8fa3b8" letter-spacing="0.2">Sua plataforma de reacts</text>
+  <rect width="200" height="200" rx="40" fill="#0a0e14"/>
+  <text x="100" y="86" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="600" font-size="30" fill="#e8f4fc" letter-spacing="-0.9">Cine</text>
+  <text x="100" y="122" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="700" font-size="30" fill="#22d3ee" letter-spacing="-1">React</text>
+  <text x="100" y="150" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="8" fill="#7a8fa6" letter-spacing="0.15">Sua plataforma de reacts</text>
 </svg>
