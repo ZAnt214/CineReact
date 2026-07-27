@@ -191,7 +191,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   forest: {
     label: 'Floresta',
     gradient: 'from-green-900 via-emerald-950 to-neutral-950',
-    gradientCss: 'linear-gradient(145deg, #14532d, #064e3b, #060714)',
+    gradientCss: 'linear-gradient(145deg, #14532d, #064e3b, #111113)',
     ring: 'ring-emerald-500/50 shadow-[0_0_20px_rgba(34,197,94,0.3)]',
     glow: 'shadow-[0_0_18px_rgba(22,163,74,0.25)]',
     accent: 'text-emerald-300',
@@ -201,7 +201,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
   slate: {
     label: 'Grafite',
     gradient: 'from-neutral-800 via-neutral-900 to-neutral-950',
-    gradientCss: 'linear-gradient(145deg, #52525b, #151a2e, #060714)',
+    gradientCss: 'linear-gradient(145deg, #52525b, #27272a, #111113)',
     ring: 'ring-zinc-400/50 shadow-[0_0_18px_rgba(161,161,170,0.25)]',
     glow: 'shadow-[0_0_16px_rgba(113,113,122,0.2)]',
     accent: 'text-zinc-300',
@@ -220,7 +220,7 @@ export const VISUAL_STYLES: Record<RewardVisualStyle, VisualStyleConfig> = {
     label: 'Ateliê Visionário',
     gradient: 'from-cine-accent-dark via-cine-accent to-cine-accent-light',
     gradientCss:
-      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(56, 189, 248, 0.42) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(99, 102, 241, 0.28) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(34, 211, 238, 0.14) 0%, transparent 46%), linear-gradient(152deg, #151a2e 0%, #0d1020 42%, #060714 100%)',
+      'radial-gradient(ellipse 120% 85% at 50% -8%, rgba(56, 189, 248, 0.35) 0%, transparent 52%), radial-gradient(ellipse 90% 70% at 92% 62%, rgba(63, 63, 70, 0.25) 0%, transparent 48%), radial-gradient(ellipse 80% 60% at 6% 72%, rgba(39, 39, 42, 0.35) 0%, transparent 46%), linear-gradient(152deg, #27272a 0%, #18181b 42%, #111113 100%)',
     ring: 'ring-2 ring-cine-accent shadow-[0_0_28px_rgba(56, 189, 248,0.45)]',
     glow: 'shadow-[0_0_32px_rgba(56, 189, 248,0.35)]',
     accent: 'text-cine-cream',
