@@ -41,7 +41,7 @@ function BrandMark({
 
   const name = (
     <span className="cine-brand-name">
-      Cine<span className="cine-brand-react">React</span>
+      CINE<span className="cine-brand-react">REACT</span>
     </span>
   );
 
