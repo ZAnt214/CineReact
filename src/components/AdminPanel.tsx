@@ -610,7 +610,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         const data = await res.json();
         setRecomendadoLink('');
         fetchAdminData();
-        showMessage('success', `Vídeo "${data.titulo}" adicionado ao CineReact Recomenda!`);
+        showMessage('success', `Vídeo "${data.titulo}" adicionado ao CineReact Recomendado!`);
       } else {
         const err = await res.json();
         showMessage('error', err.error || 'Não foi possível adicionar o vídeo.');
@@ -1337,7 +1337,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
               <Sparkles className="text-cine-accent-light w-5 h-5 animate-pulse" />
-              CineReact Recomenda (Escolha dos Editores)
+              CineReact Recomendado (Escolha dos Editores)
             </h2>
             <p className="text-xs text-zinc-400">
               Gerencie os vídeos recomendados pelos editores do CineReact. Você pode colar o link do vídeo diretamente ou pesquisar no catálogo.
