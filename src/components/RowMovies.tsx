@@ -199,21 +199,21 @@ export default function RowMovies({
                   />
                   
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center z-10">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
-                      isEditorial ? 'bg-cine-recomenda text-white' : 'bg-cine-accent text-white'
+                      isEditorial ? 'cine-recomenda-play-btn text-white' : 'bg-cine-accent text-white'
                     }`}>
-                      <Play className={`w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 ${isEditorial ? 'text-white' : 'text-white'}`} />
+                      <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ml-0.5 text-white" />
                     </div>
                   </div>
 
                   {/* Duration Badge */}
-                  <span className={`absolute bottom-2.5 right-2.5 h-6.5 px-2.5 inline-flex items-center gap-1 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold rounded-lg shadow-md leading-none ${
+                  <span className={`absolute bottom-2.5 right-2.5 z-20 h-6.5 px-2.5 inline-flex items-center gap-1 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold rounded-lg leading-none ${
                     isEditorial
-                      ? 'bg-neutral-950/90 text-cine-accent border border-cine-accent/35'
-                      : 'bg-black/85 text-zinc-200 border border-zinc-700/60'
+                      ? 'cine-recomenda-duration'
+                      : 'bg-black/85 text-zinc-200 border border-zinc-700/60 shadow-md'
                   }`}>
-                    <Clock className={`w-3 h-3 shrink-0 ${isEditorial ? 'text-cine-accent' : 'text-cine-accent-light'}`} />
+                    <Clock className={`w-3 h-3 shrink-0 ${isEditorial ? 'text-sky-300' : 'text-cine-accent-light'}`} />
                     <span>{react.duracao}</span>
                   </span>
 
@@ -228,7 +228,7 @@ export default function RowMovies({
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-neutral-950/60">
                       <div 
-                        className={`h-full rounded-r-xs ${isEditorial ? 'bg-cine-recomenda shadow-[0_0_14px_rgba(56, 189, 248,0.85)]' : 'bg-cine-accent-light'}`} 
+                        className={`h-full rounded-r-xs ${isEditorial ? 'cine-recomenda-progress' : 'bg-cine-accent-light'}`} 
                         style={{ width: `${progressMap[react.id]}%` }}
                       />
                     </div>
@@ -237,15 +237,15 @@ export default function RowMovies({
 
                 {/* CARD BODY */}
                 <div className={`p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 ${isEditorial ? 'cine-recomenda-body' : 'catalog-card-standard-body'}`}>
-                  <h3 className={`text-sm sm:text-base md:text-lg font-bold line-clamp-2 leading-snug transition-colors min-h-[2.5rem] sm:min-h-[2.75rem] ${
+                  <h3 className={`text-sm sm:text-base md:text-lg font-bold line-clamp-2 leading-snug min-h-[2.5rem] sm:min-h-[2.75rem] ${
                     isEditorial
-                      ? 'text-zinc-100 group-hover/card:text-cine-accent'
-                      : 'text-white group-hover/card:text-cine-accent-light'
+                      ? 'cine-recomenda-title text-zinc-100'
+                      : 'text-white group-hover/card:text-cine-accent-light transition-colors'
                   }`}>
                     {react.titulo}
                   </h3>
                   
-                  <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'border-t border-cine-recomenda/20' : 'border-t border-cine-border/25'}`}>
+                  <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'cine-recomenda-footer' : 'border-t border-cine-border/25'}`}>
                     <span 
                       onClick={(e) => {
                         if (onChannelClick) {

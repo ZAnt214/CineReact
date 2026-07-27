@@ -133,7 +133,7 @@
   font-size: 0.8125rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  color: var(--color-cine-accent-light);
+  color: #7dd3fc;
   max-width: 42rem;
 }
 
@@ -206,15 +206,31 @@
   }
 }
 
+@keyframes cine-recomenda-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes cine-recomenda-glow-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 .cine-recomenda-card {
   position: relative;
-  background: linear-gradient(180deg, #1c1c1f 0%, #141416 100%);
-  border: 1px solid rgba(34, 211, 238, 0.34);
+  background: linear-gradient(
+    165deg,
+    rgba(56, 189, 248, 0.09) 0%,
+    rgba(28, 28, 31, 0.98) 24%,
+    #141416 100%
+  );
+  border: 1px solid rgba(125, 211, 252, 0.38);
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.06) inset,
+    0 0 0 1px rgba(186, 230, 253, 0.07) inset,
     0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 22px rgba(56, 189, 248, 0.09);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    0 0 24px rgba(56, 189, 248, 0.14),
+    0 0 48px rgba(34, 211, 238, 0.07);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .cine-recomenda-card::before {
@@ -223,48 +239,124 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: var(--color-cine-recomenda);
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #0ea5e9 0%,
+    #38bdf8 25%,
+    #bae6fd 50%,
+    #38bdf8 75%,
+    #0ea5e9 100%
+  );
+  background-size: 200% 100%;
+  animation: cine-recomenda-shine 5s ease-in-out infinite;
   opacity: 0.95;
   z-index: 20;
   pointer-events: none;
 }
 
+.cine-recomenda-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 90% 60% at 50% -20%, rgba(125, 211, 252, 0.14) 0%, transparent 62%);
+  pointer-events: none;
+  z-index: 0;
+  animation: cine-recomenda-glow-pulse 4s ease-in-out infinite;
+}
+
 .cine-recomenda-card:hover {
-  border-color: rgba(125, 211, 252, 0.48);
+  border-color: rgba(186, 230, 253, 0.55);
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.12) inset,
-    0 16px 40px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(56, 189, 248, 0.14);
+    0 0 0 1px rgba(125, 211, 252, 0.16) inset,
+    0 18px 44px rgba(0, 0, 0, 0.52),
+    0 0 36px rgba(56, 189, 248, 0.26),
+    0 0 64px rgba(34, 211, 238, 0.14);
+}
+
+.cine-recomenda-thumb {
+  position: relative;
+  z-index: 1;
+}
+
+.cine-recomenda-progress {
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8, #7dd3fc);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.85);
+}
+
+.cine-recomenda-title {
+  transition: color 0.25s ease;
+}
+
+.group\/card:hover .cine-recomenda-title {
+  color: #bae6fd;
+}
+
+.cine-recomenda-footer {
+  border-top: 1px solid rgba(125, 211, 252, 0.22);
 }
 
 .cine-recomenda-thumb::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 45%,
-    rgba(17, 17, 19, 0.35) 72%,
-    rgba(17, 17, 19, 0.9) 100%
-  );
+  z-index: 5;
+  background:
+    radial-gradient(ellipse 72% 58% at 0% 0%, rgba(186, 230, 253, 0.2) 0%, transparent 56%),
+    radial-gradient(ellipse 48% 42% at 100% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 52%),
+    linear-gradient(
+      180deg,
+      transparent 45%,
+      rgba(17, 17, 19, 0.35) 72%,
+      rgba(17, 17, 19, 0.9) 100%
+    );
   pointer-events: none;
 }
 
 .cine-recomenda-body {
-  background: linear-gradient(180deg, rgba(28, 28, 31, 0.98) 0%, rgba(20, 20, 22, 1) 100%);
-  border-top: 1px solid rgba(34, 211, 238, 0.14);
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(22, 28, 38, 0.98) 0%,
+    rgba(16, 18, 24, 1) 100%
+  );
+  border-top: 1px solid rgba(125, 211, 252, 0.22);
+}
+
+.cine-recomenda-play-btn {
+  background: linear-gradient(180deg, #bae6fd 0%, #38bdf8 55%, #0ea5e9 100%);
+  border: 1px solid rgba(224, 242, 254, 0.85);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 6px 20px rgba(56, 189, 248, 0.45),
+    0 0 24px rgba(125, 211, 252, 0.25);
+}
+
+.cine-recomenda-duration {
+  background: rgba(17, 17, 19, 0.88);
+  color: #7dd3fc;
+  border: 1px solid rgba(125, 211, 252, 0.45);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cine-recomenda-card::before,
+  .cine-recomenda-card::after {
+    animation: none !important;
+  }
 }
 
 .cine-recomenda-creator {
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 600;
-  color: var(--color-cine-accent-light);
+  color: #7dd3fc;
   letter-spacing: 0.01em;
 }
 
 .cine-recomenda-creator:hover {
-  color: var(--color-cine-accent-light);
+  color: #bae6fd;
 }
 
 /* Custom scrollbar for a premium look, universally styled to prevent default system glitches */
