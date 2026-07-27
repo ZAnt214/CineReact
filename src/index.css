@@ -5,23 +5,23 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Plus Jakarta Sans", "Sora", ui-sans-serif, system-ui, sans-serif;
-  /* Gold dark interface */
+  /* Vivid gold dark interface */
   --color-cine-bg: #09090b;
   --color-cine-surface: #18181b;
   --color-cine-elevated: #27272a;
   --color-cine-border: #3f3f46;
   --color-cine-cream: #fafafa;
   --color-cine-muted: #a1a1aa;
-  --color-cine-accent: #d4af37;
-  --color-cine-accent-light: #e8c84a;
-  --color-cine-accent-dark: #b8941f;
-  --color-cine-mint: #d4af37;
-  --color-cine-mint-muted: #b8941f;
-  --color-cine-lilac: #c9a227;
-  --color-cine-lilac-muted: #9a7b0a;
-  --color-cine-brand: #d4af37;
-  --color-cine-recomenda: #d4af37;
-  --color-cine-recomenda-muted: #b8941f;
+  --color-cine-accent: #ffd700;
+  --color-cine-accent-light: #ffe566;
+  --color-cine-accent-dark: #e6b000;
+  --color-cine-mint: #ffd700;
+  --color-cine-mint-muted: #e6b000;
+  --color-cine-lilac: #ffc800;
+  --color-cine-lilac-muted: #d4a000;
+  --color-cine-brand: #ffd700;
+  --color-cine-recomenda: #ffd700;
+  --color-cine-recomenda-muted: #e6b000;
 }
 
 .font-display {
@@ -63,7 +63,7 @@
 
 .cine-brand-react {
   font-weight: 700;
-  color: #d4af37;
+  color: #ffd700;
   letter-spacing: 0.04em;
 }
 
@@ -133,7 +133,7 @@
   font-size: 0.8125rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  color: #d4af37;
+  color: #ffd700;
   max-width: 42rem;
 }
 
@@ -154,9 +154,9 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #d4af37;
+  color: #ffd700;
   background: rgba(9, 9, 11, 0.88);
-  border: 1px solid rgba(212, 175, 55, 0.55);
+  border: 1px solid rgba(255, 215, 0, 0.58);
   border-radius: 0.25rem;
   line-height: 1;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -186,7 +186,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
+  background: #ffd700;
 }
 
 /* Hide scrollbar completely for all horizontal-scrolling carousels */
@@ -473,7 +473,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 .profile-atelier-beam {
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(212, 175, 55, 0.28) 0%, rgba(212, 175, 55, 0.08) 48%, transparent 72%);
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.09) 48%, transparent 72%);
   animation: profile-atelier-beam-pulse 12s ease-in-out infinite;
 }
 
@@ -490,6 +490,6 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   font-family: 'Sora', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #d4af37;
+  color: #ffd700;
 }
 

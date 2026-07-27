@@ -124,7 +124,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Janela da Rua',
     creatorId: 'janela-da-rua-canal',
     creatorName: 'Janela da Rua',
-    creatorColors: { from: '#92680a', to: '#e8c84a', text: '#fefce8' },
+    creatorColors: { from: '#b8860b', to: '#ffe566', text: '#fffbeb' },
   },
   {
     id: 'tag-vip-janela-da-rua',
@@ -254,7 +254,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Sim Sou Lives',
     creatorId: 'sim-sou-lives-canal',
     creatorName: 'Sim Sou Lives',
-    creatorColors: { from: '#92680a', to: '#d4af37', text: '#fefce8' },
+    creatorColors: { from: '#b8860b', to: '#ffd700', text: '#fffbeb' },
   },
   {
     id: 'tag-squad-sim-sou-lives',
@@ -267,7 +267,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Assista 5 reações de Sim Sou Lives',
     creatorId: 'sim-sou-lives-canal',
     creatorName: 'Sim Sou Lives',
-    creatorColors: { from: '#7a5c0a', to: '#e8c84a', text: '#fef9c3' },
+    creatorColors: { from: '#9a7209', to: '#ffe566', text: '#fef9c3' },
   },
   {
     id: 'tag-fan-nat-vic-mv',
@@ -280,7 +280,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Siga o canal Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#92680a', to: '#d4af37', text: '#fefce8' },
+    creatorColors: { from: '#b8860b', to: '#ffd700', text: '#fffbeb' },
   },
   {
     id: 'tag-squad-nat-vic-mv',
@@ -293,7 +293,7 @@ const CREATOR_TAGS: RewardItemDefinition[] = [
     obtainHint: 'Assista 5 reações de Nat e Vic MV',
     creatorId: 'nat-e-vic-mv-canal',
     creatorName: 'Nat e Vic MV',
-    creatorColors: { from: '#7a5c0a', to: '#e8c84a', text: '#fef9c3' },
+    creatorColors: { from: '#9a7209', to: '#ffe566', text: '#fef9c3' },
   },
   {
     id: 'tag-fan-biana-clips',
