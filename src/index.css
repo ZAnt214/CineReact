@@ -514,6 +514,11 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 /* Catalog Carousel & Card Optimizations */
+.catalog-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 360px;
+}
+
 .catalog-carousel {
   touch-action: pan-x pan-y pinch-zoom;
   overscroll-behavior-x: contain;
@@ -523,11 +528,17 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   scroll-behavior: auto;
 }
 
+.catalog-carousel.is-scrolling .cine-recomenda-card::before,
+.catalog-carousel.is-scrolling .cine-recomenda-card::after {
+  animation-play-state: paused;
+}
+
 .catalog-card {
   touch-action: pan-x pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
+  contain: layout paint style;
 }
 
 /* Base compartilhada — fundo unificado em todos os cards de vídeo */
@@ -611,13 +622,19 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   backdrop-filter: blur(8px);
 }
 
-/* Mobile: native momentum scroll + snap like streaming apps */
+/* Mobile: native momentum scroll + light snap (proximity avoids hitch on fast flings) */
 @media (pointer: coarse) {
   .catalog-carousel {
-    scroll-snap-type: x mandatory;
+    touch-action: pan-x pinch-zoom;
+    scroll-snap-type: x proximity;
     scroll-padding-inline: 1rem;
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .catalog-carousel .catalog-card,
+  .catalog-carousel [class*="group/card"] {
+    touch-action: pan-x pinch-zoom;
   }
 
   .catalog-card {
