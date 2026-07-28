@@ -141,17 +141,19 @@ function SideNavHub({
 }: SideNavHubProps) {
   const { isSideNavOpen, closeSideNav } = useSideNavStore();
   const [creatorsExpanded, setCreatorsExpanded] = React.useState(true);
+  const [hasOpened, setHasOpened] = React.useState(false);
   const openedAtRef = useRef(0);
 
   useEffect(() => {
     if (isSideNavOpen) {
       openedAtRef.current = Date.now();
+      setHasOpened(true);
     }
   }, [isSideNavOpen]);
 
   const creators = useMemo(
-    () => buildVideoCreatorsNavList(obras, reacts),
-    [obras, reacts]
+    () => (hasOpened ? buildVideoCreatorsNavList(obras, reacts) : []),
+    [hasOpened, obras, reacts]
   );
 
   const demoCreator = creators.find((c) => c.isDemo);
@@ -193,24 +195,32 @@ function SideNavHub({
     return currentTab === 'canal' && selectedCanalId === creator.id;
   };
 
-  if (!isSideNavOpen || typeof document === 'undefined') return null;
+  if (typeof document === 'undefined') return null;
 
   const content = (
     <>
       <button
         type="button"
-        className="fixed inset-0 z-[94] bg-black/60 md:bg-black/40"
+        className={`fixed inset-0 z-[94] bg-black/60 md:bg-black/40 md:transition-opacity md:duration-150 ${
+          isSideNavOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
         onClick={() => {
           if (Date.now() - openedAtRef.current < 320) return;
           closeSideNav();
         }}
         aria-label="Fechar menu"
+        aria-hidden={!isSideNavOpen}
+        tabIndex={isSideNavOpen ? 0 : -1}
       />
 
       <aside
         id="side-nav-panel"
-        className="fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-neutral-950 border-r border-neutral-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden"
+        inert={!isSideNavOpen}
+        className={`fixed left-0 top-0 bottom-0 z-[95] w-64 max-w-[85vw] bg-neutral-950 border-r border-neutral-800/60 flex flex-col shadow-2xl shadow-black/40 overflow-hidden md:transition-transform md:duration-200 md:ease-out ${
+          isSideNavOpen ? 'translate-x-0 pointer-events-auto' : '-translate-x-full pointer-events-none'
+        }`}
         aria-label="Menu principal"
+        aria-hidden={!isSideNavOpen}
       >
         <div className="shrink-0 border-b border-neutral-800/60 px-4 py-3 space-y-3">
           <div className="flex items-center justify-between">
@@ -228,8 +238,8 @@ function SideNavHub({
           </div>
 
           <SearchBar
-            obras={obras}
-            reacts={reacts}
+            obras={hasOpened ? obras : []}
+            reacts={hasOpened ? reacts : []}
             onSearch={onSearch}
             onSelectObra={onSelectObra}
             onAfterSelect={closeSideNav}
