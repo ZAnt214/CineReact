@@ -80,12 +80,9 @@ export default function RowMovies({
     if (!isMouseDownRef.current || !rowRef.current) return;
 
     const deltaX = e.clientX - startXRef.current;
-    if (deltaX === 0) return;
+    if (Math.abs(deltaX) < 3) return;
 
-    if (Math.abs(deltaX) > 2) {
-      isDraggedRef.current = true;
-    }
-
+    isDraggedRef.current = true;
     e.preventDefault();
     rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
     markCarouselScrolling();
@@ -197,14 +194,13 @@ export default function RowMovies({
             onDragStart: (e: React.DragEvent) => e.preventDefault(),
           } : {})}
           onScroll={markCarouselScrolling}
-          onTouchStart={markCarouselScrolling}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-proximity"
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
             const cardClass = isEditorial
-              ? 'cine-recomenda-card catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all'
-              : 'catalog-card-standard catalog-card snap-start w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all';
+              ? 'cine-recomenda-card catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all'
+              : 'catalog-card-standard catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all';
 
             return (
               <div
