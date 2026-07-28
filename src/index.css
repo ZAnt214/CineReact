@@ -522,6 +522,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 .catalog-carousel {
   touch-action: pan-x pan-y pinch-zoom;
   overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
   user-select: none;
   -webkit-user-select: none;
@@ -625,16 +626,11 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 /* Mobile: native momentum scroll + light snap (proximity avoids hitch on fast flings) */
 @media (pointer: coarse) {
   .catalog-carousel {
-    touch-action: pan-x pinch-zoom;
+    touch-action: pan-x pan-y pinch-zoom;
     scroll-snap-type: x proximity;
     scroll-padding-inline: 1rem;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .catalog-carousel .catalog-card,
-  .catalog-carousel [class*="group/card"] {
-    touch-action: pan-x pinch-zoom;
   }
 
   .catalog-card {
