@@ -32,9 +32,18 @@ export default function RowMovies({
   const scrollLeftRef = useRef(0);
   const isDraggedRef = useRef(false);
   const suppressClickRef = useRef(false);
+  const scrollIdleTimerRef = useRef<number | undefined>(undefined);
   const [enableDragScroll, setEnableDragScroll] = useState(false);
 
-  const DRAG_THRESHOLD_PX = 12;
+  const markCarouselScrolling = () => {
+    const el = rowRef.current;
+    if (!el) return;
+    el.classList.add('is-scrolling');
+    window.clearTimeout(scrollIdleTimerRef.current);
+    scrollIdleTimerRef.current = window.setTimeout(() => {
+      el.classList.remove('is-scrolling');
+    }, 180);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -44,7 +53,10 @@ export default function RowMovies({
 
     update();
     mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
+    return () => {
+      mediaQuery.removeEventListener('change', update);
+      window.clearTimeout(scrollIdleTimerRef.current);
+    };
   }, []);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -66,16 +78,17 @@ export default function RowMovies({
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isMouseDownRef.current || !rowRef.current) return;
-    
+
     const deltaX = e.clientX - startXRef.current;
-    if (Math.abs(deltaX) > DRAG_THRESHOLD_PX) {
+    if (deltaX === 0) return;
+
+    if (Math.abs(deltaX) > 2) {
       isDraggedRef.current = true;
     }
 
-    if (isDraggedRef.current) {
-      e.preventDefault();
-      rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
-    }
+    e.preventDefault();
+    rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
+    markCarouselScrolling();
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -183,7 +196,9 @@ export default function RowMovies({
             onPointerCancel: handlePointerUp,
             onDragStart: (e: React.DragEvent) => e.preventDefault(),
           } : {})}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-mandatory"
+          onScroll={markCarouselScrolling}
+          onTouchStart={markCarouselScrolling}
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing snap-x snap-proximity"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
