@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Mail,
@@ -286,11 +287,13 @@ export default function AuthModal({
     return { label: 'Forte', width: '100%', color: 'bg-green-500' };
   })();
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[210] overscroll-none"
+          className="fixed inset-0 z-[230] overscroll-none"
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
@@ -616,6 +619,7 @@ export default function AuthModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

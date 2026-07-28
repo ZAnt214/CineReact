@@ -31,7 +31,10 @@ export default function RowMovies({
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const isDraggedRef = useRef(false);
+  const suppressClickRef = useRef(false);
   const [enableDragScroll, setEnableDragScroll] = useState(false);
+
+  const DRAG_THRESHOLD_PX = 12;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -65,7 +68,7 @@ export default function RowMovies({
     if (!isMouseDownRef.current || !rowRef.current) return;
     
     const deltaX = e.clientX - startXRef.current;
-    if (Math.abs(deltaX) > 6) {
+    if (Math.abs(deltaX) > DRAG_THRESHOLD_PX) {
       isDraggedRef.current = true;
     }
 
@@ -78,17 +81,21 @@ export default function RowMovies({
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isMouseDownRef.current) {
       isMouseDownRef.current = false;
+      suppressClickRef.current = isDraggedRef.current;
       try {
         if (e.currentTarget.hasPointerCapture(e.pointerId)) {
           e.currentTarget.releasePointerCapture(e.pointerId);
         }
       } catch (_) {}
+      window.setTimeout(() => {
+        isDraggedRef.current = false;
+        suppressClickRef.current = false;
+      }, 0);
     }
   };
 
   const handleCardClick = (reactId: string, obraId: string) => {
-    if (isDraggedRef.current) {
-      isDraggedRef.current = false;
+    if (suppressClickRef.current || isDraggedRef.current) {
       return;
     }
     onPlayVideo(reactId, obraId);
