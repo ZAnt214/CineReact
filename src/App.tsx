@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback, useTransition, useRef } from 'react';
 import Header from './components/Header.tsx';
 import RowMovies from './components/RowMovies.tsx';
 import ObraPage from './components/ObraPage.tsx';
@@ -78,6 +78,7 @@ export default function App() {
     setAuthInitialMode(mode);
     setShowAuthModal(true);
   }, []);
+  const pendingPlayRef = useRef<{ reactId: string; obraId: string } | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
@@ -96,7 +97,13 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object' && 'isLoggedIn' in parsed) {
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          parsed.isLoggedIn === true &&
+          typeof parsed.email === 'string' &&
+          parsed.email.trim() !== ''
+        ) {
           return parsed;
         }
       } catch (e) {
@@ -110,6 +117,8 @@ export default function App() {
       isAdmin: false
     };
   });
+
+  const isUserAuthenticated = Boolean(user.isLoggedIn && user.email?.trim());
 
   const setUser = (newUser: UserState) => {
     setUserState(newUser);
@@ -300,10 +309,12 @@ export default function App() {
   };
 
   const handlePlayVideo = (reactId: string, obraId: string) => {
-    if (!user.isLoggedIn) {
+    if (!isUserAuthenticated) {
+      pendingPlayRef.current = { reactId, obraId };
       openAuthModal('login');
       return;
     }
+    pendingPlayRef.current = null;
     window.scrollTo(0, 0);
     setSelectedObraId(obraId);
     setSelectedReactId(reactId);
@@ -1483,19 +1494,6 @@ export default function App() {
         onClose={gamification.clearPendingReward}
       />
 
-      <AuthModal 
-        isOpen={showAuthModal}
-        initialMode={authInitialMode}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={(loggedUser, isNewUser) => {
-          setUser(loggedUser);
-          setShowAuthModal(false);
-          if (isNewUser) {
-            setShowWelcomeModal(true);
-          }
-        }}
-      />
-
       {/* WELCOME / EXPLANATION MODAL */}
       <AnimatePresence>
         {showWelcomeModal && (
@@ -1570,6 +1568,32 @@ export default function App() {
         </motion.div>
       )}
     </AnimatePresence>
+
+    <AuthModal
+      isOpen={showAuthModal}
+      initialMode={authInitialMode}
+      onClose={() => {
+        setShowAuthModal(false);
+        pendingPlayRef.current = null;
+      }}
+      onSuccess={(loggedUser, isNewUser) => {
+        setUser(loggedUser);
+        setShowAuthModal(false);
+
+        const pending = pendingPlayRef.current;
+        if (pending && loggedUser.isLoggedIn && loggedUser.email?.trim()) {
+          pendingPlayRef.current = null;
+          window.scrollTo(0, 0);
+          setSelectedObraId(pending.obraId);
+          setSelectedReactId(pending.reactId);
+          setCurrentTab('reproducao');
+        }
+
+        if (isNewUser) {
+          setShowWelcomeModal(true);
+        }
+      }}
+    />
     </>
   );
 }
