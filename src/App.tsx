@@ -756,7 +756,10 @@ export default function App() {
   }, [currentTab]);
 
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
-  const showCreatorBanner = isCreatorBannerVisible && !['landing', 'admin', 'doacoes'].includes(currentTab);
+  const showCreatorBanner =
+    isCreatorBannerVisible &&
+    !showCreatorPartnerModal &&
+    !['landing', 'admin', 'doacoes'].includes(currentTab);
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
     return <MaintenanceScreen settings={platformSettings} />;
