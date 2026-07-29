@@ -24,6 +24,8 @@ import CineReactLogo from './components/CineReactLogo.tsx';
 import GamificationPage from './components/GamificationPage.tsx';
 import CreatorProfilePage from './components/CreatorProfilePage.tsx';
 import GamificationRewardToast from './components/GamificationRewardToast.tsx';
+import CineClipsPage from './components/cineclips/CineClipsPage.tsx';
+import CineClipsHashtagPage from './components/cineclips/CineClipsHashtagPage.tsx';
 import { useGamification } from './hooks/useGamification.ts';
 import { isVerifiedCreatorLoadout } from './gamification/verifiedCreator.ts';
 import OptimizedImage from './components/OptimizedImage.tsx';
@@ -59,6 +61,11 @@ export default function App() {
   });
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [selectedReactId, setSelectedReactId] = useState<string | null>(null);
+  const [cineClipsInitialClipId, setCineClipsInitialClipId] = useState<string | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('clip') || undefined;
+  });
   
   // Search overlay state
   const [searchResults, setSearchResults] = useState<Obra[]>([]);
@@ -465,7 +472,8 @@ export default function App() {
       .filter((r): r is ReactVideo => !!r);
   }, [continueWatching, reacts]);
 
-  const catalogActive = currentTab !== 'landing';
+  const catalogActive = currentTab !== 'landing' && currentTab !== 'cineclips' && !currentTab.startsWith('cineclips-hashtag-');
+  const isCineClipsView = currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-');
 
   useEffect(() => {
     if (!catalogActive) resetSideNavOnLeave();
@@ -763,7 +771,8 @@ export default function App() {
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
   const showCreatorBanner =
     isCreatorBannerVisible &&
-    !['landing', 'admin', 'doacoes', 'criadores-parceiros', 'download-logo'].includes(currentTab);
+    !['landing', 'admin', 'doacoes', 'criadores-parceiros', 'download-logo', 'cineclips'].includes(currentTab) &&
+    !currentTab.startsWith('cineclips-hashtag-');
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
     return <MaintenanceScreen settings={platformSettings} />;
@@ -824,6 +833,7 @@ export default function App() {
       <div className="flex flex-col flex-1 min-h-screen w-full">
       
       {/* HEADER & TOP NAVIGATION */}
+      {!isCineClipsView && (
       <Header 
         currentTab={currentTab}
         hasSideNav={catalogActive}
@@ -843,6 +853,7 @@ export default function App() {
           setSelectedReactId(null);
         }}
       />
+      )}
 
       {/* CORE VIEWPORT */}
       <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none">
@@ -1454,6 +1465,39 @@ export default function App() {
                 className="w-full flex-1"
               >
                 <LogoDownloadPage onBack={() => setCurrentTab('inicio')} />
+              </motion.div>
+            )}
+
+            {currentTab === 'cineclips' && (
+              <CineClipsPage
+                key="cineclips-view"
+                user={user}
+                initialClipId={cineClipsInitialClipId}
+                onBack={() => {
+                  setCineClipsInitialClipId(undefined);
+                  setCurrentTab('inicio');
+                }}
+                onOpenHashtag={(tag) => setCurrentTab(`cineclips-hashtag-${tag.replace(/^#/, '')}`)}
+                onFollowCreator={handleToggleSeguir}
+              />
+            )}
+
+            {currentTab.startsWith('cineclips-hashtag-') && (
+              <motion.div
+                key={currentTab}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <CineClipsHashtagPage
+                  hashtag={currentTab.replace('cineclips-hashtag-', '')}
+                  onBack={() => setCurrentTab('cineclips')}
+                  onSelectClip={(clipId) => {
+                    setCineClipsInitialClipId(clipId);
+                    setCurrentTab('cineclips');
+                  }}
+                />
               </motion.div>
             )}
 

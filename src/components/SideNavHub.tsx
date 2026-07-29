@@ -14,6 +14,7 @@ import {
   Sparkles,
   Radio,
   Download,
+  Zap,
 } from 'lucide-react';
 import { useSideNavStore, sideNavStore } from '../hooks/useSideNavStore.ts';
 import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
@@ -32,6 +33,7 @@ export const SIDE_NAV_ITEMS = [
   { id: 'categoria-anime', label: 'Animes', icon: Tv },
   { id: 'categoria-serie', label: 'Séries', icon: Clapperboard },
   { id: 'categoria-almoco', label: 'Hora do Almoço', icon: UtensilsCrossed },
+  { id: 'cineclips', label: 'CineClips', icon: Zap },
   { id: 'club', label: 'CineReact Club', icon: Trophy },
   { id: 'download-logo', label: 'Baixar Logo', icon: Download },
 ] as const;

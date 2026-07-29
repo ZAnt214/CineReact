@@ -14,6 +14,7 @@ import {
   SettingsAdminPage,
   SecurityAdminPage,
 } from './pages/AdminPages.tsx';
+import CineClipsAdminPage from './pages/CineClipsAdminPage.tsx';
 
 interface AdminShellProps {
   user: UserState;
@@ -35,6 +36,8 @@ export function AdminShell({ user, onClose, onSelectObra }: AdminShellProps) {
         return <AdminPanel user={user} onSelectObra={onSelectObra} forcedTab="catalogo" embedded />;
       case 'conteudo':
         return <AdminPanel user={user} onSelectObra={onSelectObra} forcedTab="conteudo" embedded />;
+      case 'cineclips':
+        return <CineClipsAdminPage email={email} />;
       case 'criadores':
         return <AdminPanel user={user} onSelectObra={onSelectObra} forcedTab="criadores" embedded />;
       case 'moderacao':

@@ -94,7 +94,13 @@ export type GamificationEventType =
   | 'share'
   | 'follow_creator'
   | 'discover_creator'
-  | 'lunch_pick';
+  | 'lunch_pick'
+  | 'clip_watch'
+  | 'clip_watch_complete'
+  | 'clip_like'
+  | 'clip_comment'
+  | 'clip_share'
+  | 'clip_favorite';
 
 export interface GamificationStats {
   totalWatchTimeMinutes: number;
@@ -111,6 +117,8 @@ export interface GamificationStats {
   commentLikesReceived: number;
   listEngagement: number;
   creatorWatchCounts?: Record<string, number>;
+  clipsWatched?: number;
+  clipInteractions?: number;
 }
 
 export interface UnlockedRewardEntry {

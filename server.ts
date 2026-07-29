@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
+import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
 import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
 import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
@@ -3111,6 +3112,7 @@ app.get("/api/search", (req, res) => {
 // ==========================================
 registerGamificationRoutes(app);
 registerAdminPanelRoutes(app, requireAdmin);
+registerCineClipsRoutes(app, requireAdmin);
 
 app.get("/api/user/account-status", (req, res) => {
   const email = String(req.query.email || "").trim().toLowerCase();

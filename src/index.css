@@ -397,6 +397,22 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cineclips-page {
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.08), transparent 55%), #000;
+}
+
 /* Evita arrastar imagens; não definir touch-action aqui — bloqueia scroll nos carrosséis */
 img,
 video {
