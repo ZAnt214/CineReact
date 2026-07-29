@@ -28,6 +28,10 @@ export interface ReactVideo {
   episodioNum?: number;
   isRecomendado?: boolean;
   likes?: number;
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'hidden';
+  isPinnedHome?: boolean;
+  scheduledAt?: string;
+  isLaunch?: boolean;
 }
 
 import type { PublicProfileDisplay } from './types/gamification.ts';
@@ -58,6 +62,7 @@ export interface Comentario {
   isDonor?: boolean;
   profileDisplay?: PublicProfileDisplay;
   publicProfile?: PublicUserProfile;
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'hidden';
 }
 
 export interface ListaPersonalizada {
@@ -110,5 +115,11 @@ export interface UserAccount {
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
   socialLinks?: CreatorSocialLinks;
+  role?: 'user' | 'moderator' | 'curator' | 'admin';
+  isSuspended?: boolean;
+  suspendedUntil?: string;
+  isBanned?: boolean;
+  bannedAt?: string;
+  lastActiveAt?: string;
 }
 

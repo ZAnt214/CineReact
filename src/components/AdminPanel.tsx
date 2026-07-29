@@ -9,15 +9,17 @@ type AdminTab = 'catalogo' | 'conteudo' | 'criadores' | 'moderacao' | 'sistema';
 interface AdminPanelProps {
   user: UserState;
   onSelectObra: (id: string) => void;
+  forcedTab?: AdminTab;
+  embedded?: boolean;
 }
 
-export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
+export default function AdminPanel({ user, onSelectObra, forcedTab, embedded = false }: AdminPanelProps) {
   const [obras, setObras] = useState<Obra[]>([]);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [reacts, setReacts] = useState<ReactVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<AdminTab>('catalogo');
+  const [activeTab, setActiveTab] = useState<AdminTab>(forcedTab || 'catalogo');
   const [solicitacoes, setSolicitacoes] = useState<Notificacao[]>([]);
   const [editingObra, setEditingObra] = useState<Obra | null>(null);
   const [savingObra, setSavingObra] = useState(false);
@@ -70,6 +72,10 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
   const [catalogVideoPreview, setCatalogVideoPreview] = useState<any>(null);
   const [loadingCatalogVideoPreview, setLoadingCatalogVideoPreview] = useState(false);
   const [savingCatalogVideo, setSavingCatalogVideo] = useState(false);
+
+  useEffect(() => {
+    if (forcedTab) setActiveTab(forcedTab);
+  }, [forcedTab]);
 
   const fetchSupabaseStatus = async () => {
     try {
@@ -696,8 +702,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <motion.div className="min-h-screen bg-cine-bg cine-container pt-24 pb-20 w-full space-y-8 text-white">
+    <motion.div className={embedded ? 'space-y-6 text-white' : 'min-h-screen bg-cine-bg cine-container pt-24 pb-20 w-full space-y-8 text-white'}>
       
+      {!embedded && (
+      <>
       {/* HEADER */}
       <div className="border-b border-neutral-800 pb-4 flex items-center justify-between">
         <div>
@@ -757,6 +765,16 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </button>
         ))}
       </div>
+      </>
+      )}
+
+      {embedded && actionMessage && (
+        <div className={`p-3 rounded-xl border text-sm ${
+          actionMessage.type === 'success' ? 'bg-green-950/40 border-green-500/30 text-green-300' : 'bg-red-950/40 border-red-500/30 text-red-300'
+        }`}>
+          {actionMessage.text}
+        </div>
+      )}
 
       {loading && (
         <div className="flex items-center justify-center gap-3 py-12 text-zinc-500">

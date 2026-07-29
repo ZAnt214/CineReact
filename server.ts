@@ -4,6 +4,7 @@ import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
+import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
 import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
 import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
@@ -3039,6 +3040,7 @@ app.get("/api/search", (req, res) => {
 // GAMIFICATION
 // ==========================================
 registerGamificationRoutes(app);
+registerAdminPanelRoutes(app, requireAdmin);
 
 // ==========================================
 // VITE MIDDLEWARE & STATIC ASSET SERVING
