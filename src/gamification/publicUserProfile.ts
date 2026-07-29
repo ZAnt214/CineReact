@@ -1,5 +1,5 @@
 import { localDb } from '../db/local_db.ts';
-import { CREATOR_FOLLOW_REWARDS, getRewardById, VERIFIED_PROFILE_BADGE_ID } from '../data/rewardsCatalog.ts';
+import { VERIFIED_PROFILE_BADGE_ID } from '../data/rewardsCatalog.ts';
 import { resolvePublicProfileDisplay } from './profileDisplay.ts';
 import { hasReward, migrateProfile } from './rewardsEngine.ts';
 import { isVerifiedCreatorLoadout } from './verifiedCreator.ts';
@@ -7,39 +7,18 @@ import { ensureDemoCreatorProfile, isDemoCreatorEmail } from './demoCreator.ts';
 import type { PublicUserProfile } from '../types.ts';
 import { hasSocialLinks, sanitizeSocialLinks } from '../utils/socialLinks.ts';
 
-function getCreatorNameForChannel(canalId: string): string | null {
-  const tagId = CREATOR_FOLLOW_REWARDS[canalId];
-  if (!tagId) return null;
-  return getRewardById(tagId)?.creatorName?.toLowerCase() || null;
-}
+export function findOfficialCreatorEmailForChannel(_canalId: string, officialCreatorEmail?: string): string | null {
+  if (!officialCreatorEmail) return null;
 
-function userMatchesChannelCreator(email: string, canalId: string): boolean {
-  const creatorName = getCreatorNameForChannel(canalId);
-  if (!creatorName) return false;
+  const user = localDb.findUsuarioByEmailSync(officialCreatorEmail);
+  if (!user) return null;
 
-  const profile = migrateProfile(localDb.getGamificationProfile(email));
-  if (!hasReward(profile, VERIFIED_PROFILE_BADGE_ID)) return false;
-
-  return profile.inventory.some((entry) => {
-    const item = getRewardById(entry.itemId);
-    return item?.category === 'tag' && item.creatorName?.toLowerCase() === creatorName;
-  });
-}
-
-export function findOfficialCreatorEmailForChannel(canalId: string, officialCreatorEmail?: string): string | null {
-  if (officialCreatorEmail) {
-    const user = localDb.findUsuarioByEmailSync(officialCreatorEmail);
-    if (user) {
-      const profile = migrateProfile(localDb.getGamificationProfile(user.email));
-      if (hasReward(profile, VERIFIED_PROFILE_BADGE_ID)) return user.email;
-    }
+  const profile = migrateProfile(localDb.getGamificationProfile(user.email));
+  if (!hasReward(profile, VERIFIED_PROFILE_BADGE_ID) && !isVerifiedCreatorLoadout(profile.loadout)) {
+    return null;
   }
 
-  for (const user of localDb.getUsuarios()) {
-    if (userMatchesChannelCreator(user.email, canalId)) return user.email;
-  }
-
-  return null;
+  return user.email;
 }
 
 export function getPublicUserProfile(email: string): PublicUserProfile | null {

@@ -161,7 +161,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[120] overscroll-none"
+          className="fixed inset-0 z-[130] overscroll-none"
           role="dialog"
           aria-modal="true"
           aria-labelledby="creator-partner-title"
