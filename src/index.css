@@ -501,19 +501,31 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   box-sizing: border-box;
 }
 
-/* Catalog Carousel — scroll nativo com momentum no iOS */
+/* Catalog Carousel — pan-x no mobile elimina hesitação ao deslizar */
 .catalog-carousel {
   overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;
   overscroll-behavior-x: auto;
   overscroll-behavior-y: auto;
   scroll-behavior: auto;
 }
 
-.catalog-carousel .catalog-card,
-.catalog-carousel .cine-recomenda-card {
-  touch-action: inherit;
+@media (pointer: coarse) {
+  html,
+  body {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .catalog-carousel {
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .catalog-carousel .catalog-card,
+  .catalog-carousel .cine-recomenda-card,
+  .catalog-carousel img,
+  .catalog-carousel video {
+    touch-action: auto;
+  }
 }
 
 .catalog-card {

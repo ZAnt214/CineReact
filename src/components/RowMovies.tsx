@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, Clock } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -29,24 +29,77 @@ export default function RowMovies({
   onChannelClick
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const tapStartRef = useRef({ x: 0, y: 0 });
+  const touchRef = useRef({ x: 0, y: 0, moved: false });
+  const suppressClickRef = useRef(false);
 
-  const handleCardPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    tapStartRef.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleCardPointerUp = (
-    e: React.PointerEvent<HTMLDivElement>,
-    reactId: string,
-    obraId: string
-  ) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-    const dx = Math.abs(e.clientX - tapStartRef.current.x);
-    const dy = Math.abs(e.clientY - tapStartRef.current.y);
-    if (dx > TAP_MOVE_THRESHOLD_PX || dy > TAP_MOVE_THRESHOLD_PX) return;
-
+  const handlePlay = useCallback((reactId: string, obraId: string) => {
     onPlayVideo(reactId, obraId);
+  }, [onPlayVideo]);
+
+  // Tap no mobile via listener passivo no carrossel — não compete com o gesto de scroll
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el || typeof window === 'undefined') return;
+
+    const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+    if (!isCoarse) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchRef.current = { x: t.clientX, y: t.clientY, moved: false };
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1 || touchRef.current.moved) return;
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - touchRef.current.x);
+      const dy = Math.abs(t.clientY - touchRef.current.y);
+      if (dx > TAP_MOVE_THRESHOLD_PX || dy > TAP_MOVE_THRESHOLD_PX) {
+        touchRef.current.moved = true;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (touchRef.current.moved) return;
+
+      const channelEl = (e.target as HTMLElement).closest('[data-channel-name]');
+      if (channelEl && onChannelClick) {
+        const channelName = channelEl.getAttribute('data-channel-name');
+        if (channelName) {
+          suppressClickRef.current = true;
+          onChannelClick(channelName);
+          window.setTimeout(() => { suppressClickRef.current = false; }, 0);
+        }
+        return;
+      }
+
+      const card = (e.target as HTMLElement).closest('[data-carousel-card]');
+      if (!card) return;
+
+      const reactId = card.getAttribute('data-react-id');
+      const obraId = card.getAttribute('data-obra-id');
+      if (!reactId || !obraId) return;
+
+      suppressClickRef.current = true;
+      handlePlay(reactId, obraId);
+      window.setTimeout(() => { suppressClickRef.current = false; }, 0);
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [handlePlay, onChannelClick]);
+
+  const handleCardClick = (reactId: string, obraId: string) => {
+    if (suppressClickRef.current) return;
+    handlePlay(reactId, obraId);
   };
 
   const matchingChannel = obras.find(o => 
@@ -128,8 +181,10 @@ export default function RowMovies({
             return (
               <div
                 key={react.id}
-                onPointerDown={handleCardPointerDown}
-                onPointerUp={(e) => handleCardPointerUp(e, react.id, react.obraId)}
+                data-carousel-card=""
+                data-react-id={react.id}
+                data-obra-id={react.obraId}
+                onClick={() => handleCardClick(react.id, react.obraId)}
                 className={cardClass}
               >
                 <div className={`relative aspect-video w-full overflow-hidden shrink-0 catalog-card-thumb ${isEditorial ? 'cine-recomenda-thumb' : 'catalog-card-standard-thumb'}`}>
@@ -184,7 +239,9 @@ export default function RowMovies({
 
                   <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'cine-recomenda-footer' : 'border-t border-cine-border/25'}`}>
                     <span 
-                      onPointerUp={(e) => {
+                      data-channel-name={react.canalNome}
+                      onClick={(e) => {
+                        if (suppressClickRef.current) return;
                         if (onChannelClick) {
                           e.stopPropagation();
                           onChannelClick(react.canalNome);
