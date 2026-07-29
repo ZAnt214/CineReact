@@ -37,7 +37,11 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
       <motion.div className="relative flex items-center gap-2.5 p-2.5 sm:gap-4 sm:p-3.5">
         <button
           type="button"
-          onClick={onClick}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+          }}
           className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1.5 text-left transition-colors hover:bg-white/[0.04] cursor-pointer"
         >
           <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cine-accent/35 bg-gradient-to-br from-cine-accent/25 via-cine-accent/10 to-transparent sm:h-12 sm:w-12 group-hover:border-cine-accent-light/50 transition-colors shadow-[0_0_24px_rgba(0,212,255,0.18)]">
@@ -70,7 +74,11 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
         <motion.div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={onClick}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClick();
+            }}
             className="sm:hidden px-3 py-1.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-extrabold text-xs transition-all shadow-md shadow-cine-accent/20 active:scale-95 cursor-pointer whitespace-nowrap"
           >
             Ver

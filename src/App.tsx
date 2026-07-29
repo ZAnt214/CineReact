@@ -14,7 +14,7 @@ import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
 import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
-import CreatorPartnerModal from './components/CreatorPartnerModal.tsx';
+import CreatorPartnersPage from './components/CreatorPartnersPage.tsx';
 import SideNavHub, { resetSideNavOnLeave, parseCreatorProfileTab } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
@@ -82,7 +82,6 @@ export default function App() {
   }, []);
   const pendingPlayRef = useRef<{ reactId: string; obraId: string } | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
   const [accountBlockNotice, setAccountBlockNotice] = useState<string | null>(null);
 
@@ -725,6 +724,11 @@ export default function App() {
     }
   }, [startTransition]);
 
+  const openCreatorPartners = useCallback(() => {
+    setCurrentTab('criadores-parceiros');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     if (currentTab !== 'landing' || typeof document === 'undefined') return;
 
@@ -758,8 +762,7 @@ export default function App() {
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
   const showCreatorBanner =
     isCreatorBannerVisible &&
-    !showCreatorPartnerModal &&
-    !['landing', 'admin', 'doacoes'].includes(currentTab);
+    !['landing', 'admin', 'doacoes', 'criadores-parceiros'].includes(currentTab);
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
     return <MaintenanceScreen settings={platformSettings} />;
@@ -1429,6 +1432,18 @@ export default function App() {
               </motion.div>
             )}
 
+            {currentTab === 'criadores-parceiros' && (
+              <motion.div
+                key="criadores-parceiros-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <CreatorPartnersPage onBack={() => setCurrentTab('inicio')} />
+              </motion.div>
+            )}
+
             {/* HORA DO ALMOÇO — sorteia react aleatório */}
             {currentTab === 'categoria-almoco' && (
               <motion.div
@@ -1558,7 +1573,7 @@ export default function App() {
             </span>
             <span>•</span>
             <button 
-              onClick={() => setShowCreatorPartnerModal(true)}
+              onClick={openCreatorPartners}
               className="text-cine-accent-light hover:text-cine-cream font-bold transition-colors underline cursor-pointer"
             >
               Seja um Criador Parceiro
@@ -1586,17 +1601,12 @@ export default function App() {
             />
             <CreatorPartnerBanner
               key="creator-partner-banner"
-              onClick={() => setShowCreatorPartnerModal(true)}
+              onClick={openCreatorPartners}
               onClose={() => setIsCreatorBannerVisible(false)}
             />
           </>
         )}
       </AnimatePresence>
-
-      <CreatorPartnerModal 
-        isOpen={showCreatorPartnerModal}
-        onClose={() => setShowCreatorPartnerModal(false)}
-      />
 
       <GamificationRewardToast
         reward={gamification.pendingReward}
