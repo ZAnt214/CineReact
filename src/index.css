@@ -617,12 +617,17 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   backdrop-filter: blur(8px);
 }
 
-/* Mobile: native momentum scroll without snap (evita micro-pulos ao soltar o dedo) */
+/* Mobile: native momentum + sem animações pesadas durante o gesto */
 @media (pointer: coarse) {
   .catalog-carousel {
-    touch-action: pan-x pan-y pinch-zoom;
+    touch-action: pan-y pinch-zoom;
     overscroll-behavior-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .catalog-carousel .cine-recomenda-card::before,
+  .catalog-carousel .cine-recomenda-card::after {
+    animation: none;
   }
 }
 
