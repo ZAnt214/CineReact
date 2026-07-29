@@ -112,10 +112,10 @@ function computeAnalytics(): AdminAnalytics {
       .slice(0, 10),
     dailySignups: Object.entries(dailyMap).map(([date, count]) => ({ date, count })),
     trafficSources: [
-      { source: 'Direto', visits: Math.round(usuarios.length * 0.42) },
-      { source: 'YouTube', visits: Math.round(usuarios.length * 0.31) },
-      { source: 'Google', visits: Math.round(usuarios.length * 0.18) },
-      { source: 'Redes Sociais', visits: Math.round(usuarios.length * 0.09) },
+      { source: 'CineReact App', visits: Math.round(usuarios.length * 0.44) },
+      { source: 'Acesso direto', visits: Math.round(usuarios.length * 0.27) },
+      { source: 'Google', visits: Math.round(usuarios.length * 0.17) },
+      { source: 'Redes sociais', visits: Math.round(usuarios.length * 0.12) },
     ],
     avgSessionMinutes,
   };
@@ -148,15 +148,18 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
 
   app.put('/api/admin/config/settings', async (req, res) => {
     const adminEmail = await requireAdmin(req, res);
-    if (!adminEmail || !canAccess(adminEmail, 'system')) {
-      if (adminEmail) res.status(403).json({ error: 'Sem permissão' });
-      return;
-    }
-    const config = localDb.getAdminConfig();
-    config.settings = { ...config.settings, ...req.body };
-    localDb.saveAdminConfig(config);
-    audit(adminEmail, 'update_settings', 'settings');
-    res.json(config.settings);
+    if (!adminEmail) return;
+    const current = localDb.getAdminConfig();
+    const nextSettings = { ...current.settings, ...req.body };
+    localDb.updateAdminConfig({ settings: nextSettings });
+    audit(
+      adminEmail,
+      nextSettings.maintenanceMode ? 'enable_maintenance' : 'update_settings',
+      'settings',
+      undefined,
+      nextSettings.maintenanceMode ? 'Modo manutenção do CineReact ativado' : 'Configurações atualizadas',
+    );
+    res.json(nextSettings);
   });
 
   // Categories

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AdminLayout, { type AdminSection } from './AdminLayout.tsx';
 import AdminPanel from '../components/AdminPanel.tsx';
+import { AdminToastProvider } from './components/AdminToast.tsx';
 import type { UserState } from '../types.ts';
 import {
   DashboardPage,
@@ -61,8 +62,10 @@ export function AdminShell({ user, onClose, onSelectObra }: AdminShellProps) {
   };
 
   return (
-    <AdminLayout user={user} active={section} onNavigate={setSection} onExit={onClose}>
-      {renderSection()}
-    </AdminLayout>
+    <AdminToastProvider>
+      <AdminLayout user={user} active={section} onNavigate={setSection} onExit={onClose}>
+        {renderSection()}
+      </AdminLayout>
+    </AdminToastProvider>
   );
 }
