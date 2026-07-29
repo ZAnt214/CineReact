@@ -501,7 +501,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   box-sizing: border-box;
 }
 
-/* Catalog Carousel — pan-x no mobile elimina hesitação ao deslizar */
+/* Catalog Carousel — scroll nativo; pan-x+pan-y no mobile para vertical e horizontal */
 .catalog-carousel {
   overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
@@ -511,20 +511,32 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 }
 
 @media (pointer: coarse) {
-  html,
-  body {
-    touch-action: pan-y pinch-zoom;
-  }
-
   .catalog-carousel {
-    touch-action: pan-x pinch-zoom;
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .catalog-carousel .catalog-card,
   .catalog-carousel .cine-recomenda-card,
-  .catalog-carousel img,
-  .catalog-carousel video {
-    touch-action: auto;
+  .catalog-carousel .catalog-card-standard {
+    transition: none !important;
+    transform: none !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+      0 10px 28px rgba(0, 0, 0, 0.42);
+  }
+
+  .catalog-carousel .cine-recomenda-card::before,
+  .catalog-carousel .cine-recomenda-card::after {
+    animation: none !important;
+  }
+
+  .catalog-carousel .catalog-card-duration,
+  .catalog-carousel .cine-recomenda-duration {
+    backdrop-filter: none;
+  }
+
+  .catalog-carousel-arrow {
+    display: none !important;
   }
 }
 
@@ -611,38 +623,6 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   background: color-mix(in srgb, var(--color-cine-surface) 88%, transparent);
   border: 1px solid color-mix(in srgb, var(--color-cine-border) 40%, transparent);
   backdrop-filter: blur(8px);
-}
-
-/* Mobile: prioriza fluidez — sem animações/transições pesadas nos cards */
-@media (pointer: coarse) {
-  .catalog-carousel {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .catalog-carousel .cine-recomenda-card,
-  .catalog-carousel .catalog-card-standard {
-    transition: none !important;
-    transform: none !important;
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.025) inset,
-      0 10px 28px rgba(0, 0, 0, 0.42);
-  }
-
-  .catalog-carousel .cine-recomenda-card::before,
-  .catalog-carousel .cine-recomenda-card::after {
-    animation: none !important;
-  }
-
-  .catalog-carousel .catalog-card-duration,
-  .catalog-carousel .cine-recomenda-duration {
-    backdrop-filter: none;
-  }
-}
-
-@media (pointer: coarse) {
-  .catalog-carousel-arrow {
-    display: none !important;
-  }
 }
 
 /* Profile surface — GPU-friendly CSS animations (no JS loop per frame) */
