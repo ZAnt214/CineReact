@@ -15,6 +15,7 @@ import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnersPage from './components/CreatorPartnersPage.tsx';
+import LogoDownloadPage from './components/LogoDownloadPage.tsx';
 import SideNavHub, { resetSideNavOnLeave, parseCreatorProfileTab } from './components/SideNavHub.tsx';
 import CategoryPage from './components/CategoryPage.tsx';
 import LunchTimePage from './components/LunchTimePage.tsx';
@@ -762,7 +763,7 @@ export default function App() {
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
   const showCreatorBanner =
     isCreatorBannerVisible &&
-    !['landing', 'admin', 'doacoes', 'criadores-parceiros'].includes(currentTab);
+    !['landing', 'admin', 'doacoes', 'criadores-parceiros', 'download-logo'].includes(currentTab);
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
     return <MaintenanceScreen settings={platformSettings} />;
@@ -1441,6 +1442,18 @@ export default function App() {
                 className="w-full flex-1"
               >
                 <CreatorPartnersPage onBack={() => setCurrentTab('inicio')} />
+              </motion.div>
+            )}
+
+            {currentTab === 'download-logo' && (
+              <motion.div
+                key="download-logo-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <LogoDownloadPage onBack={() => setCurrentTab('inicio')} />
               </motion.div>
             )}
 

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="960" height="240">
+  <rect width="480" height="120" rx="16" fill="#111113"/>
+  <rect x="1" y="1" width="478" height="118" rx="15" fill="none" stroke="#00d4ff" stroke-opacity="0.18"/>
+  <text x="32" y="58" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-weight="600" font-size="42" fill="#fafafa" letter-spacing="2">CINE</text>
+  <text x="178" y="58" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-weight="700" font-size="42" fill="#00d4ff" letter-spacing="2">REACT</text>
+  <text x="32" y="92" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="13" fill="#a1a1aa" letter-spacing="0.6">Sua plataforma de reacts</text>
+</svg>
