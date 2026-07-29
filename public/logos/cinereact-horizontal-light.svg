@@ -1,6 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="960" height="240">
-  <rect width="480" height="120" rx="16" fill="#fafafa"/>
-  <text x="32" y="58" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-weight="600" font-size="42" fill="#18181b" letter-spacing="2">CINE</text>
-  <text x="178" y="58" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-weight="700" font-size="42" fill="#0099cc" letter-spacing="2">REACT</text>
-  <text x="32" y="92" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="13" fill="#52525b" letter-spacing="0.6">Sua plataforma de reacts</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 120" width="1280" height="240">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap');
+    </style>
+  </defs>
+  <rect width="640" height="120" rx="16" fill="#fafafa"/>
+  <text x="320" y="54" text-anchor="middle" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-size="40" letter-spacing="0.05em">
+    <tspan fill="#18181b" font-weight="600">CINE</tspan><tspan fill="#0099cc" font-weight="700">REACT</tspan>
+  </text>
+  <text x="320" y="86" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#52525b" letter-spacing="0.04em">Sua plataforma de reacts</text>
 </svg>
