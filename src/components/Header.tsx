@@ -237,6 +237,18 @@ export default function Header({
                   Minha Lista
                 </button>
                 
+                <button 
+                  id="nav-download-logo"
+                  onClick={() => setCurrentTab('download-logo')} 
+                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                    currentTab === 'download-logo' 
+                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
+                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
+                  }`}
+                >
+                  Baixar Logo
+                </button>
+
                 {/* APOIADOR HIGHLIGHT */}
                 <button 
                   id="nav-doacoes"
