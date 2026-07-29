@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, Clock } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -35,7 +35,7 @@ export default function RowMovies({
   const scrollIdleTimerRef = useRef<number | undefined>(undefined);
   const [enableDragScroll, setEnableDragScroll] = useState(false);
 
-  const markCarouselScrolling = () => {
+  const markCarouselScrolling = useCallback(() => {
     const el = rowRef.current;
     if (!el) return;
     el.classList.add('is-scrolling');
@@ -43,7 +43,7 @@ export default function RowMovies({
     scrollIdleTimerRef.current = window.setTimeout(() => {
       el.classList.remove('is-scrolling');
     }, 180);
-  };
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -58,6 +58,119 @@ export default function RowMovies({
       window.clearTimeout(scrollIdleTimerRef.current);
     };
   }, []);
+
+  // Touch: lock horizontal axis early so the browser doesn't wait to decide vs page scroll
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el || typeof window === 'undefined') return;
+
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    if (!isCoarsePointer) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchScrollLeft = 0;
+    let axis: 'x' | 'y' | null = null;
+    let isTracking = false;
+    let lastMoveX = 0;
+    let lastMoveTime = 0;
+    let velocityX = 0;
+    let momentumFrame = 0;
+
+    const stopMomentum = () => {
+      if (momentumFrame) {
+        cancelAnimationFrame(momentumFrame);
+        momentumFrame = 0;
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      if ((e.target as HTMLElement).closest('button')) return;
+
+      stopMomentum();
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchScrollLeft = el.scrollLeft;
+      lastMoveX = touchStartX;
+      lastMoveTime = performance.now();
+      velocityX = 0;
+      axis = null;
+      isTracking = true;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isTracking || e.touches.length !== 1) return;
+
+      const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+      const dx = touchX - touchStartX;
+      const dy = touchY - touchStartY;
+
+      if (!axis) {
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        if (absDx < 3 && absDy < 3) return;
+
+        axis = absDx >= absDy ? 'x' : 'y';
+        if (axis === 'y') {
+          isTracking = false;
+          return;
+        }
+
+        isDraggedRef.current = true;
+        suppressClickRef.current = true;
+        markCarouselScrolling();
+      }
+
+      const now = performance.now();
+      const dt = now - lastMoveTime;
+      if (dt > 0) {
+        velocityX = (lastMoveX - touchX) / dt;
+      }
+      lastMoveX = touchX;
+      lastMoveTime = now;
+
+      e.preventDefault();
+      el.scrollLeft = touchScrollLeft - dx;
+    };
+
+    const onTouchEnd = () => {
+      if (axis === 'x' && Math.abs(velocityX) > 0.15) {
+        let v = velocityX * 18;
+        const step = () => {
+          if (Math.abs(v) < 0.35) {
+            momentumFrame = 0;
+            return;
+          }
+          el.scrollLeft += v;
+          v *= 0.92;
+          momentumFrame = requestAnimationFrame(step);
+        };
+        momentumFrame = requestAnimationFrame(step);
+      }
+
+      isTracking = false;
+      axis = null;
+      window.setTimeout(() => {
+        isDraggedRef.current = false;
+        suppressClickRef.current = false;
+      }, 0);
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    el.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+    return () => {
+      stopMomentum();
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [markCarouselScrolling]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!rowRef.current) return;
