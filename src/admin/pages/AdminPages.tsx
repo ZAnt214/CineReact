@@ -200,7 +200,7 @@ export function ModerationPage({ email }: { email: string }) {
       <PageHeader title="Moderação" subtitle="Comentários, denúncias e palavras bloqueadas" />
       <AdminPanelCard title="Palavras bloqueadas">
         <textarea value={blockedWords} onChange={e => setBlockedWords(e.target.value)} rows={3} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-sm mb-3" placeholder="palavra1, palavra2, ..." />
-        <button type="button" onClick={() => request('/api/admin/blocked-words', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ words: blockedWords.split(',').map(w => w.trim()).filter(Boolean) }) })} className="px-4 py-2 rounded-xl bg-cine-accent text-xs font-bold">Salvar lista</button>
+        <button type="button" onClick={() => request('/api/admin/blocked-words', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ words: blockedWords.split(',').map(w => w.trim()).filter(Boolean) }) }, 'Lista de palavras bloqueadas atualizada.')} className="px-4 py-2 rounded-xl bg-cine-accent text-xs font-bold">Salvar lista</button>
       </AdminPanelCard>
       <AdminPanelCard title="Comentários" actions={
         selected.length > 0 ? (
@@ -258,12 +258,28 @@ export function UsersAdminPage({ email }: { email: string }) {
 
   const loadActivity = async (targetEmail: string) => {
     setActivityEmail(targetEmail);
-    const res = await request<{ activity: any[] }>(`/api/admin/users/${encodeURIComponent(targetEmail)}/activity`);
-    setActivity(res?.activity || []);
+    const res = await request<{ comments?: any[]; auditLogs?: any[] }>(`/api/admin/users/${encodeURIComponent(targetEmail)}/activity`);
+    const items = [
+      ...(res?.comments || []).map((c) => ({
+        createdAt: c.criadoEm,
+        action: 'Comentário',
+        details: c.texto,
+      })),
+      ...(res?.auditLogs || []).map((l) => ({
+        createdAt: l.createdAt,
+        action: l.action,
+        details: l.details,
+      })),
+    ].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    setActivity(items);
   };
 
-  const updateUser = (targetEmail: string, body: Record<string, unknown>) =>
-    request(`/api/admin/users/${encodeURIComponent(targetEmail)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(load);
+  const updateUser = (targetEmail: string, body: Record<string, unknown>, successMessage: string) =>
+    request(`/api/admin/users/${encodeURIComponent(targetEmail)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }, successMessage).then(load);
 
   return (
     <div className="space-y-6">
@@ -280,21 +296,25 @@ export function UsersAdminPage({ email }: { email: string }) {
                 <p className="font-bold">{u.username}</p>
                 <p className="text-xs text-zinc-500">{u.email}</p>
                 <p className="text-xs text-zinc-600 mt-1">XP: {u.xp} · Nível {u.level}</p>
+                <div className="flex gap-2 mt-2">
+                  {u.isBanned && <span className="text-[10px] font-bold uppercase text-red-400">Banido</span>}
+                  {u.isSuspended && <span className="text-[10px] font-bold uppercase text-amber-400">Suspenso</span>}
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <select defaultValue={u.role || 'user'} onChange={e => updateUser(u.email, { role: e.target.value, isAdmin: e.target.value === 'admin' })} className="bg-neutral-950 border border-neutral-800 rounded-lg px-2 py-1.5 text-xs">
+                <select defaultValue={u.role || 'user'} onChange={e => updateUser(u.email, { role: e.target.value, isAdmin: e.target.value === 'admin' }, 'Cargo atualizado com sucesso.')} className="bg-neutral-950 border border-neutral-800 rounded-lg px-2 py-1.5 text-xs">
                   <option value="user">Usuário</option>
                   <option value="moderator">Moderador</option>
                   <option value="curator">Curador</option>
                   <option value="admin">Administrador</option>
                 </select>
-                <button type="button" onClick={() => updateUser(u.email, { isSuspended: !u.isSuspended, suspendedUntil: u.isSuspended ? null : new Date(Date.now() + 7 * 86400000).toISOString() })} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-950/50 text-amber-300 border border-amber-500/30">
+                <button type="button" onClick={() => updateUser(u.email, { isSuspended: !u.isSuspended, suspendedUntil: u.isSuspended ? null : new Date(Date.now() + 7 * 86400000).toISOString() }, u.isSuspended ? 'Conta reativada no CineReact.' : 'Conta suspensa por 7 dias.')} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-950/50 text-amber-300 border border-amber-500/30">
                   {u.isSuspended ? 'Reativar' : 'Suspender'}
                 </button>
                 <button type="button" onClick={() => loadActivity(u.email)} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-800 text-zinc-300 border border-neutral-700">
                   Atividade
                 </button>
-                <button type="button" onClick={() => updateUser(u.email, { isBanned: !u.isBanned })} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-950/50 text-red-300 border border-red-500/30 flex items-center gap-1">
+                <button type="button" onClick={() => updateUser(u.email, { isBanned: !u.isBanned, isSuspended: u.isBanned ? u.isSuspended : false }, u.isBanned ? 'Usuário desbanido.' : 'Usuário banido do CineReact.')} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-950/50 text-red-300 border border-red-500/30 flex items-center gap-1">
                   <Ban className="w-3 h-3" /> {u.isBanned ? 'Desbanir' : 'Banir'}
                 </button>
               </div>

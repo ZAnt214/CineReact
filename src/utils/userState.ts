@@ -1,10 +1,12 @@
 import type { UserAccount, UserState } from '../types.ts';
 import { sanitizeSocialLinks } from './socialLinks.ts';
+import { getAccountRestriction } from './platformEnforcement.ts';
 
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120';
 
 export function serializeUserState(user: UserAccount, overrides: Partial<UserState> = {}): UserState {
+  const restriction = getAccountRestriction(user);
   return {
     isLoggedIn: true,
     nome: user.username,
@@ -12,6 +14,11 @@ export function serializeUserState(user: UserAccount, overrides: Partial<UserSta
     avatar: user.avatar || DEFAULT_AVATAR,
     isAdmin: user.isAdmin || false,
     isDonor: user.isDonor || false,
+    isBanned: !!user.isBanned,
+    isSuspended: !!user.isSuspended,
+    suspendedUntil: user.suspendedUntil,
+    accountBlocked: restriction.blocked,
+    accountBlockMessage: restriction.message || undefined,
     continueWatching: user.continueWatching || [],
     descricao: user.descricao || '',
     socialLinks: sanitizeSocialLinks(user.socialLinks),

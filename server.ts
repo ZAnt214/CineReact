@@ -15,6 +15,13 @@ import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import { serializeUserState } from "./src/utils/userState.ts";
 import { sanitizeSocialLinks } from "./src/utils/socialLinks.ts";
+import {
+  getAccountRestriction,
+  isCommentPubliclyVisible,
+  isReactPubliclyVisible,
+  findBlockedWord,
+} from "./src/utils/platformEnforcement.ts";
+import { autoLiftExpiredSuspensions, processScheduledPublications } from "./src/utils/adminJobs.ts";
 
 dotenv.config();
 
@@ -23,6 +30,31 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+
+app.use((_req, _res, next) => {
+  processScheduledPublications();
+  autoLiftExpiredSuspensions();
+  next();
+});
+
+function getUserRestrictionResponse(email?: string) {
+  if (!email) return null;
+  const user = localDb.findUsuarioByEmailSync(email.trim().toLowerCase());
+  const restriction = getAccountRestriction(user);
+  if (!restriction.blocked) return null;
+  return restriction;
+}
+
+function assertActiveAccount(email: string | undefined, res: ExpressResponse): boolean {
+  const restriction = getUserRestrictionResponse(email);
+  if (!restriction) return true;
+  res.status(403).json({
+    error: restriction.message,
+    accountBlocked: true,
+    code: restriction.code,
+  });
+  return false;
+}
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Initialize Gemini Client safely
@@ -1781,7 +1813,9 @@ app.get("/api/reacts", (req, res) => {
     const adminEmail = getAdminEmailFromRequest(req);
     const isAdmin = verifyAdminEmailSync(adminEmail);
 
-    let allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
+    let allReacts = localDb.getReacts()
+      .filter(r => !isShortOrInvalidReact(r))
+      .filter(r => isReactPubliclyVisible(r, isAdmin));
 
     if (obraId) {
       allReacts = allReacts.filter(r => r.obraId === obraId);
@@ -1868,7 +1902,8 @@ app.delete("/api/reacts/:id", (req, res) => {
 
 app.post("/api/reacts/:id/like", (req, res) => {
   try {
-    const { action } = req.body; // 'like' | 'unlike'
+    const { action, email } = req.body; // 'like' | 'unlike'
+    if (!assertActiveAccount(email, res)) return;
     const newLikes = localDb.likeReact(req.params.id, action === 'unlike' ? 'unlike' : 'like');
     res.json({ success: true, likes: newLikes });
   } catch (error: any) {
@@ -2135,7 +2170,9 @@ app.post("/api/reacts/recomendar-link", async (req, res) => {
 app.get("/api/comentarios", (req, res) => {
   try {
     const obraId = req.query.obraId as string;
-    const rawComments = localDb.getComentarios(obraId);
+    const adminEmail = getAdminEmailFromRequest(req);
+    const isAdmin = verifyAdminEmailSync(adminEmail);
+    const rawComments = localDb.getComentarios(obraId).filter((c) => isCommentPubliclyVisible(c, isAdmin));
     
     // Enrich comments with user's isDonor status, avatar URL and equipped cosmetics
     const enriched = rawComments.map(c => {
@@ -2162,6 +2199,15 @@ app.post("/api/comentarios", (req, res) => {
     if (!obraId || !usuarioNome || !usuarioEmail || !texto) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
     }
+
+    if (!assertActiveAccount(usuarioEmail, res)) return;
+
+    const blockedWords = localDb.getAdminConfig().blockedWords || [];
+    const blocked = findBlockedWord(texto, blockedWords);
+    if (blocked) {
+      return res.status(400).json({ error: `Seu comentário contém termo bloqueado: "${blocked}"` });
+    }
+
     const novo = localDb.addComentario({
       id: Math.random().toString(36).substring(2),
       obraId,
@@ -2169,7 +2215,8 @@ app.post("/api/comentarios", (req, res) => {
       usuarioEmail,
       texto,
       likes: 0,
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
+      moderationStatus: 'approved',
     });
     const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
     const publicProfile = getPublicUserProfile(usuarioEmail);
@@ -2233,6 +2280,7 @@ app.post("/api/favoritos/toggle", (req, res) => {
   try {
     const { email, obraId } = req.body;
     if (!email || !obraId) return res.status(400).json({ error: "Email e ObraId requeridos." });
+    if (!assertActiveAccount(email, res)) return;
     const favoritado = localDb.toggleFavorito(email, obraId);
     const gamificationReward = favoritado ? handleGamificationEvent(email, 'favorite') : null;
     res.json({ favoritado, gamificationReward });
@@ -2531,6 +2579,17 @@ app.post("/api/login", async (req, res) => {
         }, authData.user?.id);
       }
 
+      const restriction = getAccountRestriction(user);
+      if (restriction.blocked) {
+        return res.status(403).json({
+          error: restriction.message,
+          accountBlocked: true,
+          code: restriction.code,
+        });
+      }
+
+      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
+
       return res.json({
         success: true,
         user: serializeUserState(user, {
@@ -2546,6 +2605,17 @@ app.post("/api/login", async (req, res) => {
       if (user.password !== password) {
         return res.status(401).json({ error: "Senha incorreta." });
       }
+
+      const restriction = getAccountRestriction(user);
+      if (restriction.blocked) {
+        return res.status(403).json({
+          error: restriction.message,
+          accountBlocked: true,
+          code: restriction.code,
+        });
+      }
+
+      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
 
       res.json({
         success: true,
@@ -3041,6 +3111,24 @@ app.get("/api/search", (req, res) => {
 // ==========================================
 registerGamificationRoutes(app);
 registerAdminPanelRoutes(app, requireAdmin);
+
+app.get("/api/user/account-status", (req, res) => {
+  const email = String(req.query.email || "").trim().toLowerCase();
+  if (!email) return res.status(400).json({ error: "E-mail obrigatório." });
+  autoLiftExpiredSuspensions();
+  const user = localDb.findUsuarioByEmailSync(email);
+  const restriction = getAccountRestriction(user);
+  res.json({
+    ok: !restriction.blocked,
+    code: restriction.code,
+    message: restriction.message,
+    isBanned: !!user?.isBanned,
+    isSuspended: !!user?.isSuspended,
+    suspendedUntil: user?.suspendedUntil,
+    isAdmin: !!user?.isAdmin,
+    role: user?.role || (user?.isAdmin ? "admin" : "user"),
+  });
+});
 
 // ==========================================
 // VITE MIDDLEWARE & STATIC ASSET SERVING

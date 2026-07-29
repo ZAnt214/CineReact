@@ -233,6 +233,10 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
       createdAt: new Date().toISOString(),
     };
     config.homePins.push(pin);
+    if (pin.type === 'react') {
+      const react = localDb.getReacts().find((r) => r.id === pin.targetId);
+      if (react) localDb.saveReact({ ...react, isPinnedHome: true });
+    }
     localDb.saveAdminConfig(config);
     audit(adminEmail, 'pin_home', pin.type, pin.targetId);
     res.json(pin);
@@ -242,7 +246,12 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
     const adminEmail = await requireAdmin(req, res);
     if (!adminEmail) return;
     const config = localDb.getAdminConfig();
+    const removed = config.homePins.find((p) => p.id === req.params.id);
     config.homePins = config.homePins.filter(p => p.id !== req.params.id);
+    if (removed?.type === 'react') {
+      const react = localDb.getReacts().find((r) => r.id === removed.targetId);
+      if (react) localDb.saveReact({ ...react, isPinnedHome: false });
+    }
     localDb.saveAdminConfig(config);
     res.json({ ok: true });
   });
@@ -414,7 +423,7 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
 
   app.patch('/api/admin/users/:email', async (req, res) => {
     const adminEmail = await requireAdmin(req, res);
-    if (!adminEmail || !canAccess(adminEmail, 'all')) return res.status(403).json({ error: 'Sem permissão' });
+    if (!adminEmail || !canAccess(adminEmail, 'moderation')) return res.status(403).json({ error: 'Sem permissão' });
     const targetEmail = decodeURIComponent(req.params.email);
     const { role, isSuspended, suspendedUntil, isBanned, username, isDonor, isAdmin } = req.body;
     const updated = await localDb.updateUsuario(targetEmail, {
@@ -609,7 +618,8 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
 
   // Public settings (non-sensitive)
   app.get('/api/platform/settings', (_req, res) => {
-    const settings = localDb.getAdminConfig().settings;
+    const config = localDb.getAdminConfig();
+    const settings = config.settings;
     res.json({
       siteName: settings.siteName,
       logoUrl: settings.logoUrl,
@@ -622,6 +632,10 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
       maintenanceMessage: settings.maintenanceMessage,
       seoTitle: settings.seoTitle,
       seoDescription: settings.seoDescription,
+      homePinIds: config.homePins
+        .filter((pin) => pin.type === 'react')
+        .sort((a, b) => a.order - b.order)
+        .map((pin) => pin.targetId),
     });
   });
 }

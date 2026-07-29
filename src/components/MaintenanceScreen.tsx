@@ -12,17 +12,21 @@ export default function MaintenanceScreen({ settings }: MaintenanceScreenProps) 
   const accent = settings.accentColor || '#00d4ff';
 
   return (
-    <div className="min-h-screen bg-cine-bg text-white flex flex-col items-center justify-center px-6 text-center">
-      <div className="max-w-lg w-full space-y-8">
-        <div className="flex justify-center">
+    <div className="min-h-screen bg-cine-bg text-white flex items-center justify-center px-6 py-10">
+      <div className="w-full max-w-lg">
+        <div className="flex justify-center mb-8">
           {settings.logoUrl ? (
-            <img src={settings.logoUrl} alt={siteName} className="h-14 w-auto object-contain" />
+            <img
+              src={settings.logoUrl}
+              alt={siteName}
+              className="h-12 md:h-14 w-auto max-w-[220px] object-contain mx-auto block"
+            />
           ) : (
-            <CineReactLogo className="h-14 w-auto" />
+            <CineReactLogo size="lg" align="center" showTagline={false} animated />
           )}
         </div>
 
-        <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 shadow-2xl">
+        <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 shadow-2xl text-center">
           <div
             className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border"
             style={{

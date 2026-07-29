@@ -84,6 +84,7 @@ export default function App() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCreatorPartnerModal, setShowCreatorPartnerModal] = useState(false);
   const [isCreatorBannerVisible, setIsCreatorBannerVisible] = useState(true);
+  const [accountBlockNotice, setAccountBlockNotice] = useState<string | null>(null);
 
   // Continue Watching state
   const [continueWatching, setContinueWatching] = useState<{
@@ -142,6 +143,37 @@ export default function App() {
       setContinueWatching([]);
     }
   };
+
+  useEffect(() => {
+    if (!user.isLoggedIn || !user.email || user.isAdmin) {
+      setAccountBlockNotice(null);
+      return;
+    }
+
+    let cancelled = false;
+    const verifyAccount = async () => {
+      try {
+        const res = await fetch(`/api/user/account-status?email=${encodeURIComponent(user.email)}`);
+        const data = await res.json();
+        if (cancelled) return;
+        if (!data.ok) {
+          setAccountBlockNotice(data.message || 'Sua conta foi restrita no CineReact.');
+          setUser({ isLoggedIn: false, nome: '', email: '', isAdmin: false });
+        } else {
+          setAccountBlockNotice(null);
+        }
+      } catch {
+        // mantém sessão em falha temporária de rede
+      }
+    };
+
+    verifyAccount();
+    const timer = window.setInterval(verifyAccount, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [user.isLoggedIn, user.email, user.isAdmin]);
 
   const gamification = useGamification({
     email: user.email,
@@ -620,6 +652,9 @@ export default function App() {
     }, {} as Record<string, ReactVideo[]>);
 
     return {
+      pinnedHome: (platformSettings?.homePinIds || [])
+        .map((id) => reacts.find((r) => r.id === id))
+        .filter((r): r is ReactVideo => Boolean(r)),
       emAlta,
       novidades,
       maisAssistidos,
@@ -628,7 +663,7 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse, channelReactsMap]);
+  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse, channelReactsMap, platformSettings?.homePinIds]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
@@ -737,6 +772,17 @@ export default function App() {
       {platformSettings?.maintenanceMode && user.isAdmin && (
         <div className="sticky top-0 z-[250] bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs font-bold text-amber-200">
           Modo manutenção ativo no CineReact — visitantes estão vendo a tela de manutenção configurada.
+        </div>
+      )}
+      {platformSettings?.globalBannerEnabled && platformSettings.globalBannerText && currentTab !== 'landing' && (
+        <div className="sticky top-0 z-[240] bg-cine-accent/10 border-b border-cine-accent/20 px-4 py-2 text-center text-xs md:text-sm text-cine-cream">
+          {platformSettings.globalBannerLink ? (
+            <a href={platformSettings.globalBannerLink} target="_blank" rel="noreferrer" className="font-semibold hover:underline">
+              {platformSettings.globalBannerText}
+            </a>
+          ) : (
+            <span className="font-semibold">{platformSettings.globalBannerText}</span>
+          )}
         </div>
       )}
       {catalogActive && (
@@ -1023,6 +1069,17 @@ export default function App() {
 
                   {homeFeeds ? (
                     <>
+                      {homeFeeds.pinnedHome.length > 0 && (
+                        <RowMovies
+                          title="Destaques CineReact"
+                          reacts={homeFeeds.pinnedHome}
+                          obras={obras}
+                          progressMap={progressMap}
+                          onPlayVideo={handlePlayVideo}
+                          isEditorial={true}
+                          onChannelClick={handleChannelClickByName}
+                        />
+                      )}
                       <RowMovies 
                         title="Reacts em Alta" 
                         reacts={homeFeeds.emAlta} 
@@ -1631,6 +1688,21 @@ export default function App() {
         }
       }}
     />
+    {accountBlockNotice && (
+      <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/80 p-6">
+        <div className="max-w-md w-full rounded-2xl border border-red-500/30 bg-neutral-950 p-6 text-center shadow-2xl">
+          <h2 className="text-xl font-bold text-white mb-3">Acesso restrito</h2>
+          <p className="text-sm text-zinc-300 leading-relaxed">{accountBlockNotice}</p>
+          <button
+            type="button"
+            onClick={() => setAccountBlockNotice(null)}
+            className="mt-6 px-5 py-2.5 rounded-xl bg-cine-accent text-sm font-bold"
+          >
+            Entendi
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 }
