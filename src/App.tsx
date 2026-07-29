@@ -818,8 +818,7 @@ export default function App() {
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
-                                style={{ touchAction: 'pan-y pinch-zoom' }}
-                                className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-neutral-800 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
+                                className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-neutral-800 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full md:select-none"
                               >
                                 <div className="relative h-36 md:h-44 w-full overflow-hidden bg-neutral-950">
                                   <OptimizedImage

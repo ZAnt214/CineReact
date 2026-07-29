@@ -32,10 +32,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const activeSrc = imgError ? fallbackSrc : (src || fallbackSrc);
 
   return (
-    <div className={`relative overflow-hidden bg-neutral-950 select-none ${containerClassName || 'w-full h-full'}`}>
-      {/* Dark Dominant Placeholder Gradient (prevents white flicker) */}
+    <div className={`relative overflow-hidden bg-neutral-950 ${containerClassName || 'w-full h-full'}`}>
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-tr from-neutral-950 via-neutral-900 to-cine-surface/20 animate-pulse pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-neutral-900 pointer-events-none z-0" />
       )}
 
       <img
@@ -48,7 +47,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         decoding="async"
         onDragStart={(e) => e.preventDefault()}
         referrerPolicy="no-referrer"
-        className={`w-full h-full object-cover transition-opacity duration-300 ease-in-out relative z-10 pointer-events-none select-none ${
+        className={`w-full h-full object-cover transition-opacity duration-300 ease-in-out relative z-10 pointer-events-none ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         } ${className}`}
         {...props}
