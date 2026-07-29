@@ -12,6 +12,7 @@ export interface PublicPlatformSettings {
   maintenanceMessage: string;
   seoTitle: string;
   seoDescription: string;
+  homePinIds?: string[];
 }
 
 export function usePlatformSettings() {

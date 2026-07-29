@@ -87,6 +87,11 @@ export interface UserState {
   avatar?: string;
   isAdmin?: boolean;
   isDonor?: boolean;
+  isBanned?: boolean;
+  isSuspended?: boolean;
+  suspendedUntil?: string;
+  accountBlocked?: boolean;
+  accountBlockMessage?: string;
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
   socialLinks?: CreatorSocialLinks;
