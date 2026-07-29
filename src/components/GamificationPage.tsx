@@ -39,6 +39,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Library: Stamp, Zap: Sparkles, Award: Medal, Radar: Compass, Share2: Compass,
   UserPlus: Users, Shield: Crown, Gem: Sparkles, UtensilsCrossed: Target, MonitorPlay: Film,
   Timer: Clock, Hourglass: Clock, Wand2: Sparkles, Car: Target, Anchor: Compass, Leaf: Target,
+  Smartphone: Film,
 };
 
 interface GamificationPageProps {
