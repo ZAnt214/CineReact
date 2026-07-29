@@ -394,19 +394,8 @@
 .overflow-x-auto {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
+  touch-action: pan-x pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
-}
-
-@media (pointer: fine) {
-  .overflow-x-auto {
-    touch-action: pan-x pan-y pinch-zoom !important;
-  }
-}
-
-@media (pointer: coarse) {
-  .catalog-carousel.overflow-x-auto {
-    touch-action: pan-y pinch-zoom !important;
-  }
 }
 
 /* Global touch action and anti-sticking for video cards, thumbnails, and carousel items */
@@ -448,15 +437,12 @@ html, body, #root {
   padding: 0;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
   scroll-behavior: auto;
 }
 
-/* Native vertical momentum on page-level scroll containers */
+/* Momentum scroll on page containers — sem touch-action que bloqueia o body */
 .smooth-scroll-page {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y pinch-zoom;
   scroll-behavior: auto;
 }
 
@@ -638,62 +624,28 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   backdrop-filter: blur(8px);
 }
 
-/* Mobile: vertical scroll suave + carrossel horizontal via JS */
+/* Mobile: scroll nativo, sem animações pesadas nos cards */
 @media (pointer: coarse) {
-  html,
-  body,
-  #root {
-    touch-action: pan-y pinch-zoom;
-  }
-
-  .group\/card,
-  [class*="group/card"],
-  .video-card,
-  img,
-  svg,
-  a,
-  button,
-  video,
-  .select-none {
-    touch-action: pan-y pinch-zoom;
-  }
-
   .catalog-carousel {
-    touch-action: pan-y pinch-zoom;
-    overscroll-behavior-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .catalog-carousel > *,
-  .catalog-carousel [class*="group/card"],
-  .catalog-carousel .catalog-card {
-    touch-action: pan-y pinch-zoom;
   }
 
   .catalog-carousel .cine-recomenda-card::before,
   .catalog-carousel .cine-recomenda-card::after {
     animation: none;
   }
-
-  header.fixed,
-  nav.fixed {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
 }
 
-/* Allow horizontal swipe inside overflow-x containers on desktop only */
-@media (pointer: fine) {
-  .overflow-x-auto > *,
-  .overflow-x-auto img,
-  .overflow-x-auto svg,
-  .overflow-x-auto a,
-  .overflow-x-auto button,
-  .overflow-x-auto video,
-  .overflow-x-auto .select-none,
-  .overflow-x-auto [class*="group/card"] {
-    touch-action: pan-x pan-y pinch-zoom;
-  }
+/* Horizontal swipe inside carousels */
+.overflow-x-auto > *,
+.overflow-x-auto img,
+.overflow-x-auto svg,
+.overflow-x-auto a,
+.overflow-x-auto button,
+.overflow-x-auto video,
+.overflow-x-auto .select-none,
+.overflow-x-auto [class*="group/card"] {
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 @media (pointer: coarse) {
