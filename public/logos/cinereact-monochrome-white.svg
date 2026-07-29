@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 72" width="840" height="144">
-  <text x="0" y="46" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-weight="700" font-size="44" fill="#ffffff" letter-spacing="2">CINEREACT</text>
-  <text x="2" y="68" font-family="Inter, Arial, sans-serif" font-weight="500" font-size="12" fill="#ffffff" fill-opacity="0.85" letter-spacing="0.5">Sua plataforma de reacts</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 88" width="1040" height="176">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap');
+    </style>
+  </defs>
+  <text x="260" y="46" text-anchor="middle" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-size="40" font-weight="700" fill="#ffffff" letter-spacing="0.05em">CINEREACT</text>
+  <text x="260" y="74" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ffffff" fill-opacity="0.88" letter-spacing="0.04em">Sua plataforma de reacts</text>
 </svg>
