@@ -22,6 +22,13 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
     merged.descricao = local.descricao;
   }
 
+  if (local.role) merged.role = local.role;
+  if (local.isBanned) merged.isBanned = true;
+  if (local.isSuspended) merged.isSuspended = true;
+  if (local.suspendedUntil) merged.suspendedUntil = local.suspendedUntil;
+  if (local.bannedAt) merged.bannedAt = local.bannedAt;
+  if (local.lastActiveAt) merged.lastActiveAt = local.lastActiveAt;
+
   return merged;
 }
 
@@ -1060,6 +1067,11 @@ export const localDb = {
         avatar: current.avatar,
         isAdmin: !!current.isAdmin,
         isDonor: !!current.isDonor,
+        role: current.role,
+        isBanned: !!current.isBanned,
+        isSuspended: !!current.isSuspended,
+        suspendedUntil: current.suspendedUntil || null,
+        bannedAt: current.bannedAt || null,
         continueWatching: current.continueWatching || [],
         descricao: current.descricao || "",
         socialLinks: current.socialLinks || {}

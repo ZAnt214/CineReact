@@ -8,6 +8,7 @@ import { ACHIEVEMENTS } from '../data/gamification.ts';
 import { REWARDS_CATALOG } from '../data/rewardsCatalog.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
+import { MASTER_EMAIL } from '../utils/platformEnforcement.ts';
 
 type ExpressRequest = Request;
 type ExpressResponse = Response;
@@ -19,7 +20,9 @@ function uid(prefix: string) {
 }
 
 function getStaffRole(email: string): StaffRole {
-  const user = localDb.findUsuarioByEmailSync(email.toLowerCase());
+  const normalized = email.toLowerCase().trim();
+  if (normalized === MASTER_EMAIL) return 'admin';
+  const user = localDb.findUsuarioByEmailSync(normalized);
   if (!user) return 'user';
   if (user.isAdmin || user.role === 'admin') return 'admin';
   if (user.role === 'moderator') return 'moderator';
@@ -441,14 +444,22 @@ export function registerAdminPanelRoutes(app: Express, requireAdmin: RequireAdmi
 
   app.patch('/api/admin/users/:email', async (req, res) => {
     const adminEmail = await requireAdmin(req, res);
-    if (!adminEmail || !canAccess(adminEmail, 'moderation')) return res.status(403).json({ error: 'Sem permissão' });
-    const targetEmail = decodeURIComponent(req.params.email);
+    if (!adminEmail) return;
+    if (!canAccess(adminEmail, 'moderation')) return res.status(403).json({ error: 'Sem permissão' });
+    const targetEmail = decodeURIComponent(req.params.email).toLowerCase().trim();
     const { role, isSuspended, suspendedUntil, isBanned, username, isDonor, isAdmin } = req.body;
+    const banUpdates = isBanned !== undefined
+      ? {
+          isBanned,
+          bannedAt: isBanned ? new Date().toISOString() : undefined,
+          ...(isBanned ? { isSuspended: false, suspendedUntil: undefined } : {}),
+        }
+      : {};
     const updated = await localDb.updateUsuario(targetEmail, {
       ...(role !== undefined && { role }),
       ...(isSuspended !== undefined && { isSuspended }),
       ...(suspendedUntil !== undefined && { suspendedUntil }),
-      ...(isBanned !== undefined && { isBanned, bannedAt: isBanned ? new Date().toISOString() : undefined }),
+      ...banUpdates,
       ...(username !== undefined && { username }),
       ...(isDonor !== undefined && { isDonor }),
       ...(isAdmin !== undefined && { isAdmin }),
