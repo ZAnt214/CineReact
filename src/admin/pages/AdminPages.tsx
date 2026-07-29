@@ -162,8 +162,8 @@ export function ContentManagePage({ email }: { email: string }) {
             <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl bg-neutral-950 border border-neutral-800">
               <p className="flex-1 text-sm font-semibold truncate">{r.titulo}</p>
               <div className="flex gap-1">
-                <ActionBtn label="Aprovar" onClick={() => request(`/api/admin/reacts/${r.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'approved' }) }).then(load)} />
-                <ActionBtn label="Ocultar" danger onClick={() => request(`/api/admin/reacts/${r.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'hidden' }) }).then(load)} />
+                <ActionBtn label="Aprovar" onClick={() => request(`/api/admin/reacts/${r.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'approved' }) }, 'Vídeo aprovado.').then(load)} />
+                <ActionBtn label="Ocultar" danger onClick={() => request(`/api/admin/reacts/${r.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'hidden' }) }, 'Vídeo ocultado do CineReact.').then(load)} />
               </div>
             </div>
           ))}
@@ -218,9 +218,9 @@ export function ModerationPage({ email }: { email: string }) {
                 </div>
               </div>
               <div className="flex gap-2 mt-2 ml-6">
-                <ActionBtn label="Aprovar" onClick={() => request(`/api/admin/comments/${c.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'approved' }) }).then(load)} />
-                <ActionBtn label="Ocultar" danger onClick={() => request(`/api/admin/comments/${c.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'hidden' }) }).then(load)} />
-                <ActionBtn label="Excluir" danger onClick={() => request(`/api/admin/comments/bulk-delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [c.id] }) }).then(load)} />
+                <ActionBtn label="Aprovar" onClick={() => request(`/api/admin/comments/${c.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'approved' }) }, 'Comentário aprovado.').then(load)} />
+                <ActionBtn label="Ocultar" danger onClick={() => request(`/api/admin/comments/${c.id}/moderate`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ moderationStatus: 'hidden' }) }, 'Comentário ocultado.').then(load)} />
+                <ActionBtn label="Excluir" danger onClick={() => request(`/api/admin/comments/bulk-delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [c.id] }) }, 'Comentário excluído.').then(load)} />
               </div>
             </div>
           ))}
