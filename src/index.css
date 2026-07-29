@@ -394,28 +394,14 @@
 .overflow-x-auto {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
-  touch-action: pan-x pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Global touch action and anti-sticking for video cards, thumbnails, and carousel items */
-.group\/card,
-[class*="group/card"],
-.video-card,
-img, 
-svg, 
-a, 
-button, 
-video,
-.select-none {
-  touch-action: pan-x pan-y pinch-zoom;
+/* Evita arrastar imagens; não definir touch-action aqui — bloqueia scroll nos carrosséis */
+img,
+video {
   -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
   user-drag: none;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .select-none {
@@ -428,7 +414,8 @@ html, body, #root {
   background-color: var(--color-cine-bg);
   color: var(--color-cine-cream);
   font-family: var(--font-sans);
-  overflow-x: hidden !important;
+  overflow-x: hidden;
+  overflow-y: auto;
   width: 100%;
   max-width: 100vw;
   min-height: 100%;
@@ -436,12 +423,6 @@ html, body, #root {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: auto;
-}
-
-/* Momentum scroll on page containers — sem touch-action que bloqueia o body */
-.smooth-scroll-page {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
 }
@@ -520,26 +501,34 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   box-sizing: border-box;
 }
 
-/* Catalog Carousel & Card Optimizations */
+/* Catalog Carousel — pan-x no mobile elimina hesitação ao deslizar */
 .catalog-carousel {
-  touch-action: pan-x pan-y pinch-zoom;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
+  overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
-  user-select: none;
-  -webkit-user-select: none;
+  overscroll-behavior-x: auto;
+  overscroll-behavior-y: auto;
   scroll-behavior: auto;
 }
 
-.catalog-carousel.is-scrolling .cine-recomenda-card::before,
-.catalog-carousel.is-scrolling .cine-recomenda-card::after {
-  animation-play-state: paused;
+@media (pointer: coarse) {
+  html,
+  body {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .catalog-carousel {
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .catalog-carousel .catalog-card,
+  .catalog-carousel .cine-recomenda-card,
+  .catalog-carousel img,
+  .catalog-carousel video {
+    touch-action: auto;
+  }
 }
 
 .catalog-card {
-  touch-action: pan-x pan-y pinch-zoom;
-  user-select: none;
-  -webkit-user-select: none;
   -webkit-user-drag: none;
 }
 
@@ -624,28 +613,30 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   backdrop-filter: blur(8px);
 }
 
-/* Mobile: scroll nativo, sem animações pesadas nos cards */
+/* Mobile: prioriza fluidez — sem animações/transições pesadas nos cards */
 @media (pointer: coarse) {
   .catalog-carousel {
     -webkit-overflow-scrolling: touch;
   }
 
+  .catalog-carousel .cine-recomenda-card,
+  .catalog-carousel .catalog-card-standard {
+    transition: none !important;
+    transform: none !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+      0 10px 28px rgba(0, 0, 0, 0.42);
+  }
+
   .catalog-carousel .cine-recomenda-card::before,
   .catalog-carousel .cine-recomenda-card::after {
-    animation: none;
+    animation: none !important;
   }
-}
 
-/* Horizontal swipe inside carousels */
-.overflow-x-auto > *,
-.overflow-x-auto img,
-.overflow-x-auto svg,
-.overflow-x-auto a,
-.overflow-x-auto button,
-.overflow-x-auto video,
-.overflow-x-auto .select-none,
-.overflow-x-auto [class*="group/card"] {
-  touch-action: pan-x pan-y pinch-zoom;
+  .catalog-carousel .catalog-card-duration,
+  .catalog-carousel .cine-recomenda-duration {
+    backdrop-filter: none;
+  }
 }
 
 @media (pointer: coarse) {

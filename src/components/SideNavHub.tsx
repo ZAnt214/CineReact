@@ -199,20 +199,19 @@ function SideNavHub({
 
   const content = (
     <>
-      <button
-        type="button"
-        className={`fixed inset-0 z-[94] bg-black/60 md:bg-black/40 md:transition-opacity md:duration-150 ${
-          isSideNavOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => {
-          if (Date.now() - openedAtRef.current < 320) return;
-          closeSideNav();
-        }}
-        aria-label="Fechar menu"
-        aria-hidden={!isSideNavOpen}
-        tabIndex={isSideNavOpen ? 0 : -1}
-      />
+      {isSideNavOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-[94] bg-black/60 md:bg-black/40 md:transition-opacity md:duration-150 opacity-100"
+          onClick={() => {
+            if (Date.now() - openedAtRef.current < 320) return;
+            closeSideNav();
+          }}
+          aria-label="Fechar menu"
+        />
+      )}
 
+      {hasOpened && (
       <aside
         id="side-nav-panel"
         inert={!isSideNavOpen}
@@ -341,6 +340,7 @@ function SideNavHub({
           </div>
         </nav>
       </aside>
+      )}
     </>
   );
 

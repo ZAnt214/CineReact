@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, Clock } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -16,6 +16,8 @@ interface RowMoviesProps {
   onChannelClick?: (channelNameOrId: string) => void;
 }
 
+const TAP_MOVE_THRESHOLD_PX = 10;
+
 export default function RowMovies({ 
   title, 
   reacts, 
@@ -27,91 +29,79 @@ export default function RowMovies({
   onChannelClick
 }: RowMoviesProps) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const isMouseDownRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const isDraggedRef = useRef(false);
+  const touchRef = useRef({ x: 0, y: 0, moved: false });
   const suppressClickRef = useRef(false);
-  const scrollIdleTimerRef = useRef<number | undefined>(undefined);
-  const [enableDragScroll, setEnableDragScroll] = useState(false);
 
-  const markCarouselScrolling = useCallback(() => {
-    const el = rowRef.current;
-    if (!el) return;
-    el.classList.add('is-scrolling');
-    window.clearTimeout(scrollIdleTimerRef.current);
-    scrollIdleTimerRef.current = window.setTimeout(() => {
-      el.classList.remove('is-scrolling');
-    }, 180);
-  }, []);
+  const handlePlay = useCallback((reactId: string, obraId: string) => {
+    onPlayVideo(reactId, obraId);
+  }, [onPlayVideo]);
 
+  // Tap no mobile via listener passivo no carrossel — não compete com o gesto de scroll
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const el = rowRef.current;
+    if (!el || typeof window === 'undefined') return;
 
-    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const update = () => setEnableDragScroll(mediaQuery.matches);
+    const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+    if (!isCoarse) return;
 
-    update();
-    mediaQuery.addEventListener('change', update);
-    return () => {
-      mediaQuery.removeEventListener('change', update);
-      window.clearTimeout(scrollIdleTimerRef.current);
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchRef.current = { x: t.clientX, y: t.clientY, moved: false };
     };
-  }, []);
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!rowRef.current) return;
-    // Don't drag if clicking buttons
-    if ((e.target as HTMLElement).closest('button')) return;
-    // Touch/pen: rely on native overflow-x scroll (pointer capture blocks swipe)
-    if (e.pointerType !== 'mouse') return;
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1 || touchRef.current.moved) return;
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - touchRef.current.x);
+      const dy = Math.abs(t.clientY - touchRef.current.y);
+      if (dx > TAP_MOVE_THRESHOLD_PX || dy > TAP_MOVE_THRESHOLD_PX) {
+        touchRef.current.moved = true;
+      }
+    };
 
-    isMouseDownRef.current = true;
-    startXRef.current = e.clientX;
-    scrollLeftRef.current = rowRef.current.scrollLeft;
-    isDraggedRef.current = false;
+    const onTouchEnd = (e: TouchEvent) => {
+      if (touchRef.current.moved) return;
 
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch (_) {}
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isMouseDownRef.current || !rowRef.current) return;
-
-    const deltaX = e.clientX - startXRef.current;
-    if (Math.abs(deltaX) < 3) return;
-
-    isDraggedRef.current = true;
-    e.preventDefault();
-    rowRef.current.scrollLeft = scrollLeftRef.current - deltaX;
-    markCarouselScrolling();
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isMouseDownRef.current) {
-      isMouseDownRef.current = false;
-      suppressClickRef.current = isDraggedRef.current;
-      try {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-          e.currentTarget.releasePointerCapture(e.pointerId);
+      const channelEl = (e.target as HTMLElement).closest('[data-channel-name]');
+      if (channelEl && onChannelClick) {
+        const channelName = channelEl.getAttribute('data-channel-name');
+        if (channelName) {
+          suppressClickRef.current = true;
+          onChannelClick(channelName);
+          window.setTimeout(() => { suppressClickRef.current = false; }, 0);
         }
-      } catch (_) {}
-      window.setTimeout(() => {
-        isDraggedRef.current = false;
-        suppressClickRef.current = false;
-      }, 0);
-    }
-  };
+        return;
+      }
+
+      const card = (e.target as HTMLElement).closest('[data-carousel-card]');
+      if (!card) return;
+
+      const reactId = card.getAttribute('data-react-id');
+      const obraId = card.getAttribute('data-obra-id');
+      if (!reactId || !obraId) return;
+
+      suppressClickRef.current = true;
+      handlePlay(reactId, obraId);
+      window.setTimeout(() => { suppressClickRef.current = false; }, 0);
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [handlePlay, onChannelClick]);
 
   const handleCardClick = (reactId: string, obraId: string) => {
-    if (suppressClickRef.current || isDraggedRef.current) {
-      return;
-    }
-    onPlayVideo(reactId, obraId);
+    if (suppressClickRef.current) return;
+    handlePlay(reactId, obraId);
   };
 
-  // Check if title matches a channel in obras
   const matchingChannel = obras.find(o => 
     o.tipo === 'canal' && (
       o.titulo.toLowerCase() === title.toLowerCase() ||
@@ -143,10 +133,8 @@ export default function RowMovies({
 
   if (reacts.length === 0) return null;
 
-
   return (
     <div className="catalog-row space-y-3.5 relative w-full min-w-0 group/row">
-      {/* ROW TITLE & ACTIONS */}
       <div className="flex flex-col gap-1 cine-container mb-1">
         <div className="flex items-center justify-between gap-3">
           <h2 
@@ -170,9 +158,7 @@ export default function RowMovies({
         )}
       </div>
 
-      {/* HORIZONTAL CAROUSEL CONTAINER */}
       <div className="relative max-w-full min-w-0">
-        {/* LEFT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('left')}
@@ -183,41 +169,33 @@ export default function RowMovies({
           </button>
         )}
 
-        {/* HORIZONTAL FLEX CAROUSEL */}
         <div
           ref={rowRef}
-          {...(enableDragScroll ? {
-            onPointerDown: handlePointerDown,
-            onPointerMove: handlePointerMove,
-            onPointerUp: handlePointerUp,
-            onPointerCancel: handlePointerUp,
-            onDragStart: (e: React.DragEvent) => e.preventDefault(),
-          } : {})}
-          onScroll={markCarouselScrolling}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing"
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full"
         >
-          {reacts.map((react) => {
-            const associatedObra = obras.find(o => o.id === react.obraId);
+          {reacts.map((react, index) => {
             const cardClass = isEditorial
-              ? 'cine-recomenda-card catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all'
-              : 'catalog-card-standard catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full select-none md:hover:-translate-y-1 md:transition-all';
+              ? 'cine-recomenda-card catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full md:select-none md:hover:-translate-y-1 md:transition-transform md:duration-300'
+              : 'catalog-card-standard catalog-card w-[220px] sm:w-[280px] md:w-[300px] lg:w-[320px] xl:w-[340px] 2xl:w-[360px] shrink-0 rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full md:select-none md:hover:-translate-y-1 md:transition-transform md:duration-300';
 
             return (
               <div
                 key={react.id}
+                data-carousel-card=""
+                data-react-id={react.id}
+                data-obra-id={react.obraId}
                 onClick={() => handleCardClick(react.id, react.obraId)}
                 className={cardClass}
               >
-                {/* THUMBNAIL (Fixed 16:9 Aspect Ratio) */}
                 <div className={`relative aspect-video w-full overflow-hidden shrink-0 catalog-card-thumb ${isEditorial ? 'cine-recomenda-thumb' : 'catalog-card-standard-thumb'}`}>
                   <OptimizedImage
                     src={react.thumbnailUrl}
                     alt={react.titulo}
+                    loading={index < 4 ? 'eager' : 'lazy'}
                     className="w-full h-full object-cover md:group-hover/card:scale-105 md:transition-transform md:duration-300"
                   />
-                  
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center z-10">
+
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center z-10 pointer-events-none">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transform group-hover/card:scale-110 transition-transform ${
                       isEditorial ? 'cine-recomenda-play-btn text-white' : 'bg-cine-accent text-white'
                     }`}>
@@ -225,7 +203,6 @@ export default function RowMovies({
                     </div>
                   </div>
 
-                  {/* Duration Badge */}
                   <span className={`absolute bottom-2.5 right-2.5 z-20 h-6.5 px-2.5 inline-flex items-center gap-1 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold rounded-lg leading-none ${
                     isEditorial
                       ? 'cine-recomenda-duration'
@@ -235,14 +212,12 @@ export default function RowMovies({
                     <span>{react.duracao}</span>
                   </span>
 
-                  {/* CineReact Recomenda Editorial Tag */}
                   {isEditorial && (
                     <span className="cine-recomenda-tag">
                       <span className="cine-recomenda-tag-label">Recomendado</span>
                     </span>
                   )}
 
-                  {/* Progress Bar */}
                   {progressMap && progressMap[react.id] !== undefined && (
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] catalog-card-progress-track">
                       <div 
@@ -253,7 +228,6 @@ export default function RowMovies({
                   )}
                 </div>
 
-                {/* CARD BODY */}
                 <div className={`p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between gap-3 ${isEditorial ? 'cine-recomenda-body' : 'catalog-card-standard-body'}`}>
                   <h3 className={`text-sm sm:text-base md:text-lg font-bold line-clamp-2 leading-snug min-h-[2.5rem] sm:min-h-[2.75rem] ${
                     isEditorial
@@ -262,10 +236,12 @@ export default function RowMovies({
                   }`}>
                     {react.titulo}
                   </h3>
-                  
+
                   <div className={`flex items-center pt-2.5 min-w-0 ${isEditorial ? 'cine-recomenda-footer' : 'border-t border-cine-border/25'}`}>
                     <span 
+                      data-channel-name={react.canalNome}
                       onClick={(e) => {
+                        if (suppressClickRef.current) return;
                         if (onChannelClick) {
                           e.stopPropagation();
                           onChannelClick(react.canalNome);
@@ -285,12 +261,10 @@ export default function RowMovies({
               </div>
             );
           })}
-          
-          {/* ENDING SPACER FOR RIGHT PADDING IN SCROLL CONTAINERS */}
+
           <div className="shrink-0 w-2 sm:w-4 lg:w-6" aria-hidden="true" />
         </div>
 
-        {/* RIGHT NAV ARROW */}
         {reacts.length > 2 && (
           <button
             onClick={() => handleScroll('right')}
@@ -304,4 +278,3 @@ export default function RowMovies({
     </div>
   );
 }
-

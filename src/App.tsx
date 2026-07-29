@@ -694,10 +694,24 @@ export default function App() {
     };
   }, [currentTab]);
 
+  // Garante que body/html não fiquem presos após landing, modais ou menus
+  useEffect(() => {
+    if (currentTab === 'landing' || typeof document === 'undefined') return;
+
+    const { body, documentElement } = document;
+    body.style.overflow = '';
+    body.style.position = '';
+    body.style.top = '';
+    body.style.left = '';
+    body.style.right = '';
+    body.style.width = '';
+    documentElement.style.overflow = '';
+  }, [currentTab]);
+
   return (
     <>
     <div
-      className={`cine-site-bg min-h-screen text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden smooth-scroll-page ${
+      className={`cine-site-bg min-h-screen text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -754,7 +768,7 @@ export default function App() {
       />
 
       {/* CORE VIEWPORT */}
-      <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none smooth-scroll-page">
+      <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none">
         {loading ? (
           currentTab === 'reproducao' ? (
             <PlaybackSkeleton />
@@ -804,8 +818,7 @@ export default function App() {
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
                                 onClick={() => handlePlayVideo(react.id, react.obraId)}
-                                style={{ touchAction: 'pan-y pinch-zoom' }}
-                                className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-neutral-800 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full select-none"
+                                className="bg-neutral-900/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-neutral-800 hover:border-cine-accent/40 hover:shadow-cine-accent/10 shadow-black/50 cursor-pointer group/card flex flex-col h-full md:select-none"
                               >
                                 <div className="relative h-36 md:h-44 w-full overflow-hidden bg-neutral-950">
                                   <OptimizedImage
@@ -958,7 +971,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-12 pb-24 pt-24 w-full flex-1 smooth-scroll-page"
+                className="space-y-12 pb-24 pt-24 w-full flex-1"
               >
                 {/* HORIZONTAL ROWS */}
                 <motion.div className="space-y-10 md:mt-8 relative z-20">
