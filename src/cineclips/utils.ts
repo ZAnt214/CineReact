@@ -35,6 +35,10 @@ export function extractVideoIdFromUrl(url: string): string | null {
   return match?.[1] || null;
 }
 
+export function usesHostedVideo(clip: { videoUrl?: string; sourceType?: string }): boolean {
+  return !!clip.videoUrl || clip.sourceType === 'tiktok' || clip.sourceType === 'instagram';
+}
+
 export function hasShortFormSignals(title: string, description = ''): boolean {
   const combined = `${title} ${description}`.toLowerCase();
   return SHORT_HASHTAGS.some((kw) => combined.includes(kw));

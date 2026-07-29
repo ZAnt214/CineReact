@@ -42,25 +42,50 @@ function ClipPlayer({
   isActive: boolean;
   onEnded?: () => void;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const videoId = clip.youtubeId || clip.id;
+  const isHosted = !!clip.videoUrl;
 
   useEffect(() => {
     if (!isActive) return;
     clipAction(clip.id, 'view').catch(() => undefined);
   }, [isActive, clip.id]);
 
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!isHosted || !el) return;
+    if (isActive) {
+      el.currentTime = 0;
+      el.play().catch(() => undefined);
+    } else {
+      el.pause();
+    }
+  }, [isActive, isHosted, clip.videoUrl]);
+
   return (
     <div className="absolute inset-0 bg-black">
       {isActive ? (
-        <iframe
-          ref={iframeRef}
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}`}
-          title={clip.titulo}
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        isHosted ? (
+          <video
+            ref={videoRef}
+            src={clip.videoUrl}
+            poster={clip.thumbnailUrl}
+            className="absolute inset-0 w-full h-full object-contain bg-black"
+            playsInline
+            loop
+            muted={false}
+            controls={false}
+            onEnded={onEnded}
+          />
+        ) : (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}`}
+            title={clip.titulo}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        )
       ) : (
         <img
           src={clip.thumbnailUrl}
@@ -69,12 +94,6 @@ function ClipPlayer({
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80 pointer-events-none" />
-      {isActive && (
-        <div
-          className="absolute bottom-0 left-0 right-16 p-4 pb-24 pointer-events-none"
-          onAnimationEnd={onEnded}
-        />
-      )}
     </div>
   );
 }
@@ -115,6 +134,11 @@ function ClipOverlay({
         )}
         <p className="text-white font-bold text-sm leading-snug line-clamp-2 drop-shadow-lg">{clip.titulo}</p>
         <p className="text-zinc-300 text-xs mt-1 font-semibold">@{clip.criadorNome}</p>
+        {(clip.sourceType === 'tiktok' || clip.sourceType === 'instagram') && (
+          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
+            Republicado no CineReact
+          </span>
+        )}
         {clip.descricao && (
           <p className="text-zinc-400 text-xs mt-1 line-clamp-2">{clip.descricao}</p>
         )}

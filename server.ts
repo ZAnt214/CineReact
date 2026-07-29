@@ -6,6 +6,7 @@ import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
+import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
 import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
 import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
@@ -14,6 +15,7 @@ import { ensureDemoCreatorProfile } from "./src/gamification/demoCreator.ts";
 import { listVideoCreators } from "./src/gamification/platformCreators.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
+import * as fs from "fs";
 import { serializeUserState } from "./src/utils/userState.ts";
 import { sanitizeSocialLinks } from "./src/utils/socialLinks.ts";
 import {
@@ -31,6 +33,16 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+
+const cineClipsUploadDir = getClipsStorageDir();
+fs.mkdirSync(cineClipsUploadDir, { recursive: true });
+app.use("/uploads/cineclips", express.static(cineClipsUploadDir, {
+  maxAge: process.env.NODE_ENV === "production" ? "7d" : 0,
+  setHeaders(res) {
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=604800");
+  },
+}));
 
 app.use((_req, _res, next) => {
   processScheduledPublications();

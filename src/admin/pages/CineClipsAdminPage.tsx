@@ -181,18 +181,19 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
         </div>
         <h1 className="text-2xl font-black text-white">Painel CineClips</h1>
         <p className="text-sm text-zinc-400 mt-2">
-          Importe vídeos curtos de reação, gerencie a fila de processamento e publique no feed vertical.
+          Cole links do <strong className="text-white">TikTok</strong>, <strong className="text-white">Instagram Reels</strong> ou <strong className="text-white">YouTube Shorts</strong>.
+          Vídeos do TikTok e Instagram são baixados e republicados no CineReact automaticamente.
         </p>
       </div>
 
-      <AdminPanelCard title="Importar por link" description="YouTube, Shorts e links compatíveis">
+      <AdminPanelCard title="Importar por link" description="TikTok/Instagram: download e hospedagem · YouTube: embed direto">
         <div className="space-y-4">
           <div>
             <label className="text-xs font-bold text-zinc-400 block mb-1.5">URL do vídeo</label>
             <input
               value={importUrl}
               onChange={(e) => setImportUrl(e.target.value)}
-              placeholder="https://youtube.com/shorts/..."
+              placeholder="https://www.tiktok.com/... ou instagram.com/reel/..."
               className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-cine-accent/50"
             />
           </div>
@@ -268,6 +269,12 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
                 <p className="font-bold text-white text-sm">{preview.titulo}</p>
                 <p className="text-xs text-zinc-400 mt-1">{preview.criadorNome}</p>
                 <p className="text-xs text-zinc-500 mt-1">{preview.duracao}</p>
+                {preview.platform && (
+                  <p className="text-[10px] text-cine-accent-light font-bold mt-1 uppercase">
+                    {preview.platform}
+                    {preview.willDownload ? ' · será baixado e hospedado no CineReact' : ' · reprodução via embed'}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-1 mt-2">
                   {(preview.hashtags || []).map((h: string) => (
                     <span key={h} className="text-[10px] text-cine-accent-light">{h}</span>
