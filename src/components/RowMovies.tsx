@@ -194,7 +194,7 @@ export default function RowMovies({
             onDragStart: (e: React.DragEvent) => e.preventDefault(),
           } : {})}
           onScroll={markCarouselScrolling}
-          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full select-none md:cursor-grab md:active:cursor-grabbing"
+          className="catalog-carousel flex items-stretch gap-3.5 sm:gap-4 md:gap-5 xl:gap-6 overflow-x-auto py-2.5 cine-container scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent min-w-0 max-w-full md:cursor-grab md:active:cursor-grabbing"
         >
           {reacts.map((react) => {
             const associatedObra = obras.find(o => o.id === react.obraId);
