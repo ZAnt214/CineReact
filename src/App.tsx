@@ -5,7 +5,7 @@ import ObraPage from './components/ObraPage.tsx';
 import PlaybackPage from './components/PlaybackPage.tsx';
 import MyList from './components/MyList.tsx';
 import ChannelPage from './components/ChannelPage.tsx';
-import AdminPanel from './components/AdminPanel.tsx';
+import { AdminShell } from './admin/AdminShell.tsx';
 import AuthModal from './components/AuthModal.tsx';
 import RowMoviesSkeleton from './components/RowMoviesSkeleton.tsx';
 import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
@@ -1258,8 +1258,9 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="w-full flex-1"
               >
-                <AdminPanel 
-                  user={user} 
+                <AdminShell
+                  user={user}
+                  onClose={() => setCurrentTab('home')}
                   onSelectObra={(id) => {
                     setSelectedObraId(id);
                     setSelectedReactId(null);

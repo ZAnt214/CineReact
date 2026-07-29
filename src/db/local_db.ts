@@ -3,6 +3,7 @@ import * as path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { Obra, ReactVideo, Comentario, ListaPersonalizada, Notificacao, UserAccount } from '../types.ts';
 import { GamificationProfile } from '../types/gamification.ts';
+import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/admin.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
@@ -36,6 +37,7 @@ interface DbSchema {
   notificacoes: Notificacao[];
   usuarios: UserAccount[];
   gamificationProfiles: Record<string, GamificationProfile>;
+  adminConfig: AdminConfig;
 }
 
 function initDb(): DbSchema {
@@ -76,6 +78,11 @@ function initDb(): DbSchema {
         saveDb(parsed);
       }
 
+      if (!parsed.adminConfig) {
+        parsed.adminConfig = createDefaultAdminConfig();
+        saveDb(parsed);
+      }
+
       return parsed;
     }
   } catch (error) {
@@ -110,6 +117,7 @@ function initDb(): DbSchema {
     listas: [],
     notificacoes: [],
     gamificationProfiles: {},
+    adminConfig: createDefaultAdminConfig(),
     usuarios: [
       {
         id: 'admin',
@@ -135,6 +143,7 @@ let dbCache: DbSchema = {
   listas: [],
   notificacoes: [],
   gamificationProfiles: {},
+  adminConfig: createDefaultAdminConfig(),
   usuarios: []
 };
 
@@ -594,6 +603,14 @@ export const localDb = {
         console.warn("[Supabase Async Network Error] Erro ao deletar comentario:", err?.message || err);
       });
     }
+  },
+
+  updateComentario: (id: string, updates: Partial<Comentario>) => {
+    const idx = dbCache.comentarios.findIndex(c => c.id === id);
+    if (idx < 0) return null;
+    dbCache.comentarios[idx] = { ...dbCache.comentarios[idx], ...updates };
+    saveDb(dbCache);
+    return dbCache.comentarios[idx];
   },
 
   likeComentario: (id: string, action: 'like' | 'unlike') => {
@@ -1076,5 +1093,39 @@ export const localDb = {
   getAllGamificationProfiles: (): GamificationProfile[] => {
     if (!dbCache.gamificationProfiles) dbCache.gamificationProfiles = {};
     return Object.values(dbCache.gamificationProfiles);
+  },
+
+  getAdminConfig: (): AdminConfig => {
+    if (!dbCache.adminConfig) dbCache.adminConfig = createDefaultAdminConfig();
+    return dbCache.adminConfig;
+  },
+
+  saveAdminConfig: (config: AdminConfig): AdminConfig => {
+    dbCache.adminConfig = config;
+    saveDb(dbCache);
+    return config;
+  },
+
+  updateAdminConfig: (updates: Partial<AdminConfig>): AdminConfig => {
+    const current = dbCache.adminConfig || createDefaultAdminConfig();
+    dbCache.adminConfig = { ...current, ...updates };
+    saveDb(dbCache);
+    return dbCache.adminConfig;
+  },
+
+  appendAuditLog: (log: Omit<AdminAuditLog, 'id' | 'createdAt'>): AdminAuditLog => {
+    if (!dbCache.adminConfig) dbCache.adminConfig = createDefaultAdminConfig();
+    const entry: AdminAuditLog = {
+      ...log,
+      id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    };
+    dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 500);
+    saveDb(dbCache);
+    return entry;
+  },
+
+  exportDbSnapshot: (): DbSchema => {
+    return JSON.parse(JSON.stringify(dbCache));
   },
 };
