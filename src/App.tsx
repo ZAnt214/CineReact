@@ -697,7 +697,7 @@ export default function App() {
   return (
     <>
     <div
-      className={`cine-site-bg min-h-screen text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden ${
+      className={`cine-site-bg min-h-screen text-white flex flex-col font-sans selection:bg-cine-accent/40 selection:text-cine-cream w-full max-w-none overflow-x-hidden smooth-scroll-page ${
         currentTab === 'landing' ? 'fixed inset-0 overflow-hidden pointer-events-none invisible' : ''
       }`}
       aria-hidden={currentTab === 'landing'}
@@ -754,7 +754,7 @@ export default function App() {
       />
 
       {/* CORE VIEWPORT */}
-      <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none">
+      <main className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] w-full max-w-none smooth-scroll-page">
         {loading ? (
           currentTab === 'reproducao' ? (
             <PlaybackSkeleton />
@@ -958,7 +958,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-12 pb-24 pt-24 w-full flex-1"
+                className="space-y-12 pb-24 pt-24 w-full flex-1 smooth-scroll-page"
               >
                 {/* HORIZONTAL ROWS */}
                 <motion.div className="space-y-10 md:mt-8 relative z-20">

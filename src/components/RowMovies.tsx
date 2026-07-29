@@ -72,29 +72,14 @@ export default function RowMovies({
     let touchScrollLeft = 0;
     let axis: 'x' | 'y' | null = null;
     let isTracking = false;
-    let lastMoveX = 0;
-    let lastMoveTime = 0;
-    let velocityX = 0;
-    let momentumFrame = 0;
-
-    const stopMomentum = () => {
-      if (momentumFrame) {
-        cancelAnimationFrame(momentumFrame);
-        momentumFrame = 0;
-      }
-    };
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       if ((e.target as HTMLElement).closest('button')) return;
 
-      stopMomentum();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       touchScrollLeft = el.scrollLeft;
-      lastMoveX = touchStartX;
-      lastMoveTime = performance.now();
-      velocityX = 0;
       axis = null;
       isTracking = true;
     };
@@ -110,9 +95,10 @@ export default function RowMovies({
       if (!axis) {
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
-        if (absDx < 3 && absDy < 3) return;
+        if (absDx < 4 && absDy < 4) return;
 
-        axis = absDx >= absDy ? 'x' : 'y';
+        // Prefer vertical page scroll unless the gesture is clearly horizontal
+        axis = absDx > absDy * 1.45 ? 'x' : 'y';
         if (axis === 'y') {
           isTracking = false;
           return;
@@ -123,33 +109,11 @@ export default function RowMovies({
         markCarouselScrolling();
       }
 
-      const now = performance.now();
-      const dt = now - lastMoveTime;
-      if (dt > 0) {
-        velocityX = (lastMoveX - touchX) / dt;
-      }
-      lastMoveX = touchX;
-      lastMoveTime = now;
-
       e.preventDefault();
       el.scrollLeft = touchScrollLeft - dx;
     };
 
     const onTouchEnd = () => {
-      if (axis === 'x' && Math.abs(velocityX) > 0.15) {
-        let v = velocityX * 18;
-        const step = () => {
-          if (Math.abs(v) < 0.35) {
-            momentumFrame = 0;
-            return;
-          }
-          el.scrollLeft += v;
-          v *= 0.92;
-          momentumFrame = requestAnimationFrame(step);
-        };
-        momentumFrame = requestAnimationFrame(step);
-      }
-
       isTracking = false;
       axis = null;
       window.setTimeout(() => {
@@ -164,7 +128,6 @@ export default function RowMovies({
     el.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
     return () => {
-      stopMomentum();
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
