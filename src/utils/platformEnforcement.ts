@@ -8,7 +8,7 @@ export interface AccountRestriction {
   message: string;
 }
 
-const MASTER_EMAIL = 'mateusvini.t10@gmail.com';
+export const MASTER_EMAIL = 'mateusvini.t10@gmail.com';
 
 export function getAccountRestriction(user: UserAccount | null | undefined): AccountRestriction {
   if (!user) {

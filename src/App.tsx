@@ -1524,7 +1524,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-cine-bg border-t border-cine-border py-10 text-center text-xs text-cine-muted font-mono space-y-4 pb-12 w-full">
+      <footer className={`bg-cine-bg border-t border-cine-border py-10 text-center text-xs text-cine-muted font-mono space-y-4 w-full ${showCreatorBanner ? 'pb-32' : 'pb-12'}`}>
         <div className="cine-container space-y-3">
           <p>© {new Date().getFullYear()} CineReact - O maior acervo de reacts de filmes, séries e jogos do Brasil.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap text-zinc-400 font-sans text-xs">
@@ -1572,10 +1572,21 @@ export default function App() {
       {/* Floating Bottom Banner for Creators */}
       <AnimatePresence>
         {showCreatorBanner && (
-          <CreatorPartnerBanner 
-            onClick={() => setShowCreatorPartnerModal(true)} 
-            onClose={() => setIsCreatorBannerVisible(false)}
-          />
+          <>
+            <motion.div
+              key="creator-banner-scrim"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-x-0 bottom-0 h-28 bg-gradient-to-t from-cine-bg via-cine-bg/95 to-transparent z-[119] pointer-events-none"
+              aria-hidden="true"
+            />
+            <CreatorPartnerBanner
+              key="creator-partner-banner"
+              onClick={() => setShowCreatorPartnerModal(true)}
+              onClose={() => setIsCreatorBannerVisible(false)}
+            />
+          </>
         )}
       </AnimatePresence>
 
