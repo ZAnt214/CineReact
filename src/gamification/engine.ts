@@ -65,6 +65,8 @@ function createDefaultStats(): GamificationStats {
     watchedReacts: {},
     commentLikesReceived: 0,
     listEngagement: 0,
+    clipsWatched: 0,
+    clipInteractions: 0,
   };
 }
 
@@ -230,6 +232,9 @@ function checkAchievements(profile: GamificationProfile): AchievementDefinition[
     ['seal-master', profile.unlockedSeals.length >= FRANCHISE_SEALS.length],
     ['tier-influenciador', ['Influenciador', 'Ícone', 'Lenda', 'Elite CineReact'].includes(tier)],
     ['tier-elite', tier === 'Elite CineReact'],
+    ['clip-first', (s.clipsWatched || 0) >= 1],
+    ['clip-25', (s.clipsWatched || 0) >= 25],
+    ['clip-100', (s.clipsWatched || 0) >= 100],
   ];
 
   for (const [id, cond] of checks) {
@@ -311,6 +316,8 @@ function checkFranchiseSeals(profile: GamificationProfile, franchiseId: string):
 export interface ProcessEventMeta {
   reactId?: string;
   obraId?: string;
+  clipId?: string;
+  watchSeconds?: number;
   progress?: number;
   durationMinutes?: number;
   category?: string;
@@ -483,6 +490,73 @@ export function processGamificationEvent(
     profile.xp += xp;
     reward.xp += xp;
     if (lunchCount >= 10) unlockAchievement(profile, 'lunch-10');
+  }
+
+  if (eventType === 'clip_watch' && meta.clipId) {
+    const xp = XP_REWARDS.clip_watch;
+    profile.xp += xp;
+    reward.xp += xp;
+    profile.stats.clipInteractions = (profile.stats.clipInteractions || 0) + 1;
+    const m = updateMissions(profile, 'clip_watch');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
+  }
+
+  if (eventType === 'clip_watch_complete' && meta.clipId) {
+    profile.stats.clipsWatched = (profile.stats.clipsWatched || 0) + 1;
+    const watchSeconds = meta.watchSeconds || 30;
+    profile.stats.totalWatchTimeMinutes += Math.max(1, Math.floor(watchSeconds / 60));
+    const xp = XP_REWARDS.clip_watch_complete;
+    profile.xp += xp;
+    reward.xp += xp;
+    const m = updateMissions(profile, 'clip_watch_complete');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
+    unlockAchievement(profile, 'clip-first');
+    if ((profile.stats.clipsWatched || 0) >= 25) unlockAchievement(profile, 'clip-25');
+    if ((profile.stats.clipsWatched || 0) >= 100) unlockAchievement(profile, 'clip-100');
+  }
+
+  if (eventType === 'clip_like') {
+    profile.stats.clipInteractions = (profile.stats.clipInteractions || 0) + 1;
+    const xp = XP_REWARDS.clip_like;
+    profile.xp += xp;
+    reward.xp += xp;
+    const m = updateMissions(profile, 'clip_like');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
+  }
+
+  if (eventType === 'clip_comment') {
+    profile.stats.clipInteractions = (profile.stats.clipInteractions || 0) + 1;
+    const xp = XP_REWARDS.clip_comment;
+    profile.xp += xp;
+    reward.xp += xp;
+    const m = updateMissions(profile, 'clip_comment');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
+  }
+
+  if (eventType === 'clip_share') {
+    profile.stats.sharesCount += 1;
+    profile.stats.clipInteractions = (profile.stats.clipInteractions || 0) + 1;
+    const xp = XP_REWARDS.clip_share;
+    profile.xp += xp;
+    reward.xp += xp;
+    const m = updateMissions(profile, 'clip_share');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
+  }
+
+  if (eventType === 'clip_favorite') {
+    profile.stats.favoritesCount += 1;
+    profile.stats.clipInteractions = (profile.stats.clipInteractions || 0) + 1;
+    const xp = XP_REWARDS.clip_favorite;
+    profile.xp += xp;
+    reward.xp += xp;
+    const m = updateMissions(profile, 'clip_favorite');
+    reward.xp += m.xp;
+    reward.spotlight += m.spotlight;
   }
 
   profile.influenceIndex = computeInfluence(profile);

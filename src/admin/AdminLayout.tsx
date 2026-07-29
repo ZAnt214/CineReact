@@ -14,8 +14,7 @@ import {
   Menu,
   X,
   ChevronRight,
-  LogOut,
-  Pin,
+  Zap,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { UserState } from '../types.ts';
@@ -32,13 +31,15 @@ export type AdminSection =
   | 'analytics'
   | 'monetizacao'
   | 'configuracoes'
-  | 'sistema';
+  | 'sistema'
+  | 'cineclips';
 
 const NAV: { id: AdminSection; label: string; icon: React.ElementType; group: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Geral' },
   { id: 'gestao', label: 'Categorias & Home', icon: Pin, group: 'Conteúdo' },
   { id: 'catalogo', label: 'Catálogo', icon: Link2, group: 'Conteúdo' },
   { id: 'conteudo', label: 'Obras & Vídeos', icon: LayoutGrid, group: 'Conteúdo' },
+  { id: 'cineclips', label: 'CineClips', icon: Zap, group: 'Conteúdo' },
   { id: 'criadores', label: 'Criadores', icon: Inbox, group: 'Conteúdo' },
   { id: 'moderacao', label: 'Moderação', icon: Shield, group: 'Comunidade' },
   { id: 'usuarios', label: 'Usuários', icon: Users, group: 'Comunidade' },

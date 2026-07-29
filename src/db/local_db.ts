@@ -2,6 +2,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { Obra, ReactVideo, Comentario, ListaPersonalizada, Notificacao, UserAccount } from '../types.ts';
+import type {
+  CineClip,
+  CineClipComment,
+  CineClipFavorite,
+  CineClipImportJob,
+  CineClipLike,
+  CineClipReport,
+  CineClipShare,
+  CineClipWatchEvent,
+} from '../types/cineclips.ts';
 import { GamificationProfile } from '../types/gamification.ts';
 import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/admin.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
@@ -45,6 +55,14 @@ interface DbSchema {
   usuarios: UserAccount[];
   gamificationProfiles: Record<string, GamificationProfile>;
   adminConfig: AdminConfig;
+  cineClips: CineClip[];
+  cineClipComments: CineClipComment[];
+  cineClipLikes: CineClipLike[];
+  cineClipFavorites: CineClipFavorite[];
+  cineClipShares: CineClipShare[];
+  cineClipReports: CineClipReport[];
+  cineClipImportJobs: CineClipImportJob[];
+  cineClipWatchHistory: CineClipWatchEvent[];
 }
 
 function initDb(): DbSchema {
@@ -87,6 +105,18 @@ function initDb(): DbSchema {
 
       if (!parsed.adminConfig) {
         parsed.adminConfig = createDefaultAdminConfig();
+        saveDb(parsed);
+      }
+
+      if (!parsed.cineClips) {
+        parsed.cineClips = [];
+        parsed.cineClipComments = [];
+        parsed.cineClipLikes = [];
+        parsed.cineClipFavorites = [];
+        parsed.cineClipShares = [];
+        parsed.cineClipReports = [];
+        parsed.cineClipImportJobs = [];
+        parsed.cineClipWatchHistory = [];
         saveDb(parsed);
       }
 
@@ -134,7 +164,15 @@ function initDb(): DbSchema {
         createdAt: new Date().toISOString(),
         isAdmin: true
       }
-    ]
+    ],
+    cineClips: [],
+    cineClipComments: [],
+    cineClipLikes: [],
+    cineClipFavorites: [],
+    cineClipShares: [],
+    cineClipReports: [],
+    cineClipImportJobs: [],
+    cineClipWatchHistory: [],
   };
 
   saveDb(initialDb);
@@ -151,7 +189,15 @@ let dbCache: DbSchema = {
   notificacoes: [],
   gamificationProfiles: {},
   adminConfig: createDefaultAdminConfig(),
-  usuarios: []
+  usuarios: [],
+  cineClips: [],
+  cineClipComments: [],
+  cineClipLikes: [],
+  cineClipFavorites: [],
+  cineClipShares: [],
+  cineClipReports: [],
+  cineClipImportJobs: [],
+  cineClipWatchHistory: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1135,6 +1181,174 @@ export const localDb = {
     dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 500);
     saveDb(dbCache);
     return entry;
+  },
+
+  // ── CineClips ──────────────────────────────────────────────
+  getCineClips: (): CineClip[] => dbCache.cineClips || [],
+
+  getCineClipById: (id: string): CineClip | undefined =>
+    (dbCache.cineClips || []).find((c) => c.id === id),
+
+  saveCineClip: (clip: CineClip): CineClip => {
+    if (!dbCache.cineClips) dbCache.cineClips = [];
+    const idx = dbCache.cineClips.findIndex((c) => c.id === clip.id);
+    if (idx >= 0) dbCache.cineClips[idx] = clip;
+    else dbCache.cineClips.push(clip);
+    saveDb(dbCache);
+    return clip;
+  },
+
+  deleteCineClip: (id: string): void => {
+    dbCache.cineClips = (dbCache.cineClips || []).filter((c) => c.id !== id);
+    dbCache.cineClipComments = (dbCache.cineClipComments || []).filter((c) => c.clipId !== id);
+    dbCache.cineClipLikes = (dbCache.cineClipLikes || []).filter((l) => l.clipId !== id);
+    dbCache.cineClipFavorites = (dbCache.cineClipFavorites || []).filter((f) => f.clipId !== id);
+    saveDb(dbCache);
+  },
+
+  incrementClipViews: (id: string): number => {
+    const clip = (dbCache.cineClips || []).find((c) => c.id === id);
+    if (!clip) return 0;
+    clip.visualizacoes = (clip.visualizacoes || 0) + 1;
+    clip.atualizadoEm = new Date().toISOString();
+    saveDb(dbCache);
+    return clip.visualizacoes;
+  },
+
+  likeCineClip: (clipId: string, email: string, action: 'like' | 'unlike'): { likes: number; liked: boolean } => {
+    if (!dbCache.cineClipLikes) dbCache.cineClipLikes = [];
+    const clip = (dbCache.cineClips || []).find((c) => c.id === clipId);
+    if (!clip) return { likes: 0, liked: false };
+
+    const key = email.toLowerCase();
+    const existing = dbCache.cineClipLikes.find((l) => l.clipId === clipId && l.usuarioEmail.toLowerCase() === key);
+
+    if (action === 'like' && !existing) {
+      dbCache.cineClipLikes.push({ clipId, usuarioEmail: key, criadoEm: new Date().toISOString() });
+      clip.likes = (clip.likes || 0) + 1;
+    } else if (action === 'unlike' && existing) {
+      dbCache.cineClipLikes = dbCache.cineClipLikes.filter((l) => !(l.clipId === clipId && l.usuarioEmail.toLowerCase() === key));
+      clip.likes = Math.max(0, (clip.likes || 0) - 1);
+    }
+
+    clip.atualizadoEm = new Date().toISOString();
+    saveDb(dbCache);
+    return { likes: clip.likes, liked: action === 'like' && !existing ? true : !!existing && action !== 'unlike' };
+  },
+
+  isClipLikedBy: (clipId: string, email: string): boolean =>
+    (dbCache.cineClipLikes || []).some((l) => l.clipId === clipId && l.usuarioEmail.toLowerCase() === email.toLowerCase()),
+
+  favoriteCineClip: (clipId: string, email: string, action: 'favorite' | 'unfavorite'): { favorites: number; favorited: boolean } => {
+    if (!dbCache.cineClipFavorites) dbCache.cineClipFavorites = [];
+    const clip = (dbCache.cineClips || []).find((c) => c.id === clipId);
+    if (!clip) return { favorites: 0, favorited: false };
+
+    const key = email.toLowerCase();
+    const existing = dbCache.cineClipFavorites.find((f) => f.clipId === clipId && f.usuarioEmail.toLowerCase() === key);
+
+    if (action === 'favorite' && !existing) {
+      dbCache.cineClipFavorites.push({ clipId, usuarioEmail: key, criadoEm: new Date().toISOString() });
+      clip.favorites = (clip.favorites || 0) + 1;
+    } else if (action === 'unfavorite' && existing) {
+      dbCache.cineClipFavorites = dbCache.cineClipFavorites.filter((f) => !(f.clipId === clipId && f.usuarioEmail.toLowerCase() === key));
+      clip.favorites = Math.max(0, (clip.favorites || 0) - 1);
+    }
+
+    clip.atualizadoEm = new Date().toISOString();
+    saveDb(dbCache);
+    return { favorites: clip.favorites, favorited: action === 'favorite' };
+  },
+
+  isClipFavoritedBy: (clipId: string, email: string): boolean =>
+    (dbCache.cineClipFavorites || []).some((f) => f.clipId === clipId && f.usuarioEmail.toLowerCase() === email.toLowerCase()),
+
+  shareCineClip: (clipId: string, email?: string): number => {
+    if (!dbCache.cineClipShares) dbCache.cineClipShares = [];
+    const clip = (dbCache.cineClips || []).find((c) => c.id === clipId);
+    if (!clip) return 0;
+    dbCache.cineClipShares.push({ clipId, usuarioEmail: email?.toLowerCase(), criadoEm: new Date().toISOString() });
+    clip.shares = (clip.shares || 0) + 1;
+    clip.atualizadoEm = new Date().toISOString();
+    saveDb(dbCache);
+    return clip.shares;
+  },
+
+  getCineClipComments: (clipId: string): CineClipComment[] =>
+    (dbCache.cineClipComments || [])
+      .filter((c) => c.clipId === clipId && c.moderationStatus !== 'hidden' && c.moderationStatus !== 'rejected')
+      .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()),
+
+  addCineClipComment: (comment: CineClipComment): CineClipComment => {
+    if (!dbCache.cineClipComments) dbCache.cineClipComments = [];
+    dbCache.cineClipComments.push(comment);
+    const clip = (dbCache.cineClips || []).find((c) => c.id === comment.clipId);
+    if (clip) {
+      clip.commentsCount = (clip.commentsCount || 0) + 1;
+      clip.atualizadoEm = new Date().toISOString();
+    }
+    saveDb(dbCache);
+    return comment;
+  },
+
+  reportCineClip: (report: CineClipReport): CineClipReport => {
+    if (!dbCache.cineClipReports) dbCache.cineClipReports = [];
+    dbCache.cineClipReports.unshift(report);
+    saveDb(dbCache);
+    return report;
+  },
+
+  getCineClipReports: (): CineClipReport[] => dbCache.cineClipReports || [],
+
+  recordClipWatch: (event: CineClipWatchEvent): void => {
+    if (!dbCache.cineClipWatchHistory) dbCache.cineClipWatchHistory = [];
+    const key = event.usuarioEmail.toLowerCase();
+    const existing = dbCache.cineClipWatchHistory.find(
+      (h) => h.clipId === event.clipId && h.usuarioEmail.toLowerCase() === key
+    );
+    if (existing) {
+      existing.watchSeconds = Math.max(existing.watchSeconds, event.watchSeconds);
+      existing.completed = existing.completed || event.completed;
+      existing.criadoEm = event.criadoEm;
+    } else {
+      dbCache.cineClipWatchHistory.push({ ...event, usuarioEmail: key });
+    }
+    saveDb(dbCache);
+  },
+
+  getClipWatchHistory: (email?: string): CineClipWatchEvent[] => {
+    const history = dbCache.cineClipWatchHistory || [];
+    if (!email) return history;
+    return history.filter((h) => h.usuarioEmail.toLowerCase() === email.toLowerCase());
+  },
+
+  getClipLikedIds: (email: string): string[] =>
+    (dbCache.cineClipLikes || [])
+      .filter((l) => l.usuarioEmail.toLowerCase() === email.toLowerCase())
+      .map((l) => l.clipId),
+
+  getClipImportJobs: (): CineClipImportJob[] =>
+    (dbCache.cineClipImportJobs || []).sort(
+      (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
+    ),
+
+  getClipImportJob: (id: string): CineClipImportJob | undefined =>
+    (dbCache.cineClipImportJobs || []).find((j) => j.id === id),
+
+  saveClipImportJob: (job: CineClipImportJob): CineClipImportJob => {
+    if (!dbCache.cineClipImportJobs) dbCache.cineClipImportJobs = [];
+    const idx = dbCache.cineClipImportJobs.findIndex((j) => j.id === job.id);
+    if (idx >= 0) dbCache.cineClipImportJobs[idx] = job;
+    else dbCache.cineClipImportJobs.unshift(job);
+    saveDb(dbCache);
+    return job;
+  },
+
+  isDuplicateClip: (youtubeId?: string, sourceUrl?: string): boolean => {
+    const clips = dbCache.cineClips || [];
+    if (youtubeId && clips.some((c) => c.youtubeId === youtubeId || c.id === youtubeId)) return true;
+    if (sourceUrl && clips.some((c) => c.sourceUrl === sourceUrl)) return true;
+    return false;
   },
 
   exportDbSnapshot: (): DbSchema => {

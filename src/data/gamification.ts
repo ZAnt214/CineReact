@@ -45,6 +45,12 @@ export const XP_REWARDS: Record<string, number> = {
   follow_creator: 30,
   discover_creator: 50,
   lunch_pick: 10,
+  clip_watch: 8,
+  clip_watch_complete: 20,
+  clip_like: 12,
+  clip_comment: 18,
+  clip_share: 15,
+  clip_favorite: 14,
 };
 
 export const STREAK_SPOTLIGHT: Record<number, number> = {
@@ -94,6 +100,9 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'seal-master', name: 'Mestre dos Selos', description: 'Desbloqueie todos os selos disponíveis.', icon: 'Medal', rarity: 'lendário', xpReward: 600, spotlightReward: 300 },
   { id: 'tier-influenciador', name: 'Status Influenciador', description: 'Alcance o nível Influenciador.', icon: 'Sparkles', rarity: 'épico', xpReward: 250, spotlightReward: 120 },
   { id: 'tier-elite', name: 'Elite Absoluta', description: 'Alcance Elite CineReact.', icon: 'Shield', rarity: 'lendário', xpReward: 1000, spotlightReward: 500 },
+  { id: 'clip-first', name: 'Primeiro Clip', description: 'Assista seu primeiro clip no CineClips.', icon: 'Smartphone', rarity: 'comum', xpReward: 40, spotlightReward: 15 },
+  { id: 'clip-25', name: 'Scroll Master', description: 'Assista 25 clips completos.', icon: 'Zap', rarity: 'raro', xpReward: 150, spotlightReward: 60 },
+  { id: 'clip-100', name: 'Viciado em Clips', description: 'Assista 100 clips completos.', icon: 'Flame', rarity: 'épico', xpReward: 350, spotlightReward: 150 },
 ];
 
 export const DAILY_MISSION_TEMPLATES: Omit<MissionDefinition, 'id'>[] = [
@@ -103,6 +112,8 @@ export const DAILY_MISSION_TEMPLATES: Omit<MissionDefinition, 'id'>[] = [
   { title: 'Favorito Express', description: 'Favorite 1 conteúdo.', period: 'daily', target: 1, xpReward: 25, spotlightReward: 10, eventType: 'favorite' },
   { title: 'Compartilhe a Magia', description: 'Compartilhe 1 página ou vídeo.', period: 'daily', target: 1, xpReward: 20, spotlightReward: 10, eventType: 'share' },
   { title: 'Avaliador', description: 'Avalie 1 conteúdo.', period: 'daily', target: 1, xpReward: 25, spotlightReward: 12, eventType: 'rate' },
+  { title: 'Clips do Dia', description: 'Assista 3 clips no CineClips.', period: 'daily', target: 3, xpReward: 35, spotlightReward: 18, eventType: 'clip_watch_complete' },
+  { title: 'Reagir Rápido', description: 'Curta 2 clips.', period: 'daily', target: 2, xpReward: 25, spotlightReward: 12, eventType: 'clip_like' },
 ];
 
 export const WEEKLY_MISSION_TEMPLATES: Omit<MissionDefinition, 'id'>[] = [
@@ -111,6 +122,7 @@ export const WEEKLY_MISSION_TEMPLATES: Omit<MissionDefinition, 'id'>[] = [
   { title: 'Caçador de Talentos', description: 'Descubra 3 novos criadores.', period: 'weekly', target: 3, xpReward: 100, spotlightReward: 50, eventType: 'discover_creator' },
   { title: 'Curador da Semana', description: 'Crie 1 lista personalizada.', period: 'weekly', target: 1, xpReward: 80, spotlightReward: 40, eventType: 'list_create' },
   { title: 'Categorias Variadas', description: 'Assista conteúdos de 3 categorias.', period: 'weekly', target: 3, xpReward: 90, spotlightReward: 45, eventType: 'watch_complete' },
+  { title: 'Maratona CineClips', description: 'Assista 15 clips completos.', period: 'weekly', target: 15, xpReward: 120, spotlightReward: 60, eventType: 'clip_watch_complete' },
 ];
 
 export const FRANCHISE_SEALS: SealDefinition[] = [
