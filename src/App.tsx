@@ -6,6 +6,8 @@ import PlaybackPage from './components/PlaybackPage.tsx';
 import MyList from './components/MyList.tsx';
 import ChannelPage from './components/ChannelPage.tsx';
 import { AdminShell } from './admin/AdminShell.tsx';
+import MaintenanceScreen from './components/MaintenanceScreen.tsx';
+import { usePlatformSettings } from './hooks/usePlatformSettings.ts';
 import AuthModal from './components/AuthModal.tsx';
 import RowMoviesSkeleton from './components/RowMoviesSkeleton.tsx';
 import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
@@ -119,6 +121,16 @@ export default function App() {
   });
 
   const isUserAuthenticated = Boolean(user.isLoggedIn && user.email?.trim());
+  const { settings: platformSettings, loading: platformSettingsLoading } = usePlatformSettings();
+
+  useEffect(() => {
+    if (!platformSettings) return;
+    if (platformSettings.seoTitle) document.title = platformSettings.seoTitle;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta && platformSettings.seoDescription) {
+      meta.setAttribute('content', platformSettings.seoDescription);
+    }
+  }, [platformSettings]);
 
   const setUser = (newUser: UserState) => {
     setUserState(newUser);
@@ -708,6 +720,12 @@ export default function App() {
     documentElement.style.overflow = '';
   }, [currentTab]);
 
+  const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
+
+  if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
+    return <MaintenanceScreen settings={platformSettings} />;
+  }
+
   return (
     <>
     <div
@@ -716,6 +734,11 @@ export default function App() {
       }`}
       aria-hidden={currentTab === 'landing'}
     >
+      {platformSettings?.maintenanceMode && user.isAdmin && (
+        <div className="sticky top-0 z-[250] bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs font-bold text-amber-200">
+          Modo manutenção ativo no CineReact — visitantes estão vendo a tela de manutenção configurada.
+        </div>
+      )}
       {catalogActive && (
         <SideNavHub
           currentTab={currentTab}

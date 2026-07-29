@@ -207,7 +207,7 @@ export function ModerationPage({ email }: { email: string }) {
           <button type="button" onClick={() => setConfirm({ open: true, action: () => request('/api/admin/comments/bulk-delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) }).then(() => { setSelected([]); load(); }) })} className="text-xs font-bold text-red-400">Excluir {selected.length}</button>
         ) : null
       }>
-        <motion.div className="max-h-96 overflow-y-auto space-y-2">
+        <div className="max-h-96 overflow-y-auto space-y-2">
           {comments.map(c => (
             <div key={c.id} className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-sm">
               <div className="flex items-start gap-2">
@@ -224,12 +224,12 @@ export function ModerationPage({ email }: { email: string }) {
               </div>
             </div>
           ))}
-        </motion.div>
+        </div>
       </AdminPanelCard>
       <AdminPanelCard title="Denúncias">
         {reports.length === 0 ? <p className="text-sm text-zinc-500">Nenhuma denúncia aberta.</p> : reports.map(r => (
           <div key={r.id} className="p-3 mb-2 rounded-xl bg-neutral-950 border border-neutral-800 text-sm flex justify-between gap-3">
-            <motion.div><p className="font-semibold">{r.targetLabel}</p><p className="text-zinc-500">{r.reason}</p></motion.div>
+            <div><p className="font-semibold">{r.targetLabel}</p><p className="text-zinc-500">{r.reason}</p></div>
             <div className="flex gap-1 shrink-0">
               <ActionBtn label="Resolver" onClick={() => request(`/api/admin/reports/${r.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'resolved' }) }).then(load)} />
               <ActionBtn label="Dispensar" onClick={() => request(`/api/admin/reports/${r.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'dismissed' }) }).then(load)} />
@@ -428,11 +428,11 @@ export function MonetizationAdminPage({ email }: { email: string }) {
   return (
     <div className="space-y-6">
       <PageHeader title="Monetização" subtitle="Premium, cupons e receita" />
-      <motion.div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <AdminStatCard label="Receita total" value={`R$ ${(data?.revenue || 0).toFixed(2)}`} icon={DollarSign} accent="text-green-400" />
         <AdminStatCard label="Premium ativos" value={data?.activePremium ?? 0} icon={Users} />
         <AdminStatCard label="Cupons" value={data?.coupons?.length ?? 0} icon={Percent} />
-      </motion.div>
+      </div>
       <AdminPanelCard title="Criar cupom de desconto">
         <div className="grid sm:grid-cols-2 gap-2 mb-3">
           <input value={coupon.code} onChange={e => setCoupon({ ...coupon, code: e.target.value })} placeholder="CÓDIGO" className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-sm uppercase" />
@@ -451,12 +451,27 @@ export function SettingsAdminPage({ email }: { email: string }) {
   const { request } = useAdminApi(email);
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmMaintenance, setConfirmMaintenance] = useState(false);
 
   useEffect(() => {
     request<AdminConfig>('/api/admin/config').then(r => {
       if (r?.settings) setSettings(r.settings);
     });
   }, [request]);
+
+  const saveSettings = async () => {
+    if (!settings) return;
+    setSaving(true);
+    const result = await request<PlatformSettings>(
+      '/api/admin/config/settings',
+      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) },
+      settings.maintenanceMode
+        ? 'Modo manutenção ativado no CineReact. Visitantes verão a mensagem configurada.'
+        : 'Configurações do CineReact salvas com sucesso.',
+    );
+    if (result) setSettings(result);
+    setSaving(false);
+  };
 
   if (!settings) return <LoadingState />;
 
@@ -473,11 +488,11 @@ export function SettingsAdminPage({ email }: { email: string }) {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Configurações" subtitle="Aparência, SEO, APIs e manutenção" />
-      <AdminPanelCard title="Identidade visual">
+      <PageHeader title="Configurações" subtitle="Personalize a plataforma CineReact" />
+      <AdminPanelCard title="Identidade CineReact">
         <div className="grid sm:grid-cols-2 gap-4">
-          {field('siteName', 'Nome do site')}
-          {field('logoUrl', 'URL do logotipo')}
+          {field('siteName', 'Nome da plataforma')}
+          {field('logoUrl', 'Logotipo do CineReact')}
           {field('primaryColor', 'Cor primária')}
           {field('accentColor', 'Cor de destaque')}
         </div>
@@ -495,16 +510,43 @@ export function SettingsAdminPage({ email }: { email: string }) {
       <AdminPanelCard title="Redes sociais">
         <div className="grid sm:grid-cols-2 gap-3">{field('socialYoutube', 'YouTube')}{field('socialInstagram', 'Instagram')}{field('socialTwitter', 'Twitter/X')}{field('socialDiscord', 'Discord')}</div>
       </AdminPanelCard>
-      <AdminPanelCard title="APIs & Integrações">
-        <div className="space-y-3">{field('apiYoutubeKey', 'YouTube API Key')}{field('apiSupabaseUrl', 'Supabase URL')}{field('apiSupabaseAnonKey', 'Supabase Anon Key')}</div>
+      <AdminPanelCard title="APIs & Integrações CineReact">
+        <p className="text-xs text-zinc-500 mb-3">Credenciais usadas pela plataforma CineReact para sincronização e serviços externos.</p>
+        <div className="space-y-3">{field('apiYoutubeKey', 'Chave de integração externa')}{field('apiSupabaseUrl', 'Supabase URL')}{field('apiSupabaseAnonKey', 'Supabase Anon Key')}</div>
       </AdminPanelCard>
-      <AdminPanelCard title="Manutenção">
-        <label className="flex items-center gap-2 text-sm mb-3"><input type="checkbox" checked={settings.maintenanceMode} onChange={e => setSettings({ ...settings, maintenanceMode: e.target.checked })} /> Modo manutenção</label>
-        {field('maintenanceMessage', 'Mensagem de manutenção')}
+      <AdminPanelCard title="Manutenção do CineReact">
+        <p className="text-xs text-zinc-500 mb-3">Quando ativo, visitantes veem a tela de manutenção com a identidade e mensagem do CineReact.</p>
+        <label className="flex items-center gap-2 text-sm mb-3">
+          <input
+            type="checkbox"
+            checked={settings.maintenanceMode}
+            onChange={e => {
+              if (e.target.checked) {
+                setConfirmMaintenance(true);
+              } else {
+                setSettings({ ...settings, maintenanceMode: false });
+              }
+            }}
+          />
+          Ativar modo manutenção
+        </label>
+        {field('maintenanceMessage', 'Mensagem exibida aos visitantes')}
       </AdminPanelCard>
-      <button type="button" disabled={saving} onClick={async () => { setSaving(true); await request('/api/admin/config/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }); setSaving(false); }} className="px-6 py-3 rounded-xl bg-cine-accent text-sm font-black flex items-center gap-2 disabled:opacity-50">
+      <button type="button" disabled={saving} onClick={saveSettings} className="px-6 py-3 rounded-xl bg-cine-accent text-sm font-black flex items-center gap-2 disabled:opacity-50">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar configurações
       </button>
+      <AdminConfirmModal
+        open={confirmMaintenance}
+        title="Ativar modo manutenção"
+        message="O CineReact ficará inacessível para visitantes e exibirá a mensagem de manutenção configurada. Administradores continuarão com acesso normal."
+        confirmLabel="Ativar manutenção"
+        danger
+        onConfirm={() => {
+          setSettings({ ...settings, maintenanceMode: true });
+          setConfirmMaintenance(false);
+        }}
+        onCancel={() => setConfirmMaintenance(false)}
+      />
     </div>
   );
 }
@@ -548,7 +590,7 @@ export function SecurityAdminPage({ email }: { email: string }) {
           ))}
         </div>
       </AdminPanelCard>
-      <AdminConfirmModal open={confirm} title="Criar backup" message="Será gerado um snapshot completo do banco de dados." confirmLabel="Criar backup" onConfirm={() => { request('/api/admin/backup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(load); setConfirm(false); }} onCancel={() => setConfirm(false)} />
+      <AdminConfirmModal open={confirm} title="Criar backup" message="Será gerado um snapshot completo do banco de dados do CineReact." confirmLabel="Criar backup" onConfirm={() => { request('/api/admin/backup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }, 'Backup do CineReact criado com sucesso.').then(load); setConfirm(false); }} onCancel={() => setConfirm(false)} />
     </div>
   );
 }
