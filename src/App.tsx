@@ -756,6 +756,7 @@ export default function App() {
   }, [currentTab]);
 
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
+  const showCreatorBanner = isCreatorBannerVisible && !['landing', 'admin', 'doacoes'].includes(currentTab);
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
     return <MaintenanceScreen settings={platformSettings} />;
@@ -1570,7 +1571,7 @@ export default function App() {
 
       {/* Floating Bottom Banner for Creators */}
       <AnimatePresence>
-        {isCreatorBannerVisible && (
+        {showCreatorBanner && (
           <CreatorPartnerBanner 
             onClick={() => setShowCreatorPartnerModal(true)} 
             onClose={() => setIsCreatorBannerVisible(false)}

@@ -75,22 +75,22 @@ export function DashboardPage({ email }: { email: string }) {
   const a = data?.analytics;
   return (
     <div className="space-y-6">
-      <PageHeader title="Dashboard" subtitle="Visão geral da plataforma" />
+      <PageHeader title="Dashboard" subtitle="Métricas reais da plataforma CineReact" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <AdminStatCard label="Usuários" value={a?.totals.users ?? 0} sub={`+${a?.totals.newUsersToday ?? 0} hoje`} icon={Users} />
-        <AdminStatCard label="Vídeos" value={a?.totals.reacts ?? 0} icon={Film} />
+        <AdminStatCard label="Reacts" value={a?.totals.reacts ?? 0} icon={Film} />
         <AdminStatCard label="Comentários" value={a?.totals.comments ?? 0} icon={MessageSquare} />
-        <AdminStatCard label="Visualizações" value={formatNum(a?.totals.views ?? 0)} icon={Eye} />
+        <AdminStatCard label="Engajamento" value={formatNum(a?.totals.views ?? 0)} icon={Eye} />
         <AdminStatCard label="Ativos (7d)" value={a?.totals.activeUsers7d ?? 0} icon={Activity} accent="text-green-400" />
         <AdminStatCard label="Novos (semana)" value={a?.totals.newUsersWeek ?? 0} icon={UserPlus} accent="text-purple-400" />
         <AdminStatCard label="Denúncias" value={data?.pendingReports ?? 0} icon={Shield} accent="text-red-400" />
         <AdminStatCard label="Pendentes" value={data?.pendingComments ?? 0} icon={MessageSquare} accent="text-amber-400" />
       </div>
       <div className="grid lg:grid-cols-2 gap-4">
-        <AdminPanelCard title="Vídeos mais assistidos">
-          <RankList items={(a?.topVideos || []).map(v => ({ label: v.titulo, sub: v.canalNome, value: formatNum(v.visualizacoes) }))} />
+        <AdminPanelCard title="Reacts em destaque no CineReact">
+          <RankList items={(a?.topVideos || []).map(v => ({ label: v.titulo, sub: v.canalNome, value: `${formatNum(v.visualizacoes)} pts` }))} />
         </AdminPanelCard>
-        <AdminPanelCard title="Canais em alta">
+        <AdminPanelCard title="Criadores em alta no CineReact">
           <RankList items={(a?.topChannels || []).map(c => ({ label: c.titulo, value: `${c.reactCount} reacts` }))} />
         </AdminPanelCard>
       </div>
@@ -401,7 +401,7 @@ export function AnalyticsAdminPage({ email }: { email: string }) {
   if (loading && !data) return <LoadingState />;
   return (
     <div className="space-y-6">
-      <PageHeader title="Analytics" subtitle="Métricas detalhadas da plataforma" />
+      <PageHeader title="Analytics" subtitle="Dados de uso e engajamento do CineReact" />
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <AdminStatCard label="Cadastros (mês)" value={data?.totals.newUsersMonth ?? 0} icon={UserPlus} />
         <AdminStatCard label="Tempo médio" value={`${data?.avgSessionMinutes ?? 0} min`} icon={Activity} />
@@ -418,7 +418,7 @@ export function AnalyticsAdminPage({ email }: { email: string }) {
         </div>
       </AdminPanelCard>
       <div className="grid lg:grid-cols-2 gap-4">
-        <AdminPanelCard title="Origem do tráfego">
+        <AdminPanelCard title="Origem de atividade no CineReact">
           {data?.trafficSources.map(t => (
             <div key={t.source} className="flex justify-between py-2 border-b border-neutral-800/50 text-sm">
               <span>{t.source}</span><span className="font-bold text-cine-accent-light">{t.visits}</span>
