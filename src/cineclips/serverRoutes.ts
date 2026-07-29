@@ -17,6 +17,13 @@ import {
   deriveUserPreferences,
 } from './recommendation.ts';
 import { handleGamificationEvent } from '../gamification/serverHelpers.ts';
+import { detectClipPlatform, platformLabel } from './platform.ts';
+import {
+  downloadAndHostClip,
+  resolveClipMetadata,
+  deleteHostedClipFiles,
+  formatDurationLabel,
+} from './downloader.ts';
 
 type RequireAdmin = (req: Request, res: Response) => Promise<string | null>;
 
@@ -177,10 +184,12 @@ function buildClipFromPayload(payload: any, id?: string): CineClip {
   const duracaoSegundos = payload.duracaoSegundos || parseDurationToSeconds(payload.duracao || '1:00');
 
   const clip: CineClip = {
-    id: id || payload.youtubeId || payload.id || `clip-${Date.now()}`,
+    id: id || payload.platformVideoId || payload.youtubeId || payload.id || `clip-${Date.now()}`,
     sourceType: payload.sourceType || 'youtube',
     sourceUrl: payload.sourceUrl,
     youtubeId: payload.youtubeId,
+    platformVideoId: payload.platformVideoId,
+    videoUrl: payload.videoUrl,
     titulo: payload.titulo || 'Clip sem título',
     descricao: payload.descricao || '',
     criadorNome: payload.criadorNome || 'Criador',
@@ -220,69 +229,159 @@ async function processImportJob(jobId: string) {
     localDb.saveClipImportJob({ ...current, ...patch, atualizadoEm: new Date().toISOString() });
   };
 
-  update({ status: 'processing', progress: 15 });
-
-  await new Promise((r) => setTimeout(r, 400));
-  update({ progress: 35 });
-
-  const result = await resolveYoutubeClipMetadata(job.sourceUrl);
-  if (!result.ok) {
+  const platform = detectClipPlatform(job.sourceUrl);
+  if (platform === 'unknown') {
     update({
       status: 'failed',
       progress: 100,
-      error: result.error,
-      errorCode: result.code,
-      alternatives: result.alternatives,
+      error: 'URL não suportada. Use YouTube, TikTok ou Instagram.',
+      errorCode: 'INVALID_URL',
+      alternatives: [
+        'Cole um link público do TikTok, Instagram Reels ou YouTube Shorts',
+        'Verifique se o post não é privado',
+      ],
       completedAt: new Date().toISOString(),
     });
     return;
   }
 
-  update({
-    progress: 65,
-    titulo: result.titulo,
-    descricao: result.descricao,
-    criadorNome: result.criadorNome,
-    thumbnailUrl: result.thumbnailUrl,
-  });
+  if (localDb.isDuplicateClip(undefined, job.sourceUrl)) {
+    update({
+      status: 'failed',
+      progress: 100,
+      error: 'Este vídeo já foi importado no CineClips.',
+      errorCode: 'DUPLICATE',
+      completedAt: new Date().toISOString(),
+    });
+    return;
+  }
 
-  await new Promise((r) => setTimeout(r, 300));
-  update({ progress: 85 });
+  update({ status: 'processing', progress: 10, sourceType: platform });
 
-  const clip = buildClipFromPayload({
-    id: result.videoId,
-    youtubeId: result.videoId,
-    sourceType: 'youtube',
-    sourceUrl: job.sourceUrl,
-    titulo: result.titulo,
-    descricao: result.descricao,
-    criadorNome: result.criadorNome,
-    thumbnailUrl: result.thumbnailUrl,
-    duracaoSegundos: result.duracaoSegundos,
-    categorias: job.categorias || ['Reação'],
-    tags: job.tags || [],
-    status: 'published',
-  });
+  try {
+    const clipId = `clip-${platform}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-  localDb.saveCineClip(clip);
+    if (platform === 'youtube') {
+      update({ progress: 25 });
+      const result = await resolveYoutubeClipMetadata(job.sourceUrl);
+      if (!result.ok) {
+        update({
+          status: 'failed',
+          progress: 100,
+          error: result.error,
+          errorCode: result.code,
+          alternatives: result.alternatives,
+          completedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
-  update({
-    status: 'completed',
-    progress: 100,
-    clipId: clip.id,
-    titulo: clip.titulo,
-    descricao: clip.descricao,
-    criadorNome: clip.criadorNome,
-    thumbnailUrl: clip.thumbnailUrl,
-    completedAt: new Date().toISOString(),
-  });
+      update({
+        progress: 70,
+        titulo: result.titulo,
+        descricao: result.descricao,
+        criadorNome: result.criadorNome,
+        thumbnailUrl: result.thumbnailUrl,
+      });
 
-  localDb.appendAuditLog({
-    actorEmail: job.createdBy,
-    action: 'cineclips.import',
-    target: clip.id,
-    details: `Importou clip "${clip.titulo}" via ${job.sourceUrl}`,
-  });
+      const clip = buildClipFromPayload({
+        id: result.videoId,
+        youtubeId: result.videoId,
+        platformVideoId: result.videoId,
+        sourceType: 'youtube',
+        sourceUrl: job.sourceUrl,
+        titulo: result.titulo,
+        descricao: result.descricao,
+        criadorNome: result.criadorNome,
+        thumbnailUrl: result.thumbnailUrl,
+        duracaoSegundos: result.duracaoSegundos,
+        categorias: job.categorias || ['Reação'],
+        tags: job.tags || [],
+        status: 'published',
+      });
+
+      localDb.saveCineClip(clip);
+      update({
+        status: 'completed',
+        progress: 100,
+        clipId: clip.id,
+        titulo: clip.titulo,
+        descricao: clip.descricao,
+        criadorNome: clip.criadorNome,
+        thumbnailUrl: clip.thumbnailUrl,
+        completedAt: new Date().toISOString(),
+      });
+    } else {
+      update({ progress: 20 });
+      const meta = await resolveClipMetadata(job.sourceUrl);
+      update({
+        progress: 35,
+        titulo: meta.titulo,
+        descricao: meta.descricao,
+        criadorNome: meta.criadorNome,
+        thumbnailUrl: meta.thumbnailUrl,
+      });
+
+      const hosted = await downloadAndHostClip(job.sourceUrl, clipId, (progress, message) => {
+        update({ progress: Math.min(95, progress) });
+      });
+
+      const clip = buildClipFromPayload({
+        id: clipId,
+        platformVideoId: hosted.platformId,
+        sourceType: platform,
+        sourceUrl: job.sourceUrl,
+        videoUrl: hosted.videoUrl,
+        titulo: hosted.titulo,
+        descricao: hosted.descricao,
+        criadorNome: hosted.criadorNome,
+        thumbnailUrl: hosted.thumbnailUrl,
+        duracaoSegundos: hosted.duracaoSegundos,
+        categorias: job.categorias || ['Reação'],
+        tags: job.tags || [],
+        status: 'published',
+      });
+
+      localDb.saveCineClip(clip);
+      update({
+        status: 'completed',
+        progress: 100,
+        clipId: clip.id,
+        titulo: clip.titulo,
+        descricao: clip.descricao,
+        criadorNome: clip.criadorNome,
+        thumbnailUrl: clip.thumbnailUrl,
+        completedAt: new Date().toISOString(),
+      });
+    }
+
+    const savedJob = localDb.getClipImportJob(jobId);
+    localDb.appendAuditLog({
+      actorEmail: job.createdBy,
+      action: 'cineclips.import',
+      target: savedJob?.clipId || clipId,
+      details: `Importou clip de ${platformLabel(platform)} via ${job.sourceUrl}`,
+    });
+  } catch (err: any) {
+    update({
+      status: 'failed',
+      progress: 100,
+      error: err.message || 'Falha ao importar vídeo.',
+      errorCode: 'DOWNLOAD_FAILED',
+      alternatives: platform === 'instagram'
+        ? [
+            'Verifique se o Reels é público',
+            'Configure YT_DLP_COOKIES no servidor para posts que exigem login',
+            'Tente republicar o conteúdo no YouTube Shorts e importe de lá',
+          ]
+        : [
+            'Verifique se o link do TikTok é público e válido',
+            'Tente copiar o link novamente pelo app',
+            'Aguarde alguns minutos e tente de novo',
+          ],
+      completedAt: new Date().toISOString(),
+    });
+  }
 }
 
 function getUserFeedContext(email?: string) {
@@ -533,28 +632,69 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
     try {
       const { url } = req.body || {};
       if (!url) return res.status(400).json({ error: 'URL obrigatória.' });
-      const result = await resolveYoutubeClipMetadata(url);
-      if (!result.ok) {
+
+      const platform = detectClipPlatform(url);
+      if (platform === 'unknown') {
         return res.status(422).json({
-          error: result.error,
-          code: result.code,
-          alternatives: result.alternatives,
+          error: 'URL não suportada. Cole links do YouTube, TikTok ou Instagram.',
+          code: 'INVALID_URL',
+          alternatives: [
+            'TikTok: https://www.tiktok.com/@usuario/video/...',
+            'Instagram: https://www.instagram.com/reel/...',
+            'YouTube: https://youtube.com/shorts/...',
+          ],
         });
       }
+
+      if (platform === 'youtube') {
+        const result = await resolveYoutubeClipMetadata(url);
+        if (!result.ok) {
+          return res.status(422).json({
+            error: result.error,
+            code: result.code,
+            alternatives: result.alternatives,
+          });
+        }
+        return res.json({
+          preview: {
+            platform,
+            videoId: result.videoId,
+            titulo: result.titulo,
+            descricao: result.descricao,
+            criadorNome: result.criadorNome,
+            thumbnailUrl: result.thumbnailUrl,
+            duracao: formatSecondsToDuration(result.duracaoSegundos),
+            duracaoSegundos: result.duracaoSegundos,
+            willDownload: false,
+            hashtags: extractHashtags(`${result.titulo} ${result.descricao}`),
+          },
+        });
+      }
+
+      const meta = await resolveClipMetadata(url);
       res.json({
         preview: {
-          videoId: result.videoId,
-          titulo: result.titulo,
-          descricao: result.descricao,
-          criadorNome: result.criadorNome,
-          thumbnailUrl: result.thumbnailUrl,
-          duracao: formatSecondsToDuration(result.duracaoSegundos),
-          duracaoSegundos: result.duracaoSegundos,
-          hashtags: extractHashtags(`${result.titulo} ${result.descricao}`),
+          platform,
+          videoId: meta.platformId,
+          titulo: meta.titulo,
+          descricao: meta.descricao,
+          criadorNome: meta.criadorNome,
+          thumbnailUrl: meta.thumbnailUrl,
+          duracao: formatDurationLabel(meta.duracaoSegundos),
+          duracaoSegundos: meta.duracaoSegundos,
+          willDownload: true,
+          hashtags: extractHashtags(`${meta.titulo} ${meta.descricao}`),
         },
       });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(422).json({
+        error: err.message || 'Não foi possível pré-visualizar este link.',
+        code: 'PREVIEW_FAILED',
+        alternatives: [
+          'Verifique se o post é público',
+          'Tente copiar o link direto do app',
+        ],
+      });
     }
   });
 
@@ -564,10 +704,11 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       const { url, categorias, tags, createdBy } = req.body || {};
       if (!url) return res.status(400).json({ error: 'URL obrigatória.' });
 
+      const platform = detectClipPlatform(url);
       const job: CineClipImportJob = {
         id: `job-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         sourceUrl: url,
-        sourceType: 'youtube',
+        sourceType: platform === 'unknown' ? 'youtube' : platform,
         status: 'queued',
         progress: 0,
         categorias: categorias || ['Reação'],
@@ -636,6 +777,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.delete('/api/admin/cineclips/:id', async (req, res) => {
     if (!(await adminOnly(requireAdmin, req, res))) return;
     try {
+      deleteHostedClipFiles(req.params.id);
       localDb.deleteCineClip(req.params.id);
       res.json({ ok: true });
     } catch (err: any) {

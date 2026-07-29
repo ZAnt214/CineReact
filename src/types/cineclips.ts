@@ -1,4 +1,4 @@
-export type CineClipSourceType = 'youtube' | 'upload';
+export type CineClipSourceType = 'youtube' | 'tiktok' | 'instagram' | 'upload';
 export type CineClipStatus = 'draft' | 'processing' | 'published' | 'hidden' | 'rejected';
 export type CineClipImportStatus = 'queued' | 'processing' | 'completed' | 'failed';
 export type CineClipReportReason = 'spam' | 'inappropriate' | 'copyright' | 'misleading' | 'other';
@@ -8,6 +8,8 @@ export interface CineClip {
   sourceType: CineClipSourceType;
   sourceUrl?: string;
   youtubeId?: string;
+  platformVideoId?: string;
+  videoUrl?: string;
   titulo: string;
   descricao: string;
   criadorNome: string;
