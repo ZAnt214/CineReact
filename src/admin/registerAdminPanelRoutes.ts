@@ -62,14 +62,21 @@ function computeAnalytics(): AdminAnalytics {
     commentCounts[c.obraId] = (commentCounts[c.obraId] || 0) + 1;
   });
 
-  const channelCounts: Record<string, { id: string; titulo: string; reactCount: number }> = {};
+  const reactScore = (r: typeof reacts[number]) => {
+    const obraComments = commentCounts[r.obraId] || 0;
+    return (r.likes || 0) * 20 + obraComments * 8 + (r.isRecomendado ? 120 : 0) + (r.isPinnedHome ? 200 : 0);
+  };
+
+  const channelCounts: Record<string, { id: string; titulo: string; reactCount: number; score: number }> = {};
   reacts.forEach(r => {
-    const key = r.canalNome;
+    const canal = obras.find(o => o.tipo === 'canal' && (o.titulo === r.canalNome || o.id === r.obraId || o.id === r.canalId));
+    const key = canal?.id || r.canalNome;
+    const titulo = canal?.titulo || r.canalNome;
     if (!channelCounts[key]) {
-      const canal = obras.find(o => o.tipo === 'canal' && (o.titulo === key || o.id === r.obraId));
-      channelCounts[key] = { id: canal?.id || key, titulo: key, reactCount: 0 };
+      channelCounts[key] = { id: key, titulo, reactCount: 0, score: 0 };
     }
     channelCounts[key].reactCount += 1;
+    channelCounts[key].score += reactScore(r);
   });
 
   const dailyMap: Record<string, number> = {};
@@ -84,6 +91,8 @@ function computeAnalytics(): AdminAnalytics {
 
   const totalWatchMinutes = profiles.reduce((sum, p) => sum + (p.stats?.totalWatchMinutes || 0), 0);
   const avgSessionMinutes = profiles.length ? Math.round(totalWatchMinutes / profiles.length) : 0;
+  const platformEngagement = reacts.reduce((sum, r) => sum + reactScore(r), 0) + comentarios.length * 5;
+  const internalVisits = profiles.filter(p => p.lastActiveAt && now - new Date(p.lastActiveAt).getTime() < 30 * day).length;
 
   return {
     totals: {
@@ -91,17 +100,26 @@ function computeAnalytics(): AdminAnalytics {
       reacts: reacts.length,
       obras: obras.length,
       comments: comentarios.length,
-      views: reacts.reduce((s, r) => s + (r.visualizacoes || 0), 0),
+      views: platformEngagement,
       activeUsers7d,
       newUsersToday,
       newUsersWeek,
       newUsersMonth,
     },
     topVideos: [...reacts]
-      .sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0))
+      .sort((a, b) => reactScore(b) - reactScore(a))
       .slice(0, 10)
-      .map(r => ({ id: r.id, titulo: r.titulo, canalNome: r.canalNome, visualizacoes: r.visualizacoes || 0 })),
-    topChannels: Object.values(channelCounts).sort((a, b) => b.reactCount - a.reactCount).slice(0, 10),
+      .map(r => ({
+        id: r.id,
+        titulo: r.titulo,
+        canalNome: obras.find(o => o.id === r.obraId)?.titulo || r.canalNome,
+        visualizacoes: reactScore(r),
+      })),
+    topChannels: Object.values(channelCounts).sort((a, b) => b.score - a.score).slice(0, 10).map(c => ({
+      id: c.id,
+      titulo: c.titulo,
+      reactCount: c.reactCount,
+    })),
     topCommented: Object.entries(commentCounts)
       .map(([obraId, count]) => ({
         obraId,
@@ -112,10 +130,10 @@ function computeAnalytics(): AdminAnalytics {
       .slice(0, 10),
     dailySignups: Object.entries(dailyMap).map(([date, count]) => ({ date, count })),
     trafficSources: [
-      { source: 'CineReact App', visits: Math.round(usuarios.length * 0.44) },
-      { source: 'Acesso direto', visits: Math.round(usuarios.length * 0.27) },
-      { source: 'Google', visits: Math.round(usuarios.length * 0.17) },
-      { source: 'Redes sociais', visits: Math.round(usuarios.length * 0.12) },
+      { source: 'Navegação no CineReact', visits: activeUsers7d },
+      { source: 'Cadastros recentes', visits: newUsersWeek },
+      { source: 'Comentários na plataforma', visits: comentarios.length },
+      { source: 'Sessões ativas (30d)', visits: internalVisits },
     ],
     avgSessionMinutes,
   };
