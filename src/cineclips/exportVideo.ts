@@ -1,8 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { execFileSync, spawnSync } from 'child_process';
 import type { CineClip } from '../types/cineclips.ts';
 import { getClipsStorageDir } from './downloader.ts';
 import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
+
+const WATERMARK_VERSION = 'v2';
+const WATERMARK_SVG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.svg');
+const WATERMARK_PNG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.png');
 
 function getExportsDir(): string {
   const base =
@@ -35,38 +40,46 @@ function resolveHostedVideoPath(clip: CineClip): string | null {
   return fs.existsSync(localPath) ? localPath : null;
 }
 
-function getFontsDir(): string {
-  return path.join(process.cwd(), 'assets', 'fonts');
-}
-
 function escapeFfmpegPath(filePath: string): string {
-  return filePath.replace(/\\/g, '/').replace(/:/g, '\\:');
+  return filePath.replace(/\\/g, '/').replace(/:/g, '\\:').replace(/'/g, "\\'");
 }
 
-function resolveWatermarkFont(bold = false): string {
-  const fontsDir = getFontsDir();
-  const fileName = bold ? 'DejaVuSans-Bold.ttf' : 'DejaVuSans.ttf';
-  const fontPath = path.join(fontsDir, fileName);
+function rasterizeWatermarkSvg(ffmpegPath: string): boolean {
+  if (!fs.existsSync(WATERMARK_SVG)) return false;
 
-  if (!fs.existsSync(fontPath)) {
-    throw new Error('Fontes do exportador não estão disponíveis. Aguarde o redeploy do servidor.');
+  try {
+    execFileSync('rsvg-convert', ['-w', '600', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
+    return fs.existsSync(WATERMARK_PNG);
+  } catch {
+    const result = spawnSync(
+      ffmpegPath,
+      ['-y', '-hide_banner', '-loglevel', 'error', '-i', WATERMARK_SVG, WATERMARK_PNG],
+      { stdio: 'pipe' }
+    );
+    return result.status === 0 && fs.existsSync(WATERMARK_PNG);
+  }
+}
+
+async function ensureWatermarkPng(ffmpegPath: string): Promise<string> {
+  if (fs.existsSync(WATERMARK_PNG)) {
+    if (!fs.existsSync(WATERMARK_SVG) || fs.statSync(WATERMARK_PNG).mtimeMs >= fs.statSync(WATERMARK_SVG).mtimeMs) {
+      return WATERMARK_PNG;
+    }
   }
 
-  return escapeFfmpegPath(fontPath);
+  fs.mkdirSync(path.dirname(WATERMARK_PNG), { recursive: true });
+  if (rasterizeWatermarkSvg(ffmpegPath)) return WATERMARK_PNG;
+
+  throw new Error('Banner CineReact não pôde ser gerado. Aguarde o redeploy do servidor.');
 }
 
-function buildWatermarkFilter(): string {
-  const boldFont = resolveWatermarkFont(true);
-  const regularFont = resolveWatermarkFont(false);
-
+function buildWatermarkFilter(watermarkPath: string): string {
+  const overlay = escapeFfmpegPath(watermarkPath);
   return [
-    "scale='min(1080,iw)':-2",
-    'drawbox=x=0:y=ih-92:w=iw:h=92:color=black@0.68:t=fill',
-    `drawtext=fontfile=${boldFont}:text='CINE':fontsize=32:fontcolor=white:x=(w-text_w)/2-54:y=h-72`,
-    `drawtext=fontfile=${boldFont}:text='REACT':fontsize=32:fontcolor=0x38bdf8:x=(w-text_w)/2+22:y=h-72`,
-    `drawtext=fontfile=${regularFont}:text='cinereactoficial.netlify.app':fontsize=14:fontcolor=white@0.78:x=(w-text_w)/2:y=h-38`,
-    `drawtext=fontfile=${regularFont}:text='CineReact':fontsize=18:fontcolor=white@0.55:x=w-tw-24:y=24`,
-  ].join(',');
+    "[0:v]scale='min(1080,iw)':-2[base]",
+    "[1:v]scale='min(560,iw*0.82)':-1[wm]",
+    '[base][wm]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p',
+  ].join(';');
 }
 
 export function canExportClip(clip: CineClip): boolean {
@@ -86,12 +99,11 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
   }
 
   const exportsDir = getExportsDir();
-  const outputPath = path.join(exportsDir, `${clip.id}-branded.mp4`);
+  const outputPath = path.join(exportsDir, `${clip.id}-branded-${WATERMARK_VERSION}.mp4`);
   const filename = buildClipDownloadFilename(clip);
   const sourceMtime = fs.statSync(sourcePath).mtimeMs;
 
   fs.mkdirSync(exportsDir, { recursive: true });
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
   if (fs.existsSync(outputPath)) {
     const cachedMtime = fs.statSync(outputPath).mtimeMs;
@@ -100,8 +112,9 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
     }
   }
 
-  const watermarkFilter = buildWatermarkFilter();
   const ffmpegPath = await getFfmpegPath();
+  const watermarkPath = await ensureWatermarkPng(ffmpegPath);
+  const filterComplex = buildWatermarkFilter(watermarkPath);
 
   await runFfmpeg(ffmpegPath, [
     '-y',
@@ -110,8 +123,10 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
     'error',
     '-i',
     sourcePath,
-    '-vf',
-    watermarkFilter,
+    '-i',
+    watermarkPath,
+    '-filter_complex',
+    filterComplex,
     '-map_metadata',
     '-1',
     '-metadata',
@@ -126,14 +141,14 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
     'description=',
     '-metadata',
     'encoder=',
+    '-map',
+    '0:a?',
     '-c:v',
     'libx264',
     '-preset',
     'fast',
     '-crf',
     '23',
-    '-pix_fmt',
-    'yuv420p',
     '-c:a',
     'aac',
     '-b:a',
