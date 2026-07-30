@@ -35,15 +35,37 @@ function resolveHostedVideoPath(clip: CineClip): string | null {
   return fs.existsSync(localPath) ? localPath : null;
 }
 
+function getFontsDir(): string {
+  return path.join(process.cwd(), 'assets', 'fonts');
+}
+
+function escapeFfmpegPath(filePath: string): string {
+  return filePath.replace(/\\/g, '/').replace(/:/g, '\\:');
+}
+
+function resolveWatermarkFont(bold = false): string {
+  const fontsDir = getFontsDir();
+  const fileName = bold ? 'DejaVuSans-Bold.ttf' : 'DejaVuSans.ttf';
+  const fontPath = path.join(fontsDir, fileName);
+
+  if (!fs.existsSync(fontPath)) {
+    throw new Error('Fontes do exportador não estão disponíveis. Aguarde o redeploy do servidor.');
+  }
+
+  return escapeFfmpegPath(fontPath);
+}
+
 function buildWatermarkFilter(): string {
-  // Sem fontfile: usa fonte padrão do FFmpeg (funciona no binário estático do Railway)
+  const boldFont = resolveWatermarkFont(true);
+  const regularFont = resolveWatermarkFont(false);
+
   return [
     "scale='min(1080,iw)':-2",
     'drawbox=x=0:y=ih-92:w=iw:h=92:color=black@0.68:t=fill',
-    "drawtext=text='CINE':fontsize=32:fontcolor=white:x=(w-text_w)/2-54:y=h-72",
-    "drawtext=text='REACT':fontsize=32:fontcolor=0x38bdf8:x=(w-text_w)/2+22:y=h-72",
-    "drawtext=text='cinereactoficial.netlify.app':fontsize=14:fontcolor=white@0.78:x=(w-text_w)/2:y=h-38",
-    "drawtext=text='CineReact':fontsize=18:fontcolor=white@0.55:x=w-tw-24:y=24",
+    `drawtext=fontfile=${boldFont}:text='CINE':fontsize=32:fontcolor=white:x=(w-text_w)/2-54:y=h-72`,
+    `drawtext=fontfile=${boldFont}:text='REACT':fontsize=32:fontcolor=0x38bdf8:x=(w-text_w)/2+22:y=h-72`,
+    `drawtext=fontfile=${regularFont}:text='cinereactoficial.netlify.app':fontsize=14:fontcolor=white@0.78:x=(w-text_w)/2:y=h-38`,
+    `drawtext=fontfile=${regularFont}:text='CineReact':fontsize=18:fontcolor=white@0.55:x=w-tw-24:y=24`,
   ].join(',');
 }
 
@@ -67,6 +89,9 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
   const outputPath = path.join(exportsDir, `${clip.id}-branded.mp4`);
   const filename = buildClipDownloadFilename(clip);
   const sourceMtime = fs.statSync(sourcePath).mtimeMs;
+
+  fs.mkdirSync(exportsDir, { recursive: true });
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
   if (fs.existsSync(outputPath)) {
     const cachedMtime = fs.statSync(outputPath).mtimeMs;
