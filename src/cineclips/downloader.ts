@@ -56,7 +56,10 @@ async function getYtDlpPath(): Promise<string> {
 
   const binDir = path.join(process.cwd(), 'bin');
   const isLinux = process.platform === 'linux';
-  const binaryName = isLinux ? 'yt-dlp_linux' : 'yt-dlp';
+  const isArm64 = process.arch === 'arm64';
+  const binaryName = isLinux
+    ? (isArm64 ? 'yt-dlp_linux_arm64' : 'yt-dlp_linux')
+    : 'yt-dlp';
   const localBin = path.join(binDir, binaryName);
 
   if (fs.existsSync(localBin)) return localBin;
@@ -69,7 +72,9 @@ async function getYtDlpPath(): Promise<string> {
 
   fs.mkdirSync(binDir, { recursive: true });
   const downloadUrl = isLinux
-    ? 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux'
+    ? (isArm64
+      ? 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux_arm64'
+      : 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux')
     : 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp';
 
   const res = await safeFetch(downloadUrl);
@@ -78,6 +83,14 @@ async function getYtDlpPath(): Promise<string> {
   const buf = Buffer.from(await res.arrayBuffer());
   fs.writeFileSync(localBin, buf, { mode: 0o755 });
   return localBin;
+}
+
+function normalizeYtDlpError(stderr: string): string {
+  const text = stderr.trim();
+  if (/python3.*no such file|env:.*python3/i.test(text)) {
+    return 'Utilitário de download indisponível no servidor. Aguarde o redeploy com a correção mais recente.';
+  }
+  return text || 'yt-dlp falhou ao processar o vídeo.';
 }
 
 function runYtDlp(args: string[], timeoutMs = 120_000): Promise<string> {
@@ -108,7 +121,7 @@ function runYtDlp(args: string[], timeoutMs = 120_000): Promise<string> {
     proc.on('close', (code) => {
       clearTimeout(timer);
       if (code === 0) resolve(stdout);
-      else reject(new Error(stderr.trim() || `yt-dlp falhou (código ${code})`));
+      else reject(new Error(normalizeYtDlpError(stderr) || `yt-dlp falhou (código ${code})`));
     });
     proc.on('error', (err) => {
       clearTimeout(timer);
