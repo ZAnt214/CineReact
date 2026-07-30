@@ -1,11 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+const PRODUCTION_DATA_DIR = '/data';
+
 export function getDataDir(): string {
   const base =
     process.env.CINE_REACT_DATA_DIR ||
+    process.env.RAILWAY_VOLUME_MOUNT_PATH ||
     (process.env.NODE_ENV === 'production'
-      ? path.join(process.cwd(), 'data')
+      ? PRODUCTION_DATA_DIR
       : process.cwd());
 
   fs.mkdirSync(base, { recursive: true });
