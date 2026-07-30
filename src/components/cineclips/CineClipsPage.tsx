@@ -5,18 +5,15 @@ import {
   MessageCircle,
   Share2,
   Bookmark,
-  UserPlus,
   Flag,
   Flame,
   X,
   Send,
   Loader2,
   Download,
-  ChevronDown,
   Play,
   Volume2,
   VolumeX,
-  Home,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -46,34 +43,36 @@ function formatCount(value: number): string {
   return String(value);
 }
 
-function CineReactMark({ size = 'md' }: { size?: 'sm' | 'md' }) {
-  const icon = size === 'sm' ? 'w-7 h-7 rounded-xl' : 'w-9 h-9 rounded-2xl';
-  const play = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
-  const text = size === 'sm' ? 'text-sm' : 'text-base';
+function useBodyScrollLock(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
 
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className={`${icon} bg-cine-accent flex items-center justify-center shadow-[0_0_20px_rgba(0,229,255,0.35)] shrink-0`}>
-        <Play className={`${play} text-black fill-black ml-0.5`} />
-      </div>
-      <div className={`font-display font-extrabold ${text} leading-none tracking-tight`}>
-        <span className="text-white">Cine</span>
-        <span className="text-cine-accent">React</span>
-      </div>
-    </div>
-  );
+    const scrollY = window.scrollY;
+    const { overflow, position, width, top } = document.body.style;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.position = position;
+      document.body.style.width = width;
+      document.body.style.top = top;
+      window.scrollTo(0, scrollY);
+    };
+  }, [active]);
 }
 
 function ClipPlayer({
   clip,
   isActive,
   muted,
-  onEnded,
 }: {
   clip: CineClip;
   isActive: boolean;
   muted: boolean;
-  onEnded?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
@@ -94,7 +93,6 @@ function ClipPlayer({
     if (!isHosted || !el || videoFailed) return;
     el.muted = muted;
     if (isActive) {
-      el.currentTime = 0;
       el.play().catch(() => setVideoFailed(true));
     } else {
       el.pause();
@@ -104,55 +102,44 @@ function ClipPlayer({
   const showHostedVideo = isHosted && !videoFailed;
 
   return (
-    <div className="absolute inset-0 bg-black">
+    <div className="cineclips-slide-media">
       {isActive ? (
         showHostedVideo ? (
           <video
             ref={videoRef}
             src={clip.videoUrl}
             poster={clip.thumbnailUrl}
-            className="absolute inset-0 w-full h-full object-contain bg-black"
+            className="cineclips-video"
             playsInline
             loop
             muted={muted}
             controls={false}
-            onEnded={onEnded}
             onError={() => setVideoFailed(true)}
           />
         ) : isHosted ? (
-          <img
-            src={clip.thumbnailUrl}
-            alt={clip.titulo}
-            className="absolute inset-0 w-full h-full object-contain bg-black"
-          />
+          <img src={clip.thumbnailUrl} alt={clip.titulo} className="cineclips-video" />
         ) : (
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}`}
             title={clip.titulo}
-            className="absolute inset-0 w-full h-full pointer-events-none"
+            className="cineclips-video pointer-events-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
           />
         )
       ) : (
-        <img
-          src={clip.thumbnailUrl}
-          alt={clip.titulo}
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
-        />
+        <img src={clip.thumbnailUrl} alt={clip.titulo} className="cineclips-video cineclips-video--idle" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/90 pointer-events-none" />
+      <div className="cineclips-slide-scrim" />
     </div>
   );
 }
 
-function ActionButton({
+function ActionBtn({
   icon: Icon,
   label,
   onClick,
   active,
   activeClass = '',
-  small,
   spinning,
 }: {
   icon: React.ElementType;
@@ -160,172 +147,22 @@ function ActionButton({
   onClick: () => void;
   active?: boolean;
   activeClass?: string;
-  small?: boolean;
   spinning?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={typeof label === 'string' ? label : undefined}
-      className="flex flex-col items-center gap-1.5 cursor-pointer group"
-    >
-      <div className={`cineclips-action-btn ${small ? '!w-10 !h-10' : ''}`}>
+    <button type="button" onClick={onClick} className="cineclips-action">
+      <span className="cineclips-action-icon">
         <Icon
-          className={`${small ? 'w-4 h-4' : 'w-[22px] h-[22px]'} ${spinning ? 'animate-spin' : ''} ${active ? activeClass || 'text-cine-accent' : 'text-white'}`}
+          className={`w-5 h-5 ${spinning ? 'animate-spin' : ''} ${active ? activeClass || 'text-cine-accent' : 'text-white'}`}
           fill={active ? 'currentColor' : 'none'}
         />
-      </div>
-      {label !== '' && (
-        <span className="text-[10px] font-semibold text-white/90 drop-shadow-sm">{label}</span>
-      )}
+      </span>
+      {label !== '' && <span className="cineclips-action-label">{label}</span>}
     </button>
   );
 }
 
-function ClipOverlay({
-  clip,
-  user,
-  liked,
-  favorited,
-  muted,
-  onLike,
-  onFavorite,
-  onShare,
-  onComment,
-  onFollow,
-  onReport,
-  onHashtag,
-  onDownload,
-  onToggleMute,
-  canDownload,
-  isDownloading,
-}: {
-  clip: CineClip;
-  user: UserState;
-  liked: boolean;
-  favorited: boolean;
-  muted: boolean;
-  onLike: () => void;
-  onFavorite: () => void;
-  onShare: () => void;
-  onComment: () => void;
-  onFollow: () => void;
-  onReport: () => void;
-  onHashtag: (tag: string) => void;
-  onDownload: () => void;
-  onToggleMute: () => void;
-  canDownload: boolean;
-  isDownloading: boolean;
-}) {
-  const sourceLabel =
-    clip.sourceType === 'tiktok'
-      ? 'TikTok'
-      : clip.sourceType === 'instagram'
-        ? 'Instagram'
-        : clip.sourceType === 'youtube'
-          ? 'YouTube'
-          : null;
-
-  return (
-    <>
-      <div className="absolute top-24 left-4 z-10 pointer-events-auto">
-        <button
-          type="button"
-          onClick={onToggleMute}
-          className="cineclips-chip-btn"
-          aria-label={muted ? 'Ativar som' : 'Silenciar'}
-        >
-          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-        </button>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pb-6 pr-[4.5rem] pointer-events-none">
-        <div className="cineclips-info-card pointer-events-auto">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {clip.isTrending && (
-              <span className="cineclips-badge cineclips-badge--hot">
-                <Flame className="w-3 h-3" />
-                Em alta
-              </span>
-            )}
-            {sourceLabel && (
-              <span className="cineclips-badge">
-                <Play className="w-2.5 h-2.5" />
-                {sourceLabel}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <button
-                type="button"
-                onClick={onFollow}
-                className="text-cine-accent text-sm font-bold hover:text-cine-accent-light transition-colors cursor-pointer"
-              >
-                @{clip.criadorNome}
-              </button>
-              <h2 className="text-white font-bold text-[15px] leading-snug mt-1 line-clamp-2">
-                {clip.titulo}
-              </h2>
-              {clip.descricao && (
-                <p className="text-zinc-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">{clip.descricao}</p>
-              )}
-            </div>
-            {user.isLoggedIn && (
-              <button
-                type="button"
-                onClick={onFollow}
-                className="shrink-0 px-3 py-1.5 rounded-full bg-cine-accent/15 border border-cine-accent/30 text-cine-accent text-[11px] font-bold hover:bg-cine-accent hover:text-black transition-all cursor-pointer"
-              >
-                Seguir
-              </button>
-            )}
-          </div>
-
-          {clip.hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {clip.hashtags.slice(0, 4).map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => onHashtag(tag)}
-                  className="text-cine-accent-light text-[11px] font-semibold hover:text-white transition-colors cursor-pointer"
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <p className="text-zinc-500 text-[10px] mt-3 font-medium">
-            {formatCount(clip.visualizacoes)} views · {clip.duracao}
-          </p>
-        </div>
-      </div>
-
-      <div className="absolute right-3 bottom-36 z-10 flex flex-col items-center gap-5">
-        <ActionButton icon={Heart} label={formatCount(clip.likes)} active={liked} activeClass="text-red-500" onClick={onLike} />
-        <ActionButton icon={MessageCircle} label={formatCount(clip.commentsCount)} onClick={onComment} />
-        <ActionButton icon={Bookmark} label={formatCount(clip.favorites)} active={favorited} activeClass="text-cine-accent" onClick={onFavorite} />
-        <ActionButton icon={Share2} label="Share" onClick={onShare} />
-        {canDownload && (
-          <ActionButton
-            icon={isDownloading ? Loader2 : Download}
-            label={isDownloading ? '...' : 'Baixar'}
-            onClick={onDownload}
-            spinning={isDownloading}
-          />
-        )}
-        {user.isLoggedIn && <ActionButton icon={UserPlus} label="Seguir" onClick={onFollow} />}
-        <ActionButton icon={Flag} label="" onClick={onReport} small />
-      </div>
-    </>
-  );
-}
-
-function CommentsPanel({
+function CommentsSheet({
   clipId,
   user,
   onClose,
@@ -362,39 +199,31 @@ function CommentsPanel({
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
-      transition={{ type: 'spring', damping: 30, stiffness: 340 }}
-      className="absolute inset-x-0 bottom-0 z-40 bg-[#0a0a0c]/97 backdrop-blur-2xl border-t border-white/8 rounded-t-[1.75rem] max-h-[75vh] flex flex-col shadow-[0_-20px_60px_rgba(0,0,0,0.5)]"
+      transition={{ type: 'tween', duration: 0.22 }}
+      className="cineclips-sheet"
     >
-      <div className="flex items-center justify-center pt-3 pb-1">
-        <div className="w-10 h-1 rounded-full bg-white/15" />
-      </div>
-      <div className="flex items-center justify-between px-5 py-2 border-b border-white/5">
-        <h3 className="text-sm font-bold text-white">Comentários</h3>
-        <button type="button" onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors">
-          <X className="w-4 h-4 text-zinc-400" />
+      <div className="cineclips-sheet-handle" />
+      <div className="cineclips-sheet-header">
+        <h3>Comentários</h3>
+        <button type="button" onClick={onClose} aria-label="Fechar">
+          <X className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <div className="cineclips-sheet-body">
         {loading ? (
-          <div className="flex justify-center py-10">
+          <div className="cineclips-sheet-empty">
             <Loader2 className="w-5 h-5 animate-spin text-cine-accent" />
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageCircle className="w-9 h-9 text-zinc-700 mx-auto mb-3" />
-            <p className="text-zinc-500 text-sm">Nenhum comentário ainda</p>
-            <p className="text-zinc-600 text-xs mt-1">Seja o primeiro a comentar</p>
-          </div>
+          <p className="cineclips-sheet-empty">Seja o primeiro a comentar</p>
         ) : (
           comments.map((c) => (
-            <div key={c.id} className="flex gap-3">
-              <div className="w-9 h-9 rounded-full bg-cine-accent/12 border border-cine-accent/25 flex items-center justify-center text-xs font-bold text-cine-accent shrink-0">
-                {c.usuarioNome.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-white">{c.usuarioNome}</p>
-                <p className="text-sm text-zinc-300 mt-0.5 leading-relaxed">{c.texto}</p>
+            <div key={c.id} className="cineclips-comment">
+              <div className="cineclips-comment-avatar">{c.usuarioNome.charAt(0).toUpperCase()}</div>
+              <div>
+                <p className="cineclips-comment-name">{c.usuarioNome}</p>
+                <p className="cineclips-comment-text">{c.texto}</p>
               </div>
             </div>
           ))
@@ -402,55 +231,21 @@ function CommentsPanel({
       </div>
 
       {user.isLoggedIn ? (
-        <div className="p-4 border-t border-white/5 flex gap-2">
+        <div className="cineclips-sheet-input">
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Escreva um comentário..."
-            className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-cine-accent/40 transition-colors"
+            placeholder="Comentar..."
           />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={sending || !text.trim()}
-            className="px-4 rounded-2xl bg-cine-accent text-black font-bold disabled:opacity-40 cursor-pointer hover:brightness-110 transition-all"
-          >
+          <button type="button" onClick={handleSend} disabled={sending || !text.trim()}>
             <Send className="w-4 h-4" />
           </button>
         </div>
       ) : (
-        <p className="p-5 text-center text-xs text-zinc-500 border-t border-white/5">Faça login para comentar</p>
+        <p className="cineclips-sheet-login">Faça login para comentar</p>
       )}
     </motion.div>
-  );
-}
-
-function EmptyState({ onBack }: { onBack: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full gap-6 px-8 text-center">
-      <CineReactMark size="md" />
-      <div className="space-y-2 max-w-xs">
-        <h2 className="text-xl font-bold text-white">Nenhum clip ainda</h2>
-        <p className="text-zinc-400 text-sm leading-relaxed">
-          Reações curtas em breve. Enquanto isso, explore o restante do CineReact.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-        <button type="button" onClick={onBack} className="cineclips-primary-btn flex-1 justify-center">
-          <Home className="w-4 h-4" />
-          Voltar ao início
-        </button>
-        <a
-          href="https://bit.ly/CineReact"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="cineclips-secondary-btn flex-1 justify-center"
-        >
-          bit.ly/CineReact
-        </a>
-      </div>
-    </div>
   );
 }
 
@@ -463,68 +258,84 @@ export default function CineClipsPage({
 }: CineClipsPageProps) {
   const { clips, trending, loading, error, loadMore, nextCursor } = useCineClipsFeed(user.email);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [feedTab, setFeedTab] = useState<'para-voce' | 'em-alta'>('para-voce');
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
   const [commentsClipId, setCommentsClipId] = useState<string | null>(null);
   const [downloadingClipId, setDownloadingClipId] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [showTrending, setShowTrending] = useState(false);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const slideHeightRef = useRef(0);
+  const activeIndexRef = useRef(0);
   const watchTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const scrollingRef = useRef(false);
 
-  const displayClips =
-    feedTab === 'em-alta' && trending.length > 0
-      ? [...trending, ...clips.filter((c) => !trending.some((t) => t.id === c.id))]
-      : clips;
+  useBodyScrollLock(true);
 
-  const scrollToIndex = useCallback((index: number) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const child = container.children[index] as HTMLElement | undefined;
-    child?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  activeIndexRef.current = activeIndex;
+
+  const scrollToIndex = useCallback((index: number, smooth = false) => {
+    const feed = feedRef.current;
+    if (!feed) return;
+    const h = slideHeightRef.current || feed.clientHeight;
+    scrollingRef.current = true;
+    feed.scrollTo({ top: index * h, behavior: smooth ? 'smooth' : 'auto' });
     setActiveIndex(index);
+    window.setTimeout(() => {
+      scrollingRef.current = false;
+    }, smooth ? 350 : 50);
   }, []);
 
   useEffect(() => {
-    if (!initialClipId || displayClips.length === 0) return;
-    const idx = displayClips.findIndex((c) => c.id === initialClipId);
+    const feed = feedRef.current;
+    if (!feed) return;
+
+    const updateHeight = () => {
+      slideHeightRef.current = feed.clientHeight;
+    };
+    updateHeight();
+
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(feed);
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!initialClipId || clips.length === 0) return;
+    const idx = clips.findIndex((c) => c.id === initialClipId);
     if (idx >= 0) scrollToIndex(idx);
-  }, [initialClipId, displayClips, scrollToIndex]);
+  }, [initialClipId, clips, scrollToIndex]);
 
   useEffect(() => {
-    setActiveIndex(0);
-    containerRef.current?.scrollTo({ top: 0 });
-  }, [feedTab]);
+    const feed = feedRef.current;
+    if (!feed || clips.length === 0) return;
+
+    const onScroll = () => {
+      if (scrollingRef.current) return;
+      const h = slideHeightRef.current || feed.clientHeight;
+      if (!h) return;
+      const idx = Math.round(feed.scrollTop / h);
+      const clamped = Math.max(0, Math.min(idx, clips.length - 1));
+      if (clamped !== activeIndexRef.current) {
+        activeIndexRef.current = clamped;
+        setActiveIndex(clamped);
+      }
+      if (clamped >= clips.length - 3 && nextCursor) loadMore();
+    };
+
+    feed.addEventListener('scroll', onScroll, { passive: true });
+    return () => feed.removeEventListener('scroll', onScroll);
+  }, [clips.length, nextCursor, loadMore]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-            const idx = Number((entry.target as HTMLElement).dataset.index);
-            if (!Number.isNaN(idx)) {
-              setActiveIndex(idx);
-              if (idx >= displayClips.length - 3 && nextCursor) loadMore();
-            }
-          }
-        }
-      },
-      { root: container, threshold: [0.6] }
-    );
-
-    Array.from(container.children).forEach((child) => observer.observe(child));
-    return () => observer.disconnect();
-  }, [displayClips.length, nextCursor, loadMore]);
-
-  useEffect(() => {
-    const clip = displayClips[activeIndex];
+    const clip = clips[activeIndex];
     if (!clip || !user.isLoggedIn) return;
 
     if (watchTimers.current[clip.id]) clearTimeout(watchTimers.current[clip.id]);
-
     watchTimers.current[clip.id] = setTimeout(() => {
       clipAction(clip.id, 'watch', {
         email: user.email,
@@ -536,7 +347,7 @@ export default function CineClipsPage({
     return () => {
       if (watchTimers.current[clip.id]) clearTimeout(watchTimers.current[clip.id]);
     };
-  }, [activeIndex, displayClips, user.email, user.isLoggedIn]);
+  }, [activeIndex, clips, user.email, user.isLoggedIn]);
 
   const handleLike = async (clip: CineClip) => {
     if (!user.isLoggedIn) return;
@@ -608,138 +419,169 @@ export default function CineClipsPage({
     }
   };
 
+  const activeClip = clips[activeIndex];
+
   return (
-    <div className="fixed inset-0 z-40 bg-black cineclips-page">
-      <header className="absolute top-0 inset-x-0 z-50 px-4 pt-3 pb-2 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
-        <div className="flex items-center justify-between gap-3">
-          <button type="button" onClick={onBack} className="cineclips-nav-btn" aria-label="Voltar">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+    <div className="cineclips-shell">
+      <header className="cineclips-header">
+        <button type="button" onClick={onBack} className="cineclips-header-btn" aria-label="Voltar">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
 
-          <CineReactMark size="sm" />
-
-          {displayClips.length > 0 ? (
-            <span className="cineclips-counter">
-              {activeIndex + 1}/{displayClips.length}
-            </span>
-          ) : (
-            <div className="w-12" />
-          )}
+        <div className="cineclips-header-brand">
+          <span className="cineclips-header-logo" aria-hidden>
+            <Play className="w-3.5 h-3.5 fill-black text-black ml-0.5" />
+          </span>
+          <span className="cineclips-header-title">
+            <span className="text-white">Cine</span>
+            <span className="text-cine-accent">Clips</span>
+          </span>
         </div>
 
-        <nav className="flex items-center justify-center gap-2 mt-3" aria-label="Feed">
-          {(['para-voce', 'em-alta'] as const).map((tab) => (
+        <div className="cineclips-header-actions">
+          {trending.length > 0 && (
             <button
-              key={tab}
               type="button"
-              onClick={() => setFeedTab(tab)}
-              className={`cineclips-tab ${feedTab === tab ? 'cineclips-tab--active' : ''}`}
+              onClick={() => setShowTrending((v) => !v)}
+              className={`cineclips-header-btn ${showTrending ? 'cineclips-header-btn--active' : ''}`}
+              aria-label="Em alta"
             >
-              {tab === 'para-voce' ? 'Para você' : 'Em alta'}
+              <Flame className="w-4 h-4" />
             </button>
-          ))}
-        </nav>
+          )}
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            className="cineclips-header-btn"
+            aria-label={muted ? 'Ativar som' : 'Silenciar'}
+          >
+            {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+        </div>
       </header>
 
-      {trending.length > 0 && feedTab === 'para-voce' && (
-        <div className="absolute top-[7.25rem] left-0 right-0 z-40 px-4">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {trending.slice(0, 8).map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => {
-                  const idx = displayClips.findIndex((c) => c.id === t.id);
-                  if (idx >= 0) scrollToIndex(idx);
-                }}
-                className="cineclips-trend-chip shrink-0"
-              >
-                <Flame className="w-3 h-3 text-cine-accent" />
-                <span className="max-w-[110px] truncate">{t.titulo}</span>
-              </button>
-            ))}
-          </div>
+      {showTrending && trending.length > 0 && (
+        <div className="cineclips-trending-bar">
+          {trending.slice(0, 6).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => {
+                const idx = clips.findIndex((c) => c.id === t.id);
+                if (idx >= 0) scrollToIndex(idx, true);
+                setShowTrending(false);
+              }}
+              className="cineclips-trending-item"
+            >
+              {t.titulo}
+            </button>
+          ))}
         </div>
       )}
 
-      {loading && displayClips.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-cine-accent" />
-          <p className="text-zinc-500 text-sm">Carregando clips...</p>
+      {loading && clips.length === 0 ? (
+        <div className="cineclips-state">
+          <Loader2 className="w-7 h-7 animate-spin text-cine-accent" />
+          <p>Carregando...</p>
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center">
-          <p className="text-zinc-300">{error}</p>
-          <button type="button" onClick={onBack} className="cineclips-primary-btn">
+        <div className="cineclips-state">
+          <p>{error}</p>
+          <button type="button" onClick={onBack} className="cineclips-cta">
+            Voltar
+          </button>
+        </div>
+      ) : clips.length === 0 ? (
+        <div className="cineclips-state">
+          <p className="text-lg font-bold text-white">Nenhum clip ainda</p>
+          <p className="text-sm text-zinc-400">Em breve novos reacts por aqui.</p>
+          <button type="button" onClick={onBack} className="cineclips-cta">
             Voltar ao início
           </button>
         </div>
-      ) : displayClips.length === 0 ? (
-        <EmptyState onBack={onBack} />
       ) : (
-        <>
-          <div
-            ref={containerRef}
-            className="h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar"
-            style={{ scrollSnapType: 'y mandatory' }}
-          >
-            {displayClips.map((clip, index) => (
-              <section
-                key={clip.id}
-                data-index={index}
-                className="relative h-full w-full snap-start snap-always shrink-0"
-              >
-                <ClipPlayer clip={clip} isActive={index === activeIndex} muted={muted} />
-                <ClipOverlay
-                  clip={clip}
-                  user={user}
-                  liked={likedIds.has(clip.id)}
-                  favorited={favIds.has(clip.id)}
-                  muted={muted}
-                  onLike={() => handleLike(clip)}
-                  onFavorite={() => handleFavorite(clip)}
-                  onShare={() => handleShare(clip)}
-                  onComment={() => setCommentsClipId(clip.id)}
-                  onFollow={() => onFollowCreator?.(clip.criadorNome)}
-                  onReport={() => handleReport(clip)}
-                  onHashtag={(tag) => onOpenHashtag?.(tag)}
-                  onDownload={() => handleDownload(clip)}
-                  onToggleMute={() => setMuted((m) => !m)}
-                  canDownload={!!clip.videoUrl}
-                  isDownloading={downloadingClipId === clip.id}
-                />
-              </section>
-            ))}
-          </div>
+        <div ref={feedRef} className="cineclips-feed">
+          {clips.map((clip, index) => (
+            <article key={clip.id} className="cineclips-slide" data-index={index}>
+              <ClipPlayer clip={clip} isActive={index === activeIndex} muted={muted} />
 
-          {displayClips.length > 1 && activeIndex < displayClips.length - 1 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none opacity-60">
-              <ChevronDown className="w-5 h-5 text-white animate-bounce" />
-              <span className="text-[9px] font-medium text-white/70 uppercase tracking-widest">Deslize</span>
-            </div>
-          )}
+              <div className="cineclips-slide-ui">
+                <div className="cineclips-meta">
+                  {clip.isTrending && (
+                    <span className="cineclips-tag cineclips-tag--hot">
+                      <Flame className="w-3 h-3" /> Em alta
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onFollowCreator?.(clip.criadorNome)}
+                    className="cineclips-creator"
+                  >
+                    @{clip.criadorNome}
+                  </button>
+                  <h2 className="cineclips-title">{clip.titulo}</h2>
+                  {clip.descricao && <p className="cineclips-desc">{clip.descricao}</p>}
+                  {clip.hashtags.length > 0 && (
+                    <div className="cineclips-tags">
+                      {clip.hashtags.slice(0, 3).map((tag) => (
+                        <button key={tag} type="button" onClick={() => onOpenHashtag?.(tag)}>
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <p className="cineclips-stats">
+                    {formatCount(clip.visualizacoes)} views · {clip.duracao}
+                  </p>
+                </div>
 
-          {displayClips.length > 1 && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1.5">
-              {displayClips.slice(0, Math.min(displayClips.length, 10)).map((clip, i) => (
-                <button
-                  key={clip.id}
-                  type="button"
-                  onClick={() => scrollToIndex(i)}
-                  className={`rounded-full transition-all cursor-pointer ${
-                    i === activeIndex ? 'w-1 h-6 bg-cine-accent shadow-[0_0_8px_rgba(0,229,255,0.6)]' : 'w-1 h-2 bg-white/25 hover:bg-white/50'
-                  }`}
-                  aria-label={`Clip ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </>
+                <div className="cineclips-rail">
+                  <ActionBtn
+                    icon={Heart}
+                    label={formatCount(clip.likes)}
+                    active={likedIds.has(clip.id)}
+                    activeClass="text-red-500"
+                    onClick={() => handleLike(clip)}
+                  />
+                  <ActionBtn
+                    icon={MessageCircle}
+                    label={formatCount(clip.commentsCount)}
+                    onClick={() => setCommentsClipId(clip.id)}
+                  />
+                  <ActionBtn
+                    icon={Bookmark}
+                    label={formatCount(clip.favorites)}
+                    active={favIds.has(clip.id)}
+                    onClick={() => handleFavorite(clip)}
+                  />
+                  <ActionBtn icon={Share2} label="Share" onClick={() => handleShare(clip)} />
+                  {clip.videoUrl && (
+                    <ActionBtn
+                      icon={downloadingClipId === clip.id ? Loader2 : Download}
+                      label="Baixar"
+                      onClick={() => handleDownload(clip)}
+                      spinning={downloadingClipId === clip.id}
+                    />
+                  )}
+                  <ActionBtn icon={Flag} label="" onClick={() => handleReport(clip)} />
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {clips.length > 1 && activeClip && (
+        <div className="cineclips-progress" aria-hidden>
+          {clips.slice(0, Math.min(clips.length, 12)).map((clip, i) => (
+            <span key={clip.id} className={i === activeIndex ? 'is-active' : ''} />
+          ))}
+        </div>
       )}
 
       <AnimatePresence>
         {commentsClipId && (
-          <CommentsPanel
+          <CommentsSheet
             clipId={commentsClipId}
             user={user}
             onClose={() => setCommentsClipId(null)}

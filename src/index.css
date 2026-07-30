@@ -409,196 +409,503 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.cineclips-page {
+.cineclips-page,
+.cineclips-shell {
   --clips-accent: #00e5ff;
   --clips-accent-soft: rgba(0, 229, 255, 0.12);
   --clips-accent-border: rgba(0, 229, 255, 0.28);
-  background:
-    radial-gradient(ellipse at 50% -10%, rgba(0, 229, 255, 0.08), transparent 52%),
-    radial-gradient(ellipse at 20% 100%, rgba(0, 229, 255, 0.04), transparent 40%),
-    #000;
+  --cineclips-header-h: 3.25rem;
+  background: #000;
 }
 
-.cineclips-nav-btn {
+.cineclips-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.cineclips-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: var(--cineclips-header-h);
+  padding: 0 0.75rem;
+  padding-top: env(safe-area-inset-top, 0px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent);
+  pointer-events: none;
+}
+
+.cineclips-header > * {
+  pointer-events: auto;
+}
+
+.cineclips-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cineclips-header-logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.55rem;
+  background: var(--clips-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
 }
 
-.cineclips-nav-btn:hover {
-  background: rgba(0, 229, 255, 0.1);
-  border-color: var(--clips-accent-border);
+.cineclips-header-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.cineclips-counter {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.3rem 0.55rem;
-  border-radius: 9999px;
-  font-variant-numeric: tabular-nums;
-}
-
-.cineclips-tab {
-  padding: 0.45rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cineclips-tab:hover {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.cineclips-tab--active {
-  color: #000;
-  background: var(--clips-accent);
-  border-color: var(--clips-accent);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
-}
-
-.cineclips-trend-chip {
-  display: inline-flex;
+.cineclips-header-actions {
+  display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
+}
+
+.cineclips-header-btn {
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.65rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cineclips-trend-chip:hover {
-  background: var(--clips-accent-soft);
-  border-color: var(--clips-accent-border);
-}
-
-.cineclips-info-card {
-  background: rgba(10, 10, 12, 0.72);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.25rem;
-  padding: 1rem 1.1rem;
-}
-
-.cineclips-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
 }
 
-.cineclips-badge--hot {
-  background: rgba(0, 229, 255, 0.1);
+.cineclips-header-btn--active {
+  background: var(--clips-accent-soft);
   border-color: var(--clips-accent-border);
   color: var(--clips-accent);
 }
 
-.cineclips-chip-btn {
+.cineclips-trending-bar {
+  position: absolute;
+  top: calc(var(--cineclips-header-h) + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  z-index: 45;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent);
+}
+
+.cineclips-trending-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cineclips-trending-item {
+  flex-shrink: 0;
+  max-width: 10rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.cineclips-feed {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.cineclips-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.cineclips-slide {
+  position: relative;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: 100%;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+
+.cineclips-slide-media {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
+.cineclips-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.cineclips-video--idle {
+  object-fit: cover;
+  opacity: 0.35;
+}
+
+.cineclips-slide-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 28%, transparent 55%, rgba(0, 0, 0, 0.82) 100%);
+  pointer-events: none;
+}
+
+.cineclips-slide-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 0.65rem calc(1rem + env(safe-area-inset-bottom, 0px)) 0.85rem;
+  gap: 0.5rem;
+}
+
+.cineclips-meta {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 4.25rem);
+  pointer-events: auto;
+}
+
+.cineclips-creator {
+  display: block;
+  color: var(--clips-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+}
+
+.cineclips-title {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cineclips-desc {
+  margin-top: 0.35rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cineclips-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.cineclips-tags button {
+  color: var(--clips-accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cineclips-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cineclips-tag--hot {
+  background: var(--clips-accent-soft);
+  color: var(--clips-accent);
+}
+
+.cineclips-stats {
+  margin-top: 0.4rem;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}
+
+.cineclips-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  pointer-events: auto;
+  padding-bottom: 0.25rem;
+}
+
+.cineclips-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.cineclips-action-icon {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+.cineclips-action-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 3rem;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.cineclips-progress {
+  position: absolute;
+  bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 0.2rem;
+  pointer-events: none;
+}
+
+.cineclips-progress span {
+  width: 0.9rem;
+  height: 2px;
   border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: white;
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background 0.2s ease, width 0.2s ease;
 }
 
-.cineclips-chip-btn:hover {
-  background: var(--clips-accent-soft);
-  border-color: var(--clips-accent-border);
+.cineclips-progress span.is-active {
+  width: 1.25rem;
+  background: var(--clips-accent);
 }
 
-.cineclips-primary-btn {
-  display: inline-flex;
+.cineclips-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.25rem;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #a1a1aa;
+}
+
+.cineclips-cta {
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.25rem;
   border-radius: 9999px;
   background: var(--clips-accent);
   color: #000;
   font-size: 0.8rem;
   font-weight: 800;
   cursor: pointer;
-  transition: filter 0.2s ease;
 }
 
-.cineclips-primary-btn:hover {
-  filter: brightness(1.08);
+.cineclips-sheet {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 60;
+  max-height: min(72dvh, 520px);
+  background: rgba(12, 12, 14, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.cineclips-secondary-btn {
-  display: inline-flex;
+.cineclips-sheet-handle {
+  width: 2.25rem;
+  height: 0.2rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  margin: 0.55rem auto 0;
+}
+
+.cineclips-sheet-header {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.25rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: white;
-  font-size: 0.8rem;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cineclips-sheet-header h3 {
+  font-size: 0.85rem;
   font-weight: 700;
+  color: white;
+}
+
+.cineclips-sheet-header button {
+  padding: 0.35rem;
+  color: #a1a1aa;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.cineclips-secondary-btn:hover {
-  background: var(--clips-accent-soft);
-  border-color: var(--clips-accent-border);
+.cineclips-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.85rem 1rem;
 }
 
-.cineclips-action-btn {
-  width: 3rem;
-  height: 3rem;
+.cineclips-sheet-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: #71717a;
+  font-size: 0.85rem;
+}
+
+.cineclips-comment {
+  display: flex;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.cineclips-comment-avatar {
+  width: 2rem;
+  height: 2rem;
   border-radius: 9999px;
+  background: var(--clips-accent-soft);
+  border: 1px solid var(--clips-accent-border);
+  color: var(--clips-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.cineclips-comment-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+}
+
+.cineclips-comment-text {
+  font-size: 0.82rem;
+  color: #d4d4d8;
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}
+
+.cineclips-sheet-input {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cineclips-sheet-input input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  border-radius: 9999px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  color: white;
+  outline: none;
 }
 
-.cineclips-action-btn:hover {
-  background: var(--clips-accent-soft);
-  border-color: var(--clips-accent-border);
+.cineclips-sheet-input button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--clips-accent);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
-.cineclips-action-btn:active {
-  transform: scale(0.94);
+.cineclips-sheet-input button:disabled {
+  opacity: 0.4;
+}
+
+.cineclips-sheet-login {
+  padding: 0.85rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #71717a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+  .cineclips-shell {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 430px;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* Evita arrastar imagens; não definir touch-action aqui — bloqueia scroll nos carrosséis */

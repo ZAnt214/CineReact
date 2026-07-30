@@ -8,7 +8,7 @@ const PNG_PATH = path.join(ASSETS_DIR, 'watermark-banner.png');
 
 function tryRsvgConvert() {
   try {
-    execFileSync('rsvg-convert', ['-w', '960', '-o', PNG_PATH, SVG_PATH], { stdio: 'pipe' });
+    execFileSync('rsvg-convert', ['-w', '480', '-o', PNG_PATH, SVG_PATH], { stdio: 'pipe' });
     return fs.existsSync(PNG_PATH);
   } catch {
     return false;
