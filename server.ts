@@ -3182,21 +3182,25 @@ async function startServer() {
     ensureDemoCreatorProfile();
     
     // Inicialização da sincronização com Supabase se ativo
-    if (localDb.isSupabaseActive()) {
-      console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
-      localDb.syncFromSupabase()
-        .then(success => {
-          ensureDemoCreatorProfile();
-          if (success) {
-            console.log("[Supabase] Sincronização inicial na inicialização concluída!");
-          } else {
-            console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
-          }
-        })
-        .catch(err => {
-          console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
-        });
-    }
+    localDb.ensureCineClipsRestored()
+      .then(() => {
+        if (localDb.isSupabaseActive()) {
+          console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
+          return localDb.syncFromSupabase();
+        }
+        return false;
+      })
+      .then((success) => {
+        ensureDemoCreatorProfile();
+        if (success) {
+          console.log("[Supabase] Sincronização inicial na inicialização concluída!");
+        } else if (localDb.isSupabaseActive()) {
+          console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
+        }
+      })
+      .catch(err => {
+        console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
+      });
 
     // Sincroniza fotos de perfil reais dos canais
     syncChannelAvatars().catch(err => {

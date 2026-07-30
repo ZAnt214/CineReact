@@ -100,6 +100,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
   "continueWatching" JSONB DEFAULT '[]'::jsonb
 );
 
+-- 9. Backup dos CineClips (sobrevive a deploys no Railway)
+CREATE TABLE IF NOT EXISTS cineclips_payload (
+  id TEXT PRIMARY KEY DEFAULT 'main',
+  payload JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Habilitar acesso público / Desativar RLS temporariamente para facilitar a integração simples
 ALTER TABLE obras DISABLE ROW LEVEL SECURITY;
 ALTER TABLE reacts DISABLE ROW LEVEL SECURITY;
@@ -109,3 +116,4 @@ ALTER TABLE canais_seguidos DISABLE ROW LEVEL SECURITY;
 ALTER TABLE listas DISABLE ROW LEVEL SECURITY;
 ALTER TABLE notificacoes DISABLE ROW LEVEL SECURITY;
 ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;
+ALTER TABLE cineclips_payload DISABLE ROW LEVEL SECURITY;

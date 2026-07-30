@@ -19,6 +19,10 @@ import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
 import { getDataDir, migrateLegacyFile } from './dataPaths.ts';
+import {
+  persistCineClipsToSupabase,
+  restoreCineClipsOnStartup,
+} from './cineclipsPersistence.ts';
 
 function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAccount): UserAccount {
   const merged: UserAccount = { ...remote };
@@ -49,6 +53,7 @@ migrateLegacyFile(DB_PATH, [
   path.join('/tmp', 'db_cine_react.json'),
   path.join(process.cwd(), 'db_cine_react.json'),
   path.join(process.cwd(), 'data', 'db_cine_react.json'),
+  '/app/data/db_cine_react.json',
 ]);
 
 interface DbSchema {
@@ -130,7 +135,18 @@ function initDb(): DbSchema {
       return parsed;
     }
   } catch (error) {
-    console.error('Erro ao ler banco de dados local, reiniciando:', error);
+    console.error('Erro ao ler banco de dados local:', error);
+    const backupPath = `${DB_PATH}.bak`;
+    if (fs.existsSync(backupPath)) {
+      try {
+        const backupData = fs.readFileSync(backupPath, 'utf-8');
+        const parsed = JSON.parse(backupData);
+        console.warn('[DB] Recuperado a partir de backup .bak');
+        return parsed;
+      } catch (backupError) {
+        console.error('[DB] Backup também inválido:', backupError);
+      }
+    }
   }
 
   const initialDb: DbSchema = {
@@ -244,6 +260,11 @@ async function doSaveAsync() {
     const jsonStr = JSON.stringify(dbCache, null, 2);
     await fs.promises.writeFile(tempPath, jsonStr, 'utf-8');
     await fs.promises.rename(tempPath, DB_PATH);
+    try {
+      await fs.promises.copyFile(DB_PATH, `${DB_PATH}.bak`);
+    } catch {
+      /* backup opcional */
+    }
   } catch (error) {
     console.error('Erro ao salvar banco de dados local:', error);
   } finally {
@@ -296,6 +317,11 @@ if (supabaseUrl && supabaseAnonKey && supabaseUrl !== "" && supabaseAnonKey !== 
   }
 }
 
+function queueCineClipsCloudSync(immediate = false) {
+  if (!supabaseClient) return;
+  persistCineClipsToSupabase(supabaseClient, dbCache, { immediate }).catch(() => undefined);
+}
+
 export const localDb = {
   // Supabase Connection Check
   isSupabaseActive: () => {
@@ -304,6 +330,13 @@ export const localDb = {
 
   getSupabaseClient: () => {
     return supabaseClient;
+  },
+
+  ensureCineClipsRestored: async (): Promise<boolean> => {
+    return restoreCineClipsOnStartup(supabaseClient, dbCache, (data, immediate) => {
+      if (data) dbCache = data as DbSchema;
+      saveDb(dbCache, immediate);
+    });
   },
 
   // Pull data from Supabase and refresh the memory cache
@@ -358,6 +391,7 @@ export const localDb = {
         return mergeUsuarioFromRemote(local, remote);
       });
       saveDb(dbCache);
+      queueCineClipsCloudSync(true);
 
       console.log("[Supabase] Sincronização de volta para o cache concluída com sucesso!");
       return true;
@@ -1202,6 +1236,7 @@ export const localDb = {
     if (idx >= 0) dbCache.cineClips[idx] = clip;
     else dbCache.cineClips.push(clip);
     saveDb(dbCache, true);
+    queueCineClipsCloudSync(true);
     return clip;
   },
 
@@ -1210,7 +1245,8 @@ export const localDb = {
     dbCache.cineClipComments = (dbCache.cineClipComments || []).filter((c) => c.clipId !== id);
     dbCache.cineClipLikes = (dbCache.cineClipLikes || []).filter((l) => l.clipId !== id);
     dbCache.cineClipFavorites = (dbCache.cineClipFavorites || []).filter((f) => f.clipId !== id);
-    saveDb(dbCache);
+    saveDb(dbCache, true);
+    queueCineClipsCloudSync(true);
   },
 
   incrementClipViews: (id: string): number => {
@@ -1348,6 +1384,7 @@ export const localDb = {
     if (idx >= 0) dbCache.cineClipImportJobs[idx] = job;
     else dbCache.cineClipImportJobs.unshift(job);
     saveDb(dbCache, true);
+    queueCineClipsCloudSync(true);
     return job;
   },
 

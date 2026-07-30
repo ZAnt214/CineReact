@@ -33,6 +33,7 @@ export function getClipsStorageDir(): string {
     path.join('/tmp', 'cineclips-uploads'),
     path.join(process.cwd(), 'uploads', 'cineclips'),
     path.join(process.cwd(), 'data', 'cineclips-uploads'),
+    '/app/data/cineclips-uploads',
   ]);
   return base;
 }
