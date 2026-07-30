@@ -48,6 +48,7 @@ const DB_PATH = path.join(getDataDir(), 'db_cine_react.json');
 migrateLegacyFile(DB_PATH, [
   path.join('/tmp', 'db_cine_react.json'),
   path.join(process.cwd(), 'db_cine_react.json'),
+  path.join(process.cwd(), 'data', 'db_cine_react.json'),
 ]);
 
 interface DbSchema {

@@ -32,6 +32,7 @@ export function getClipsStorageDir(): string {
   migrateLegacyDir(base, [
     path.join('/tmp', 'cineclips-uploads'),
     path.join(process.cwd(), 'uploads', 'cineclips'),
+    path.join(process.cwd(), 'data', 'cineclips-uploads'),
   ]);
   return base;
 }
