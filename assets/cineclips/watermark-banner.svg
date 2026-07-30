@@ -1,28 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="148" viewBox="0 0 400 148">
-  <defs>
-    <filter id="cardShadow" x="-20%" y="-30%" width="140%" height="160%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.22"/>
-    </filter>
-    <linearGradient id="pin" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f87171"/>
-      <stop offset="100%" stop-color="#dc2626"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+  <rect x="28" y="12" width="424" height="336" rx="28" fill="#000000" fill-opacity="0.82"/>
 
-  <g filter="url(#cardShadow)">
-    <rect x="18" y="30" width="364" height="106" rx="22" fill="#ffffff"/>
-  </g>
+  <line x1="118" y1="48" x2="178" y2="48" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="240" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#FFD700" letter-spacing="4.5">CINEREACT</text>
+  <line x1="302" y1="48" x2="362" y2="48" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
 
-  <ellipse cx="118" cy="24" rx="11" ry="10" fill="url(#pin)"/>
-  <ellipse cx="115" cy="21" rx="4" ry="3.5" fill="#fecaca" opacity="0.85"/>
-  <rect x="114" y="24" width="4" height="10" rx="1.5" fill="#b91c1c"/>
+  <text x="240" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800" fill="#FFD700">MAIS</text>
+  <text x="240" y="214" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800" fill="#ffffff">REACTS</text>
+  <text x="240" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800" fill="#FFD700">ASSIM?</text>
 
-  <circle cx="42" cy="54" r="7" fill="#38bdf8"/>
-  <text x="58" y="58" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#a1a1aa" letter-spacing="2.2">CINEREACT</text>
-
-  <text x="34" y="86" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">Mais reacts assim &#128064;</text>
-
-  <rect x="34" y="98" width="178" height="30" rx="15" fill="#111111"/>
-  <polygon points="48,113 48,107 56,110" fill="#38bdf8"/>
-  <text x="64" y="118" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#ffffff">bit.ly/CineReact</text>
+  <rect x="98" y="306" width="284" height="48" rx="24" fill="#FFD700"/>
+  <text x="240" y="338" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="800" fill="#000000">bit.ly/CineReact</text>
 </svg>

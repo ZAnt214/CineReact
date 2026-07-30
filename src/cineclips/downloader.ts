@@ -5,6 +5,7 @@ import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import { detectClipPlatform, type ClipPlatform } from './platform.ts';
 import { formatSecondsToDuration } from './utils.ts';
+import { getDataDir, migrateLegacyDir } from '../db/dataPaths.ts';
 
 export interface ClipMediaMetadata {
   platform: ClipPlatform;
@@ -26,10 +27,12 @@ export interface DownloadedClipMedia extends ClipMediaMetadata {
 export function getClipsStorageDir(): string {
   const base =
     process.env.CINECLIPS_UPLOAD_DIR ||
-    (process.env.NODE_ENV === 'production'
-      ? path.join('/tmp', 'cineclips-uploads')
-      : path.join(process.cwd(), 'uploads', 'cineclips'));
+    path.join(getDataDir(), 'cineclips-uploads');
   fs.mkdirSync(base, { recursive: true });
+  migrateLegacyDir(base, [
+    path.join('/tmp', 'cineclips-uploads'),
+    path.join(process.cwd(), 'uploads', 'cineclips'),
+  ]);
   return base;
 }
 

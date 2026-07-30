@@ -8,6 +8,7 @@ coverage/
 !.env.example
 uploads/cineclips/
 uploads/cineclips-exports/
+data/
 bin/yt-dlp
 bin/yt-dlp_linux
 bin/yt-dlp_linux_arm64
