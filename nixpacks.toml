@@ -1,2 +1,2 @@
 [phases.setup]
-aptPkgs = ["ffmpeg", "tar", "xz-utils"]
+aptPkgs = ["ffmpeg", "tar", "xz-utils", "librsvg2-bin"]
