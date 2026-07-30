@@ -113,6 +113,35 @@ export async function fetchClipComments(clipId: string) {
   return res.json();
 }
 
+export async function downloadClipVideo(clipId: string, options?: { adminEmail?: string }) {
+  const endpoint = options?.adminEmail
+    ? `/api/admin/cineclips/${clipId}/download`
+    : `/api/cineclips/${clipId}/download`;
+
+  const res = await fetch(endpoint, {
+    headers: options?.adminEmail ? { 'x-admin-email': options.adminEmail } : undefined,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Falha ao baixar o vídeo.');
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+
+  const disposition = res.headers.get('content-disposition') || '';
+  const match = disposition.match(/filename=\"?([^\";]+)\"?/i);
+  link.download = match?.[1] || `cinereact-${clipId}.mp4`;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function reportClip(
   clipId: string,
   email: string,
