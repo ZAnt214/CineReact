@@ -12,11 +12,13 @@ import {
   Clock,
   Zap,
   Upload,
+  Download,
 } from 'lucide-react';
 import type { CineClip, CineClipImportJob } from '../../types/cineclips.ts';
 import { CINECLIPS_CATEGORIES } from '../../types/cineclips.ts';
 import { AdminPanelCard, AdminBadge } from '../components/AdminUi.tsx';
 import { useAdminToast } from '../components/AdminToast.tsx';
+import { downloadClipVideo } from '../../hooks/useCineClips.ts';
 
 interface CineClipsAdminPageProps {
   email: string;
@@ -35,6 +37,7 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
   const [tags, setTags] = useState('');
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [alternatives, setAlternatives] = useState<string[]>([]);
+  const [downloadingClipId, setDownloadingClipId] = useState<string | null>(null);
 
   const adminFetch = useCallback(async (path: string, options?: RequestInit) => {
     const res = await fetch(path, {
@@ -155,6 +158,18 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
     }
   };
 
+  const handleDownloadClip = async (clip: CineClip) => {
+    setDownloadingClipId(clip.id);
+    try {
+      await downloadClipVideo(clip.id, { adminEmail: email });
+      toast.success('Download iniciado com marca CineReact');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setDownloadingClipId(null);
+    }
+  };
+
   const jobIcon = (status: CineClipImportJob['status']) => {
     switch (status) {
       case 'completed': return <CheckCircle2 className="w-4 h-4 text-green-400" />;
@@ -186,7 +201,7 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
         </p>
       </div>
 
-      <AdminPanelCard title="Importar por link" description="TikTok/Instagram: download e hospedagem · YouTube: embed direto">
+      <AdminPanelCard title="Importar por link" description="TikTok/Instagram: download e hospedagem · YouTube: embed direto · Baixar com marca CineReact e sem metadados">
         <div className="space-y-4">
           <div>
             <label className="text-xs font-bold text-zinc-400 block mb-1.5">URL do vídeo</label>
@@ -356,6 +371,19 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
                     className="p-2 rounded-lg hover:bg-neutral-800 text-zinc-400 hover:text-white cursor-pointer"
                   >
                     {clip.status === 'published' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadClip(clip)}
+                    disabled={!clip.videoUrl || downloadingClipId === clip.id}
+                    className="p-2 rounded-lg hover:bg-neutral-800 text-zinc-400 hover:text-cine-accent-light disabled:opacity-40 cursor-pointer"
+                    title={clip.videoUrl ? 'Baixar com marca CineReact' : 'Disponível apenas para vídeos hospedados'}
+                  >
+                    {downloadingClipId === clip.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
                   </button>
                   <button
                     type="button"

@@ -12,12 +12,14 @@ import {
   Send,
   Loader2,
   Zap,
+  Download,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
 import type { UserState } from '../types.ts';
 import {
   clipAction,
+  downloadClipVideo,
   fetchClipComments,
   postClipComment,
   reportClip,
@@ -124,6 +126,9 @@ function ClipOverlay({
   onFollow,
   onReport,
   onHashtag,
+  onDownload,
+  canDownload,
+  isDownloading,
 }: {
   clip: CineClip;
   user: UserState;
@@ -136,6 +141,9 @@ function ClipOverlay({
   onFollow: () => void;
   onReport: () => void;
   onHashtag: (tag: string) => void;
+  onDownload: () => void;
+  canDownload: boolean;
+  isDownloading: boolean;
 }) {
   return (
     <>
@@ -190,6 +198,14 @@ function ClipOverlay({
           onClick={onFavorite}
         />
         <ActionButton icon={Share2} label={clip.shares} onClick={onShare} />
+        {canDownload && (
+          <ActionButton
+            icon={isDownloading ? Loader2 : Download}
+            label={isDownloading ? '...' : 'Baixar'}
+            onClick={onDownload}
+            spinning={isDownloading}
+          />
+        )}
         {user.isLoggedIn && (
           <ActionButton icon={UserPlus} label="" onClick={onFollow} />
         )}
@@ -206,6 +222,7 @@ function ActionButton({
   active,
   activeClass = '',
   small,
+  spinning,
 }: {
   icon: React.ElementType;
   label: string | number;
@@ -213,6 +230,7 @@ function ActionButton({
   active?: boolean;
   activeClass?: string;
   small?: boolean;
+  spinning?: boolean;
 }) {
   return (
     <button
@@ -221,7 +239,7 @@ function ActionButton({
       className="flex flex-col items-center gap-1 cursor-pointer group"
     >
       <div className={`${small ? 'w-9 h-9' : 'w-11 h-11'} rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors`}>
-        <Icon className={`${small ? 'w-4 h-4' : 'w-5 h-5'} ${active ? activeClass || 'text-cine-accent-light' : 'text-white'}`} fill={active ? 'currentColor' : 'none'} />
+        <Icon className={`${small ? 'w-4 h-4' : 'w-5 h-5'} ${spinning ? 'animate-spin' : ''} ${active ? activeClass || 'text-cine-accent-light' : 'text-white'}`} fill={active ? 'currentColor' : 'none'} />
       </div>
       {label !== '' && (
         <span className="text-[10px] font-bold text-white drop-shadow">{label}</span>
@@ -333,6 +351,7 @@ export default function CineClipsPage({
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
   const [commentsClipId, setCommentsClipId] = useState<string | null>(null);
+  const [downloadingClipId, setDownloadingClipId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const watchTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -437,6 +456,17 @@ export default function CineClipsPage({
     } catch { /* ignore */ }
   };
 
+  const handleDownload = async (clip: CineClip) => {
+    setDownloadingClipId(clip.id);
+    try {
+      await downloadClipVideo(clip.id);
+    } catch (err: any) {
+      window.alert(err.message || 'Não foi possível baixar o vídeo.');
+    } finally {
+      setDownloadingClipId(null);
+    }
+  };
+
   const handleReport = async (clip: CineClip) => {
     if (!user.isLoggedIn) return;
     const reason = window.prompt('Motivo: spam, inappropriate, copyright, misleading ou other');
@@ -531,6 +561,9 @@ export default function CineClipsPage({
                 onFollow={() => onFollowCreator?.(clip.criadorNome)}
                 onReport={() => handleReport(clip)}
                 onHashtag={(tag) => onOpenHashtag?.(tag)}
+                onDownload={() => handleDownload(clip)}
+                canDownload={!!clip.videoUrl}
+                isDownloading={downloadingClipId === clip.id}
               />
             </section>
           ))}

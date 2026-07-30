@@ -25,6 +25,7 @@ import {
   formatDurationLabel,
   withResolvedMediaUrls,
 } from './downloader.ts';
+import { exportClipWithBranding } from './exportVideo.ts';
 
 type RequireAdmin = (req: Request, res: Response) => Promise<string | null>;
 
@@ -401,6 +402,14 @@ function getUserFeedContext(email?: string) {
   };
 }
 
+async function sendBrandedClipDownload(clip: CineClip, res: Response) {
+  const { filePath, filename } = await exportClipWithBranding(clip);
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename.replace(/"/g, '')}"`);
+  res.setHeader('Cache-Control', 'private, max-age=3600');
+  res.sendFile(filePath);
+}
+
 export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin) {
   app.get('/api/cineclips/feed', (req, res) => {
     try {
@@ -440,6 +449,18 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       res.json({ hashtag: tag, clips: clips.map(withResolvedMediaUrls), total: clips.length });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/cineclips/:id/download', async (req, res) => {
+    try {
+      const clip = localDb.getCineClipById(req.params.id);
+      if (!clip || clip.status !== 'published') {
+        return res.status(404).json({ error: 'Clip não encontrado.' });
+      }
+      await sendBrandedClipDownload(clip, res);
+    } catch (err: any) {
+      res.status(422).json({ error: err.message || 'Não foi possível preparar o download.' });
     }
   });
 
@@ -770,6 +791,17 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       res.json({ clip });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/admin/cineclips/:id/download', async (req, res) => {
+    if (!(await adminOnly(requireAdmin, req, res))) return;
+    try {
+      const clip = localDb.getCineClipById(req.params.id);
+      if (!clip) return res.status(404).json({ error: 'Clip não encontrado.' });
+      await sendBrandedClipDownload(clip, res);
+    } catch (err: any) {
+      res.status(422).json({ error: err.message || 'Não foi possível preparar o download.' });
     }
   });
 
