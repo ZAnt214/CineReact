@@ -138,27 +138,34 @@ function ActionBtn({
   icon: Icon,
   label,
   onClick,
+  variant,
   active,
-  activeClass = '',
   spinning,
 }: {
   icon: React.ElementType;
-  label: string | number;
+  label: string;
   onClick: () => void;
+  variant: 'like' | 'comment' | 'favorite' | 'share' | 'download' | 'report';
   active?: boolean;
-  activeClass?: string;
   spinning?: boolean;
 }) {
   return (
-    <button type="button" onClick={onClick} className="cineclips-action">
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileTap={{ scale: 0.9 }}
+      className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
+      aria-label={label}
+    >
+      <span className="cineclips-action-glow" aria-hidden />
       <span className="cineclips-action-icon">
         <Icon
-          className={`w-5 h-5 ${spinning ? 'animate-spin' : ''} ${active ? activeClass || 'text-cine-accent' : 'text-white'}`}
-          fill={active ? 'currentColor' : 'none'}
+          className={`w-[22px] h-[22px] ${spinning ? 'animate-spin' : ''}`}
+          fill={active && variant === 'like' ? 'currentColor' : active && variant === 'favorite' ? 'currentColor' : 'none'}
         />
       </span>
       {label !== '' && <span className="cineclips-action-label">{label}</span>}
-    </button>
+    </motion.button>
   );
 }
 
@@ -539,31 +546,44 @@ export default function CineClipsPage({
                   <ActionBtn
                     icon={Heart}
                     label={formatCount(clip.likes)}
+                    variant="like"
                     active={likedIds.has(clip.id)}
-                    activeClass="text-red-500"
                     onClick={() => handleLike(clip)}
                   />
                   <ActionBtn
                     icon={MessageCircle}
                     label={formatCount(clip.commentsCount)}
+                    variant="comment"
                     onClick={() => setCommentsClipId(clip.id)}
                   />
                   <ActionBtn
                     icon={Bookmark}
                     label={formatCount(clip.favorites)}
+                    variant="favorite"
                     active={favIds.has(clip.id)}
                     onClick={() => handleFavorite(clip)}
                   />
-                  <ActionBtn icon={Share2} label="Share" onClick={() => handleShare(clip)} />
+                  <ActionBtn
+                    icon={Share2}
+                    label="Enviar"
+                    variant="share"
+                    onClick={() => handleShare(clip)}
+                  />
                   {clip.videoUrl && (
                     <ActionBtn
                       icon={downloadingClipId === clip.id ? Loader2 : Download}
                       label="Baixar"
+                      variant="download"
                       onClick={() => handleDownload(clip)}
                       spinning={downloadingClipId === clip.id}
                     />
                   )}
-                  <ActionBtn icon={Flag} label="" onClick={() => handleReport(clip)} />
+                  <ActionBtn
+                    icon={Flag}
+                    label=""
+                    variant="report"
+                    onClick={() => handleReport(clip)}
+                  />
                 </div>
               </div>
             </article>

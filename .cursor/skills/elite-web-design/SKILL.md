@@ -111,12 +111,19 @@ Rounded `1.25rem`, blur backdrop, subtle border.
 
 ## Watermark / Brand Overlay
 
-For video exports, use horizontal logo layout:
-- Left: cyan squircle + play icon
-- Right: "Cine" (white) + "React" (cyan)
-- Subtitle: "assista mais reacts aqui ↓" in cyan
-- URL: "• bit.ly/CineReact"
-- Position: bottom-left, ~42% video width, 24px padding
+For video exports, use a **discreet centered vertical card** (~28% video width):
+
+- Play icon squircle cyan + "CineReact" wordmark
+- Subtitle: "assista mais reacts aqui"
+- CTA pill: `bit.ly/CineReact`
+- Position: center `(W-w)/2:(H-h)/2`
+- See [cineclips-ui skill](../cineclips-ui/SKILL.md) for full specs
+
+### Action rail (enhanced)
+
+- Variant per action: `like`, `comment`, `favorite`, `share`, `download`, `report`
+- 3.1rem glass circles with gradient, glow on active, Portuguese labels
+- See [cineclips-ui skill](../cineclips-ui/SKILL.md)
 
 ## Workflow
 
