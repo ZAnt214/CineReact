@@ -54,19 +54,43 @@ async function getYtDlpPath(): Promise<string> {
     return process.env.YT_DLP_PATH;
   }
 
-  const localBin = path.join(process.cwd(), 'bin', 'yt-dlp');
+  const binDir = path.join(process.cwd(), 'bin');
+  const isLinux = process.platform === 'linux';
+  const isArm64 = process.arch === 'arm64';
+  const binaryName = isLinux
+    ? (isArm64 ? 'yt-dlp_linux_arm64' : 'yt-dlp_linux')
+    : 'yt-dlp';
+  const localBin = path.join(binDir, binaryName);
+
   if (fs.existsSync(localBin)) return localBin;
 
-  if (fs.existsSync('/tmp/yt-dlp')) return '/tmp/yt-dlp';
+  // Remove legacy Python script if present (causes python3 errors on Railway)
+  const legacyScript = path.join(binDir, 'yt-dlp');
+  if (fs.existsSync(legacyScript) && isLinux) {
+    try { fs.unlinkSync(legacyScript); } catch { /* ignore */ }
+  }
 
-  fs.mkdirSync(path.dirname(localBin), { recursive: true });
-  const res = await safeFetch(
-    'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp'
-  );
-  if (!res?.ok) throw new Error('Não foi possível baixar o utilitário yt-dlp.');
+  fs.mkdirSync(binDir, { recursive: true });
+  const downloadUrl = isLinux
+    ? (isArm64
+      ? 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux_arm64'
+      : 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux')
+    : 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp';
+
+  const res = await safeFetch(downloadUrl);
+  if (!res?.ok) throw new Error('Não foi possível baixar o utilitário de download de vídeos.');
+
   const buf = Buffer.from(await res.arrayBuffer());
   fs.writeFileSync(localBin, buf, { mode: 0o755 });
   return localBin;
+}
+
+function normalizeYtDlpError(stderr: string): string {
+  const text = stderr.trim();
+  if (/python3.*no such file|env:.*python3/i.test(text)) {
+    return 'Utilitário de download indisponível no servidor. Aguarde o redeploy com a correção mais recente.';
+  }
+  return text || 'yt-dlp falhou ao processar o vídeo.';
 }
 
 function runYtDlp(args: string[], timeoutMs = 120_000): Promise<string> {
@@ -97,7 +121,7 @@ function runYtDlp(args: string[], timeoutMs = 120_000): Promise<string> {
     proc.on('close', (code) => {
       clearTimeout(timer);
       if (code === 0) resolve(stdout);
-      else reject(new Error(stderr.trim() || `yt-dlp falhou (código ${code})`));
+      else reject(new Error(normalizeYtDlpError(stderr) || `yt-dlp falhou (código ${code})`));
     });
     proc.on('error', (err) => {
       clearTimeout(timer);
