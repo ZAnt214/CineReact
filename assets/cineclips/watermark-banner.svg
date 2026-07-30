@@ -1,27 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="520" height="120" viewBox="0 0 520 120">
-  <defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="6" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="72" viewBox="0 0 400 72">
+  <rect width="400" height="72" rx="14" fill="#000000" fill-opacity="0.72"/>
 
-  <rect width="520" height="120" rx="22" fill="#000000" fill-opacity="0.78"/>
+  <rect x="10" y="12" width="48" height="48" rx="14" fill="#00E5FF"/>
+  <polygon points="26,24 26,48 46,36" fill="#0a0a0a"/>
 
-  <circle cx="60" cy="60" r="42" fill="#00E5FF" fill-opacity="0.12" filter="url(#glow)"/>
-  <rect x="26" y="26" width="68" height="68" rx="20" fill="#00E5FF"/>
-  <polygon points="48,40 48,80 78,60" fill="#0a0a0a"/>
-
-  <text x="112" y="50" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="-0.5">
+  <text x="70" y="32" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" letter-spacing="-0.3">
     <tspan fill="#ffffff">Cine</tspan><tspan fill="#00E5FF">React</tspan>
   </text>
 
-  <text x="112" y="76" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#00E5FF">assista mais reacts aqui ↓</text>
+  <text x="70" y="50" font-family="Arial, Helvetica, sans-serif" font-size="9.5" font-weight="600" fill="#00E5FF">assista mais reacts aqui ↓</text>
 
-  <text x="112" y="98" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">
+  <text x="70" y="64" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">
     <tspan fill="#00E5FF">• </tspan><tspan fill="#ffffff">bit.ly/CineReact</tspan>
   </text>
 </svg>
