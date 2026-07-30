@@ -23,6 +23,7 @@ import {
   resolveClipMetadata,
   deleteHostedClipFiles,
   formatDurationLabel,
+  withResolvedMediaUrls,
 } from './downloader.ts';
 
 type RequireAdmin = (req: Request, res: Response) => Promise<string | null>;
@@ -388,9 +389,7 @@ function getUserFeedContext(email?: string) {
   const history = email ? localDb.getClipWatchHistory(email) : [];
   const allClips = localDb.getCineClips();
   const prefs = deriveUserPreferences(history, allClips);
-  const followed = email
-    ? localDb.getCanaisSeguidos(email).map((c) => c.canalNome)
-    : [];
+  const followed = email ? localDb.getCanaisSeguidos(email) : [];
 
   return {
     email,
@@ -414,9 +413,9 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       const trending = getTrendingClips(localDb.getCineClips(), 8);
 
       res.json({
-        clips: items,
+        clips: items.map(withResolvedMediaUrls),
         nextCursor: nextCursor !== null ? String(nextCursor) : null,
-        trending,
+        trending: trending.map(withResolvedMediaUrls),
       });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Erro ao carregar feed.' });
@@ -425,7 +424,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
 
   app.get('/api/cineclips/trending', (_req, res) => {
     try {
-      res.json({ clips: getTrendingClips(localDb.getCineClips(), 20) });
+      res.json({ clips: getTrendingClips(localDb.getCineClips(), 20).map(withResolvedMediaUrls) });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -438,7 +437,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
         .getCineClips()
         .filter((c) => c.status === 'published' && c.hashtags.includes(tag))
         .sort((a, b) => b.trendingScore - a.trendingScore);
-      res.json({ hashtag: tag, clips, total: clips.length });
+      res.json({ hashtag: tag, clips: clips.map(withResolvedMediaUrls), total: clips.length });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -452,8 +451,8 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       }
       const email = String(req.query.email || '').trim().toLowerCase();
       res.json({
-        clip,
-        related: getRelatedClips(clip, localDb.getCineClips()),
+        clip: withResolvedMediaUrls(clip),
+        related: getRelatedClips(clip, localDb.getCineClips()).map(withResolvedMediaUrls),
         liked: email ? localDb.isClipLikedBy(clip.id, email) : false,
         favorited: email ? localDb.isClipFavoritedBy(clip.id, email) : false,
       });
@@ -466,7 +465,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
     try {
       const clip = localDb.getCineClipById(req.params.id);
       if (!clip) return res.status(404).json({ error: 'Clip não encontrado.' });
-      res.json({ clips: getRelatedClips(clip, localDb.getCineClips()) });
+      res.json({ clips: getRelatedClips(clip, localDb.getCineClips()).map(withResolvedMediaUrls) });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

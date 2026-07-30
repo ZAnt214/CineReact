@@ -43,8 +43,13 @@ function ClipPlayer({
   onEnded?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
   const videoId = clip.youtubeId || clip.id;
   const isHosted = !!clip.videoUrl;
+
+  useEffect(() => {
+    setVideoFailed(false);
+  }, [clip.id, clip.videoUrl]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -53,19 +58,21 @@ function ClipPlayer({
 
   useEffect(() => {
     const el = videoRef.current;
-    if (!isHosted || !el) return;
+    if (!isHosted || !el || videoFailed) return;
     if (isActive) {
       el.currentTime = 0;
-      el.play().catch(() => undefined);
+      el.play().catch(() => setVideoFailed(true));
     } else {
       el.pause();
     }
-  }, [isActive, isHosted, clip.videoUrl]);
+  }, [isActive, isHosted, clip.videoUrl, videoFailed]);
+
+  const showHostedVideo = isHosted && !videoFailed;
 
   return (
     <div className="absolute inset-0 bg-black">
       {isActive ? (
-        isHosted ? (
+        showHostedVideo ? (
           <video
             ref={videoRef}
             src={clip.videoUrl}
@@ -76,6 +83,13 @@ function ClipPlayer({
             muted={false}
             controls={false}
             onEnded={onEnded}
+            onError={() => setVideoFailed(true)}
+          />
+        ) : isHosted ? (
+          <img
+            src={clip.thumbnailUrl}
+            alt={clip.titulo}
+            className="absolute inset-0 w-full h-full object-contain bg-black"
           />
         ) : (
           <iframe

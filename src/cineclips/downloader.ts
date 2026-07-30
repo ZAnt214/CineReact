@@ -37,6 +37,30 @@ export function clipVideoPublicUrl(filename: string): string {
   return `/uploads/cineclips/${filename}`;
 }
 
+export function resolveClipMediaUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const base = (
+    process.env.CINECLIPS_PUBLIC_BASE_URL ||
+    process.env.PUBLIC_API_BASE_URL ||
+    (process.env.RAILWAY_PUBLIC_DOMAIN
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+      : '')
+  ).replace(/\/$/, '');
+
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return base ? `${base}${path}` : path;
+}
+
+export function withResolvedMediaUrls<T extends { videoUrl?: string; thumbnailUrl?: string }>(clip: T): T {
+  return {
+    ...clip,
+    videoUrl: resolveClipMediaUrl(clip.videoUrl),
+    thumbnailUrl: clip.thumbnailUrl || undefined,
+  };
+}
+
 async function safeFetch(url: string, init?: RequestInit): Promise<Response | null> {
   try {
     const controller = new AbortController();
