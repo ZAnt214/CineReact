@@ -11,3 +11,5 @@ uploads/cineclips-exports/
 bin/yt-dlp
 bin/yt-dlp_linux
 bin/yt-dlp_linux_arm64
+bin/ffmpeg_linux
+bin/ffmpeg_linux_arm64

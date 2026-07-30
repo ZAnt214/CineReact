@@ -1,15 +1,8 @@
-import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { CineClip } from '../types/cineclips.ts';
 import { getClipsStorageDir } from './downloader.ts';
-
-const FONT_CANDIDATES = [
-  '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-  '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-  '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
-  '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-];
+import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
 
 function getExportsDir(): string {
   const base =
@@ -31,11 +24,6 @@ function slugify(text: string): string {
     .slice(0, 60) || 'clip';
 }
 
-function resolveFont(bold = false): string | undefined {
-  const preferred = bold ? FONT_CANDIDATES : [...FONT_CANDIDATES].reverse();
-  return preferred.find((candidate) => fs.existsSync(candidate));
-}
-
 function resolveHostedVideoPath(clip: CineClip): string | null {
   if (!clip.videoUrl) return null;
 
@@ -48,52 +36,15 @@ function resolveHostedVideoPath(clip: CineClip): string | null {
 }
 
 function buildWatermarkFilter(): string {
-  const boldFont = resolveFont(true);
-  const regularFont = resolveFont(false);
-  const fontBold = boldFont ? `:fontfile=${boldFont}` : '';
-  const fontRegular = regularFont ? `:fontfile=${regularFont}` : '';
-
+  // Sem fontfile: usa fonte padrão do FFmpeg (funciona no binário estático do Railway)
   return [
     "scale='min(1080,iw)':-2",
     'drawbox=x=0:y=ih-92:w=iw:h=92:color=black@0.68:t=fill',
-    `drawtext=text='CINE'${fontBold}:fontsize=32:fontcolor=white:x=(w-text_w)/2-54:y=h-72`,
-    `drawtext=text='REACT'${fontBold}:fontsize=32:fontcolor=0x38bdf8:x=(w-text_w)/2+22:y=h-72`,
-    `drawtext=text='cinereactoficial.netlify.app'${fontRegular}:fontsize=14:fontcolor=white@0.78:x=(w-text_w)/2:y=h-38`,
-    `drawtext=text='CineReact'${fontRegular}:fontsize=18:fontcolor=white@0.55:x=w-tw-24:y=24`,
+    "drawtext=text='CINE':fontsize=32:fontcolor=white:x=(w-text_w)/2-54:y=h-72",
+    "drawtext=text='REACT':fontsize=32:fontcolor=0x38bdf8:x=(w-text_w)/2+22:y=h-72",
+    "drawtext=text='cinereactoficial.netlify.app':fontsize=14:fontcolor=white@0.78:x=(w-text_w)/2:y=h-38",
+    "drawtext=text='CineReact':fontsize=18:fontcolor=white@0.55:x=w-tw-24:y=24",
   ].join(',');
-}
-
-function runFfmpeg(args: string[], timeoutMs = 300_000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
-    let stderr = '';
-    const timer = setTimeout(() => {
-      proc.kill('SIGTERM');
-      reject(new Error('Tempo esgotado ao processar o vídeo para download.'));
-    }, timeoutMs);
-
-    proc.stderr.on('data', (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timer);
-      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-        reject(new Error('FFmpeg não está disponível no servidor. Contate o administrador.'));
-        return;
-      }
-      reject(err);
-    });
-
-    proc.on('close', (code) => {
-      clearTimeout(timer);
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(stderr.trim().slice(-600) || `FFmpeg falhou (código ${code}).`));
-    });
-  });
 }
 
 export function canExportClip(clip: CineClip): boolean {
@@ -125,8 +76,9 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
   }
 
   const watermarkFilter = buildWatermarkFilter();
+  const ffmpegPath = await getFfmpegPath();
 
-  await runFfmpeg([
+  await runFfmpeg(ffmpegPath, [
     '-y',
     '-hide_banner',
     '-loglevel',
