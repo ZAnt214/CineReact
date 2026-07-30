@@ -6,7 +6,7 @@ import { getClipsStorageDir } from './downloader.ts';
 import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
 import { getDataDir } from '../db/dataPaths.ts';
 
-const WATERMARK_VERSION = 'v5';
+const WATERMARK_VERSION = 'v6';
 const WATERMARK_SVG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.svg');
 const WATERMARK_PNG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.png');
 
@@ -71,8 +71,8 @@ async function ensureWatermarkPng(ffmpegPath: string): Promise<string> {
 function buildWatermarkFilter(): string {
   return [
     "[0:v]scale='min(1080,iw)':-2[base]",
-    "[1:v]scale='min(420,iw*0.52)':-1[wm]",
-    '[base][wm]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p',
+    "[1:v]scale='min(340,iw*0.42)':-1[wm]",
+    '[base][wm]overlay=24:(H-h-24):format=auto,format=yuv420p',
   ].join(';');
 }
 
