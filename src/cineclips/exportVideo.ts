@@ -4,17 +4,16 @@ import { execFileSync, spawnSync } from 'child_process';
 import type { CineClip } from '../types/cineclips.ts';
 import { getClipsStorageDir } from './downloader.ts';
 import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
+import { getDataDir } from '../db/dataPaths.ts';
 
-const WATERMARK_VERSION = 'v4';
+const WATERMARK_VERSION = 'v5';
 const WATERMARK_SVG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.svg');
 const WATERMARK_PNG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.png');
 
 function getExportsDir(): string {
   const base =
     process.env.CINECLIPS_EXPORT_DIR ||
-    (process.env.NODE_ENV === 'production'
-      ? path.join('/tmp', 'cineclips-exports')
-      : path.join(process.cwd(), 'uploads', 'cineclips-exports'));
+    path.join(getDataDir(), 'cineclips-exports');
   fs.mkdirSync(base, { recursive: true });
   return base;
 }
@@ -44,7 +43,7 @@ function rasterizeWatermarkSvg(ffmpegPath: string): boolean {
   if (!fs.existsSync(WATERMARK_SVG)) return false;
 
   try {
-    execFileSync('rsvg-convert', ['-w', '800', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
+    execFileSync('rsvg-convert', ['-w', '960', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
     return fs.existsSync(WATERMARK_PNG);
   } catch {
     const result = spawnSync(
@@ -69,11 +68,11 @@ async function ensureWatermarkPng(ffmpegPath: string): Promise<string> {
   throw new Error('Banner CineReact não pôde ser gerado. Aguarde o redeploy do servidor.');
 }
 
-function buildWatermarkFilter(watermarkPath: string): string {
+function buildWatermarkFilter(): string {
   return [
     "[0:v]scale='min(1080,iw)':-2[base]",
-    "[1:v]scale='min(360,iw*0.38)':-1[wm]",
-    '[base][wm]overlay=20:72:format=auto,format=yuv420p',
+    "[1:v]scale='min(420,iw*0.52)':-1[wm]",
+    '[base][wm]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p',
   ].join(';');
 }
 
@@ -109,7 +108,7 @@ export async function exportClipWithBranding(clip: CineClip): Promise<{ filePath
 
   const ffmpegPath = await getFfmpegPath();
   const watermarkPath = await ensureWatermarkPng(ffmpegPath);
-  const filterComplex = buildWatermarkFilter(watermarkPath);
+  const filterComplex = buildWatermarkFilter();
 
   await runFfmpeg(ffmpegPath, [
     '-y',

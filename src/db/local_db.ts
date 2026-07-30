@@ -18,6 +18,7 @@ import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
+import { getDataDir, migrateLegacyFile } from './dataPaths.ts';
 
 function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAccount): UserAccount {
   const merged: UserAccount = { ...remote };
@@ -42,7 +43,12 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   return merged;
 }
 
-const DB_PATH = path.join(process.env.NODE_ENV === 'production' ? '/tmp' : process.cwd(), 'db_cine_react.json');
+const DB_PATH = path.join(getDataDir(), 'db_cine_react.json');
+
+migrateLegacyFile(DB_PATH, [
+  path.join('/tmp', 'db_cine_react.json'),
+  path.join(process.cwd(), 'db_cine_react.json'),
+]);
 
 interface DbSchema {
   obras: Obra[];
@@ -1194,7 +1200,7 @@ export const localDb = {
     const idx = dbCache.cineClips.findIndex((c) => c.id === clip.id);
     if (idx >= 0) dbCache.cineClips[idx] = clip;
     else dbCache.cineClips.push(clip);
-    saveDb(dbCache);
+    saveDb(dbCache, true);
     return clip;
   },
 
@@ -1340,7 +1346,7 @@ export const localDb = {
     const idx = dbCache.cineClipImportJobs.findIndex((j) => j.id === job.id);
     if (idx >= 0) dbCache.cineClipImportJobs[idx] = job;
     else dbCache.cineClipImportJobs.unshift(job);
-    saveDb(dbCache);
+    saveDb(dbCache, true);
     return job;
   },
 

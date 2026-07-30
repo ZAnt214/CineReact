@@ -9,6 +9,8 @@ interface FeedState {
   error: string | null;
 }
 
+const FEED_POLL_MS = 20_000;
+
 export function useCineClipsFeed(email?: string) {
   const [state, setState] = useState<FeedState>({
     clips: [],
@@ -18,11 +20,13 @@ export function useCineClipsFeed(email?: string) {
     error: null,
   });
   const loadingMore = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
-  const fetchFeed = useCallback(async (cursor?: string) => {
+  const fetchFeed = useCallback(async (cursor?: string, options?: { silent?: boolean }) => {
     const isMore = !!cursor;
     if (isMore) loadingMore.current = true;
-    else setState((s) => ({ ...s, loading: true, error: null }));
+    else if (!options?.silent) setState((s) => ({ ...s, loading: true, error: null }));
 
     try {
       const params = new URLSearchParams();
@@ -49,13 +53,31 @@ export function useCineClipsFeed(email?: string) {
   }, [email]);
 
   const loadMore = useCallback(() => {
-    if (!state.nextCursor || loadingMore.current) return;
-    fetchFeed(state.nextCursor);
-  }, [state.nextCursor, fetchFeed]);
+    if (!stateRef.current.nextCursor || loadingMore.current) return;
+    fetchFeed(stateRef.current.nextCursor);
+  }, [fetchFeed]);
+
+  const reload = useCallback(() => fetchFeed(undefined, { silent: true }), [fetchFeed]);
 
   useEffect(() => {
     fetchFeed();
   }, [fetchFeed]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') reload();
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') reload();
+    }, FEED_POLL_MS);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      clearInterval(interval);
+    };
+  }, [reload]);
 
   return { ...state, reload: () => fetchFeed(), loadMore };
 }
