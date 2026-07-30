@@ -14,6 +14,7 @@ import {
   Play,
   Volume2,
   VolumeX,
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -41,6 +42,53 @@ function formatCount(value: number): string {
   if (value >= 10_000) return `${Math.round(value / 1000)}K`;
   if (value >= 1000) return `${(value / 1000).toFixed(1).replace('.0', '')}K`;
   return String(value);
+}
+
+function CineClipsBetaNotice({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="cineclips-beta-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cineclips-beta-title"
+    >
+      <button
+        type="button"
+        className="cineclips-beta-backdrop"
+        onClick={onDismiss}
+        aria-label="Fechar aviso"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 16 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        className="cineclips-beta-modal"
+      >
+        <div className="cineclips-beta-badge">
+          <Sparkles className="w-3.5 h-3.5" />
+          Beta
+        </div>
+
+        <h2 id="cineclips-beta-title" className="cineclips-beta-title">
+          CineClips em desenvolvimento
+        </h2>
+
+        <p className="cineclips-beta-text">
+          Esta é uma função <strong>beta</strong> que ainda está em desenvolvimento. Novos vídeos e
+          funcionalidades chegarão em breve.
+        </p>
+
+        <button type="button" onClick={onDismiss} className="cineclips-beta-cta">
+          Entendi, continuar
+        </button>
+      </motion.div>
+    </motion.div>
+  );
 }
 
 function useBodyScrollLock(active: boolean) {
@@ -271,6 +319,7 @@ export default function CineClipsPage({
   const [downloadingClipId, setDownloadingClipId] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [showTrending, setShowTrending] = useState(false);
+  const [showBetaNotice, setShowBetaNotice] = useState(true);
   const feedRef = useRef<HTMLDivElement>(null);
   const slideHeightRef = useRef(0);
   const activeIndexRef = useRef(0);
@@ -598,6 +647,10 @@ export default function CineClipsPage({
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {showBetaNotice && <CineClipsBetaNotice onDismiss={() => setShowBetaNotice(false)} />}
+      </AnimatePresence>
 
       <AnimatePresence>
         {commentsClipId && (
