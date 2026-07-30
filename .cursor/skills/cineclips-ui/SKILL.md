@@ -41,33 +41,28 @@ Cada botão deve ter **identidade visual própria**, não ícones genéricos igu
 
 Logo **discreta no centro** do vídeo convidando ao CineReact.
 
-### Layout (vertical, centralizado)
+### Layout (vertical, centralizado, sem fundo escuro)
 
 ```
-┌─────────────────────┐
-│    [▶ ícone cyan]   │
-│      CineReact      │
-│ assista mais reacts │
-│  [bit.ly/CineReact] │  ← pill cyan
-└─────────────────────┘
+      [▶ ícone cyan]
+        CineReact
+  assista mais reacts aqui
+    [bit.ly/CineReact]
 ```
 
 ### Especificações
 
-- SVG: `300×220`, fundo preto 50% opacidade, `border-radius: 26px`
-- Ícone play em squircle cyan `#00E5FF`
-- "Cine" branco + "React" cyan
-- Subtítulo: "assista mais reacts aqui" em cyan
-- Pill cyan com `bit.ly/CineReact` em preto
-- FFmpeg: `scale='min(240,iw*0.28)'`, overlay `(W-w)/2:(H-h)/2`
-- Versão em `WATERMARK_VERSION` — incrementar a cada mudança visual
-- Rasterizar SVG em 600px (`rsvg-convert -w 600`)
+- SVG: `360×260`, **sem retângulo de fundo** — apenas logo, textos e pill
+- Textos com `feDropShadow` para legibilidade em qualquer vídeo
+- Ícone play em squircle cyan `#00E5FF` com glow suave
+- Pill cyan sólido com `bit.ly/CineReact` em preto
+- FFmpeg: `scale='min(360,iw*0.38)'`, overlay `(W-w)/2:(H-h)/2`
+- Rasterizar SVG em 800px (`rsvg-convert -w 800`)
 
 ### O que evitar
 
-- Marca d'água maior que ~30% da largura do vídeo
-- Canto inferior se o pedido for centro
-- Texto ilegível em vídeos claros (manter fundo semi-opaco)
+- Marca d'água excessiva (> ~45% da largura do vídeo)
+- Retângulo/fundo escuro semi-transparente atrás da logo
 
 ## Checklist
 
