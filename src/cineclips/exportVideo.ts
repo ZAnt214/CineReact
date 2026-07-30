@@ -5,7 +5,7 @@ import type { CineClip } from '../types/cineclips.ts';
 import { getClipsStorageDir } from './downloader.ts';
 import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
 
-const WATERMARK_VERSION = 'v3';
+const WATERMARK_VERSION = 'v4';
 const WATERMARK_SVG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.svg');
 const WATERMARK_PNG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.png');
 
@@ -40,15 +40,11 @@ function resolveHostedVideoPath(clip: CineClip): string | null {
   return fs.existsSync(localPath) ? localPath : null;
 }
 
-function escapeFfmpegPath(filePath: string): string {
-  return filePath.replace(/\\/g, '/').replace(/:/g, '\\:').replace(/'/g, "\\'");
-}
-
 function rasterizeWatermarkSvg(ffmpegPath: string): boolean {
   if (!fs.existsSync(WATERMARK_SVG)) return false;
 
   try {
-    execFileSync('rsvg-convert', ['-w', '1080', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
+    execFileSync('rsvg-convert', ['-w', '800', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
     return fs.existsSync(WATERMARK_PNG);
   } catch {
     const result = spawnSync(
@@ -74,11 +70,10 @@ async function ensureWatermarkPng(ffmpegPath: string): Promise<string> {
 }
 
 function buildWatermarkFilter(watermarkPath: string): string {
-  const overlay = escapeFfmpegPath(watermarkPath);
   return [
     "[0:v]scale='min(1080,iw)':-2[base]",
-    "[1:v]scale='min(720,iw*0.88)':-1[wm]",
-    '[base][wm]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p',
+    "[1:v]scale='min(360,iw*0.38)':-1[wm]",
+    '[base][wm]overlay=20:72:format=auto,format=yuv420p',
   ].join(';');
 }
 
