@@ -5,7 +5,7 @@ import type { CineClip } from '../types/cineclips.ts';
 import { getClipsStorageDir } from './downloader.ts';
 import { getFfmpegPath, runFfmpeg } from './ffmpegBinary.ts';
 
-const WATERMARK_VERSION = 'v2';
+const WATERMARK_VERSION = 'v3';
 const WATERMARK_SVG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.svg');
 const WATERMARK_PNG = path.join(process.cwd(), 'assets', 'cineclips', 'watermark-banner.png');
 
@@ -48,7 +48,7 @@ function rasterizeWatermarkSvg(ffmpegPath: string): boolean {
   if (!fs.existsSync(WATERMARK_SVG)) return false;
 
   try {
-    execFileSync('rsvg-convert', ['-w', '600', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
+    execFileSync('rsvg-convert', ['-w', '1080', '-o', WATERMARK_PNG, WATERMARK_SVG], { stdio: 'pipe' });
     return fs.existsSync(WATERMARK_PNG);
   } catch {
     const result = spawnSync(
@@ -77,7 +77,7 @@ function buildWatermarkFilter(watermarkPath: string): string {
   const overlay = escapeFfmpegPath(watermarkPath);
   return [
     "[0:v]scale='min(1080,iw)':-2[base]",
-    "[1:v]scale='min(560,iw*0.82)':-1[wm]",
+    "[1:v]scale='min(720,iw*0.88)':-1[wm]",
     '[base][wm]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p',
   ].join(';');
 }
