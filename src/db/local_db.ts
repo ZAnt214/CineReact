@@ -344,6 +344,11 @@ export const localDb = {
     if (!supabaseClient) return false;
     try {
       console.log("[Supabase] Sincronizando dados do Supabase...");
+
+      await restoreCineClipsOnStartup(supabaseClient, dbCache, (data, immediate) => {
+        if (data) dbCache = data as DbSchema;
+        saveDb(dbCache, immediate);
+      });
       
       const { data: obras, error: errObras } = await supabaseClient.from('obras').select('*');
       const { data: reacts, error: errReacts } = await supabaseClient.from('reacts').select('*');
@@ -534,6 +539,10 @@ export const localDb = {
           }))
         );
         if (error) console.error("[Supabase Upload] Erro nos usuarios:", error);
+      }
+
+      if ((dbCache.cineClips || []).length > 0) {
+        await persistCineClipsToSupabase(supabaseClient, dbCache, { immediate: true });
       }
 
       console.log("[Supabase] Upload de dados manuais com sucesso!");

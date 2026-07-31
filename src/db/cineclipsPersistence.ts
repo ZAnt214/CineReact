@@ -68,7 +68,19 @@ export async function persistCineClipsToSupabase(
   options?: { immediate?: boolean }
 ): Promise<void> {
   const run = async () => {
-    const payload = buildCineClipsPayload(db);
+    let localPayload = buildCineClipsPayload(db);
+    const remote = await fetchCineClipsPayloadFromSupabase(client);
+
+    // Nunca apagar clips do Supabase com cache local vazio (ex.: container novo antes do restore)
+    if (localPayload.cineClips.length === 0 && remote && remote.cineClips.length > 0) {
+      console.warn(
+        `[CineClips] Sync ignorado: local vazio (${localPayload.cineClips.length}) mas Supabase tem ${remote.cineClips.length} clips`
+      );
+      return;
+    }
+
+    const payload = remote ? mergeCineClipsPayload(localPayload, remote) : localPayload;
+
     const { error } = await client.from('cineclips_payload').upsert({
       id: CINECLIPS_PAYLOAD_ID,
       payload,
@@ -127,11 +139,18 @@ export async function restoreCineClipsOnStartup(
       const clipsChanged =
         merged.cineClips.length !== localPayload.cineClips.length ||
         JSON.stringify(merged.cineClips.map((c) => c.id).sort()) !==
-          JSON.stringify(localPayload.cineClips.map((c) => c.id).sort());
+          JSON.stringify(localPayload.cineClips.map((c) => c.id).sort()) ||
+        merged.cineClips.some((clip, i) => {
+          const local = localPayload.cineClips.find((c) => c.id === clip.id);
+          return !local || local.videoUrl !== clip.videoUrl || local.status !== clip.status;
+        });
 
       if (clipsChanged) {
         applyCineClipsPayload(db, merged);
         saveDb(db as any, true);
+        if (client && merged.cineClips.length > 0) {
+          await persistCineClipsToSupabase(client, db, { immediate: true });
+        }
       }
 
       if (diag.onRailway && !diag.volumeMounted && !diag.envDataDir) {

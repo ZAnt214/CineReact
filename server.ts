@@ -3176,40 +3176,34 @@ async function startServer() {
     });
   }
 
+  ensureDemoCreatorProfile();
+
+  try {
+    await localDb.ensureCineClipsRestored();
+    if (localDb.isSupabaseActive()) {
+      console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
+      const success = await localDb.syncFromSupabase();
+      ensureDemoCreatorProfile();
+      if (success) {
+        console.log("[Supabase] Sincronização inicial na inicialização concluída!");
+      } else {
+        console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
+      }
+    }
+  } catch (err: any) {
+    console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
+  }
+
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
+    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
 
-    ensureDemoCreatorProfile();
-    
-    // Inicialização da sincronização com Supabase se ativo
-    localDb.ensureCineClipsRestored()
-      .then(() => {
-        if (localDb.isSupabaseActive()) {
-          console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
-          return localDb.syncFromSupabase();
-        }
-        return false;
-      })
-      .then((success) => {
-        ensureDemoCreatorProfile();
-        if (success) {
-          console.log("[Supabase] Sincronização inicial na inicialização concluída!");
-        } else if (localDb.isSupabaseActive()) {
-          console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
-        }
-      })
-      .catch(err => {
-        console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
-      });
-
-    // Sincroniza fotos de perfil reais dos canais
-    syncChannelAvatars().catch(err => {
-      console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
-    });
-    // Pré-carrega reacts do YouTube se necessário
-    prefillDefaultReacts().catch(err => {
-      console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
-    });
+  syncChannelAvatars().catch(err => {
+    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
+  });
+  prefillDefaultReacts().catch(err => {
+    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
   });
 }
 
