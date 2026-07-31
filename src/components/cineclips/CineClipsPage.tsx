@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Hash,
+  ChevronUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -55,6 +56,59 @@ function formatCount(value: number): string {
   if (value >= 10_000) return `${Math.round(value / 1000)}K`;
   if (value >= 1000) return `${(value / 1000).toFixed(1).replace('.0', '')}K`;
   return String(value);
+}
+
+function CineClipsBetaNotice({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+      <button
+        type="button"
+        className="absolute inset-0"
+        onClick={onDismiss}
+        aria-label="Fechar aviso"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 12 }}
+        className="relative w-full max-w-sm rounded-2xl border border-cyan-400/30 bg-zinc-900/95 p-6 text-center shadow-2xl"
+      >
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold uppercase tracking-wider mb-4">
+          <Sparkles className="w-3.5 h-3.5" />
+          Beta
+        </span>
+        <h2 className="text-lg font-black text-white mb-2">CineClips em desenvolvimento</h2>
+        <p className="text-sm text-zinc-400 leading-relaxed mb-5">
+          Esta é uma função <span className="text-cyan-300 font-semibold">beta</span> que ainda está em
+          desenvolvimento. Novos vídeos e funcionalidades chegarão em breve.
+        </p>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="w-full py-2.5 rounded-full bg-cyan-400 text-black text-sm font-extrabold"
+        >
+          Entendi, continuar
+        </button>
+      </motion.div>
+    </div>
+  );
+}
+
+function SwipeHint({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      className="absolute bottom-14 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-[11px] font-semibold text-white/90 pointer-events-none"
+    >
+      <motion.span animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+        <ChevronUp className="w-4 h-4" />
+      </motion.span>
+      Deslize para ver mais
+    </motion.div>
+  );
 }
 
 function useBodyScrollLock(active: boolean) {
@@ -241,12 +295,12 @@ function ClipPlayer({
       </AnimatePresence>
 
       {/* Bottom Gradient Scrim for Legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent 35% to-black/85 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent 42% to-black/72 pointer-events-none" />
     </div>
   );
 }
 
-/** Botão de Ação Lateral Flutuante */
+/** Botão de Ação Lateral — skill cineclips-ui */
 function ActionBtn({
   icon: Icon,
   label,
@@ -269,40 +323,18 @@ function ActionBtn({
         e.stopPropagation();
         onClick();
       }}
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.88 }}
-      className="group relative flex flex-col items-center gap-1.5 cursor-pointer outline-none"
-      aria-label={label}
+      whileTap={{ scale: 0.9 }}
+      className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
+      aria-label={label || variant}
     >
-      <div
-        className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl backdrop-blur-xl border ${
-          active && variant === 'like'
-            ? 'bg-rose-500/25 border-rose-500/60 text-rose-500 shadow-rose-500/30'
-            : active && variant === 'favorite'
-            ? 'bg-amber-500/25 border-amber-500/60 text-amber-400 shadow-amber-500/30'
-            : variant === 'download'
-            ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300 shadow-cyan-500/20'
-            : 'bg-black/45 border-white/15 text-white/90 hover:bg-black/65 hover:border-white/30 hover:text-white'
-        }`}
-      >
+      <span className="cineclips-action-glow" aria-hidden />
+      <span className="cineclips-action-icon">
         <Icon
-          className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
-            spinning ? 'animate-spin' : ''
-          }`}
-          fill={
-            active && variant === 'like'
-              ? 'currentColor'
-              : active && variant === 'favorite'
-              ? 'currentColor'
-              : 'none'
-          }
+          className={`w-[22px] h-[22px] ${spinning ? 'animate-spin' : ''}`}
+          fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
         />
-      </div>
-      {label !== '' && (
-        <span className="text-[11px] font-bold text-white tracking-wide drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-          {label}
-        </span>
-      )}
+      </span>
+      {label !== '' && <span className="cineclips-action-label">{label}</span>}
     </motion.button>
   );
 }
@@ -563,6 +595,8 @@ export default function CineClipsPage({
   );
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([]);
   const [expandedDesc, setExpandedDesc] = useState<Record<string, boolean>>({});
+  const [showBetaNotice, setShowBetaNotice] = useState(true);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
 
   const feedRef = useRef<HTMLDivElement>(null);
   const slideHeightRef = useRef(0);
@@ -585,6 +619,7 @@ export default function CineClipsPage({
     scrollingRef.current = true;
     feed.scrollTo({ top: index * h, behavior: smooth ? 'smooth' : 'auto' });
     setActiveIndex(index);
+    if (index > 0) setShowSwipeHint(false);
     window.setTimeout(() => {
       scrollingRef.current = false;
     }, smooth ? 350 : 50);
@@ -627,6 +662,7 @@ export default function CineClipsPage({
       if (clamped !== activeIndexRef.current) {
         activeIndexRef.current = clamped;
         setActiveIndex(clamped);
+        if (clamped > 0) setShowSwipeHint(false);
       }
       if (clamped >= clips.length - 3 && nextCursor) loadMore();
     };
@@ -652,6 +688,10 @@ export default function CineClipsPage({
       if (watchTimers.current[clip.id]) clearTimeout(watchTimers.current[clip.id]);
     };
   }, [activeIndex, clips, user.email, user.isLoggedIn]);
+
+  useEffect(() => {
+    if (clips.length <= 1) setShowSwipeHint(false);
+  }, [clips.length]);
 
   const handleLike = async (clip: CineClip) => {
     if (!user.isLoggedIn) {
@@ -766,7 +806,7 @@ export default function CineClipsPage({
   const activeClip = clips[activeIndex];
 
   return (
-    <div className="fixed inset-0 z-[60] bg-zinc-950 text-white flex items-center justify-center overflow-hidden">
+    <div className="cineclips-shell fixed inset-0 z-[60] bg-zinc-950 text-white flex items-center justify-center overflow-hidden">
       {/* Toast Notification */}
       <AnimatePresence>
         {toast && <ToastNotification message={toast.message} type={toast.type} />}
@@ -796,6 +836,9 @@ export default function CineClipsPage({
 
           {/* Center Feed Tabs */}
           <div className="flex items-center gap-1 bg-black/50 border border-white/15 rounded-full p-1 backdrop-blur-xl">
+            <span className="px-2 text-[9px] font-extrabold uppercase tracking-wider text-cyan-300/90 hidden sm:inline">
+              Beta
+            </span>
             <button
               type="button"
               onClick={() => {
@@ -919,7 +962,8 @@ export default function CineClipsPage({
                   {/* UI Controls Overlay Layer */}
                   <div className="absolute inset-0 z-20 pointer-events-none flex items-end justify-between p-4 pb-6 gap-3">
                     {/* Left Info Column */}
-                    <div className="flex-1 min-w-0 pointer-events-auto space-y-2.5 text-left">
+                    <div className="flex-1 min-w-0 pointer-events-auto">
+                      <div className="cineclips-meta-panel space-y-2.5 text-left">
                       {/* Hot Tag */}
                       {clip.isTrending && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/25 border border-rose-500/50 text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">
@@ -1019,10 +1063,11 @@ export default function CineClipsPage({
                         <Music className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
                         <span className="truncate">Som original - @{clip.criadorNome}</span>
                       </div>
+                      </div>
                     </div>
 
                     {/* Right Floating Rail Buttons */}
-                    <div className="flex flex-col items-center gap-4 pointer-events-auto pb-2">
+                    <div className="cineclips-rail pointer-events-auto">
                       <ActionBtn
                         icon={Heart}
                         label={formatCount(clip.likes)}
@@ -1062,7 +1107,13 @@ export default function CineClipsPage({
                         icon={Flag}
                         label=""
                         variant="report"
-                        onClick={() => setReportingClip(clip)}
+                        onClick={() => {
+                          if (!user.isLoggedIn) {
+                            showToast('Faça login para denunciar', 'info');
+                            return;
+                          }
+                          setReportingClip(clip);
+                        }}
                       />
                     </div>
                   </div>
@@ -1071,6 +1122,8 @@ export default function CineClipsPage({
             })}
           </div>
         )}
+
+        <SwipeHint visible={showSwipeHint && clips.length > 1 && !showBetaNotice} />
 
         {/* Bottom Progress Bar Indicator */}
         {clips.length > 1 && (
@@ -1096,6 +1149,11 @@ export default function CineClipsPage({
             onClose={() => setCommentsClipId(null)}
           />
         )}
+      </AnimatePresence>
+
+      {/* Beta Notice */}
+      <AnimatePresence>
+        {showBetaNotice && <CineClipsBetaNotice onDismiss={() => setShowBetaNotice(false)} />}
       </AnimatePresence>
 
       {/* Report Modal */}
