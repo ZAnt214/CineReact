@@ -8,34 +8,18 @@ disable-model-invocation: true
 
 ## Botões de ação (rail lateral)
 
-Cada botão deve ter **identidade visual própria**, não ícones genéricos iguais.
+**Seguir skill `identidade`** — orb rail com avatar do criador, halo radial nos sociais, CTAs cyan.
 
-| Variante | Ícone | Label | Estado ativo |
-|----------|-------|-------|--------------|
-| `like` | Heart | contagem | Vermelho + glow `#ef4444` |
-| `comment` | MessageCircle | contagem | Cyan no toque |
-| `favorite` | Bookmark | contagem | Cyan + glow |
-| `share` | Share2 | "Enviar" | Fundo cyan suave |
-| `download` | Download | "Baixar" | Borda cyan, label cyan |
-| `report` | Flag | (vazio) | Menor, discreto |
+Resumo: avatar + follow no topo; like vermelho ativo; favorite cyan ativo; share orb cyan sólido; download orb outline cyan; report discreto.
 
-### Estrutura HTML/CSS
+Estrutura:
 
 ```html
 <button class="cineclips-action cineclips-action--like is-active">
-  <span class="cineclips-action-glow" aria-hidden />
-  <span class="cineclips-action-icon"><!-- ícone --></span>
+  <span class="cineclips-action-orb"><!-- ícone --></span>
   <span class="cineclips-action-label">1.2K</span>
 </button>
 ```
-
-### Regras visuais
-
-- Ícone: **3.1rem** círculo, gradiente escuro, borda 1.5px, `backdrop-blur`, sombra interna
-- Glow: `radial-gradient` atrás do ícone, visível só no estado ativo
-- Tap: `whileTap={{ scale: 0.9 }}` (motion)
-- Labels em **português**: Enviar, Baixar (não Share)
-- `-webkit-tap-highlight-color: transparent` no mobile
 
 ## Marca d'água (download de vídeo)
 
@@ -66,8 +50,8 @@ Logo **discreta no centro** do vídeo convidando ao CineReact.
 
 ## Checklist
 
+- [ ] Seguir skill `identidade` para botões e meta do clip
 - [ ] Cada ação tem variante CSS (`cineclips-action--{variant}`)
-- [ ] Estados ativos com cor + glow distintos
 - [ ] Watermark centralizada e discreta (~28% largura)
 - [ ] `WATERMARK_VERSION` atualizado + PNG regenerado
 - [ ] Mobile: scroll lock mantido, botões ≥ 44px
