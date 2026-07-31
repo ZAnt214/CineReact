@@ -50,6 +50,17 @@ export function mergeCineClipsPayload(
   local: CineClipsPayload,
   remote: CineClipsPayload
 ): CineClipsPayload {
+  // Restauração após deploy: disco local vazio → usar Supabase como fonte
+  if (local.cineClips.length === 0 && remote.cineClips.length > 0) {
+    return {
+      ...remote,
+      cineClipComments: remote.cineClipComments.length ? remote.cineClipComments : local.cineClipComments,
+      cineClipLikes: [...remote.cineClipLikes, ...local.cineClipLikes],
+      cineClipFavorites: [...remote.cineClipFavorites, ...local.cineClipFavorites],
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
   const clipMap = new Map<string, CineClip>();
   for (const clip of remote.cineClips) clipMap.set(clip.id, clip);
   for (const clip of local.cineClips) {
@@ -61,6 +72,16 @@ export function mergeCineClipsPayload(
     const localTime = new Date(clip.atualizadoEm || clip.criadoEm || 0).getTime();
     const remoteTime = new Date(existing.atualizadoEm || existing.criadoEm || 0).getTime();
     clipMap.set(clip.id, localTime >= remoteTime ? clip : existing);
+  }
+
+  // Clips adicionados em outra instância ainda não no disco local
+  if (local.cineClips.length > 0) {
+    const localIds = new Set(local.cineClips.map((c) => c.id));
+    for (const clip of remote.cineClips) {
+      if (!localIds.has(clip.id)) {
+        clipMap.set(clip.id, clip);
+      }
+    }
   }
 
   const mergeById = <T extends { id: string }>(a: T[], b: T[]) => {

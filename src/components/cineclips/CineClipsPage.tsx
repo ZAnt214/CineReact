@@ -300,7 +300,7 @@ function ClipPlayer({
   );
 }
 
-/** Botão de Ação Lateral — skill cineclips-ui (premium) */
+/** Botão de Ação Lateral — skill cineclips-ui */
 function ActionBtn({
   icon: Icon,
   label,
@@ -323,17 +323,15 @@ function ActionBtn({
         e.stopPropagation();
         onClick();
       }}
-      whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.9 }}
       className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
       aria-label={label || variant}
     >
-      <span className="cineclips-action-ring" aria-hidden />
       <span className="cineclips-action-glow" aria-hidden />
       <span className="cineclips-action-icon">
         <Icon
           className={`cineclips-action-svg ${spinning ? 'animate-spin' : ''}`}
-          strokeWidth={variant === 'report' ? 2 : 2.25}
+          strokeWidth={2}
           fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
         />
       </span>
