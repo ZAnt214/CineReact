@@ -16,11 +16,9 @@ import {
   Volume2,
   VolumeX,
   Sparkles,
-  Check,
   Music,
   CheckCircle2,
   AlertCircle,
-  Hash,
   ChevronUp,
   Plus,
 } from 'lucide-react';
@@ -294,9 +292,6 @@ function ClipPlayer({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Bottom Gradient Scrim for Legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent 42% to-black/72 pointer-events-none" />
     </div>
   );
 }
@@ -334,7 +329,7 @@ function RailCreatorAvatar({
             e.stopPropagation();
             onFollowClick();
           }}
-          whileTap={{ scale: 0.88 }}
+          whileTap={{ scale: 0.9 }}
           aria-label="Seguir criador"
         >
           <Plus className="w-3 h-3" strokeWidth={3} />
@@ -374,7 +369,7 @@ function ActionBtn({
       <span className="cineclips-action-orb">
         <Icon
           className={`cineclips-action-svg ${spinning ? 'animate-spin' : ''}`}
-          strokeWidth={variant === 'report' ? 1.75 : 2.25}
+          strokeWidth={variant === 'report' ? 1.75 : 2}
           fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
         />
       </span>
@@ -974,17 +969,17 @@ export default function CineClipsPage({
               const isExpanded = expandedDesc[clip.id];
 
               return (
-                <article
-                  key={clip.id}
-                  className="relative w-full h-full flex-shrink-0 snap-start snap-always overflow-hidden"
-                >
-                  {/* Clip Player Frame */}
-                  <ClipPlayer
-                    clip={clip}
-                    isActive={index === activeIndex}
-                    muted={muted}
-                    onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
-                  />
+                <article key={clip.id} className="cineclips-slide">
+                  <div className="cineclips-slide-media">
+                    <ClipPlayer
+                      clip={clip}
+                      isActive={index === activeIndex}
+                      muted={muted}
+                      onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
+                    />
+                  </div>
+
+                  <div className="cineclips-slide-scrim" aria-hidden />
 
                   {/* Floating Double-Tap Hearts */}
                   <AnimatePresence>
@@ -1003,113 +998,68 @@ export default function CineClipsPage({
                     ))}
                   </AnimatePresence>
 
-                  {/* UI Controls Overlay Layer */}
-                  <div className="absolute inset-0 z-20 pointer-events-none flex items-end justify-between p-4 pb-6 gap-3">
-                    {/* Left Info Column — sem caixa/blur, legível pelo gradiente do vídeo */}
-                    <div className="flex-1 min-w-0 pointer-events-auto space-y-2.5 text-left cineclips-meta-copy">
-                      {/* Hot Tag */}
+                  <div className="cineclips-slide-ui">
+                    <div className="cineclips-meta cineclips-meta-copy">
                       {clip.isTrending && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/25 border border-rose-500/50 text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">
+                        <span className="cineclips-trending-badge">
                           <Flame className="w-3 h-3 fill-current" />
                           Em Alta
                         </span>
                       )}
 
-                      {/* Creator Row */}
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 p-0.5 shadow-md flex-shrink-0">
-                          <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-[10px] font-extrabold text-cyan-300">
-                            {clip.criadorNome.charAt(0).toUpperCase()}
-                          </div>
-                        </div>
+                      <button
+                        type="button"
+                        onClick={() => onFollowCreator?.(clip.criadorNome)}
+                        className="cineclips-creator-handle"
+                      >
+                        @{clip.criadorNome}
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => onFollowCreator?.(clip.criadorNome)}
-                          className="font-bold text-sm text-white hover:text-cyan-300 transition-colors cursor-pointer truncate"
-                        >
-                          @{clip.criadorNome}
-                        </button>
+                      <h2 className="cineclips-title">{clip.titulo}</h2>
 
-                        <button
-                          type="button"
-                          onClick={() => toggleFollow(clip.criadorNome)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border ${
-                            isFollowing
-                              ? 'bg-white/10 border-white/20 text-zinc-300'
-                              : 'bg-cyan-400 border-cyan-400 text-black hover:bg-cyan-300'
-                          }`}
-                        >
-                          {isFollowing ? (
-                            <>
-                              <Check className="w-3 h-3" />
-                              Seguindo
-                            </>
-                          ) : (
-                            '+ Seguir'
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Title & Caption */}
-                      <div>
-                        <h2 className="text-sm font-bold text-white leading-snug line-clamp-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-                          {clip.titulo}
-                        </h2>
-
-                        {clip.descricao && (
-                          <div className="mt-1">
-                            <p
-                              className={`text-xs text-zinc-200 leading-relaxed transition-all ${
-                                isExpanded ? '' : 'line-clamp-2'
-                              }`}
+                      {clip.descricao && (
+                        <div className="cineclips-desc-block">
+                          <p className={`cineclips-desc ${isExpanded ? '' : 'line-clamp-2'}`}>
+                            {clip.descricao}
+                          </p>
+                          {clip.descricao.length > 70 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedDesc((prev) => ({
+                                  ...prev,
+                                  [clip.id]: !prev[clip.id],
+                                }))
+                              }
+                              className="cineclips-desc-more"
                             >
-                              {clip.descricao}
-                            </p>
-                            {clip.descricao.length > 70 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setExpandedDesc((prev) => ({
-                                    ...prev,
-                                    [clip.id]: !prev[clip.id],
-                                  }))
-                                }
-                                className="text-[11px] font-bold text-cyan-400 hover:underline mt-0.5"
-                              >
-                                {isExpanded ? 'mostrar menos' : 'mais'}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                              {isExpanded ? 'mostrar menos' : 'mais'}
+                            </button>
+                          )}
+                        </div>
+                      )}
 
-                      {/* Hashtag Badges */}
                       {clip.hashtags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        <div className="cineclips-tags cineclips-tags--text">
                           {clip.hashtags.slice(0, 3).map((tag) => (
                             <button
                               key={tag}
                               type="button"
                               onClick={() => onOpenHashtag?.(tag)}
-                              className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-cyan-400/20 border border-white/15 text-[11px] font-semibold text-cyan-300 transition-all cursor-pointer flex items-center gap-0.5"
                             >
-                              <Hash className="w-2.5 h-2.5 opacity-70" />
-                              {tag.replace(/^#/, '')}
+                              #{tag.replace(/^#/, '')}
                             </button>
                           ))}
                         </div>
                       )}
 
-                      {/* Audio / Track Bar */}
-                      <div className="flex items-center gap-2 pt-1 text-[11px] text-zinc-300/90 font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                      <div className="cineclips-audio">
                         <Music className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
-                        <span className="truncate">Som original - @{clip.criadorNome}</span>
+                        <span>Som original - @{clip.criadorNome}</span>
                       </div>
                     </div>
 
-                    {/* Right Floating Rail Buttons */}
-                    <div className="cineclips-rail pointer-events-auto">
+                    <div className="cineclips-rail">
                       <RailCreatorAvatar
                         name={clip.criadorNome}
                         isFollowing={isFollowing}

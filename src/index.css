@@ -635,7 +635,7 @@
 .cineclips-slide-ui {
   position: absolute;
   inset: 0;
-  z-index: 10;
+  z-index: 20;
   pointer-events: none;
   display: flex;
   align-items: flex-end;
@@ -649,6 +649,9 @@
   min-width: 0;
   max-width: calc(100% - 4.75rem);
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
 .cineclips-meta-copy {
@@ -659,6 +662,99 @@
 .cineclips-meta-copy p,
 .cineclips-meta-copy button {
   text-shadow: inherit;
+}
+
+.cineclips-trending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fb7185;
+}
+
+.cineclips-creator-handle {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  text-shadow: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cineclips-creator-handle:hover {
+  color: var(--clips-accent);
+}
+
+.cineclips-desc-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cineclips-desc-more {
+  width: fit-content;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--clips-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-shadow: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cineclips-desc-more:hover {
+  text-decoration: underline;
+}
+
+.cineclips-tags--text {
+  margin-top: 0.1rem;
+}
+
+.cineclips-tags--text button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--clips-accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-shadow: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cineclips-tags--text button:hover {
+  color: #fff;
+}
+
+.cineclips-audio {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.1rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: inherit;
+}
+
+.cineclips-audio span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cineclips-creator {
