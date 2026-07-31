@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Hash,
   ChevronUp,
+  Plus,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -300,7 +301,50 @@ function ClipPlayer({
   );
 }
 
-/** Botão de Ação Lateral — skill cineclips-ui */
+/** Avatar + seguir no topo do rail (TikTok-native) */
+function RailCreatorAvatar({
+  name,
+  isFollowing,
+  onAvatarClick,
+  onFollowClick,
+}: {
+  name: string;
+  isFollowing: boolean;
+  onAvatarClick: () => void;
+  onFollowClick: () => void;
+}) {
+  return (
+    <div className="cineclips-rail-creator">
+      <button
+        type="button"
+        className="cineclips-rail-avatar"
+        onClick={(e) => {
+          e.stopPropagation();
+          onAvatarClick();
+        }}
+        aria-label={`Perfil de @${name}`}
+      >
+        <span>{name.charAt(0).toUpperCase()}</span>
+      </button>
+      {!isFollowing && (
+        <motion.button
+          type="button"
+          className="cineclips-rail-follow"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFollowClick();
+          }}
+          whileTap={{ scale: 0.88 }}
+          aria-label="Seguir criador"
+        >
+          <Plus className="w-3 h-3" strokeWidth={3} />
+        </motion.button>
+      )}
+    </div>
+  );
+}
+
+/** Botão de ação — skill identidade (orb rail) */
 function ActionBtn({
   icon: Icon,
   label,
@@ -327,11 +371,10 @@ function ActionBtn({
       className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
       aria-label={label || variant}
     >
-      <span className="cineclips-action-glow" aria-hidden />
-      <span className="cineclips-action-icon">
+      <span className="cineclips-action-orb">
         <Icon
           className={`cineclips-action-svg ${spinning ? 'animate-spin' : ''}`}
-          strokeWidth={2}
+          strokeWidth={variant === 'report' ? 1.75 : 2.25}
           fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
         />
       </span>
@@ -1067,6 +1110,12 @@ export default function CineClipsPage({
 
                     {/* Right Floating Rail Buttons */}
                     <div className="cineclips-rail pointer-events-auto">
+                      <RailCreatorAvatar
+                        name={clip.criadorNome}
+                        isFollowing={isFollowing}
+                        onAvatarClick={() => onFollowCreator?.(clip.criadorNome)}
+                        onFollowClick={() => toggleFollow(clip.criadorNome)}
+                      />
                       <ActionBtn
                         icon={Heart}
                         label={formatCount(clip.likes)}

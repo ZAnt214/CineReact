@@ -755,197 +755,201 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.15rem;
   pointer-events: auto;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.25rem;
 }
 
-.cineclips-action {
+/* Avatar do criador no topo do rail */
+.cineclips-rail-creator {
   position: relative;
+  margin-bottom: 0.35rem;
+}
+
+.cineclips-rail-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--clips-accent) 0%, #6366f1 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cineclips-rail-avatar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: #0a0a0c;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--clips-accent);
+}
+
+.cineclips-rail-follow {
+  position: absolute;
+  bottom: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 9999px;
+  border: 2px solid #0a0a0c;
+  background: #ff2d55;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 45, 85, 0.45);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Identidade: orb rail — halo suave + CTAs cyan */
+.cineclips-action {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  background: none;
-  border: none;
+  justify-content: center;
+  gap: 0.32rem;
+  min-width: 3rem;
   padding: 0;
-  min-width: 3.25rem;
+  border: none;
+  background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.cineclips-action-glow {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 3.1rem;
-  height: 3.1rem;
-  transform: translateX(-50%);
-  border-radius: 1.05rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.cineclips-action-icon {
+.cineclips-action-orb {
   position: relative;
-  z-index: 1;
-  width: 3.1rem;
-  height: 3.1rem;
-  border-radius: 1.05rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, rgba(22, 22, 26, 0.72) 0%, rgba(8, 8, 10, 0.55) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  width: 3rem;
+  height: 3rem;
   color: #fff;
-  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.cineclips-action-icon::after {
+.cineclips-action-orb::before {
   content: '';
   position: absolute;
-  bottom: 0.28rem;
-  left: 50%;
-  width: 1.1rem;
-  height: 0.18rem;
-  transform: translateX(-50%);
+  inset: 0;
   border-radius: 9999px;
-  background: currentColor;
-  opacity: 0.55;
+  background: radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.15) 55%, transparent 72%);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: none;
 }
 
 .cineclips-action-svg {
-  width: 1.4rem;
-  height: 1.4rem;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.65));
+  position: relative;
+  z-index: 1;
+  width: 1.55rem;
+  height: 1.55rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
 }
 
 .cineclips-action-label {
-  position: relative;
-  z-index: 1;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   color: #fff;
-  max-width: 3.5rem;
-  text-align: center;
-  line-height: 1.1;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.85);
+  line-height: 1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.95);
 }
 
 /* Like */
-.cineclips-action--like .cineclips-action-icon {
-  color: #fecaca;
+.cineclips-action--like.is-active .cineclips-action-orb {
+  color: #ff2d55;
 }
 
-.cineclips-action--like .cineclips-action-glow {
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, transparent 70%);
+.cineclips-action--like.is-active .cineclips-action-orb::before {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 45, 85, 0.35) 0%, rgba(255, 45, 85, 0.08) 55%, transparent 72%);
+  box-shadow: 0 0 18px rgba(255, 45, 85, 0.35);
 }
 
-.cineclips-action--like.is-active .cineclips-action-icon {
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.55);
-  background: linear-gradient(160deg, rgba(60, 16, 24, 0.85), rgba(30, 8, 12, 0.75));
-  box-shadow:
-    0 0 16px rgba(239, 68, 68, 0.35),
-    inset 0 0 10px rgba(239, 68, 68, 0.12);
-}
-
-.cineclips-action--like.is-active .cineclips-action-glow {
-  opacity: 1;
+.cineclips-action--like.is-active .cineclips-action-svg {
+  filter: drop-shadow(0 0 8px rgba(255, 45, 85, 0.7));
 }
 
 /* Comment */
-.cineclips-action--comment .cineclips-action-icon {
-  color: #e0f7fa;
-}
-
-.cineclips-action--comment .cineclips-action-glow {
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.38) 0%, transparent 70%);
-}
-
-.cineclips-action--comment:active .cineclips-action-icon,
-.cineclips-action--comment:focus-visible .cineclips-action-icon {
+.cineclips-action--comment:active .cineclips-action-orb,
+.cineclips-action--comment:focus-visible .cineclips-action-orb {
   color: var(--clips-accent);
-  border-color: var(--clips-accent-border);
 }
 
-.cineclips-action--comment:active .cineclips-action-glow {
-  opacity: 0.9;
+.cineclips-action--comment:active .cineclips-action-orb::before {
+  background: radial-gradient(circle at 50% 45%, rgba(0, 229, 255, 0.28) 0%, rgba(0, 229, 255, 0.06) 55%, transparent 72%);
 }
 
 /* Favorite */
-.cineclips-action--favorite .cineclips-action-icon {
-  color: #cffafe;
-}
-
-.cineclips-action--favorite .cineclips-action-glow {
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.42) 0%, transparent 70%);
-}
-
-.cineclips-action--favorite.is-active .cineclips-action-icon {
+.cineclips-action--favorite.is-active .cineclips-action-orb {
   color: var(--clips-accent);
-  border-color: var(--clips-accent-border);
-  background: linear-gradient(160deg, rgba(8, 48, 56, 0.88), rgba(4, 24, 30, 0.78));
+}
+
+.cineclips-action--favorite.is-active .cineclips-action-orb::before {
+  background: radial-gradient(circle at 50% 45%, rgba(0, 229, 255, 0.32) 0%, rgba(0, 229, 255, 0.08) 55%, transparent 72%);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
+}
+
+/* Share — CTA orb preenchido */
+.cineclips-action--share .cineclips-action-orb::before {
+  background: linear-gradient(145deg, rgba(0, 229, 255, 0.9) 0%, rgba(0, 180, 210, 0.75) 100%);
   box-shadow:
-    0 0 16px rgba(0, 229, 255, 0.3),
-    inset 0 0 10px rgba(0, 229, 255, 0.1);
+    0 4px 16px rgba(0, 229, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.cineclips-action--favorite.is-active .cineclips-action-glow {
-  opacity: 1;
+.cineclips-action--share .cineclips-action-orb {
+  color: #041014;
 }
 
-/* Share */
-.cineclips-action--share .cineclips-action-icon {
-  color: #ecfeff;
-  background: linear-gradient(160deg, rgba(0, 229, 255, 0.22), rgba(0, 100, 120, 0.18));
-  border-color: rgba(0, 229, 255, 0.32);
+.cineclips-action--share .cineclips-action-svg {
+  filter: none;
 }
 
-.cineclips-action--share .cineclips-action-glow {
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.3) 0%, transparent 70%);
+.cineclips-action--share:active .cineclips-action-orb::before {
+  background: linear-gradient(145deg, rgba(0, 229, 255, 1) 0%, rgba(0, 200, 230, 0.9) 100%);
 }
 
-/* Download */
-.cineclips-action--download .cineclips-action-icon {
+/* Download — CTA orb outline */
+.cineclips-action--download .cineclips-action-orb::before {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(0, 229, 255, 0.65);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.2);
+}
+
+.cineclips-action--download .cineclips-action-orb {
   color: var(--clips-accent);
-  background: linear-gradient(160deg, rgba(0, 229, 255, 0.2), rgba(0, 70, 85, 0.25));
-  border-color: rgba(0, 229, 255, 0.4);
 }
 
 .cineclips-action--download .cineclips-action-label {
   color: var(--clips-accent);
 }
 
-.cineclips-action--download .cineclips-action-glow {
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.35) 0%, transparent 70%);
+/* Report — discreto */
+.cineclips-action--report {
+  opacity: 0.5;
+  margin-top: 0.1rem;
 }
 
-/* Report */
-.cineclips-action--report .cineclips-action-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.85rem;
-  opacity: 0.7;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.cineclips-action--report .cineclips-action-icon::after {
-  display: none;
+.cineclips-action--report .cineclips-action-orb {
+  width: 2.25rem;
+  height: 2.25rem;
 }
 
 .cineclips-action--report .cineclips-action-svg {
   width: 1rem;
   height: 1rem;
-}
-
-.cineclips-action--report .cineclips-action-glow {
-  display: none;
 }
 
 .cineclips-progress {
