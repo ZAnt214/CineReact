@@ -300,7 +300,7 @@ function ClipPlayer({
   );
 }
 
-/** Botão de Ação Lateral — skill cineclips-ui */
+/** Botão de Ação Lateral — skill cineclips-ui (premium) */
 function ActionBtn({
   icon: Icon,
   label,
@@ -323,14 +323,17 @@ function ActionBtn({
         e.stopPropagation();
         onClick();
       }}
+      whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.9 }}
       className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
       aria-label={label || variant}
     >
+      <span className="cineclips-action-ring" aria-hidden />
       <span className="cineclips-action-glow" aria-hidden />
       <span className="cineclips-action-icon">
         <Icon
-          className={`w-[22px] h-[22px] ${spinning ? 'animate-spin' : ''}`}
+          className={`cineclips-action-svg ${spinning ? 'animate-spin' : ''}`}
+          strokeWidth={variant === 'report' ? 2 : 2.25}
           fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
         />
       </span>
@@ -961,9 +964,8 @@ export default function CineClipsPage({
 
                   {/* UI Controls Overlay Layer */}
                   <div className="absolute inset-0 z-20 pointer-events-none flex items-end justify-between p-4 pb-6 gap-3">
-                    {/* Left Info Column */}
-                    <div className="flex-1 min-w-0 pointer-events-auto">
-                      <div className="cineclips-meta-panel space-y-2.5 text-left">
+                    {/* Left Info Column — sem caixa/blur, legível pelo gradiente do vídeo */}
+                    <div className="flex-1 min-w-0 pointer-events-auto space-y-2.5 text-left cineclips-meta-copy">
                       {/* Hot Tag */}
                       {clip.isTrending && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/25 border border-rose-500/50 text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">
@@ -1059,10 +1061,9 @@ export default function CineClipsPage({
                       )}
 
                       {/* Audio / Track Bar */}
-                      <div className="flex items-center gap-2 pt-1 text-[11px] text-zinc-300/80 font-medium">
+                      <div className="flex items-center gap-2 pt-1 text-[11px] text-zinc-300/90 font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
                         <Music className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
                         <span className="truncate">Som original - @{clip.criadorNome}</span>
-                      </div>
                       </div>
                     </div>
 
