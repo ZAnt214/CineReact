@@ -1,50 +1,71 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const PRODUCTION_DATA_DIR = '/data';
-
 export function getDataDir(): string {
-  const base =
-    process.env.CINE_REACT_DATA_DIR ||
-    process.env.RAILWAY_VOLUME_MOUNT_PATH ||
-    (process.env.NODE_ENV === 'production'
-      ? PRODUCTION_DATA_DIR
-      : process.cwd());
+  const candidates = [
+    process.env.CINE_REACT_DATA_DIR,
+    process.env.RAILWAY_VOLUME_MOUNT_PATH,
+    path.join(process.cwd(), 'data'),
+    process.cwd(),
+    path.join('/tmp', 'cine_react_data'),
+    '/data',
+  ].filter(Boolean) as string[];
 
-  fs.mkdirSync(base, { recursive: true });
-  return base;
+  for (const dir of candidates) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      // Verify write access
+      const testFile = path.join(dir, `.writable_test_${Date.now()}`);
+      fs.writeFileSync(testFile, 'ok');
+      fs.unlinkSync(testFile);
+      return dir;
+    } catch {
+      // Try next candidate if permission denied or invalid path
+      continue;
+    }
+  }
+
+  return process.cwd();
 }
 
 /** Copia dados legados de /tmp para o diretório persistente (Railway). */
 export function migrateLegacyFile(targetPath: string, legacyPaths: string[]): void {
-  if (fs.existsSync(targetPath)) return;
+  try {
+    if (fs.existsSync(targetPath)) return;
 
-  for (const legacy of legacyPaths) {
-    if (legacy === targetPath || !fs.existsSync(legacy)) continue;
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.copyFileSync(legacy, targetPath);
-    console.log(`[data] Migrado ${legacy} → ${targetPath}`);
-    return;
+    for (const legacy of legacyPaths) {
+      if (legacy === targetPath || !fs.existsSync(legacy)) continue;
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.copyFileSync(legacy, targetPath);
+      console.log(`[data] Migrado ${legacy} → ${targetPath}`);
+      return;
+    }
+  } catch (err) {
+    console.warn('[data] Aviso ao migrar arquivo legado:', err);
   }
 }
 
 export function migrateLegacyDir(targetDir: string, legacyDirs: string[]): void {
-  if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) return;
+  try {
+    if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) return;
 
-  for (const legacy of legacyDirs) {
-    if (legacy === targetDir || !fs.existsSync(legacy)) continue;
-    const entries = fs.readdirSync(legacy);
-    if (entries.length === 0) continue;
+    for (const legacy of legacyDirs) {
+      if (legacy === targetDir || !fs.existsSync(legacy)) continue;
+      const entries = fs.readdirSync(legacy);
+      if (entries.length === 0) continue;
 
-    fs.mkdirSync(targetDir, { recursive: true });
-    for (const entry of entries) {
-      const src = path.join(legacy, entry);
-      const dest = path.join(targetDir, entry);
-      if (!fs.existsSync(dest)) {
-        fs.copyFileSync(src, dest);
+      fs.mkdirSync(targetDir, { recursive: true });
+      for (const entry of entries) {
+        const src = path.join(legacy, entry);
+        const dest = path.join(targetDir, entry);
+        if (!fs.existsSync(dest)) {
+          fs.copyFileSync(src, dest);
+        }
       }
+      console.log(`[data] Migrados ${entries.length} arquivos de ${legacy} → ${targetDir}`);
+      return;
     }
-    console.log(`[data] Migrados ${entries.length} arquivos de ${legacy} → ${targetDir}`);
-    return;
+  } catch (err) {
+    console.warn('[data] Aviso ao migrar diretório legado:', err);
   }
 }

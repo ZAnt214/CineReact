@@ -559,8 +559,8 @@
 }
 
 .cineclips-feed {
-  height: 100dvh;
-  max-height: 100dvh;
+  height: 100%;
+  max-height: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
@@ -570,14 +570,29 @@
   scrollbar-width: none;
 }
 
-.cineclips-feed::-webkit-scrollbar {
+.cineclips-feed::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
 }
 
 .cineclips-slide {
   position: relative;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: 100%;
+  max-height: 100%;
   width: 100%;
   flex-shrink: 0;
   scroll-snap-align: start;
