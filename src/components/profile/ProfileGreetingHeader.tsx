@@ -42,7 +42,6 @@ function ProfileGreetingHeader({ firstName, onClose }: ProfileGreetingHeaderProp
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-cine-accent/10 border border-cine-accent/20 text-[9px] font-bold uppercase tracking-[0.22em] text-cine-accent-light">
                   {greet}
                 </span>
-                <span className="text-[10px] text-zinc-600 font-mono hidden xs:inline">·</span>
                 <span className="text-[10px] text-zinc-500 hidden sm:inline">sessão CineReact</span>
               </div>
 
