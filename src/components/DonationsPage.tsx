@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import {
   Heart,
   Crown,
@@ -8,14 +8,13 @@ import {
   Loader2,
   LogIn,
   Star,
+  Award,
+  Palette,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import type { UserState } from '../types.ts';
 import { DONATION_AMOUNT_BRL } from '../types/donations.ts';
 import { useDonationStatus } from '../hooks/useDonations.ts';
 import { CATEGORY_LABELS, DONOR_VIP_ITEMS, RARITY_STYLES } from '../data/rewardsCatalog.ts';
-import { RewardPreviewThumb } from './rewards/RewardPreview.tsx';
-import { PremiumFrameRing } from './rewards/PremiumRewardSurface.tsx';
 import TitleRewardVisual from './rewards/TitleRewardVisual.tsx';
 import type { RewardItemDefinition } from '../types/gamification.ts';
 
@@ -26,23 +25,53 @@ interface DonationsPageProps {
 }
 
 const DEMO_AVATAR =
-  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=70';
 
 const DEMO_ITEMS: (RewardItemDefinition & { owned: true })[] = DONOR_VIP_ITEMS.map((item) => ({
   ...item,
   owned: true as const,
 }));
 
-function DonorProfileDemo({ displayName }: { displayName: string }) {
-  const frame = DEMO_ITEMS.find((i) => i.id === 'frame-apoiador-cinereact');
-  const title = DEMO_ITEMS.find((i) => i.id === 'title-apoiador-cinereact');
-  const badge = DEMO_ITEMS.find((i) => i.id === 'badge-apoiador-vip');
+const TITLE_ITEM = DEMO_ITEMS.find((i) => i.id === 'title-apoiador-cinereact');
+const FRAME_ITEM = DEMO_ITEMS.find((i) => i.id === 'frame-apoiador-cinereact');
 
+function CosmeticThumb({ item }: { item: (typeof DEMO_ITEMS)[number] }) {
+  const base = 'w-14 h-14 rounded-xl shrink-0 flex items-center justify-center border border-white/10';
+
+  if (item.category === 'theme') {
+    return (
+      <div className={`${base} bg-gradient-to-br from-cyan-950 via-neutral-900 to-amber-950`}>
+        <Palette className="w-6 h-6 text-cyan-300/90" strokeWidth={1.75} />
+      </div>
+    );
+  }
+  if (item.category === 'frame') {
+    return (
+      <div className="w-14 h-14 shrink-0 flex items-center justify-center">
+        <div className="rounded-full p-[3px] bg-gradient-to-br from-amber-400 via-cyan-400 to-violet-400">
+          <div className="w-10 h-10 rounded-full bg-neutral-800" />
+        </div>
+      </div>
+    );
+  }
+  if (item.category === 'title') {
+    return (
+      <div className={`${base} bg-neutral-950/80`}>
+        <Award className="w-6 h-6 text-amber-200/90" strokeWidth={1.75} />
+      </div>
+    );
+  }
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-cyan-400/25 bg-gradient-to-br from-cyan-950/70 via-[#0a0f18] to-amber-950/50 p-6 sm:p-8 shadow-[0_0_60px_rgba(34,211,238,0.12)]">
-      <div className="absolute -top-20 -right-16 w-56 h-56 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-12 w-48 h-48 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.08),transparent_55%)] pointer-events-none" />
+    <div className={`${base} bg-gradient-to-br from-amber-500/20 to-cyan-500/15`}>
+      <Heart className="w-6 h-6 text-amber-300 fill-amber-300/40" strokeWidth={1.75} />
+    </div>
+  );
+}
+
+const DonorProfileDemo = memo(function DonorProfileDemo({ displayName }: { displayName: string }) {
+  return (
+    <div className="donor-demo-card relative overflow-hidden rounded-[1.75rem] border border-cyan-400/25 bg-gradient-to-br from-cyan-950/80 via-[#0a0f18] to-amber-950/60 p-6 sm:p-8">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.1),transparent_60%)] pointer-events-none" />
 
       <div className="relative flex flex-col items-center text-center">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-cyan-200/90 mb-5">
@@ -50,18 +79,17 @@ function DonorProfileDemo({ displayName }: { displayName: string }) {
           Prévia do seu perfil
         </span>
 
-        <motion.div
-          animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <PremiumFrameRing visualStyle="gold" size="lg">
-            <img
-              src={DEMO_AVATAR}
-              alt=""
-              className="w-20 h-20 rounded-full object-cover"
-            />
-          </PremiumFrameRing>
-        </motion.div>
+        <div className="rounded-full p-[4px] bg-gradient-to-br from-amber-400 via-cyan-400 to-violet-400 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
+          <img
+            src={DEMO_AVATAR}
+            alt=""
+            width={80}
+            height={80}
+            loading="lazy"
+            decoding="async"
+            className="w-20 h-20 rounded-full object-cover bg-neutral-800"
+          />
+        </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <p className="text-xl sm:text-2xl font-black text-white tracking-tight">{displayName}</p>
@@ -71,41 +99,47 @@ function DonorProfileDemo({ displayName }: { displayName: string }) {
           </span>
         </div>
 
-        {title && (
+        {TITLE_ITEM && (
           <div className="mt-3">
-            <TitleRewardVisual name={title.name} rarity={title.rarity} item={title} size="lg" />
+            <TitleRewardVisual
+              name={TITLE_ITEM.name}
+              rarity={TITLE_ITEM.rarity}
+              item={TITLE_ITEM}
+              size="lg"
+            />
           </div>
         )}
 
-        {badge && (
-          <div className="mt-4 flex items-center gap-2">
-            <RewardPreviewThumb item={badge} size="sm" lite />
-            <span className="text-[11px] text-zinc-400">Emblema exclusivo no perfil</span>
+        <div className="mt-4 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/25 to-cyan-500/15 border border-amber-400/30 flex items-center justify-center">
+            <Heart className="w-4 h-4 text-amber-300 fill-amber-300/50" />
           </div>
-        )}
+          <span className="text-[11px] text-zinc-400">Emblema exclusivo no perfil</span>
+        </div>
 
-        {frame && (
+        {FRAME_ITEM && (
           <p className="mt-4 text-[10px] text-cyan-200/50 max-w-xs leading-relaxed">
-            Moldura {frame.name.toLowerCase()} + tema premium aplicados automaticamente
+            Moldura {FRAME_ITEM.name.toLowerCase()} + tema premium aplicados automaticamente
           </p>
         )}
       </div>
     </div>
   );
-}
+});
 
-function CosmeticShowcaseCard({ item }: { item: (typeof DEMO_ITEMS)[number] }) {
+const CosmeticShowcaseCard = memo(function CosmeticShowcaseCard({
+  item,
+}: {
+  item: (typeof DEMO_ITEMS)[number];
+}) {
   const rarity = RARITY_STYLES[item.rarity];
 
   return (
-    <motion.div
-      whileHover={{ y: -3, scale: 1.01 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-      className={`group relative overflow-hidden rounded-2xl border ${rarity.border} ${rarity.bg} p-4 ${rarity.glow}`}
+    <div
+      className={`donor-cosmetic-card rounded-2xl border ${rarity.border} ${rarity.bg} p-4 transition-transform duration-200 hover:-translate-y-0.5`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-      <div className="relative flex items-start gap-3">
-        <RewardPreviewThumb item={item} size="md" lite />
+      <div className="flex items-start gap-3">
+        <CosmeticThumb item={item} />
         <div className="min-w-0 flex-1 pt-0.5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-300/70">
             {CATEGORY_LABELS[item.category]}
@@ -114,9 +148,9 @@ function CosmeticShowcaseCard({ item }: { item: (typeof DEMO_ITEMS)[number] }) {
           <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed line-clamp-2">{item.description}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-}
+});
 
 export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: DonationsPageProps) {
   const { data, loading, submitting, error, startDonation, refresh } = useDonationStatus(
@@ -152,30 +186,22 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
   }, [data?.isDonor, onUpdateUser, user]);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 left-1/4 w-[28rem] h-[28rem] rounded-full bg-violet-600/10 blur-[100px]" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-[90px]" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-amber-500/8 blur-[110px]" />
-      </div>
+    <div className="donor-page relative min-h-screen w-full bg-[#07090f]">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-90"
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,0.12), transparent), radial-gradient(ellipse 60% 40% at 90% 20%, rgba(34,211,238,0.1), transparent), radial-gradient(ellipse 70% 50% at 10% 100%, rgba(245,158,11,0.08), transparent)',
+        }}
+      />
 
       <div className="cine-container relative pt-20 pb-28">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto space-y-8"
-        >
-          {/* Hero */}
+        <div className="max-w-3xl mx-auto space-y-8 donor-page-content">
           <section className="relative text-center space-y-5">
-            <motion.span
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.05 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/15 via-violet-500/10 to-amber-500/15 border border-white/10 text-cyan-100 text-[11px] font-bold uppercase tracking-wider"
-            >
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/15 via-violet-500/10 to-amber-500/15 border border-white/10 text-cyan-100 text-[11px] font-bold uppercase tracking-wider">
               <Crown className="w-3.5 h-3.5 text-amber-300" />
               Apoiador VIP
-            </motion.span>
+            </span>
 
             <h1 className="text-3xl sm:text-4xl md:text-[2.6rem] font-black text-white tracking-tight leading-[1.1]">
               Apoie o CineReact e{' '}
@@ -193,9 +219,8 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             </p>
           </section>
 
-          {/* Status */}
           {!user.isLoggedIn && (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
               <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-300 shrink-0">
                 <LogIn className="w-6 h-6" />
               </div>
@@ -206,7 +231,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-cyan-300 text-black text-sm font-extrabold hover:brightness-110 transition-all"
+                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-cyan-300 text-black text-sm font-extrabold hover:brightness-110 transition-[filter]"
               >
                 Fazer login
               </button>
@@ -257,8 +282,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             <div className="rounded-2xl border border-rose-500/25 bg-rose-950/15 p-5 text-sm text-zinc-300">
               <p className="font-bold text-white mb-1">Não encontramos seu pagamento</p>
               <p className="text-zinc-400">
-                {request?.adminNote ||
-                  'Se você já pagou, tente novamente ou fale com o suporte.'}
+                {request?.adminNote || 'Se você já pagou, tente novamente ou fale com o suporte.'}
               </p>
               <button
                 type="button"
@@ -275,7 +299,6 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             <p className="text-center text-sm text-rose-400 font-medium">{error}</p>
           )}
 
-          {/* Profile demo */}
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
@@ -289,7 +312,6 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             <DonorProfileDemo displayName={displayName} />
           </section>
 
-          {/* Cosmetic grid */}
           <section className="space-y-4">
             <h2 className="text-sm font-bold text-white uppercase tracking-wide">
               Tudo que você ganha
@@ -301,10 +323,8 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
             </div>
           </section>
 
-          {/* CTA */}
           {!isDonor && (
-            <section className="relative overflow-hidden rounded-3xl border border-cyan-400/20 p-8 text-center space-y-5">
-              <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/10 via-violet-500/5 to-amber-500/10 pointer-events-none" />
+            <section className="relative overflow-hidden rounded-3xl border border-cyan-400/20 p-8 text-center space-y-5 bg-gradient-to-b from-cyan-500/8 via-transparent to-amber-500/8">
               <div className="relative space-y-5">
                 <div>
                   <p className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold">
@@ -324,7 +344,7 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
                   type="button"
                   onClick={handleDonate}
                   disabled={submitting || loading || isPending}
-                  className="w-full max-w-sm mx-auto py-3.5 px-6 rounded-full bg-gradient-to-r from-cyan-400 via-cyan-300 to-amber-300 text-black text-sm font-extrabold shadow-lg shadow-cyan-500/20 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  className="w-full max-w-sm mx-auto py-3.5 px-6 rounded-full bg-gradient-to-r from-cyan-400 via-cyan-300 to-amber-300 text-black text-sm font-extrabold shadow-lg shadow-cyan-500/15 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-[filter] flex items-center justify-center gap-2"
                 >
                   {submitting || loading ? (
                     <>
@@ -350,8 +370,28 @@ export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: Donati
               </div>
             </section>
           )}
-        </motion.div>
+        </div>
       </div>
+
+      <style>{`
+        .donor-page-content {
+          content-visibility: auto;
+          contain-intrinsic-size: auto 1200px;
+        }
+        .donor-demo-card,
+        .donor-cosmetic-card {
+          contain: layout style paint;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          .donor-page-content {
+            animation: donor-fade-in 0.35s ease-out;
+          }
+        }
+        @keyframes donor-fade-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
