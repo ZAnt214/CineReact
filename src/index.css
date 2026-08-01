@@ -100,15 +100,17 @@
 .cine-brand-tagline {
   display: block;
   width: 100%;
-  margin-top: 0.22em;
+  margin-top: 0.2em;
   padding: 0;
+  padding-left: 0.04em;
   font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.42em;
-  letter-spacing: 0.04em;
-  color: var(--color-cine-muted);
+  font-weight: 500;
+  font-size: 0.34em;
+  letter-spacing: 0.03em;
+  color: #71717a;
   white-space: nowrap;
   text-align: left;
+  line-height: 1.1;
 }
 
 .cine-brand--center .cine-brand-tagline {
@@ -123,7 +125,8 @@
 
 .cine-brand--xs .cine-brand-tagline,
 .cine-brand--sm .cine-brand-tagline {
-  font-size: 0.38em;
+  font-size: 0.3em;
+  letter-spacing: 0.025em;
 }
 
 .cine-brand--md .cine-brand-tagline {

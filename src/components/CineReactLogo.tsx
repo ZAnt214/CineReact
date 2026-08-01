@@ -20,7 +20,7 @@ interface CineReactLogoProps {
   showTagline?: boolean;
 }
 
-const DEFAULT_TAGLINE = 'Sua plataforma de reacts';
+const DEFAULT_TAGLINE = 'A melhor plataforma do mundo';
 
 function BrandMark({
   sizeClass,
