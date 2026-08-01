@@ -214,7 +214,6 @@ export default function Header({
               >
                 <CineReactLogo
                   size="sm"
-                  showTagline={false}
                   className="transition-transform duration-300 group-hover:-translate-y-0.5"
                 />
               </button>
