@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Trophy, X, Zap } from 'lucide-react';
+import { Star, Trophy, X, Zap } from 'lucide-react';
 import { RewardPreviewThumb } from './rewards/RewardPreview.tsx';
 import type { GamificationReward } from '../types/gamification.ts';
 
@@ -57,7 +57,7 @@ export default function GamificationRewardToast({ reward, onClose }: Gamificatio
                 )}
                 {reward!.spotlight > 0 && (
                   <span className="px-2 py-0.5 rounded-md bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" />
+                    <Star className="w-2.5 h-2.5" />
                     +{reward!.spotlight}
                   </span>
                 )}

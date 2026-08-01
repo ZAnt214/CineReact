@@ -9,7 +9,6 @@ import {
   RotateCcw, 
   RotateCw, 
   Tv, 
-  Sparkles, 
   Settings, 
   Film, 
   Flame, 
@@ -348,7 +347,7 @@ export default function CineReactPlayer({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cine-accent/20 text-cine-accent-light border border-cine-accent/30 flex items-center gap-1.5 shadow-md">
-                    <Sparkles className="w-3 h-3 text-cine-accent-light animate-pulse" />
+                    <Film className="w-3 h-3 text-cine-accent-light animate-pulse" />
                     Obra Sincronizada
                   </span>
                   <button 

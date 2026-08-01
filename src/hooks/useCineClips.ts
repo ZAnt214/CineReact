@@ -9,8 +9,6 @@ interface FeedState {
   error: string | null;
 }
 
-const FEED_POLL_MS = 20_000;
-
 export function useCineClipsFeed(email?: string) {
   const [state, setState] = useState<FeedState>({
     clips: [],
@@ -32,9 +30,11 @@ export function useCineClipsFeed(email?: string) {
       const params = new URLSearchParams();
       if (email) params.set('email', email);
       if (cursor) params.set('cursor', cursor);
-      params.set('limit', '8');
+      params.set('limit', '6');
 
-      const res = await fetch(`/api/cineclips/feed?${params}`);
+      const res = await fetch(`/api/cineclips/feed?${params}`, {
+        headers: { Accept: 'application/json' },
+      });
       if (!res.ok) throw new Error('Falha ao carregar feed');
       const data = await res.json();
 
@@ -67,16 +67,8 @@ export function useCineClipsFeed(email?: string) {
     const onVisible = () => {
       if (document.visibilityState === 'visible') reload();
     };
-
     document.addEventListener('visibilitychange', onVisible);
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') reload();
-    }, FEED_POLL_MS);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible);
-      clearInterval(interval);
-    };
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, [reload]);
 
   return { ...state, reload: () => fetchFeed(), loadMore };

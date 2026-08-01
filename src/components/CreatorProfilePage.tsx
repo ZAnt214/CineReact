@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, BadgeCheck, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, Loader2 } from 'lucide-react';
 import PublicCreatorProfile from './profile/PublicCreatorProfile.tsx';
 import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
 import type { PublicUserProfile } from '../types.ts';
@@ -61,7 +61,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
 
       {isDemo && (
         <div className="max-w-2xl mb-8 flex items-start gap-3 rounded-xl border border-cine-accent/25 bg-cine-accent/5 px-4 py-3">
-          <Sparkles className="w-4 h-4 text-cine-accent shrink-0 mt-0.5" />
+          <BadgeCheck className="w-4 h-4 text-cine-accent shrink-0 mt-0.5" />
           <p className="text-sm text-zinc-300 leading-relaxed">
             <span className="font-bold text-cine-accent-light">Perfil demonstrativo.</span>{' '}
             Exemplo de como criadores de vídeo verificados aparecem na plataforma.

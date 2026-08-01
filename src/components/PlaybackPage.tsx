@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, Check, Sparkles, ChevronDown, ChevronUp, Copy, ThumbsUp, Film, User, Star, Trash2, Tv, Clock, Layers, Info } from 'lucide-react';
+import { Play, Eye, Calendar, ExternalLink, Share2, Heart, MessageSquare, Plus, Check, ChevronDown, ChevronUp, Copy, ThumbsUp, Film, User, Star, Trash2, Tv, Clock, Layers, Info } from 'lucide-react';
 import { Obra, ReactVideo, UserState, Comentario } from '../types.ts';
 import type { ProfileLoadout } from '../types/gamification.ts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -437,7 +437,7 @@ export default function PlaybackPage({
     }
     return (
       <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <Sparkles className="w-12 h-12 text-cine-accent mb-3 animate-pulse" />
+        <Film className="w-12 h-12 text-cine-accent mb-3 animate-pulse" />
         <div className="text-white font-bold text-lg">Vídeo de React não encontrado</div>
         <p className="text-zinc-500 text-xs mt-1">O link pode estar quebrado ou o conteúdo foi removido.</p>
       </div>
@@ -597,7 +597,7 @@ export default function PlaybackPage({
 
                       <div className="space-y-1.5">
                         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-xs font-black uppercase tracking-widest shadow-md backdrop-blur-md">
-                          <Sparkles className="w-3.5 h-3.5 text-cine-accent-light animate-spin" />
+                          <Film className="w-3.5 h-3.5 text-cine-accent-light animate-spin" />
                           Carregando React...
                         </div>
                         <p className="text-xs text-zinc-300 font-bold max-w-sm line-clamp-1 drop-shadow-md">
@@ -638,7 +638,7 @@ export default function PlaybackPage({
                 {activeObra && (
                   <>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-cine-accent/10 text-cine-accent-light border border-cine-accent/20 shadow-sm shadow-cine-accent/5">
-                      <Sparkles className="w-3 h-3 text-cine-accent-light" />
+                      <Film className="w-3 h-3 text-cine-accent-light" />
                       {activeObra.tipo === 'canal' 
                         ? 'Reação em Destaque' 
                         : activeObra.tipo === 'serie' 
@@ -928,7 +928,7 @@ export default function PlaybackPage({
         <div className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'} space-y-5 transition-all duration-300`}>
           <div className="border-b border-neutral-900 pb-3">
             <h3 className="font-black text-white text-md uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cine-accent-light animate-pulse" />
+              <Star className="w-4 h-4 text-cine-accent-light animate-pulse" />
               Recomendações
             </h3>
             <p className="text-[10px] text-zinc-500 mt-1 tracking-wide">Vídeos semelhantes baseados no seu gosto</p>

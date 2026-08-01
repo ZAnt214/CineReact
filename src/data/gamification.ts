@@ -64,7 +64,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'watch-500', name: 'Imortal do Streaming', description: 'Assista 500 reações completas.', icon: 'Crown', rarity: 'lendário', xpReward: 1000, spotlightReward: 500 },
   { id: 'first-comment', name: 'Voz da Plateia', description: 'Publique seu primeiro comentário.', icon: 'MessageCircle', rarity: 'comum', xpReward: 40, spotlightReward: 15 },
   { id: 'comments-25', name: 'Comentarista Ativo', description: 'Publique 25 comentários.', icon: 'MessagesSquare', rarity: 'raro', xpReward: 150, spotlightReward: 60 },
-  { id: 'comments-100', name: 'Oráculo da Comunidade', description: 'Publique 100 comentários.', icon: 'Sparkles', rarity: 'épico', xpReward: 350, spotlightReward: 150 },
+  { id: 'comments-100', name: 'Oráculo da Comunidade', description: 'Publique 100 comentários.', icon: 'Star', rarity: 'épico', xpReward: 350, spotlightReward: 150 },
   { id: 'first-favorite', name: 'Coração Aquecido', description: 'Favorite seu primeiro conteúdo.', icon: 'Heart', rarity: 'comum', xpReward: 30, spotlightReward: 10 },
   { id: 'favorites-20', name: 'Colecionador', description: 'Favorite 20 obras ou vídeos.', icon: 'Bookmark', rarity: 'raro', xpReward: 120, spotlightReward: 50 },
   { id: 'first-list', name: 'Curador em Formação', description: 'Crie sua primeira lista personalizada.', icon: 'List', rarity: 'comum', xpReward: 60, spotlightReward: 25 },
@@ -92,7 +92,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'lunch-10', name: 'Almoço com Estilo', description: 'Use Hora do Almoço 10 vezes.', icon: 'UtensilsCrossed', rarity: 'comum', xpReward: 80, spotlightReward: 35 },
   { id: 'seal-collector', name: 'Colecionador de Selos', description: 'Desbloqueie 5 selos de franquia.', icon: 'Stamp', rarity: 'raro', xpReward: 180, spotlightReward: 80 },
   { id: 'seal-master', name: 'Mestre dos Selos', description: 'Desbloqueie todos os selos disponíveis.', icon: 'Medal', rarity: 'lendário', xpReward: 600, spotlightReward: 300 },
-  { id: 'tier-influenciador', name: 'Status Influenciador', description: 'Alcance o nível Influenciador.', icon: 'Sparkles', rarity: 'épico', xpReward: 250, spotlightReward: 120 },
+  { id: 'tier-influenciador', name: 'Status Influenciador', description: 'Alcance o nível Influenciador.', icon: 'Star', rarity: 'épico', xpReward: 250, spotlightReward: 120 },
   { id: 'tier-elite', name: 'Elite Absoluta', description: 'Alcance Elite CineReact.', icon: 'Shield', rarity: 'lendário', xpReward: 1000, spotlightReward: 500 },
 ];
 

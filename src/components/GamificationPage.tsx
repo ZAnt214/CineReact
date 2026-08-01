@@ -11,8 +11,8 @@ import {
   MessageCircle,
   Heart,
   Compass,
-  Sparkles,
   TrendingUp,
+  Zap,
   Medal,
   Palette,
   ChevronRight,
@@ -34,11 +34,11 @@ import type { UserState } from '../types.ts';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Trophy, Target, Stamp, Crown, Flame, Clock, Eye, MessageCircle, Heart, Compass,
-  Sparkles, TrendingUp, Medal, Star, Film, Play: Film, Gamepad2: Target, Tv: Eye,
+  TrendingUp, Medal, Star, Film, Play: Film, Gamepad2: Target, Tv: Eye,
   Clapperboard: Film, MessagesSquare: MessageCircle, Bookmark: Heart, List: Target,
-  Library: Stamp, Zap: Sparkles, Award: Medal, Radar: Compass, Share2: Compass,
-  UserPlus: Users, Shield: Crown, Gem: Sparkles, UtensilsCrossed: Target, MonitorPlay: Film,
-  Timer: Clock, Hourglass: Clock, Wand2: Sparkles, Car: Target, Anchor: Compass, Leaf: Target,
+  Library: Stamp, Zap, Award: Medal, Radar: Compass, Share2: Compass,
+  UserPlus: Users, Shield: Crown, Gem: Star, UtensilsCrossed: Target, MonitorPlay: Film,
+  Timer: Clock, Hourglass: Clock, Wand2: Star, Car: Target, Anchor: Compass, Leaf: Target,
   Smartphone: Film,
 };
 
@@ -145,7 +145,7 @@ export default function GamificationPage({
               <p className="text-cine-accent-light font-bold text-sm mt-1">{data?.tier || 'Espectador'}</p>
               {profile?.earlyAccess && (
                 <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-cine-accent-light font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3" /> Acesso Antecipado
+                  <Star className="w-3 h-3" /> Acesso Antecipado
                 </span>
               )}
             </div>

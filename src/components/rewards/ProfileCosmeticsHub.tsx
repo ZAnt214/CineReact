@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Sparkles, Eye, Search, Filter, Package, Lock, Check, Palette, X,
+  Eye, Search, Filter, Package, Lock, Check, Palette, X, Star,
 } from 'lucide-react';
 import {
   CATEGORY_LABELS, CATEGORY_INFO, RARITY_ORDER, RARITY_STYLES,
@@ -283,7 +283,7 @@ export default function ProfileCosmeticsHub({
                     }`}
                   >
                     {item.cost > 0 ? (
-                      <><Sparkles className="w-3 h-3" /> {item.cost}</>
+                      <><Star className="w-3 h-3" /> {item.cost}</>
                     ) : (
                       <><Lock className="w-3 h-3" /></>
                     )}

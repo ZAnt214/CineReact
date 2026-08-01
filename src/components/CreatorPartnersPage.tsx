@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, BadgeCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 import CreatorPartnersContent from './CreatorPartnersContent.tsx';
 
@@ -26,7 +26,7 @@ export default function CreatorPartnersPage({ onBack }: CreatorPartnersPageProps
         </button>
 
         <div className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cine-accent/10 border border-cine-accent/25 text-cine-accent-light text-[10px] font-bold uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5" />
+          <BadgeCheck className="w-3.5 h-3.5" />
           Programa de Parceiros
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload, Palette, Link2, BadgeCheck } from 'lucide-react';
+import { User, Lock, Shield, Star, Check, AlertCircle, Heart, Upload, Palette, Link2, BadgeCheck } from 'lucide-react';
 import { UserState, CreatorSocialLinks } from '../types.ts';
 import { motion } from 'motion/react';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
@@ -252,7 +252,7 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
                   <div className="absolute top-0 right-0 w-16 h-16 bg-cine-accent/10 blur-xl rounded-full" />
                   
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-[10px] font-extrabold uppercase tracking-widest">
-                    <Sparkles className="w-3 h-3 text-cine-accent-light animate-spin-slow" />
+                    <Star className="w-3 h-3 text-cine-accent-light animate-spin-slow" />
                     APOIADOR VIP
                   </div>
                   <p className="text-[11px] text-zinc-400 leading-normal">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Download, Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BRAND_LOGO_ASSETS, BRAND_LOGO_CATEGORIES } from '../data/brandLogos.ts';
 import { downloadBrandLogoAsPng, downloadBrandLogoFile } from '../utils/downloadBrandLogo.ts';
@@ -52,7 +52,6 @@ export default function LogoDownloadPage({ onBack }: LogoDownloadPageProps) {
 
         <motion.div className="max-w-5xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cine-accent/10 border border-cine-accent/25 text-cine-accent-light text-[10px] font-bold uppercase tracking-wider mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
             Kit de Marca CineReact
           </div>
 

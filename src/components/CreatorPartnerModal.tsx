@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles } from 'lucide-react';
+import { X, BadgeCheck } from 'lucide-react';
 import CreatorPartnersContent from './CreatorPartnersContent.tsx';
 
 interface CreatorPartnerModalProps {
@@ -119,7 +119,7 @@ export default function CreatorPartnerModal({ isOpen, onClose }: CreatorPartnerM
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <BadgeCheck className="w-3.5 h-3.5" />
               Programa de Parceiros
             </motion.div>
 

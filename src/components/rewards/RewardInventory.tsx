@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Search, Sparkles, Lock, Check, Package, Eye, Frame, Tag, Award,
+  Search, Star, Lock, Check, Package, Eye, Frame, Tag, Award,
   Palette, Zap, Image, MessageCircle, Smile, CreditCard, User, Medal,
   Filter,
 } from 'lucide-react';
@@ -353,7 +353,7 @@ function RewardCard({
             ) : item.owned ? (
               'Equipar'
             ) : item.cost > 0 ? (
-              <><Sparkles className="w-3.5 h-3.5" /> {item.cost}</>
+              <><Star className="w-3.5 h-3.5" /> {item.cost}</>
             ) : (
               <><Lock className="w-3.5 h-3.5" /> Bloqueado</>
             )}

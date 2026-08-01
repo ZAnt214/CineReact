@@ -16,7 +16,6 @@ import {
   ListVideo,
   Youtube,
   Instagram,
-  Sparkles,
 } from 'lucide-react';
 import type { CineClip, CineClipImportJob } from '../../types/cineclips.ts';
 import { CINECLIPS_CATEGORIES } from '../../types/cineclips.ts';
@@ -262,7 +261,7 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <AdminStatCard label="Clips publicados" value={publishedCount} sub={`${clips.length} no total`} icon={ListVideo} />
         <AdminStatCard label="Na fila" value={pendingJobs} sub="importações em andamento" icon={Clock} accent="text-amber-300" />
-        <AdminStatCard label="Plataformas" value="3" sub="TikTok · Instagram · YouTube" icon={Sparkles} accent="text-pink-300" />
+        <AdminStatCard label="Plataformas" value="3" sub="TikTok · Instagram · YouTube" icon={Film} accent="text-pink-300" />
       </div>
 
       <AdminPanelCard

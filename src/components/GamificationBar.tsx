@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Flame, Sparkles, Zap } from 'lucide-react';
+import { Flame, Star, Zap } from 'lucide-react';
 import { getXpProgress, getTierFromXp } from '../data/gamification.ts';
 import type { GamificationMeResponse } from '../types/gamification.ts';
 
@@ -42,7 +42,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
           </span>
         )}
         <span className="flex items-center gap-1 text-cine-cream text-xs font-bold">
-          <Sparkles className="w-3.5 h-3.5" />
+          <Star className="w-3.5 h-3.5" />
           {profile.spotlight}
         </span>
       </button>
@@ -89,7 +89,7 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
           </span>
         )}
         <span className="flex items-center gap-1.5 text-cine-cream font-bold">
-          <Sparkles className="w-4 h-4" />
+          <Star className="w-4 h-4" />
           {profile.spotlight} Spotlight
         </span>
         {profile.featuredInfluencer && (

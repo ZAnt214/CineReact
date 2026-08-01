@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import {
   ArrowLeft,
   Heart,
@@ -11,9 +11,11 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
+  Info,
+  Film,
+  BadgeCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -40,6 +42,25 @@ interface FloatingHeart {
   y: number;
 }
 
+const BETA_DISMISS_KEY = 'cineclips-beta-dismissed';
+const SLIDE_WINDOW = 1;
+
+function readBetaDismissed(): boolean {
+  try {
+    return localStorage.getItem(BETA_DISMISS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function persistBetaDismissed() {
+  try {
+    localStorage.setItem(BETA_DISMISS_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+}
+
 function formatCount(value: number): string {
   if (!value) return '0';
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace('.0', '')}M`;
@@ -64,7 +85,7 @@ function CineClipsBetaNotice({ onDismiss }: { onDismiss: () => void }) {
         className="relative w-full max-w-sm rounded-2xl border border-cyan-400/30 bg-zinc-900/95 p-6 text-center shadow-2xl"
       >
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold uppercase tracking-wider mb-4">
-          <Sparkles className="w-3.5 h-3.5" />
+          <BadgeCheck className="w-3.5 h-3.5" />
           Beta
         </span>
         <h2 className="text-lg font-black text-white mb-2">CineClips em desenvolvimento</h2>
@@ -122,22 +143,24 @@ function ToastNotification({
       className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-zinc-900/90 border border-white/15 text-white shadow-2xl backdrop-blur-xl text-xs font-semibold"
     >
       {type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-      {type === 'info' && <Sparkles className="w-4 h-4 text-cyan-400" />}
+      {type === 'info' && <Info className="w-4 h-4 text-cyan-400" />}
       {type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
       <span>{message}</span>
     </motion.div>
   );
 }
 
-/** Player de Vídeo do Clip */
-function ClipPlayer({
+/** Player de Vídeo do Clip — só carrega mídia no slide ativo e vizinhos */
+const ClipPlayer = memo(function ClipPlayer({
   clip,
   isActive,
+  shouldLoad,
   muted,
   onDoubleTapHeart,
 }: {
   clip: CineClip;
   isActive: boolean;
+  shouldLoad: boolean;
   muted: boolean;
   onDoubleTapHeart: (x: number, y: number) => void;
 }) {
@@ -207,6 +230,22 @@ function ClipPlayer({
 
   const showHostedVideo = isHosted && !videoFailed;
 
+  if (!shouldLoad) {
+    return (
+      <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
+        {clip.thumbnailUrl ? (
+          <img
+            src={clip.thumbnailUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover opacity-50"
+          />
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div
       onClick={handleContainerClick}
@@ -218,17 +257,20 @@ function ClipPlayer({
             ref={videoRef}
             src={clip.videoUrl}
             poster={clip.thumbnailUrl}
-            className="w-full h-full object-contain pointer-events-none"
+            className="w-full h-full object-contain pointer-events-none cineclips-video"
             playsInline
             loop
             muted={muted}
             controls={false}
+            preload={isActive ? 'metadata' : 'none'}
             onError={() => setVideoFailed(true)}
           />
         ) : isHosted ? (
           <img
             src={clip.thumbnailUrl}
             alt={clip.titulo}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover opacity-80"
           />
         ) : (
@@ -245,33 +287,28 @@ function ClipPlayer({
         <img
           src={clip.thumbnailUrl}
           alt={clip.titulo}
-          className="w-full h-full object-cover opacity-40 filter blur-[1px]"
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover opacity-60"
         />
       )}
 
       {/* Play/Pause Overlay Animation */}
-      <AnimatePresence>
-        {showPlayOverlay && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1.1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute z-20 w-16 h-16 rounded-full bg-black/60 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-2xl pointer-events-none"
-          >
+      {showPlayOverlay && (
+          <div className="absolute z-20 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/55 border border-white/15 flex items-center justify-center text-white pointer-events-none cineclips-play-flash">
             {isPlaying ? (
-              <Play className="w-8 h-8 fill-white ml-1" />
+              <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-white ml-0.5" />
             ) : (
-              <Pause className="w-8 h-8 fill-white" />
+              <Pause className="w-7 h-7 sm:w-8 sm:h-8 fill-white" />
             )}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
-}
+});
 
 /** Botão de ação — skill identidade (orb rail, modo limpo) */
-function ActionBtn({
+const ActionBtn = memo(function ActionBtn({
   icon: Icon,
   label,
   onClick,
@@ -285,13 +322,12 @@ function ActionBtn({
   active?: boolean;
 }) {
   return (
-    <motion.button
+    <button
       type="button"
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
-      whileTap={{ scale: 0.9 }}
       className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
       aria-label={label || (variant === 'share' ? 'Enviar' : variant)}
     >
@@ -303,9 +339,9 @@ function ActionBtn({
         />
       </span>
       {label !== '' && <span className="cineclips-action-label">{label}</span>}
-    </motion.button>
+    </button>
   );
-}
+});
 
 /** Drawer / Sheet de Comentários Moderno */
 function CommentsSheet({
@@ -467,13 +503,15 @@ export default function CineClipsPage({
     null
   );
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([]);
-  const [showBetaNotice, setShowBetaNotice] = useState(true);
+  const [showBetaNotice, setShowBetaNotice] = useState(() => !readBetaDismissed());
 
   const feedRef = useRef<HTMLDivElement>(null);
   const slideHeightRef = useRef(0);
   const activeIndexRef = useRef(0);
   const watchTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const scrollingRef = useRef(false);
+  const scrollRafRef = useRef(0);
+  const preloadLinkRef = useRef<HTMLLinkElement | null>(null);
 
   useBodyScrollLock(true);
   activeIndexRef.current = activeIndex;
@@ -525,20 +563,56 @@ export default function CineClipsPage({
 
     const onScroll = () => {
       if (scrollingRef.current) return;
-      const h = slideHeightRef.current || feed.clientHeight;
-      if (!h) return;
-      const idx = Math.round(feed.scrollTop / h);
-      const clamped = Math.max(0, Math.min(idx, clips.length - 1));
-      if (clamped !== activeIndexRef.current) {
-        activeIndexRef.current = clamped;
-        setActiveIndex(clamped);
-      }
-      if (clamped >= clips.length - 3 && nextCursor) loadMore();
+      cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = requestAnimationFrame(() => {
+        const h = slideHeightRef.current || feed.clientHeight;
+        if (!h) return;
+        const idx = Math.round(feed.scrollTop / h);
+        const clamped = Math.max(0, Math.min(idx, clips.length - 1));
+        if (clamped !== activeIndexRef.current) {
+          activeIndexRef.current = clamped;
+          setActiveIndex(clamped);
+        }
+        if (clamped >= clips.length - 2 && nextCursor) loadMore();
+      });
     };
 
     feed.addEventListener('scroll', onScroll, { passive: true });
-    return () => feed.removeEventListener('scroll', onScroll);
+    return () => {
+      feed.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(scrollRafRef.current);
+    };
   }, [clips.length, nextCursor, loadMore]);
+
+  const visibleRange = useMemo(() => {
+    const min = Math.max(0, activeIndex - SLIDE_WINDOW);
+    const max = Math.min(clips.length - 1, activeIndex + SLIDE_WINDOW);
+    return { min, max };
+  }, [activeIndex, clips.length]);
+
+  useEffect(() => {
+    const next = clips[activeIndex + 1];
+    if (!next?.videoUrl && !next?.thumbnailUrl) return;
+
+    const href = next.videoUrl || next.thumbnailUrl;
+    if (!href) return;
+
+    if (!preloadLinkRef.current) {
+      preloadLinkRef.current = document.createElement('link');
+      preloadLinkRef.current.rel = 'prefetch';
+      document.head.appendChild(preloadLinkRef.current);
+    }
+    preloadLinkRef.current.href = href;
+
+    return () => {
+      if (preloadLinkRef.current) preloadLinkRef.current.href = '';
+    };
+  }, [activeIndex, clips]);
+
+  const dismissBetaNotice = useCallback(() => {
+    persistBetaDismissed();
+    setShowBetaNotice(false);
+  }, []);
 
   useEffect(() => {
     const clip = clips[activeIndex];
@@ -615,7 +689,7 @@ export default function CineClipsPage({
       </AnimatePresence>
 
       {/* Desktop shell — sem blur ambiente para visual mais limpo */}
-      <div className="relative w-full h-full md:max-w-[420px] md:h-[92vh] md:rounded-3xl border-0 md:border md:border-white/10 bg-black shadow-2xl overflow-hidden flex flex-col">
+      <div className="cineclips-device">
         {/* Floating Top Header */}
         <header className="cineclips-header-minimal">
           <button
@@ -658,7 +732,7 @@ export default function CineClipsPage({
         ) : clips.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <div className="w-16 h-16 rounded-full bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
-              <Sparkles className="w-8 h-8" />
+              <Film className="w-8 h-8" />
             </div>
             <h3 className="text-base font-bold text-white">Nenhum clip por aqui</h3>
             <p className="text-xs text-zinc-400 max-w-xs">
@@ -674,12 +748,17 @@ export default function CineClipsPage({
           </div>
         ) : (
           <div ref={feedRef} className="cineclips-feed w-full h-full flex-1">
-            {clips.map((clip, index) => (
+            {clips.map((clip, index) => {
+              const isActive = index === activeIndex;
+              const shouldLoad = index >= visibleRange.min && index <= visibleRange.max;
+
+              return (
               <article key={clip.id} className="cineclips-slide">
                 <div className="cineclips-slide-media">
                   <ClipPlayer
                     clip={clip}
-                    isActive={index === activeIndex}
+                    isActive={isActive}
+                    shouldLoad={shouldLoad}
                     muted={muted}
                     onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
                   />
@@ -738,7 +817,8 @@ export default function CineClipsPage({
                   </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -757,7 +837,7 @@ export default function CineClipsPage({
 
       {/* Beta Notice */}
       <AnimatePresence>
-        {showBetaNotice && <CineClipsBetaNotice onDismiss={() => setShowBetaNotice(false)} />}
+        {showBetaNotice && <CineClipsBetaNotice onDismiss={dismissBetaNotice} />}
       </AnimatePresence>
     </div>
   );
