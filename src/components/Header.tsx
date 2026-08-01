@@ -466,16 +466,16 @@ export default function Header({
             <Suspense fallback={<div className="flex-1 min-h-0 bg-neutral-950" aria-hidden />}>
               <div className="flex flex-col flex-1 min-h-0 h-full w-full">
                 <ProfilePanel
-              user={user}
-              currentTab={currentTab}
-              gamificationData={gamificationData}
-              onClose={() => setShowProfileMenu(false)}
-              onNavigate={setCurrentTab}
-              onOpenGamification={onOpenGamification}
-              onLogout={handleLogout}
-              onOpenAuth={onOpenAuth}
-              onRequestCreator={() => setShowRequestModal(true)}
-              onUpdateUser={setUser}
+                  user={user}
+                  currentTab={currentTab}
+                  gamificationData={gamificationData}
+                  onClose={() => setShowProfileMenu(false)}
+                  onNavigate={setCurrentTab}
+                  onOpenGamification={onOpenGamification}
+                  onLogout={handleLogout}
+                  onOpenAuth={onOpenAuth}
+                  onRequestCreator={() => setShowRequestModal(true)}
+                  onUpdateUser={setUser}
                 />
               </div>
             </Suspense>
