@@ -1,5 +1,7 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Bell, Play, User, Check, X, Youtube, Heart, Zap } from 'lucide-react';
+import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
+import HeaderNotificationButton from './header/HeaderNotificationButton.tsx';
+import HeaderClipsButton from './header/HeaderClipsButton.tsx';
 import { UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import CineReactLogo from './CineReactLogo.tsx';
@@ -220,18 +222,7 @@ export default function Header({
 
               {/* DESKTOP NAV */}
               <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
-                <button
-                  id="nav-cineclips"
-                  onClick={openCineClips}
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                    isCineClipsActive
-                      ? 'bg-cine-accent/15 text-cine-accent-light border border-cine-accent/35 shadow-sm shadow-cine-accent/10'
-                      : 'border border-transparent hover:text-cine-accent-light hover:bg-cine-accent/10'
-                  }`}
-                >
-                  <Zap className="w-3 h-3" strokeWidth={2.25} />
-                  CineClips
-                </button>
+                <HeaderClipsButton active={isCineClipsActive} onClick={openCineClips} />
                 <button 
                   id="nav-inicio"
                   onClick={() => setCurrentTab('inicio')} 
@@ -306,25 +297,24 @@ export default function Header({
             </div>
 
             {/* RIGHT SECTION: Controls */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+              <HeaderClipsButton
+                id="nav-cineclips-mobile"
+                variant="icon"
+                active={isCineClipsActive}
+                onClick={openCineClips}
+                className="md:hidden"
+              />
 
-              {/* BELL */}
               <div className="relative">
-                <button 
-                  id="notification-toggle" 
+                <HeaderNotificationButton
+                  active={showNotifications}
+                  unreadCount={unreadCount}
                   onClick={() => {
                     setShowNotifications(!showNotifications);
                     setShowProfileMenu(false);
-                  }} 
-                  className={`p-2 text-zinc-400 hover:text-white rounded-lg transition-all duration-200 ${
-                    showNotifications ? 'bg-neutral-900 text-white border border-neutral-800/80' : 'hover:bg-neutral-900/40 border border-transparent'
-                  }`}
-                >
-                  <Bell className="w-4.5 h-4.5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cine-accent-light rounded-full ring-2 ring-cine-bg animate-pulse" />
-                  )}
-                </button>
+                  }}
+                />
 
                 <AnimatePresence>
                   {showNotifications && (
