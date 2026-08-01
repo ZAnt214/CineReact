@@ -21,7 +21,7 @@ import CineReactLogo from './CineReactLogo.tsx';
 import PlaybackPageHeader from './playback/PlaybackPageHeader.tsx';
 import PlaybackVideoShelf from './playback/PlaybackVideoShelf.tsx';
 import { PLAYBACK_SHELF_LIMIT, PLAYBACK_SIDEBAR_LIMIT } from '../constants/playback.ts';
-import { findOfficialCreatorEmailForChannel } from '../gamification/publicUserProfile.ts';
+import { isChannelVerifiedOnClient } from '../utils/channelVerification.ts';
 
 const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
 
@@ -197,10 +197,7 @@ export default function PlaybackPage({
       )
     : undefined;
 
-  const isChannelVerified = Boolean(
-    channelObra &&
-      findOfficialCreatorEmailForChannel(channelObra.id, channelObra.officialCreatorEmail)
-  );
+  const isChannelVerified = isChannelVerifiedOnClient(channelObra);
 
   const onUpdateProgressRef = useRef(onUpdateProgress);
   useEffect(() => {
