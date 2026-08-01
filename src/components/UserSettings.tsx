@@ -4,6 +4,7 @@ import { UserState, CreatorSocialLinks } from '../types.ts';
 import { motion } from 'motion/react';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
 import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
+import DonorBadge from './profile/DonorBadge.tsx';
 
 interface UserSettingsProps {
   user: UserState;
@@ -208,10 +209,6 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
             {/* Profile Avatar Live Preview */}
             <div className="space-y-4">
               <div className="relative group">
-                {/* Glowing Aura if Donor */}
-                {user.isDonor && (
-                  <div className="absolute -inset-1 rounded-full border-2 border-cine-accent/50" />
-                )}
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-neutral-800 bg-neutral-950 flex items-center justify-center mx-auto">
                   {avatarUrl ? (
                     <img 
@@ -232,12 +229,9 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
 
               {/* User Name with customization based on Donor Status */}
               <div>
-                <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
-                  user.isDonor 
-                    ? "text-cine-accent font-black" 
-                    : "text-white"
-                }`}>
+                <h3 className="text-lg font-black tracking-wide flex items-center justify-center gap-2 text-white flex-wrap">
                   {user.nome}
+                  {user.isDonor && <DonorBadge size="md" />}
                 </h3>
                 <p className="text-zinc-500 text-[10px] font-mono">{user.email}</p>
               </div>
@@ -248,15 +242,10 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
               <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
               
               {user.isDonor ? (
-                <div className="bg-cine-surface/50 border border-cine-accent/30 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-cine-accent/10 blur-xl rounded-full" />
-                  
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-[10px] font-extrabold uppercase tracking-widest">
-                    <Star className="w-3 h-3 text-cine-accent-light animate-spin-slow" />
-                    APOIADOR VIP
-                  </div>
+                <div className="border border-amber-400/25 rounded-xl p-4 text-center space-y-2 bg-neutral-950/60">
+                  <DonorBadge size="md" className="mx-auto" />
                   <p className="text-[11px] text-zinc-400 leading-normal">
-                    Seu nome brilha com destaque! Você tem a tag exclusiva de doador além do seu nome estilizado em tons de amarelo e dourado. Obrigado por apoiar o CineReact!
+                    Sua tag de apoiador aparece no perfil e nos comentários. Obrigado por apoiar o CineReact!
                   </p>
                 </div>
               ) : (

@@ -8,6 +8,7 @@ import ProfileAvatar from './ProfileAvatar.tsx';
 import ProfileSurface from './ProfileSurface.tsx';
 import ProfileThemeScope from './ProfileThemeScope.tsx';
 import ProfileNameRow from './ProfileNameRow.tsx';
+import DonorBadge from './DonorBadge.tsx';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import { RewardPreviewThumb } from '../rewards/RewardPreview.tsx';
 import { VERIFIED_PROFILE_BADGE_ID } from '../../data/rewardsCatalog.ts';
@@ -236,15 +237,13 @@ export default function ProfilePanel({
                       Admin
                     </span>
                   )}
-                  <span
-                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${
-                      user.isDonor
-                        ? 'bg-cine-accent/10 text-cine-cream border-cine-accent/25'
-                        : 'bg-neutral-900/60 text-zinc-500 border-neutral-800'
-                    }`}
-                  >
-                    {user.isDonor ? 'Apoiador VIP' : 'Conta gratuita'}
-                  </span>
+                  {user.isDonor ? (
+                    <DonorBadge size="md" />
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border bg-neutral-900/60 text-zinc-500 border-neutral-800">
+                      Conta gratuita
+                    </span>
+                  )}
                 </div>
               </ProfileSurface>
 
