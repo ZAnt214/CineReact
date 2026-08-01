@@ -14,6 +14,7 @@ import type {
 } from '../types/cineclips.ts';
 import { GamificationProfile } from '../types/gamification.ts';
 import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/admin.ts';
+import type { DonationRequest } from '../types/donations.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
@@ -75,6 +76,7 @@ interface DbSchema {
   cineClipReports: CineClipReport[];
   cineClipImportJobs: CineClipImportJob[];
   cineClipWatchHistory: CineClipWatchEvent[];
+  donationRequests: DonationRequest[];
 }
 
 function initDb(): DbSchema {
@@ -129,6 +131,11 @@ function initDb(): DbSchema {
         parsed.cineClipReports = [];
         parsed.cineClipImportJobs = [];
         parsed.cineClipWatchHistory = [];
+        saveDb(parsed);
+      }
+
+      if (!parsed.donationRequests) {
+        parsed.donationRequests = [];
         saveDb(parsed);
       }
 
@@ -196,6 +203,7 @@ function initDb(): DbSchema {
     cineClipReports: [],
     cineClipImportJobs: [],
     cineClipWatchHistory: [],
+    donationRequests: [],
   };
 
   saveDb(initialDb);
@@ -221,6 +229,7 @@ let dbCache: DbSchema = {
   cineClipReports: [],
   cineClipImportJobs: [],
   cineClipWatchHistory: [],
+  donationRequests: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1402,6 +1411,49 @@ export const localDb = {
     if (youtubeId && clips.some((c) => c.youtubeId === youtubeId || c.id === youtubeId)) return true;
     if (sourceUrl && clips.some((c) => c.sourceUrl === sourceUrl)) return true;
     return false;
+  },
+
+  createDonationRequest: (data: Omit<DonationRequest, 'id' | 'requestedAt' | 'status'>): DonationRequest => {
+    if (!dbCache.donationRequests) dbCache.donationRequests = [];
+    const request: DonationRequest = {
+      ...data,
+      id: `don-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+    };
+    dbCache.donationRequests.unshift(request);
+    saveDb(dbCache, true);
+    return request;
+  },
+
+  getDonationRequests: (status?: DonationRequest['status']): DonationRequest[] => {
+    const list = dbCache.donationRequests || [];
+    if (!status) return [...list];
+    return list.filter((r) => r.status === status);
+  },
+
+  getLatestDonationRequestForUser: (email: string): DonationRequest | null => {
+    const key = email.toLowerCase();
+    const list = dbCache.donationRequests || [];
+    return list.find((r) => r.usuarioEmail.toLowerCase() === key) || null;
+  },
+
+  getPendingDonationRequestForUser: (email: string): DonationRequest | null => {
+    const key = email.toLowerCase();
+    const list = dbCache.donationRequests || [];
+    return list.find((r) => r.usuarioEmail.toLowerCase() === key && r.status === 'pending') || null;
+  },
+
+  updateDonationRequest: (
+    id: string,
+    updates: Partial<Pick<DonationRequest, 'status' | 'reviewedAt' | 'reviewedBy' | 'adminNote'>>
+  ): DonationRequest | null => {
+    if (!dbCache.donationRequests) dbCache.donationRequests = [];
+    const idx = dbCache.donationRequests.findIndex((r) => r.id === id);
+    if (idx < 0) return null;
+    dbCache.donationRequests[idx] = { ...dbCache.donationRequests[idx], ...updates };
+    saveDb(dbCache, true);
+    return dbCache.donationRequests[idx];
   },
 
   exportDbSnapshot: (): DbSchema => {

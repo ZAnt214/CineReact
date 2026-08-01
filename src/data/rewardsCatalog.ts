@@ -354,6 +354,72 @@ export const CREATOR_PROGRAM_ART_BUNDLE_ID = 'creator-program-art';
 export const VERIFIED_PROFILE_BADGE_ID = 'badge-perfil-verificado-oficial';
 export const LEGACY_CREATOR_PROGRAM_TAG_ID = 'tag-arte-programa-criadores';
 
+export const DONOR_VIP_BUNDLE_ID = 'donor-vip-bundle';
+
+export const DONOR_VIP_REWARD_IDS = [
+  'theme-apoiador-cinereact',
+  'frame-apoiador-cinereact',
+  'title-apoiador-cinereact',
+  'badge-apoiador-vip',
+] as const;
+
+export const DONOR_VIP_ITEMS: RewardItemDefinition[] = [
+  {
+    id: 'theme-apoiador-cinereact',
+    name: 'Tema Apoiador',
+    description: 'Paleta cream e cyan exclusiva para quem apoia o CineReact.',
+    category: 'theme',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'donation',
+    obtainHint: 'Apoie o CineReact com a doação VIP',
+    bundleId: DONOR_VIP_BUNDLE_ID,
+    limited: true,
+    previewGradient: 'from-cyan-950 via-neutral-950 to-black',
+    visualStyle: 'gold',
+  },
+  {
+    id: 'frame-apoiador-cinereact',
+    name: 'Moldura Apoiador',
+    description: 'Anel dourado com brilho cyan para apoiadores VIP.',
+    category: 'frame',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'donation',
+    obtainHint: 'Apoie o CineReact com a doação VIP',
+    bundleId: DONOR_VIP_BUNDLE_ID,
+    limited: true,
+    previewClass: 'ring-2 ring-cine-accent shadow-[0_0_22px_rgba(56,189,248,0.35)]',
+    animated: true,
+    visualStyle: 'gold',
+  },
+  {
+    id: 'title-apoiador-cinereact',
+    name: 'Apoiador CineReact',
+    description: 'Título exclusivo exibido no seu perfil.',
+    category: 'title',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'donation',
+    obtainHint: 'Apoie o CineReact com a doação VIP',
+    bundleId: DONOR_VIP_BUNDLE_ID,
+    limited: true,
+  },
+  {
+    id: 'badge-apoiador-vip',
+    name: 'Selo Apoiador VIP',
+    description: 'Emblema premium de apoiador oficial.',
+    category: 'badge',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'donation',
+    obtainHint: 'Apoie o CineReact com a doação VIP',
+    bundleId: DONOR_VIP_BUNDLE_ID,
+    limited: true,
+    visualStyle: 'gold',
+  },
+];
+
 export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
   {
     id: 'theme-atelie-visionario',
@@ -645,6 +711,7 @@ export const REWARDS_CATALOG: RewardItemDefinition[] = [
 
   ...CREATOR_TAGS,
   ...CREATOR_PROGRAM_ART_ITEMS,
+  ...DONOR_VIP_ITEMS,
   ...SEASONAL,
 ];
 

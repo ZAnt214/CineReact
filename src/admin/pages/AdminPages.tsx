@@ -2,7 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Users, Film, MessageSquare, Eye, UserPlus, Activity, Plus, Trash2, X,
   Shield, Award, Zap, Pin, Calendar, DollarSign, Save, Download, Loader2, Search, Ban, Percent,
+  Heart, CheckCircle2, Clock, XCircle,
 } from 'lucide-react';
+import type { DonationRequest } from '../../types/donations.ts';
 import type { AdminAnalytics, AdminCategory, AdminConfig, PlatformSettings } from '../../types/admin.ts';
 import { useAdminApi } from '../hooks/useAdminApi.ts';
 import { AdminStatCard, AdminPanelCard } from '../components/AdminUi.tsx';
@@ -437,22 +439,171 @@ export function MonetizationAdminPage({ email }: { email: string }) {
   const { request } = useAdminApi(email);
   const [data, setData] = useState<any>(null);
   const [coupon, setCoupon] = useState({ code: '', discountPercent: 10, description: '', maxUses: 100 });
+  const [donations, setDonations] = useState<DonationRequest[]>([]);
+  const [pendingDonationCount, setPendingDonationCount] = useState(0);
+  const [donationFilter, setDonationFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [processingDonation, setProcessingDonation] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<DonationRequest | null>(null);
+  const [rejectNote, setRejectNote] = useState('');
 
   const load = useCallback(async () => {
-    const res = await request('/api/admin/monetization');
-    if (res) setData(res);
-  }, [request]);
+    const [monetization, donationRes, pendingRes] = await Promise.all([
+      request('/api/admin/monetization'),
+      request<{ requests: DonationRequest[] }>(
+        donationFilter === 'all'
+          ? '/api/admin/donations'
+          : `/api/admin/donations?status=${donationFilter}`,
+      ),
+      request<{ requests: DonationRequest[] }>('/api/admin/donations?status=pending'),
+    ]);
+    if (monetization) setData(monetization);
+    if (donationRes) setDonations(donationRes.requests || []);
+    if (pendingRes) setPendingDonationCount(pendingRes.requests?.length ?? 0);
+  }, [request, donationFilter]);
 
   useEffect(() => { load(); }, [load]);
 
+  const approveDonation = async (id: string) => {
+    setProcessingDonation(id);
+    await request(
+      `/api/admin/donations/${id}/approve`,
+      { method: 'POST' },
+      'Doação aprovada. VIP e cosméticos concedidos ao usuário.',
+    );
+    setProcessingDonation(null);
+    load();
+  };
+
+  const rejectDonation = async () => {
+    if (!rejectTarget) return;
+    setProcessingDonation(rejectTarget.id);
+    await request(
+      `/api/admin/donations/${rejectTarget.id}/reject`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: rejectNote.trim() || undefined }),
+      },
+      'Doação rejeitada. O usuário foi notificado.',
+    );
+    setProcessingDonation(null);
+    setRejectTarget(null);
+    setRejectNote('');
+    load();
+  };
+
+  const statusBadge = (status: DonationRequest['status']) => {
+    if (status === 'pending') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[10px] font-bold uppercase">
+          <Clock className="w-3 h-3" /> Pendente
+        </span>
+      );
+    }
+    if (status === 'approved') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold uppercase">
+          <CheckCircle2 className="w-3 h-3" /> Aprovado
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 text-[10px] font-bold uppercase">
+        <XCircle className="w-3 h-3" /> Rejeitado
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <PageHeader title="Monetização" subtitle="Premium, cupons e receita" />
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <PageHeader title="Monetização" subtitle="Premium, cupons, doações VIP e receita" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <AdminStatCard label="Receita total" value={`R$ ${(data?.revenue || 0).toFixed(2)}`} icon={DollarSign} accent="text-green-400" />
         <AdminStatCard label="Premium ativos" value={data?.activePremium ?? 0} icon={Users} />
         <AdminStatCard label="Cupons" value={data?.coupons?.length ?? 0} icon={Percent} />
+        <AdminStatCard
+          label="Doações pendentes"
+          value={pendingDonationCount}
+          icon={Heart}
+          accent="text-amber-400"
+        />
       </div>
+
+      <AdminPanelCard title="Fila de doações VIP (R$ 4,99)">
+        <p className="text-xs text-zinc-500 mb-4">
+          Confirme o pagamento no Mercado Pago antes de aprovar. Ao aprovar, o usuário recebe selo VIP, cosméticos e notificação.
+        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {([
+            ['pending', 'Pendentes'],
+            ['approved', 'Aprovadas'],
+            ['rejected', 'Rejeitadas'],
+            ['all', 'Todas'],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setDonationFilter(key)}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+                donationFilter === key
+                  ? 'bg-cine-accent text-black'
+                  : 'bg-neutral-900 text-zinc-400 border border-neutral-800 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {donations.length === 0 ? (
+          <p className="text-sm text-zinc-500 py-6 text-center">Nenhuma doação nesta fila.</p>
+        ) : (
+          <div className="space-y-3">
+            {donations.map((d) => (
+              <div
+                key={d.id}
+                className="rounded-xl border border-neutral-800 bg-neutral-950/70 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+              >
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-bold text-white truncate">{d.usuarioNome}</p>
+                    {statusBadge(d.status)}
+                  </div>
+                  <p className="text-xs text-zinc-500 truncate">{d.usuarioEmail}</p>
+                  <p className="text-[11px] text-zinc-600">
+                    Pedido em {new Date(d.requestedAt).toLocaleString('pt-BR')}
+                    {d.reviewedAt && ` · Revisado em ${new Date(d.reviewedAt).toLocaleString('pt-BR')}`}
+                  </p>
+                  {d.adminNote && (
+                    <p className="text-[11px] text-rose-300/90 mt-1">Nota: {d.adminNote}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-black text-cine-accent-light">
+                    R$ {d.amount.toFixed(2).replace('.', ',')}
+                  </span>
+                  {d.status === 'pending' && (
+                    <>
+                      <ActionBtn
+                        label={processingDonation === d.id ? '...' : 'Aprovar'}
+                        onClick={() => approveDonation(d.id)}
+                      />
+                      <ActionBtn
+                        label="Rejeitar"
+                        danger
+                        onClick={() => {
+                          setRejectTarget(d);
+                          setRejectNote('');
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </AdminPanelCard>
+
       <AdminPanelCard title="Criar cupom de desconto">
         <div className="grid sm:grid-cols-2 gap-2 mb-3">
           <input value={coupon.code} onChange={e => setCoupon({ ...coupon, code: e.target.value })} placeholder="CÓDIGO" className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-sm uppercase" />
@@ -463,6 +614,30 @@ export function MonetizationAdminPage({ email }: { email: string }) {
           <div key={c.id} className="flex justify-between p-2 rounded-lg bg-neutral-950 text-sm font-mono"><span>{c.code} (-{c.discountPercent}%)</span><button type="button" onClick={() => request(`/api/admin/coupons/${c.id}`, { method: 'DELETE' }).then(load)} className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></button></div>
         ))}</div>
       </AdminPanelCard>
+
+      <AdminConfirmModal
+        open={!!rejectTarget}
+        title="Rejeitar doação"
+        message={`Rejeitar o pedido de ${rejectTarget?.usuarioNome}? O usuário será notificado.`}
+        confirmLabel="Rejeitar"
+        danger
+        onConfirm={rejectDonation}
+        onCancel={() => {
+          setRejectTarget(null);
+          setRejectNote('');
+        }}
+      >
+        <label className="block mt-3">
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Motivo (opcional)</span>
+          <textarea
+            value={rejectNote}
+            onChange={(e) => setRejectNote(e.target.value)}
+            rows={3}
+            placeholder="Ex.: Pagamento não encontrado no Mercado Pago"
+            className="mt-1 w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-sm resize-none"
+          />
+        </label>
+      </AdminConfirmModal>
     </div>
   );
 }

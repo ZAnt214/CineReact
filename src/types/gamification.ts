@@ -47,7 +47,8 @@ export type UnlockMethod =
   | 'event'
   | 'streak'
   | 'legacy'
-  | 'creator_program_art';
+  | 'creator_program_art'
+  | 'donation';
 
 export type RewardVisualStyle =
   | 'amber'
