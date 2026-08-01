@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   Film, Play, User, LogOut, Settings, Bookmark, ShieldAlert,
   ChevronRight, UtensilsCrossed, Trophy, Youtube, Star, Flame, Zap, Palette,
-  Sparkles, X, BadgeCheck, Crown, ArrowRight,
+  X, BadgeCheck, Crown, ArrowRight, Film, Check,
 } from 'lucide-react';
 import GamificationBar from '../GamificationBar.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
@@ -172,7 +172,7 @@ function SpotlightCard({
         <ul className="mt-4 space-y-1.5">
           {perks.map((perk) => (
             <li key={perk} className="flex items-center gap-2 text-[11px] text-zinc-300">
-              <Sparkles className={`w-3 h-3 shrink-0 ${isDonor ? 'text-amber-300' : 'text-cine-accent-light'}`} />
+              <Check className={`w-3 h-3 shrink-0 ${isDonor ? 'text-amber-300' : 'text-cine-accent-light'}`} />
               {perk}
             </li>
           ))}
@@ -286,7 +286,7 @@ export default function ProfilePanel({
       <header className="sticky top-0 z-20 border-b border-neutral-800/40 bg-neutral-950/80 backdrop-blur-xl">
         <div className="cine-container h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cine-accent-light" />
+            <Film className="w-4 h-4 text-cine-accent-light" />
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Sua conta</p>
               <h1 className="text-sm font-bold profile-text">{greeting()}, {firstName}</h1>

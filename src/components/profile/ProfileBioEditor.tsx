@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, Loader2, Pencil, Sparkles } from 'lucide-react';
+import { Check, Loader2, Pencil, PenLine } from 'lucide-react';
 
 const MAX_BIO = 180;
 
@@ -149,7 +149,7 @@ export default function ProfileBioEditor({ bio, email, onSaved, className = '' }
 
       {isEmpty ? (
         <div className="flex items-start gap-2.5 pr-14">
-          <Sparkles className="w-4 h-4 text-cine-accent-light shrink-0 mt-0.5" />
+          <PenLine className="w-4 h-4 text-cine-accent-light shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-cine-cream/90">Escreva sua bio</p>
             <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
