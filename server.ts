@@ -4,6 +4,7 @@ import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
+import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
 import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
@@ -2926,7 +2927,13 @@ app.post("/api/usuarios/:email/vip", async (req, res) => {
     const targetEmail = decodeURIComponent(req.params.email);
     const { isDonor } = req.body;
 
-    const updated = await localDb.updateUsuario(targetEmail, { isDonor: !!isDonor });
+    if (isDonor) {
+      grantDonorVipBenefits(targetEmail, 'admin-vip');
+      const user = localDb.findUsuarioByEmailSync(targetEmail);
+      return res.json({ success: true, user: sanitizeUsuario(user) });
+    }
+
+    const updated = await localDb.updateUsuario(targetEmail, { isDonor: false });
     if (!updated) {
       return res.status(404).json({ error: "Usuário não encontrado." });
     }

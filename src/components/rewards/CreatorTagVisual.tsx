@@ -1,5 +1,7 @@
 import React from 'react';
 import { Heart, Users, Crown, Radio } from 'lucide-react';
+import DonorBadge from '../profile/DonorBadge.tsx';
+import { DONOR_TAG_ID } from '../../data/rewardsCatalog.ts';
 
 type TagTier = 'fan' | 'squad' | 'vip' | 'community';
 
@@ -34,6 +36,16 @@ export default function CreatorTagVisual({
   size = 'md',
   className = '',
 }: CreatorTagVisualProps) {
+  const badgeSizes = {
+    sm: 'sm' as const,
+    md: 'md' as const,
+    lg: 'md' as const,
+  };
+
+  if (id === DONOR_TAG_ID) {
+    return <DonorBadge size={badgeSizes[size]} className={className} />;
+  }
+
   const tier = getTagTier(id, name);
   const tierCfg = TIER_CONFIG[tier];
   const TierIcon = tierCfg.Icon;

@@ -355,11 +355,13 @@ export const VERIFIED_PROFILE_BADGE_ID = 'badge-perfil-verificado-oficial';
 export const LEGACY_CREATOR_PROGRAM_TAG_ID = 'tag-arte-programa-criadores';
 
 export const DONOR_VIP_BUNDLE_ID = 'donor-vip-bundle';
+export const DONOR_TAG_ID = 'tag-apoiador-vip';
 
 export const DONOR_VIP_REWARD_IDS = [
   'theme-apoiador-cinereact',
   'frame-apoiador-cinereact',
   'title-apoiador-cinereact',
+  'tag-apoiador-vip',
   'badge-apoiador-vip',
 ] as const;
 
@@ -404,6 +406,20 @@ export const DONOR_VIP_ITEMS: RewardItemDefinition[] = [
     obtainHint: 'Apoie o CineReact com a doação VIP',
     bundleId: DONOR_VIP_BUNDLE_ID,
     limited: true,
+  },
+  {
+    id: 'tag-apoiador-vip',
+    name: 'Apoiador',
+    description: 'Tag dourada com coração exibida ao lado do seu nome em todo o site.',
+    category: 'tag',
+    rarity: 'exclusivo',
+    cost: 0,
+    unlockMethod: 'donation',
+    obtainHint: 'Apoie o CineReact com a doação VIP',
+    bundleId: DONOR_VIP_BUNDLE_ID,
+    limited: true,
+    creatorName: 'CineReact',
+    creatorColors: { from: '#fbbf24', to: '#f59e0b', text: '#fffbeb' },
   },
   {
     id: 'badge-apoiador-vip',
