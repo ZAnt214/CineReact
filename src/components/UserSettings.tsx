@@ -388,8 +388,7 @@ function UserSettings({
                         <FieldLabel htmlFor={`social-${key}`}>{label}</FieldLabel>
                         <input
                           id={`social-${key}`}
-                          type="url"
-                          inputMode="url"
+                          type="text"
                           autoComplete="off"
                           value={socialLinks[key] || ''}
                           onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
