@@ -245,6 +245,7 @@ export const UNLOCK_METHOD_INFO: Record<
   streak: { label: 'Sequência diária', shortLabel: 'Sequência' },
   legacy: { label: 'Legado', shortLabel: 'Legado' },
   creator_program_art: { label: 'Programa de Criadores — Arte', shortLabel: 'Arte oficial' },
+  donation: { label: 'Apoio VIP', shortLabel: 'Doação' },
 };
 
 export function getVisualStyle(style?: RewardVisualStyle): VisualStyleConfig {
@@ -304,7 +305,7 @@ export function formatObtainText(
 ): string {
   if (item.owned) return 'Você já possui este item';
   const method = item.unlockMethod || 'shop';
-  const info = UNLOCK_METHOD_INFO[method];
+  const info = UNLOCK_METHOD_INFO[method] || UNLOCK_METHOD_INFO.default;
   if (method === 'shop' && item.cost > 0) {
     return `${info.label} · ${item.cost} Spotlight`;
   }

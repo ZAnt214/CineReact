@@ -15,7 +15,7 @@ import { motion } from 'motion/react';
 import type { UserState } from '../types.ts';
 import { DONATION_AMOUNT_BRL } from '../types/donations.ts';
 import { useDonationStatus } from '../hooks/useDonations.ts';
-import { getDonorRewardPreviews } from '../gamification/donorRewards.ts';
+import { getDonorRewardPreviews } from '../data/rewardsCatalog.ts';
 
 interface DonationsPageProps {
   user: UserState;

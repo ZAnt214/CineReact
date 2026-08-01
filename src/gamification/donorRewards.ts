@@ -1,6 +1,6 @@
 import { localDb } from '../db/local_db.ts';
 import type { PaymentRecord } from '../types/admin.ts';
-import { DONOR_VIP_ITEMS, DONOR_VIP_REWARD_IDS } from '../data/rewardsCatalog.ts';
+import { DONOR_VIP_REWARD_IDS } from '../data/rewardsCatalog.ts';
 import { unlockReward, hasReward } from './rewardsEngine.ts';
 import type { GamificationProfile } from '../types/gamification.ts';
 
@@ -47,14 +47,4 @@ export function recordDonationPayment(email: string, amount: number, requestId: 
   };
   config.payments.unshift(payment);
   localDb.saveAdminConfig(config);
-}
-
-export function getDonorRewardPreviews() {
-  return DONOR_VIP_ITEMS.map((item) => ({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    category: item.category,
-    rarity: item.rarity,
-  }));
 }
