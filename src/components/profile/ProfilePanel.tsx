@@ -281,11 +281,11 @@ export default function ProfilePanel({
       loadout={displayLoadout}
       isDonor={!!user.isDonor}
       variant="fullscreen"
-      className="flex flex-col flex-1 min-h-0 h-full"
+      className="flex flex-col flex-1 min-h-0 h-full w-full"
     >
       <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
 
-      <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y [contain:strict]">
+      <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-cine-accent/[0.04]" aria-hidden />
 
         {!user.isLoggedIn ? (
