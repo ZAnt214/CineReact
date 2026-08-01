@@ -117,7 +117,7 @@ export default function GamificationPage({
       className="cine-container py-24 pb-32 space-y-8"
     >
       {/* Hero */}
-      <ProfileSurface loadout={profile?.loadout} variant="hero" className="border-neutral-800/60">
+      <ProfileSurface loadout={profile?.loadout} isDonor={!!user.isDonor} variant="hero" className="border-neutral-800/60">
         <div className="relative flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex items-center gap-5">
             <div className="relative">
@@ -126,6 +126,7 @@ export default function GamificationPage({
                 alt={user.nome}
                 size="lg"
                 loadout={profile?.loadout}
+                isDonor={!!user.isDonor}
               />
               {profile?.featuredInfluencer && (
                 <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-white-light text-[9px] font-black text-black uppercase z-20">
@@ -135,7 +136,14 @@ export default function GamificationPage({
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-cine-accent/70 mb-1">CineReact Club</p>
-              <ProfileNameRow name={user.nome} loadout={profile?.loadout} nameSize="lg" align="start" className="w-full" />
+              <ProfileNameRow
+                name={user.nome}
+                isDonor={!!user.isDonor}
+                loadout={profile?.loadout}
+                nameSize="lg"
+                align="start"
+                className="w-full"
+              />
               {user.descricao && (
                 <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">{user.descricao}</p>
               )}
@@ -384,11 +392,13 @@ export default function GamificationPage({
                       alt={entry.username}
                       size="md"
                       profileDisplay={entry.publicProfile?.profileDisplay ?? entry.profileDisplay}
+                      isDonor={!!entry.isDonor || !!entry.publicProfile?.isDonor}
                       lite={!!entry.publicProfile?.isVerifiedCreator}
                     />
                     <div className="flex-1 min-w-0">
                       <ProfileNameRow
                         name={entry.username}
+                        isDonor={!!entry.isDonor || !!entry.publicProfile?.isDonor}
                         profileDisplay={entry.publicProfile?.profileDisplay ?? entry.profileDisplay}
                         nameSize="md"
                       />

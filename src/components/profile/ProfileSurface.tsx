@@ -5,6 +5,7 @@ import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamificat
 export interface ProfileSurfaceProps {
   loadout?: ProfileLoadout | null;
   profileDisplay?: PublicProfileDisplay | null;
+  isDonor?: boolean;
   variant?: 'hero' | 'panel' | 'preview';
   themed?: boolean;
   lite?: boolean;
@@ -17,6 +18,7 @@ export interface ProfileSurfaceProps {
 export default function ProfileSurface({
   loadout,
   profileDisplay,
+  isDonor = false,
   variant = 'preview',
   themed = true,
   lite = false,
@@ -38,7 +40,7 @@ export default function ProfileSurface({
   if (!themed) return card;
 
   return (
-    <ProfileThemeScope loadout={loadout} profileDisplay={profileDisplay} variant={lite ? 'lite' : 'default'}>
+    <ProfileThemeScope loadout={loadout} profileDisplay={profileDisplay} isDonor={isDonor} variant={lite ? 'lite' : 'default'}>
       {card}
     </ProfileThemeScope>
   );

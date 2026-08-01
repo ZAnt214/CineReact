@@ -47,12 +47,14 @@ export default function PublicCreatorProfile({
             alt={profile.nome}
             size={size === 'sm' ? 'lg' : 'xl'}
             profileDisplay={profile.profileDisplay}
+            isDonor={!!profile.isDonor}
             lite={lite}
             className="shrink-0"
           />
           <div className={`flex-1 min-w-0 ${isCenter ? 'w-full' : ''}`}>
             <ProfileNameRow
               name={profile.nome}
+              isDonor={!!profile.isDonor}
               profileDisplay={profile.profileDisplay}
               nameSize={size === 'sm' ? 'md' : 'lg'}
               align={align}

@@ -2234,9 +2234,11 @@ app.post("/api/comentarios", (req, res) => {
     });
     const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
     const publicProfile = getPublicUserProfile(usuarioEmail);
+    const userAcct = localDb.findUsuarioByEmailSync(usuarioEmail);
     res.status(201).json({
       ...novo,
-      avatar: localDb.findUsuarioByEmailSync(usuarioEmail)?.avatar || "",
+      isDonor: !!userAcct?.isDonor,
+      avatar: userAcct?.avatar || "",
       profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(usuarioEmail),
       publicProfile: publicProfile ?? undefined,
       gamificationReward,

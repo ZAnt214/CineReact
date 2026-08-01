@@ -1,3 +1,6 @@
+import type { PublicProfileDisplay } from './gamification.ts';
+import type { PublicUserProfile } from '../types.ts';
+
 export type CineClipSourceType = 'youtube' | 'tiktok' | 'instagram' | 'upload';
 export type CineClipStatus = 'draft' | 'processing' | 'published' | 'hidden' | 'rejected';
 export type CineClipImportStatus = 'queued' | 'processing' | 'completed' | 'failed';
@@ -43,6 +46,10 @@ export interface CineClipComment {
   likes: number;
   criadoEm: string;
   moderationStatus?: 'pending' | 'approved' | 'rejected' | 'hidden';
+  avatar?: string;
+  isDonor?: boolean;
+  profileDisplay?: PublicProfileDisplay;
+  publicProfile?: PublicUserProfile;
 }
 
 export interface CineClipLike {

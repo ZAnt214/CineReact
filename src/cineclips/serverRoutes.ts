@@ -16,7 +16,8 @@ import {
   getRelatedClips,
   deriveUserPreferences,
 } from './recommendation.ts';
-import { handleGamificationEvent } from '../gamification/serverHelpers.ts';
+import { handleGamificationEvent, getPublicProfileForEmail } from '../gamification/serverHelpers.ts';
+import { getPublicUserProfile } from '../gamification/publicUserProfile.ts';
 import { detectClipPlatform, platformLabel } from './platform.ts';
 import {
   downloadAndHostClip,
@@ -27,7 +28,18 @@ import {
 } from './downloader.ts';
 import { exportClipWithBranding } from './exportVideo.ts';
 
-type RequireAdmin = (req: Request, res: Response) => Promise<string | null>;
+function enrichCineClipComment(comment: CineClipComment) {
+  const userAcct = localDb.findUsuarioByEmailSync(comment.usuarioEmail);
+  const publicProfile = getPublicUserProfile(comment.usuarioEmail);
+  return {
+    ...comment,
+    isDonor: !!userAcct?.isDonor,
+    avatar: userAcct?.avatar || '',
+    profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(comment.usuarioEmail),
+    publicProfile: publicProfile ?? undefined,
+  };
+}
+
 
 async function adminOnly(requireAdmin: RequireAdmin, req: Request, res: Response): Promise<string | null> {
   const email = await requireAdmin(req, res);
@@ -579,7 +591,8 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
 
   app.get('/api/cineclips/:id/comments', (req, res) => {
     try {
-      res.json({ comments: localDb.getCineClipComments(req.params.id) });
+      const comments = localDb.getCineClipComments(req.params.id).map(enrichCineClipComment);
+      res.json({ comments });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -606,7 +619,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       localDb.addCineClipComment(comment);
       const gamificationReward = handleGamificationEvent(email, 'clip_comment', { clipId: req.params.id });
 
-      res.json({ comment, gamificationReward });
+      res.json({ comment: enrichCineClipComment(comment), gamificationReward });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

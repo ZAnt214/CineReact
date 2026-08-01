@@ -5,6 +5,7 @@ import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import ProfileAvatar from '../profile/ProfileAvatar.tsx';
 import ProfileSurface from '../profile/ProfileSurface.tsx';
 import ProfileNameRow from '../profile/ProfileNameRow.tsx';
+import { applyDonorLoadout } from '../../gamification/profileDisplay.ts';
 import type { InventoryItemView, ProfileLoadout } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
 
@@ -94,20 +95,26 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
     if (ok) setSaved(true);
   };
 
+  const displayDraft = useMemo(
+    () => applyDonorLoadout(draft, !!user.isDonor),
+    [draft, user.isDonor],
+  );
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
       <div className="space-y-4">
         <h2 className="text-lg font-black text-white">Pré-visualização ao vivo</h2>
-        <ProfileSurface loadout={draft} variant="preview" className="min-h-[420px]">
+        <ProfileSurface loadout={displayDraft} isDonor={!!user.isDonor} variant="preview" className="min-h-[420px]">
           <div className="flex flex-col items-center text-center">
             <ProfileAvatar
               photoUrl={user.avatar}
               alt={user.nome}
               size="lg"
-              loadout={draft}
+              loadout={displayDraft}
+              isDonor={!!user.isDonor}
               className="mb-4"
             />
-            <ProfileNameRow name={user.nome} loadout={draft} align="center" className="w-full" />
+            <ProfileNameRow name={user.nome} loadout={displayDraft} isDonor={!!user.isDonor} align="center" className="w-full" />
           </div>
         </ProfileSurface>
 

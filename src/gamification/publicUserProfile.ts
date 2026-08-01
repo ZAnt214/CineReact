@@ -1,6 +1,6 @@
 import { localDb } from '../db/local_db.ts';
 import { VERIFIED_PROFILE_BADGE_ID } from '../data/rewardsCatalog.ts';
-import { resolvePublicProfileDisplay } from './profileDisplay.ts';
+import { resolvePublicProfileDisplay, applyDonorLoadout, resolveUserProfileDisplay } from './profileDisplay.ts';
 import { hasReward, migrateProfile } from './rewardsEngine.ts';
 import { isVerifiedCreatorLoadout } from './verifiedCreator.ts';
 import { ensureDemoCreatorProfile, isDemoCreatorEmail } from './demoCreator.ts';
@@ -32,7 +32,9 @@ export function getPublicUserProfile(email: string): PublicUserProfile | null {
   if (!account) return null;
 
   const gamification = migrateProfile(localDb.getGamificationProfile(email));
-  const profileDisplay = resolvePublicProfileDisplay(gamification.loadout);
+  const isDonor = !!account.isDonor;
+  const loadout = applyDonorLoadout(gamification.loadout, isDonor);
+  const profileDisplay = resolvePublicProfileDisplay(loadout);
   const isVerifiedCreator = isVerifiedCreatorLoadout(gamification.loadout);
 
   const socialLinks = isVerifiedCreator
@@ -46,6 +48,7 @@ export function getPublicUserProfile(email: string): PublicUserProfile | null {
     descricao: account.descricao || '',
     socialLinks: hasSocialLinks(socialLinks) ? socialLinks : undefined,
     isVerifiedCreator,
+    isDonor,
     profileDisplay,
   };
 }

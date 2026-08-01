@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { User } from 'lucide-react';
 import { PremiumFrameRing } from '../rewards/PremiumRewardSurface.tsx';
 import { AvatarRewardVisual } from '../rewards/RewardPreview.tsx';
-import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
+import { resolveUserProfileDisplay } from '../../gamification/profileDisplay.ts';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 const DEFAULT_AVATAR =
@@ -27,6 +27,7 @@ export interface ProfileAvatarProps {
   lite?: boolean;
   className?: string;
   donorBadge?: boolean;
+  isDonor?: boolean;
 }
 
 function AvatarInner({
@@ -74,10 +75,11 @@ export default function ProfileAvatar({
   lite = false,
   className = '',
   donorBadge = false,
+  isDonor = false,
 }: ProfileAvatarProps) {
   const display = useMemo(
-    () => profileDisplay || resolvePublicProfileDisplay(loadout),
-    [profileDisplay, loadout]
+    () => profileDisplay || resolveUserProfileDisplay(loadout, isDonor || donorBadge),
+    [profileDisplay, loadout, isDonor, donorBadge]
   );
 
   const cfg = SIZE_MAP[size];

@@ -9,7 +9,7 @@ import {
   findOfficialCreatorEmailForChannel,
   getPublicUserProfile,
 } from './publicUserProfile.ts';
-import { resolvePublicProfileDisplay } from './profileDisplay.ts';
+import { resolvePublicProfileDisplay, resolveUserProfileDisplay, applyDonorLoadout } from './profileDisplay.ts';
 import {
   equipReward,
   ensureOwnerFullUnlock,
@@ -37,10 +37,17 @@ export function handleGamificationEvent(
 export function getGamificationMe(email: string) {
   const profile = localDb.getGamificationProfile(email);
   migrateProfile(profile);
+  const account = localDb.findUsuarioByEmailSync(email);
   ensureOwnerFullUnlock(profile);
   localDb.saveGamificationProfile(profile);
   const allProfiles = localDb.getAllGamificationProfiles();
   const enriched = enrichProfileResponse(profile);
+  if (account?.isDonor) {
+    enriched.profile = {
+      ...enriched.profile,
+      loadout: applyDonorLoadout(enriched.profile.loadout, true),
+    };
+  }
 
   const rankTypes: LeaderboardType[] = ['xp', 'influence', 'streak', 'watch_time', 'comments', 'discoverers', 'curators'];
   const rankPositions: Partial<Record<LeaderboardType, number>> = {};
@@ -61,7 +68,10 @@ export function getGamificationLeaderboard(type: LeaderboardType, limit = 20) {
 }
 
 export function getPublicProfileForEmail(email: string) {
-  return getPublicUserProfile(email)?.profileDisplay ?? resolvePublicProfileDisplay();
+  const account = localDb.findUsuarioByEmailSync(email);
+  const publicProfile = getPublicUserProfile(email);
+  if (publicProfile) return publicProfile.profileDisplay;
+  return resolveUserProfileDisplay(undefined, !!account?.isDonor);
 }
 
 export function purchaseCosmetic(email: string, itemId: string) {

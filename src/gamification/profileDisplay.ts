@@ -10,6 +10,42 @@ import type {
 
 const DEFAULT_LOADOUT = (): ProfileLoadout => ({ tags: [], badges: [] });
 
+const DONOR_LOADOUT = {
+  theme: 'theme-apoiador-cinereact',
+  frame: 'frame-apoiador-cinereact',
+  title: 'title-apoiador-cinereact',
+  badge: 'badge-apoiador-vip',
+} as const;
+
+/** Garante cosméticos VIP no loadout exibido para apoiadores. */
+export function applyDonorLoadout(
+  loadout?: ProfileLoadout | null,
+  isDonor = false,
+): ProfileLoadout {
+  const base = sanitizeLoadout(loadout);
+  if (!isDonor) return base;
+
+  const badges = [...base.badges];
+  if (!badges.includes(DONOR_LOADOUT.badge)) {
+    badges.unshift(DONOR_LOADOUT.badge);
+  }
+
+  return {
+    ...base,
+    theme: base.theme || DONOR_LOADOUT.theme,
+    frame: base.frame || DONOR_LOADOUT.frame,
+    title: base.title || DONOR_LOADOUT.title,
+    badges: badges.slice(0, 2),
+  };
+}
+
+export function resolveUserProfileDisplay(
+  loadout?: ProfileLoadout | null,
+  isDonor = false,
+): PublicProfileDisplay {
+  return resolvePublicProfileDisplay(applyDonorLoadout(loadout, isDonor));
+}
+
 export function sanitizeLoadout(loadout?: ProfileLoadout | null): ProfileLoadout {
   if (!loadout) return DEFAULT_LOADOUT();
   const result: ProfileLoadout = {
@@ -88,7 +124,8 @@ export function resolvePublicProfileDisplay(loadout?: ProfileLoadout | null): Pu
 
 export function getPublicProfileDisplayForEmail(
   getLoadout: (email: string) => ProfileLoadout | undefined | null,
-  email: string
+  email: string,
+  isDonor = false,
 ): PublicProfileDisplay {
-  return resolvePublicProfileDisplay(getLoadout(email));
+  return resolveUserProfileDisplay(getLoadout(email), isDonor);
 }

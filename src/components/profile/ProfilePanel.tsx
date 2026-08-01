@@ -11,7 +11,8 @@ import ProfileNameRow from './ProfileNameRow.tsx';
 import DonorBadge from './DonorBadge.tsx';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import { RewardPreviewThumb } from '../rewards/RewardPreview.tsx';
-import { VERIFIED_PROFILE_BADGE_ID } from '../../data/rewardsCatalog.ts';
+import { VERIFIED_PROFILE_BADGE_ID, getRewardById } from '../../data/rewardsCatalog.ts';
+import { applyDonorLoadout } from '../../gamification/profileDisplay.ts';
 import { isVerifiedCreatorLoadout } from '../../gamification/verifiedCreator.ts';
 import type { GamificationMeResponse } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
@@ -99,10 +100,16 @@ export default function ProfilePanel({
   const profile = gamificationData?.profile;
   const loadout = profile?.loadout;
   const isVerifiedCreator = isVerifiedCreatorLoadout(loadout);
-  const badgeItems = (loadout?.badges || [])
-    .map((id) => gamificationData?.inventory.find((i) => i.id === id))
-    .filter((b): b is NonNullable<typeof b> => !!b)
-    .filter((b) => b.id !== VERIFIED_PROFILE_BADGE_ID);
+  const displayLoadout = applyDonorLoadout(loadout, !!user.isDonor);
+  const badgeItems = (displayLoadout.badges || [])
+    .filter((id) => id !== VERIFIED_PROFILE_BADGE_ID)
+    .map((id) => {
+      const fromInventory = gamificationData?.inventory.find((i) => i.id === id);
+      if (fromInventory) return fromInventory;
+      const def = getRewardById(id);
+      return def ? { ...def, owned: true, equipped: true } : null;
+    })
+    .filter((b): b is NonNullable<typeof b> => !!b);
 
   const go = (tab: string, extra?: () => void) => {
     onNavigate(tab);
@@ -137,7 +144,7 @@ export default function ProfilePanel({
   }
 
   return (
-    <ProfileThemeScope loadout={loadout} variant="fullscreen" className="flex-1 flex flex-col min-h-dvh bg-neutral-950">
+    <ProfileThemeScope loadout={displayLoadout} isDonor={!!user.isDonor} variant="fullscreen" className="flex-1 flex flex-col min-h-dvh bg-neutral-950">
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-neutral-800/60 bg-neutral-950">
         <div className="cine-container h-16 flex items-center justify-between gap-4">
@@ -182,7 +189,8 @@ export default function ProfilePanel({
             {/* Identity card */}
             <div className="lg:col-span-4 space-y-4">
               <ProfileSurface
-                loadout={loadout}
+                loadout={displayLoadout}
+                isDonor={!!user.isDonor}
                 variant="panel"
                 themed={false}
                 rounded="rounded-2xl"
@@ -193,8 +201,8 @@ export default function ProfilePanel({
                   photoUrl={user.avatar}
                   alt={user.nome}
                   size="xl"
-                  loadout={loadout}
-                  donorBadge={!!user.isDonor}
+                  loadout={displayLoadout}
+                  isDonor={!!user.isDonor}
                   lite
                   className="mb-4"
                 />
@@ -202,7 +210,7 @@ export default function ProfilePanel({
                 <ProfileNameRow
                   name={user.nome}
                   isDonor={!!user.isDonor}
-                  loadout={loadout}
+                  loadout={displayLoadout}
                   nameSize="lg"
                   align="center"
                   className="w-full"
