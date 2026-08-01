@@ -67,7 +67,7 @@ export default function ProfileThemeScope({
             <div className="absolute inset-0 profile-theme-scrim pointer-events-none" />
           </div>
         )}
-        <div className="relative z-10">{children}</div>
+        <div className={`relative z-10 ${isFullscreen ? 'flex flex-col flex-1 min-h-0 h-full w-full' : ''}`}>{children}</div>
       </div>
     </ProfileThemeContext.Provider>
   );

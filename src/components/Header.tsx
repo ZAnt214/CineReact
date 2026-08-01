@@ -463,8 +463,9 @@ export default function Header({
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[100] overflow-hidden flex flex-col bg-neutral-950"
           >
-            <Suspense fallback={<div className="flex-1 bg-neutral-950" aria-hidden />}>
-              <ProfilePanel
+            <Suspense fallback={<div className="flex-1 min-h-0 bg-neutral-950" aria-hidden />}>
+              <div className="flex flex-col flex-1 min-h-0 h-full w-full">
+                <ProfilePanel
               user={user}
               currentTab={currentTab}
               gamificationData={gamificationData}
@@ -475,7 +476,8 @@ export default function Header({
               onOpenAuth={onOpenAuth}
               onRequestCreator={() => setShowRequestModal(true)}
               onUpdateUser={setUser}
-              />
+                />
+              </div>
             </Suspense>
           </motion.div>
         )}
