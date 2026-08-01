@@ -2,13 +2,14 @@ import React, { useMemo } from 'react';
 import {
   Film, Play, User, LogOut, Settings, Bookmark, ShieldAlert,
   ChevronRight, UtensilsCrossed, Trophy, Youtube, Star, Flame, Zap, Palette,
-  X, BadgeCheck, Crown, ArrowRight, Check,
+  BadgeCheck, Crown, ArrowRight, Check,
 } from 'lucide-react';
 import GamificationBar from '../GamificationBar.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import ProfileThemeScope from './ProfileThemeScope.tsx';
 import ProfileNameRow from './ProfileNameRow.tsx';
 import ProfileBioEditor from './ProfileBioEditor.tsx';
+import ProfileGreetingHeader from './ProfileGreetingHeader.tsx';
 import DonorBadge from './DonorBadge.tsx';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import { RewardPreviewThumb } from '../rewards/RewardPreview.tsx';
@@ -38,13 +39,6 @@ interface ProfilePanelProps {
   onOpenAuth?: (mode: 'login' | 'register') => void;
   onRequestCreator: () => void;
   onUpdateUser?: (user: UserState) => void;
-}
-
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
 }
 
 function NavCard({
@@ -282,24 +276,7 @@ export default function ProfilePanel({
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-cine-accent/5 rounded-full blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-20">
-        <div className="cine-container pt-4 pb-2 flex items-start justify-between gap-4">
-          <div className="min-w-0 pt-1">
-            <p className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white leading-none">
-              {greeting()}, <span className="text-cine-accent-light">{firstName}</span>
-            </p>
-            <p className="text-sm text-zinc-500 mt-2 font-medium">Seu espaço na CineReact</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-neutral-900/80 border border-neutral-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors cursor-pointer shrink-0"
-            aria-label="Fechar perfil"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
+      <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
 
       {!user.isLoggedIn ? (
         <div className="cine-container relative flex-1 flex items-center justify-center py-20">

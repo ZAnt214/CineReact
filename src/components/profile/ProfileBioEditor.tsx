@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const MAX_BIO = 180;
 
@@ -51,7 +51,7 @@ export default function ProfileBioEditor({ bio, email, onSaved, className = '' }
       onSaved(trimmed);
       setEditing(false);
       setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+      window.setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar.');
     } finally {
@@ -80,42 +80,51 @@ export default function ProfileBioEditor({ bio, email, onSaved, className = '' }
 
   if (editing) {
     return (
-      <div className={`w-full max-w-md ${className}`}>
-        <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4 shadow-inner">
-          <textarea
-            ref={textareaRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value.slice(0, MAX_BIO))}
-            onKeyDown={handleKeyDown}
-            rows={3}
-            placeholder="Conte um pouco sobre você, seus gêneros favoritos, o que curte assistir..."
-            className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none focus:outline-none leading-relaxed"
-          />
-          <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-neutral-800/60">
-            <span className={`text-[10px] tabular-nums ${draft.length >= MAX_BIO - 20 ? 'text-amber-400' : 'text-zinc-600'}`}>
-              {draft.length}/{MAX_BIO}
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={cancel}
-                disabled={saving}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-500 hover:text-zinc-300 cursor-pointer disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => void saveBio()}
-                disabled={saving}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-white text-[11px] font-bold cursor-pointer disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                Salvar
-              </button>
+      <div className={`w-full max-w-lg ${className}`}>
+        <div className="relative rounded-2xl overflow-hidden ring-1 ring-cine-accent/35 bg-neutral-950/90 shadow-xl shadow-black/25">
+          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-cine-accent via-cine-accent-light to-cine-accent-dark" aria-hidden />
+          <div className="pl-5 pr-4 py-4 md:pl-6 md:pr-5 md:py-5">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-cine-accent-light font-bold">
+                Editando bio
+              </p>
+              <span className={`text-[10px] tabular-nums ${draft.length >= MAX_BIO - 20 ? 'text-amber-400' : 'text-zinc-600'}`}>
+                {draft.length}/{MAX_BIO}
+              </span>
             </div>
+            <textarea
+              ref={textareaRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value.slice(0, MAX_BIO))}
+              onKeyDown={handleKeyDown}
+              rows={4}
+              placeholder="Filmes favoritos, criadores que acompanha, o que curte assistir..."
+              className="w-full bg-neutral-900/60 rounded-xl border border-neutral-800/80 px-3.5 py-3 text-sm text-zinc-100 placeholder-zinc-600 resize-none focus:outline-none focus:border-cine-accent/45 focus:ring-1 focus:ring-cine-accent/25 leading-relaxed"
+            />
+            <div className="flex items-center justify-between gap-2 mt-3">
+              <p className="text-[10px] text-zinc-600 hidden sm:block">Esc para cancelar</p>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  type="button"
+                  onClick={cancel}
+                  disabled={saving}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-500 hover:text-zinc-200 cursor-pointer disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void saveBio()}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-neutral-950 text-xs font-bold cursor-pointer disabled:opacity-50"
+                >
+                  {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  Salvar bio
+                </button>
+              </div>
+            </div>
+            {error && <p className="text-[11px] text-red-400 mt-2">{error}</p>}
           </div>
-          {error && <p className="text-[11px] text-red-400 mt-2">{error}</p>}
         </div>
       </div>
     );
@@ -125,38 +134,39 @@ export default function ProfileBioEditor({ bio, email, onSaved, className = '' }
     <button
       type="button"
       onClick={() => setEditing(true)}
-      className={`group relative w-full max-w-md text-left rounded-2xl border transition-all cursor-pointer ${
-        isEmpty
-          ? 'border-neutral-800/70 bg-neutral-950/50 hover:bg-neutral-900/60 hover:border-neutral-700'
-          : 'border-neutral-800/70 bg-neutral-950/40 hover:border-neutral-700 hover:bg-neutral-900/55'
-      } px-4 py-3.5 ${className}`}
-      title="Clique para editar sua bio"
+      aria-label="Editar bio"
+      className={`group w-full max-w-lg text-left rounded-2xl overflow-hidden ring-1 ring-neutral-800/70 bg-gradient-to-br from-neutral-900/50 to-neutral-950/40 hover:from-neutral-900/70 hover:to-neutral-950/60 hover:ring-cine-accent/30 transition-all cursor-pointer shadow-sm hover:shadow-lg hover:shadow-black/20 ${className}`}
     >
-      <span className="absolute top-3 right-3 text-[10px] font-semibold text-zinc-600 group-hover:text-cine-accent-light transition-colors">
-        {saved ? (
-          <span className="inline-flex items-center gap-1 text-emerald-400">
-            <Check className="w-3 h-3" />
-            Salvo
-          </span>
-        ) : (
-          'Editar'
-        )}
-      </span>
+      <div className="flex min-h-[92px]">
+        <div
+          className="w-1 shrink-0 bg-gradient-to-b from-cine-accent/80 via-cine-accent/35 to-transparent group-hover:from-cine-accent group-hover:via-cine-accent-light transition-all duration-300"
+          aria-hidden
+        />
+        <div className="flex-1 px-4 py-4 md:px-5 md:py-5">
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 font-bold group-hover:text-zinc-400 transition-colors">
+              Sobre mim
+            </p>
+            {saved ? (
+              <span className="text-[10px] font-semibold text-emerald-400">Salvo</span>
+            ) : (
+              <span className="text-[10px] font-medium text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                Editar
+              </span>
+            )}
+          </div>
 
-      {isEmpty ? (
-        <div className="pr-12">
-          <p className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors">
-            Sua bio
-          </p>
-          <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-            Toque para contar quem você é na comunidade CineReact.
-          </p>
+          {isEmpty ? (
+            <p className="text-sm text-zinc-500 leading-relaxed italic group-hover:text-zinc-400 transition-colors">
+              Conte quem você é na comunidade — gêneros favoritos, criadores que acompanha...
+            </p>
+          ) : (
+            <p className="text-sm text-zinc-200 leading-relaxed group-hover:text-white transition-colors">
+              {bio}
+            </p>
+          )}
         </div>
-      ) : (
-        <p className="text-sm text-zinc-300 leading-relaxed pr-12 group-hover:text-zinc-100 transition-colors">
-          {bio}
-        </p>
-      )}
+      </div>
     </button>
   );
 }
