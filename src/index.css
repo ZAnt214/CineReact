@@ -58,18 +58,21 @@
 
 .cine-brand-name {
   display: block;
-  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-family: "Lobster", "Pacifico", cursive;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--color-cine-cream);
   white-space: nowrap;
+  line-height: 1.05;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
 }
 
 .cine-brand-react {
-  font-weight: 700;
+  font-weight: 400;
   color: var(--color-cine-accent);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.2));
 }
 
 .cine-brand-tagline {
@@ -95,11 +98,11 @@
   text-align-last: center;
 }
 
-.cine-brand--xs { font-size: 1rem; }
-.cine-brand--sm { font-size: 1.15rem; }
-.cine-brand--md { font-size: 1.5rem; }
-.cine-brand--lg { font-size: 2.5rem; }
-.cine-brand--xl { font-size: 3.1rem; }
+.cine-brand--xs { font-size: 1.1rem; }
+.cine-brand--sm { font-size: 1.45rem; }
+.cine-brand--md { font-size: 1.85rem; }
+.cine-brand--lg { font-size: 2.85rem; }
+.cine-brand--xl { font-size: 3.45rem; }
 
 .cine-brand--xs .cine-brand-tagline,
 .cine-brand--sm .cine-brand-tagline {
@@ -117,10 +120,10 @@
 }
 
 @media (min-width: 640px) {
-  .cine-brand--sm { font-size: 1.3rem; }
-  .cine-brand--md { font-size: 1.7rem; }
-  .cine-brand--lg { font-size: 2.85rem; }
-  .cine-brand--xl { font-size: 3.55rem; }
+  .cine-brand--sm { font-size: 1.65rem; }
+  .cine-brand--md { font-size: 2.1rem; }
+  .cine-brand--lg { font-size: 3.15rem; }
+  .cine-brand--xl { font-size: 3.85rem; }
 }
 
 .font-righteous {
@@ -1725,38 +1728,6 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 
 *, *::before, *::after {
   box-sizing: border-box;
-}
-
-/* Catalog page sign / header */
-.catalog-sign-title {
-  font-family: "Lobster", "Pacifico", cursive;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
-}
-
-.catalog-sign-accent {
-  background: linear-gradient(105deg, #67e8f9 0%, #f5f0e6 42%, #22d3ee 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.22));
-}
-
-.catalog-clips-shortcut {
-  border: 1px solid rgba(34, 211, 238, 0.28);
-  background: linear-gradient(145deg, rgba(34, 211, 238, 0.12) 0%, rgba(0, 0, 0, 0.35) 100%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-}
-
-.catalog-clips-shortcut:hover {
-  border-color: rgba(34, 211, 238, 0.5);
-  background: linear-gradient(145deg, rgba(34, 211, 238, 0.2) 0%, rgba(0, 0, 0, 0.25) 100%);
-}
-
-.catalog-clips-shortcut:active {
-  transform: scale(0.98);
 }
 
 /* Catalog Carousel — scroll nativo; pan-x+pan-y no mobile para vertical e horizontal */
