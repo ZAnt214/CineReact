@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useTransition, useRef } from 'react';
 import Header from './components/Header.tsx';
 import RowMovies from './components/RowMovies.tsx';
+import CatalogPageHeader from './components/catalog/CatalogPageHeader.tsx';
 import ObraPage from './components/ObraPage.tsx';
 import PlaybackPage from './components/PlaybackPage.tsx';
 import MyList from './components/MyList.tsx';
@@ -30,6 +31,8 @@ import { useGamification } from './hooks/useGamification.ts';
 import { isVerifiedCreatorLoadout } from './gamification/verifiedCreator.ts';
 import OptimizedImage from './components/OptimizedImage.tsx';
 import { Obra, ReactVideo, UserState } from './types.ts';
+import { filterCatalogReacts } from './utils/reactVideoFilters.ts';
+import { CATALOG_ROW_LIMIT } from './constants/catalog.ts';
 import { hasSocialLinks } from './utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -210,100 +213,76 @@ export default function App() {
     }
   };
 
+  const mergeChannelReacts = useCallback(async (
+    canais: Obra[],
+    baseReacts: ReactVideo[],
+  ) => {
+    const channelPayloads = await Promise.all(
+      canais.map((canal) =>
+        safeFetchJson(`/api/obras/${encodeURIComponent(canal.id)}`).then((data) => ({
+          id: canal.id,
+          reacts: Array.isArray(data?.reacts) ? (data.reacts as ReactVideo[]) : [],
+        }))
+      )
+    );
+
+    const channelMap: Record<string, ReactVideo[]> = {};
+    const channelReactsMerged: ReactVideo[] = [];
+    const seenIds = new Set<string>();
+
+    for (const payload of channelPayloads) {
+      const filtered = filterCatalogReacts(payload.reacts);
+      channelMap[payload.id] = filtered;
+      for (const react of filtered) {
+        if (!seenIds.has(react.id)) {
+          seenIds.add(react.id);
+          channelReactsMerged.push(react);
+        }
+      }
+    }
+
+    setChannelReactsMap(channelMap);
+
+    if (channelReactsMerged.length === 0) return;
+
+    setReacts((prev) => {
+      const existingIds = new Set(prev.map((r) => r.id));
+      const merged = [...prev];
+      for (const react of channelReactsMerged) {
+        if (!existingIds.has(react.id)) {
+          merged.push(react);
+          existingIds.add(react.id);
+        }
+      }
+      return merged;
+    });
+  }, []);
+
   const fetchData = async (showLoading = false) => {
     try {
       if (showLoading) {
         setLoading(true);
       }
       const emailQuery = user.email;
-      
+
       const [obrasData, reactsData, seguidosData, userData] = await Promise.all([
         safeFetchJson('/api/obras'),
         safeFetchJson('/api/reacts'),
         emailQuery ? safeFetchJson(`/api/canais/seguidos?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null),
-        emailQuery ? safeFetchJson(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null)
+        emailQuery ? safeFetchJson(`/api/usuario/me?email=${encodeURIComponent(emailQuery)}`) : Promise.resolve(null),
       ]);
 
-      let channelMap: Record<string, ReactVideo[]> = {};
-      let channelReactsMerged: ReactVideo[] = [];
+      let baseReacts: ReactVideo[] = [];
+      let canais: Obra[] = [];
 
       if (Array.isArray(obrasData) && obrasData.length > 0) {
         setObras(obrasData);
-
-        const canais = obrasData.filter((o: Obra) => o.tipo === 'canal');
-        if (canais.length > 0) {
-          const channelPayloads = await Promise.all(
-            canais.map((canal: Obra) =>
-              safeFetchJson(`/api/obras/${encodeURIComponent(canal.id)}`).then((data) => ({
-                id: canal.id,
-                reacts: Array.isArray(data?.reacts) ? data.reacts as ReactVideo[] : [],
-              }))
-            )
-          );
-
-          const seenIds = new Set<string>();
-          for (const payload of channelPayloads) {
-            channelMap[payload.id] = payload.reacts;
-            for (const react of payload.reacts) {
-              if (!seenIds.has(react.id)) {
-                seenIds.add(react.id);
-                channelReactsMerged.push(react);
-              }
-            }
-          }
-
-          setChannelReactsMap(channelMap);
-        }
+        canais = obrasData.filter((o: Obra) => o.tipo === 'canal');
       }
 
-      const isShortOrInvalid = (r: ReactVideo): boolean => {
-        if (!r) return true;
-
-        if (!r.thumbnailUrl || r.thumbnailUrl.trim() === '' || r.thumbnailUrl.includes('no_thumbnail')) {
-          return true;
-        }
-
-        const lowerTitle = (r.titulo || '').toLowerCase();
-        const shortsKeywords = [
-          '#shorts', '#short', '#reels', '#tiktok', '#shortsyoutube', '#shortsvideo',
-          '#viralshorts', '#ytshorts', '#shortsfeed', '#shortsclip', ' #shorts', ' #reels', ' #short'
-        ];
-        if (shortsKeywords.some(kw => lowerTitle.includes(kw))) {
-          return true;
-        }
-
-        const duracaoStr = r.duracao;
-        if (!duracaoStr) return false;
-        const parts = duracaoStr.split(':');
-        if (parts.length === 3) {
-          return false;
-        }
-        if (parts.length === 2) {
-          const mins = parseInt(parts[0], 10);
-          const secs = parseInt(parts[1], 10);
-          if (isNaN(mins) || isNaN(secs)) return false;
-          return (mins * 60 + secs) <= 120;
-        }
-        if (parts.length === 1) {
-          const secs = parseInt(parts[0], 10);
-          if (isNaN(secs)) return false;
-          return secs <= 120;
-        }
-        return false;
-      };
-
       if (Array.isArray(reactsData) && reactsData.length > 0) {
-        const filteredReacts = reactsData.filter((r: ReactVideo) => !isShortOrInvalid(r));
-        const existingIds = new Set(filteredReacts.map((r) => r.id));
-        const mergedReacts = [...filteredReacts];
-        for (const react of channelReactsMerged) {
-          if (!existingIds.has(react.id) && !isShortOrInvalid(react)) {
-            mergedReacts.push(react);
-          }
-        }
-        setReacts(mergedReacts);
-      } else if (channelReactsMerged.length > 0) {
-        setReacts(channelReactsMerged.filter((r) => !isShortOrInvalid(r)));
+        baseReacts = filterCatalogReacts(reactsData as ReactVideo[]);
+        setReacts(baseReacts);
       }
 
       if (Array.isArray(seguidosData)) {
@@ -322,12 +301,19 @@ export default function App() {
           descricao: serverUser.descricao?.trim() ? serverUser.descricao : user.descricao,
         };
         setUser(mergedUser);
-        
-        // Sync continue watching with server
+
         if (Array.isArray(userData.user.continueWatching)) {
           setContinueWatching(userData.user.continueWatching);
           localStorage.setItem('cine_react_continue_watching', JSON.stringify(userData.user.continueWatching));
         }
+      }
+
+      if (showLoading) {
+        setLoading(false);
+      }
+
+      if (canais.length > 0) {
+        void mergeChannelReacts(canais, baseReacts);
       }
     } catch {
       // Silently handle error
@@ -377,6 +363,12 @@ export default function App() {
     const shouldShowSkeleton = obras.length === 0 || reacts.length === 0;
     fetchData(shouldShowSkeleton);
   }, [user.email]);
+
+  useEffect(() => {
+    if (currentTab === 'inicio' && reacts.length > 0 && !feedsWarm) {
+      setFeedsWarm(true);
+    }
+  }, [currentTab, reacts.length, feedsWarm]);
 
   // Precompute home feeds in idle time while user reads the landing page
   useEffect(() => {
@@ -536,25 +528,15 @@ export default function App() {
   }, [searchQuery, reacts, obras]);
 
 
-  // Helper shuffle function (Fisher-Yates)
-  const shuffleArray = useCallback(<T,>(arr: T[]): T[] => {
-    const list = [...arr];
-    for (let i = list.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [list[i], list[j]] = [list[j], list[i]];
-    }
-    return list;
-  }, []);
-
-  const selectChannelDiverse = React.useCallback((items: ReactVideo[], limit: number = 20): ReactVideo[] => {
+  const selectChannelDiverse = React.useCallback((items: ReactVideo[], limit: number = CATALOG_ROW_LIMIT): ReactVideo[] => {
     const result: ReactVideo[] = [];
     const channelCount: Record<string, number> = {};
-    
+
     for (const item of items) {
       if (result.length >= limit) break;
       const channel = item.canalNome || 'desconhecido';
       const count = channelCount[channel] || 0;
-      
+
       if (count < 3) {
         result.push(item);
         channelCount[channel] = count + 1;
@@ -562,7 +544,7 @@ export default function App() {
     }
 
     if (result.length < limit) {
-      const resultIds = new Set(result.map(r => r.id));
+      const resultIds = new Set(result.map((r) => r.id));
       for (const item of items) {
         if (result.length >= limit) break;
         if (!resultIds.has(item.id)) {
@@ -573,6 +555,11 @@ export default function App() {
     }
     return result;
   }, []);
+
+  const obraById = React.useMemo(
+    () => new Map(obras.map((obra) => [obra.id, obra])),
+    [obras]
+  );
 
   const homeFeeds = React.useMemo(() => {
     if (reacts.length === 0) return null;
@@ -591,78 +578,73 @@ export default function App() {
       
       return scoreB - scoreA || b.id.localeCompare(a.id);
     });
-    const emAlta = selectChannelDiverse(sortedEmAlta, 20);
+    const emAlta = selectChannelDiverse(sortedEmAlta, CATALOG_ROW_LIMIT);
 
-    // Novidades: top 20 newest by publication date
     const sortedNovidades = [...reacts].sort((a, b) => {
       const dateA = new Date(a.publicadoEm || 0).getTime();
       const dateB = new Date(b.publicadoEm || 0).getTime();
       return dateB - dateA || b.id.localeCompare(a.id);
     });
-    const novidades = selectChannelDiverse(sortedNovidades, 20);
+    const novidades = selectChannelDiverse(sortedNovidades, CATALOG_ROW_LIMIT);
 
-    // Mais Assistidos: top 30 highest total view count strictly
     const sortedMaisAssistidos = [...reacts].sort((a, b) => {
       const viewsA = a.visualizacoes || 0;
       const viewsB = b.visualizacoes || 0;
       if (viewsB !== viewsA) return viewsB - viewsA;
       return (b.likes || 0) - (a.likes || 0) || a.id.localeCompare(b.id);
     });
-    const maisAssistidos = selectChannelDiverse(sortedMaisAssistidos, 30);
+    const maisAssistidos = selectChannelDiverse(sortedMaisAssistidos, CATALOG_ROW_LIMIT);
 
-    // Dynamic type-based carousels (filme, serie, jogo, anime)
+    const capSorted = (items: ReactVideo[]) =>
+      selectChannelDiverse(
+        [...items].sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0)),
+        CATALOG_ROW_LIMIT
+      );
+
     const tipoFeeds = ['filme', 'serie', 'jogo', 'anime'].reduce((acc, tipo) => {
-      const filtered = reacts.filter(r => {
-        const obra = obras.find(o => o.id === r.obraId);
-        return obra && obra.tipo === tipo;
-      });
-      acc[tipo] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
+      acc[tipo] = capSorted(reacts.filter((r) => obraById.get(r.obraId)?.tipo === tipo));
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
-    // Genre-based carousels (Terror, Ação, Comédia)
     const generoFeeds = ['Terror', 'Ação', 'Comédia'].reduce((acc, genero) => {
-      const filtered = reacts.filter(r => {
-        const obra = obras.find(o => o.id === r.obraId);
-        return obra && obra.generos.some(g => g.toLowerCase() === genero.toLowerCase());
-      });
-      acc[genero] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
+      acc[genero] = capSorted(reacts.filter((r) => {
+        const obra = obraById.get(r.obraId);
+        return obra?.generos?.some((g) => g.toLowerCase() === genero.toLowerCase());
+      }));
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
-    // Franquia-based carousels (Marvel, DC, Harry Potter, One Piece, GTA, Resident Evil, The Last of Us)
     const franquiaFeeds = ['Marvel', 'DC', 'Harry Potter', 'One Piece', 'GTA', 'Resident Evil', 'The Last of Us'].reduce((acc, franquia) => {
-      const filtered = reacts.filter(r => {
-        const obra = obras.find(o => o.id === r.obraId);
-        return obra && (obra.titulo.toLowerCase().includes(franquia.toLowerCase()) || obra.id.toLowerCase().includes(franquia.toLowerCase().replace(/ /g, '-')));
-      });
-      acc[franquia] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
+      const needle = franquia.toLowerCase();
+      acc[franquia] = capSorted(reacts.filter((r) => {
+        const obra = obraById.get(r.obraId);
+        return obra && (obra.titulo.toLowerCase().includes(needle) || obra.id.toLowerCase().includes(needle.replace(/ /g, '-')));
+      }));
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
-    // Creator channels carousels
-    const canalFeeds = obras.filter(o => o.tipo === 'canal').reduce((acc, canal) => {
+    const canalFeeds = obras.filter((o) => o.tipo === 'canal').reduce((acc, canal) => {
       const fromChannelMap = channelReactsMap[canal.id];
       if (fromChannelMap && fromChannelMap.length > 0) {
-        acc[canal.id] = [...fromChannelMap].sort((a, b) => b.visualizacoes - a.visualizacoes);
+        acc[canal.id] = capSorted(fromChannelMap);
         return acc;
       }
 
-      const filtered = reacts.filter(r => {
+      const cleanCanalTitle = canal.titulo.replace(/^Canal\s+/i, '').trim().toLowerCase();
+      acc[canal.id] = capSorted(reacts.filter((r) => {
         if (r.obraId === canal.id) return true;
         if (canal.channelId && r.canalId === canal.channelId) return true;
-        const cleanCanalTitle = canal.titulo.replace(/^Canal\s+/i, '').trim().toLowerCase();
         const cleanReactCanal = r.canalNome.trim().toLowerCase();
         return cleanReactCanal.includes(cleanCanalTitle) || cleanCanalTitle.includes(cleanReactCanal);
-      });
-      acc[canal.id] = [...filtered].sort((a, b) => b.visualizacoes - a.visualizacoes);
+      }));
       return acc;
     }, {} as Record<string, ReactVideo[]>);
 
     return {
       pinnedHome: (platformSettings?.homePinIds || [])
         .map((id) => reacts.find((r) => r.id === id))
-        .filter((r): r is ReactVideo => Boolean(r)),
+        .filter((r): r is ReactVideo => Boolean(r))
+        .slice(0, CATALOG_ROW_LIMIT),
       emAlta,
       novidades,
       maisAssistidos,
@@ -671,19 +653,13 @@ export default function App() {
       franquiaFeeds,
       canalFeeds
     };
-  }, [currentTab, feedsWarm, reacts, obras, selectChannelDiverse, channelReactsMap, platformSettings?.homePinIds]);
+  }, [currentTab, feedsWarm, reacts, obras, obraById, selectChannelDiverse, channelReactsMap, platformSettings?.homePinIds]);
 
   const handleSearchTriggered = (results: Obra[], query: string) => {
     setSearchResults(results);
     setSearchQuery(query);
     setSelectedObraId(null);
     setCurrentTab('busca');
-  };
-
-  const handlePlayReact = (videoId: string, obraId: string) => {
-    setSelectedObraId(obraId);
-    setSelectedReactId(videoId);
-    setCurrentTab('obra');
   };
 
   const handleChannelClickByName = (channelNameOrId: string) => {
@@ -710,8 +686,6 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-
-  const canais = obras.filter(o => o.tipo === 'canal');
 
   const handleExplore = useCallback(() => {
     setIsExploring(true);
@@ -1059,29 +1033,31 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-12 pb-24 pt-24 w-full flex-1"
+                className="space-y-8 pb-24 pt-24 w-full flex-1"
               >
-                {/* HORIZONTAL ROWS */}
-                <motion.div className="space-y-10 md:mt-8 relative z-20">
+                <CatalogPageHeader />
+
+                <div className="space-y-10 relative z-20">
                   {user.isLoggedIn && continueWatchingReacts.length > 0 && (
-                    <RowMovies 
-                      title="Continue Assistindo" 
-                      reacts={continueWatchingReacts} 
+                    <RowMovies
+                      title="Continue Assistindo"
+                      reacts={continueWatchingReacts}
                       obras={obras}
                       progressMap={progressMap}
                       onPlayVideo={handlePlayVideo}
                       onChannelClick={handleChannelClickByName}
+                      limit={12}
                     />
                   )}
 
                   {recomendadosReacts.length > 0 && (
-                    <RowMovies 
-                      title="CineReact Recomendado" 
-                      reacts={recomendadosReacts} 
+                    <RowMovies
+                      title="CineReact Recomendado"
+                      reacts={recomendadosReacts}
                       obras={obras}
                       progressMap={progressMap}
                       onPlayVideo={handlePlayVideo}
-                      isEditorial={true}
+                      isEditorial
                       onChannelClick={handleChannelClickByName}
                     />
                   )}
@@ -1200,57 +1176,11 @@ export default function App() {
                       })}
                     </>
                   ) : (
-                    <>
-                      <RowMovies 
-                        title="Reacts em Alta" 
-                        reacts={[...reacts].sort((a, b) => {
-                          const pubA = new Date(a.publicadoEm || Date.now()).getTime();
-                          const pubB = new Date(b.publicadoEm || Date.now()).getTime();
-                          const daysA = Math.max(0.1, (Date.now() - pubA) / (1000 * 60 * 60 * 24));
-                          const daysB = Math.max(0.1, (Date.now() - pubB) / (1000 * 60 * 60 * 24));
-                          return ((b.visualizacoes || 0) + (b.likes || 0) * 25 + 500) / Math.pow(daysB + 2, 1.25) - ((a.visualizacoes || 0) + (a.likes || 0) * 25 + 500) / Math.pow(daysA + 2, 1.25);
-                        }).slice(0, 20)} 
-                        obras={obras}
-                        progressMap={progressMap}
-                        onPlayVideo={handlePlayVideo}
-                      />
-                      <RowMovies 
-                        title="Novidades" 
-                        reacts={[...reacts].sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime()).slice(0, 20)} 
-                        obras={obras}
-                        progressMap={progressMap}
-                        onPlayVideo={handlePlayVideo}
-                      />
-                      <RowMovies 
-                        title="Mais Assistidos" 
-                        reacts={[...reacts].sort((a, b) => b.visualizacoes - a.visualizacoes).slice(0, 50)} 
-                        obras={obras}
-                        progressMap={progressMap}
-                        onPlayVideo={handlePlayVideo}
-                      />
-
-                      {/* CATEGORIES */}
-                      {['filme', 'serie', 'jogo', 'anime'].map(tipo => {
-                        const tipoReacts = reacts.filter(r => {
-                          const obra = obras.find(o => o.id === r.obraId);
-                          return obra && obra.tipo === tipo;
-                        });
-                        
-                        if (tipoReacts.length === 0) return null;
-                        return (
-                          <RowMovies 
-                            key={tipo}
-                            title={tipo === 'filme' ? 'Filmes' : tipo === 'serie' ? 'Séries' : tipo === 'jogo' ? 'Jogos' : 'Animes'} 
-                            reacts={tipoReacts} 
-                            obras={obras}
-                            progressMap={progressMap}
-                            onPlayVideo={handlePlayVideo}
-                          />
-                        );
-                      })}
-                    </>
+                    <p className="cine-container text-sm text-zinc-500 py-8">
+                      Carregando catálogo...
+                    </p>
                   )}
-                </motion.div>
+                </div>
               </motion.div>
             )}
 
