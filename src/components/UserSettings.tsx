@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Lock, Check, AlertCircle, Heart, Upload, Loader2 } from 'lucide-react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Lock, Check, AlertCircle, Heart, Loader2, Camera } from 'lucide-react';
 import { UserState, CreatorSocialLinks } from '../types.ts';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
 import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
 import DonorBadge from './profile/DonorBadge.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
-import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
+
+const MIN_PASSWORD_LENGTH = 8;
 
 interface UserSettingsProps {
   user: UserState;
@@ -28,9 +29,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) {
   return (
-    <label className="block text-[11px] uppercase tracking-[0.28em] text-zinc-500 font-semibold mb-2">
+    <label htmlFor={htmlFor} className="block text-[11px] uppercase tracking-[0.28em] text-zinc-500 font-semibold mb-2">
       {children}
     </label>
   );
@@ -39,15 +40,65 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 const inputClass =
   'w-full bg-neutral-950/40 border border-neutral-800/70 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-colors focus:border-cine-accent/45 focus:ring-1 focus:ring-cine-accent/20';
 
-export default function UserSettings({
+function StatusMessage({ type, children }: { type: 'error' | 'success'; children: React.ReactNode }) {
+  const Icon = type === 'error' ? AlertCircle : Check;
+  const color = type === 'error' ? 'text-red-400' : 'text-emerald-400';
+  return (
+    <p className={`text-sm ${color} flex items-center gap-2`}>
+      <Icon className="w-4 h-4 shrink-0" />
+      {children}
+    </p>
+  );
+}
+
+function ActionButton({
+  children,
+  loading,
+  disabled,
+  onClick,
+}: {
+  children: React.ReactNode;
+  loading?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled || loading}
+      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-neutral-950 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+    >
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : children}
+    </button>
+  );
+}
+
+async function patchUser(
+  email: string,
+  payload: Record<string, unknown>
+): Promise<{ success: boolean; user?: UserState; error?: string }> {
+  const res = await fetch('/api/usuario/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, ...payload }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    return { success: false, error: data.error || 'Não foi possível salvar.' };
+  }
+  return { success: true, user: data.user as UserState };
+}
+
+function UserSettings({
   user,
   onUpdateUser,
   onNavigateToDonations,
   isVerifiedCreator = false,
   userLoadout,
 }: UserSettingsProps) {
-  const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
-  const [descricao, setDescricao] = useState(user.descricao || '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarDraft, setAvatarDraft] = useState(user.avatar || '');
   const [socialLinks, setSocialLinks] = useState<CreatorSocialLinks>({
     instagram: user.socialLinks?.instagram || '',
     youtube: user.socialLinks?.youtube || '',
@@ -56,23 +107,24 @@ export default function UserSettings({
   });
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [blurEffectsEnabled, setBlurEffectsEnabled] = useState(() => getBlurEffectsEnabled());
+
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [socialMsg, setSocialMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   useEffect(() => {
-    setAvatarUrl(user.avatar || '');
-    setDescricao(user.descricao || '');
+    setAvatarDraft(user.avatar || '');
     setSocialLinks({
       instagram: user.socialLinks?.instagram || '',
       youtube: user.socialLinks?.youtube || '',
       x: user.socialLinks?.x || '',
       twitch: user.socialLinks?.twitch || '',
     });
-  }, [user.avatar, user.descricao, user.socialLinks]);
-
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [dragActive, setDragActive] = useState(false);
-  const [blurEffectsEnabled, setBlurEffectsEnabled] = useState(() => getBlurEffectsEnabled());
+  }, [user.avatar, user.socialLinks]);
 
   useEffect(() => {
     const syncBlur = () => setBlurEffectsEnabled(getBlurEffectsEnabled());
@@ -80,106 +132,123 @@ export default function UserSettings({
     return () => window.removeEventListener('cinereact:blur-effects-changed', syncBlur);
   }, []);
 
-  const processFile = (file: File) => {
+  const avatarDirty = avatarDraft !== (user.avatar || '');
+  const socialDirty = useMemo(() => {
+    if (!isVerifiedCreator) return false;
+    return SOCIAL_PLATFORMS.some(({ key }) => (socialLinks[key] || '') !== (user.socialLinks?.[key] || ''));
+  }, [isVerifiedCreator, socialLinks, user.socialLinks]);
+
+  const processFile = useCallback((file: File) => {
+    setAvatarMsg(null);
     if (file.size > 2.5 * 1024 * 1024) {
-      setErrorMsg('A imagem deve ter no máximo 2.5MB.');
+      setAvatarMsg({ type: 'error', text: 'A imagem deve ter no máximo 2.5MB.' });
       return;
     }
-
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('Por favor, selecione apenas arquivos de imagem.');
+      setAvatarMsg({ type: 'error', text: 'Selecione apenas arquivos de imagem.' });
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarUrl(reader.result as string);
-      setSuccessMsg('Imagem carregada. Salve para aplicar.');
-      setErrorMsg('');
+      setAvatarDraft(reader.result as string);
+      setAvatarMsg({ type: 'success', text: 'Foto pronta. Toque em salvar para aplicar.' });
     };
     reader.onerror = () => {
-      setErrorMsg('Erro ao ler o arquivo de imagem.');
+      setAvatarMsg({ type: 'error', text: 'Erro ao ler o arquivo.' });
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);
-  };
+    e.target.value = '';
+  }, [processFile]);
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
+  const saveAvatar = useCallback(async () => {
+    if (!user.isLoggedIn || !avatarDirty) return;
+    setAvatarLoading(true);
+    setAvatarMsg(null);
+    try {
+      const result = await patchUser(user.email, { avatar: avatarDraft });
+      if (result.success && result.user) {
+        onUpdateUser(result.user);
+        setAvatarMsg({ type: 'success', text: 'Foto atualizada.' });
+      } else {
+        setAvatarMsg({ type: 'error', text: result.error || 'Erro ao salvar foto.' });
+      }
+    } catch {
+      setAvatarMsg({ type: 'error', text: 'Erro de conexão.' });
+    } finally {
+      setAvatarLoading(false);
     }
-  };
+  }, [avatarDirty, avatarDraft, onUpdateUser, user.email, user.isLoggedIn]);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]);
-  };
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const savePassword = useCallback(async () => {
     if (!user.isLoggedIn) return;
+    setPasswordMsg(null);
 
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    if (newPassword && newPassword !== confirmPassword) {
-      setErrorMsg('As senhas não coincidem.');
+    if (!newPassword) {
+      setPasswordMsg({ type: 'error', text: 'Informe a nova senha.' });
+      return;
+    }
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setPasswordMsg({ type: 'error', text: `Use pelo menos ${MIN_PASSWORD_LENGTH} caracteres.` });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'As senhas não coincidem.' });
       return;
     }
 
-    setLoading(true);
-
+    setPasswordLoading(true);
     try {
-      const res = await fetch('/api/usuario/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user.email,
-          avatar: avatarUrl,
-          descricao,
-          socialLinks: isVerifiedCreator ? socialLinks : undefined,
-          password: newPassword || undefined,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        onUpdateUser(data.user);
-        setSuccessMsg('Alterações salvas com sucesso.');
+      const result = await patchUser(user.email, { password: newPassword });
+      if (result.success) {
         setNewPassword('');
         setConfirmPassword('');
+        setPasswordMsg({ type: 'success', text: 'Senha alterada com sucesso.' });
       } else {
-        setErrorMsg(data.error || 'Erro ao atualizar perfil.');
+        setPasswordMsg({ type: 'error', text: result.error || 'Erro ao alterar senha.' });
       }
     } catch {
-      setErrorMsg('Erro de conexão com o servidor.');
+      setPasswordMsg({ type: 'error', text: 'Erro de conexão.' });
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
-  };
+  }, [confirmPassword, newPassword, user.email, user.isLoggedIn]);
+
+  const saveSocialLinks = useCallback(async () => {
+    if (!user.isLoggedIn || !isVerifiedCreator || !socialDirty) return;
+    setSocialLoading(true);
+    setSocialMsg(null);
+    try {
+      const result = await patchUser(user.email, { socialLinks });
+      if (result.success && result.user) {
+        onUpdateUser(result.user);
+        setSocialMsg({ type: 'success', text: 'Links atualizados.' });
+      } else {
+        setSocialMsg({ type: 'error', text: result.error || 'Erro ao salvar links.' });
+      }
+    } catch {
+      setSocialMsg({ type: 'error', text: 'Erro de conexão.' });
+    } finally {
+      setSocialLoading(false);
+    }
+  }, [isVerifiedCreator, onUpdateUser, socialDirty, socialLinks, user.email, user.isLoggedIn]);
 
   return (
-    <div className="cine-container pt-24 pb-20 min-h-screen w-full text-zinc-300">
+    <div className="cine-container pt-24 pb-20 min-h-screen w-full text-zinc-300 max-w-2xl">
       <header className="pt-2 pb-6 md:pb-8">
         <SectionLabel>Sua conta</SectionLabel>
         <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
           {user.isLoggedIn ? 'Configurações' : 'Preferências'}
         </h1>
-        <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg">
+        <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
           {user.isLoggedIn
-            ? 'Perfil, aparência do site e segurança da sua conta.'
-            : 'Ajuste a aparência do site. Entre na conta para editar perfil e senha.'}
+            ? 'Gerencie foto, senha e preferências do site.'
+            : 'Ajuste a aparência do site. Entre na conta para mais opções.'}
         </p>
         <div className="mt-5">
           <SettingsDivider />
@@ -187,13 +256,172 @@ export default function UserSettings({
       </header>
 
       <div className="space-y-8 md:space-y-10">
+        {user.isLoggedIn && (
+          <>
+            <section className="space-y-3">
+              <SectionLabel>Conta</SectionLabel>
+              <p className="text-sm text-zinc-400 break-all">{user.email}</p>
+              <p className="text-xs text-zinc-600 leading-relaxed">
+                A biografia é editada diretamente na aba Perfil.
+              </p>
+              {user.isDonor ? (
+                <DonorBadge size="sm" />
+              ) : (
+                <button
+                  type="button"
+                  onClick={onNavigateToDonations}
+                  className="inline-flex items-center gap-1.5 text-sm text-cine-accent-light hover:text-cine-accent transition-colors cursor-pointer"
+                >
+                  <Heart className="w-3.5 h-3.5" />
+                  Seja um apoiador
+                </button>
+              )}
+            </section>
+
+            <SettingsDivider />
+
+            <section className="space-y-4">
+              <SectionLabel>Foto de perfil</SectionLabel>
+              <div className="flex items-center gap-4">
+                <ProfileAvatar
+                  photoUrl={avatarDraft || user.avatar}
+                  alt={user.nome}
+                  size="lg"
+                  loadout={userLoadout}
+                  isDonor={!!user.isDonor}
+                  lite
+                  className="shrink-0"
+                />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <p className="text-sm text-zinc-500 leading-relaxed">
+                    PNG, JPG ou WEBP · máx. 2.5MB
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-800/80 text-sm text-zinc-300 hover:text-white hover:border-neutral-600 transition-colors cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Escolher foto
+                    </button>
+                    {avatarDirty && (
+                      <ActionButton loading={avatarLoading} onClick={() => void saveAvatar()}>
+                        Salvar foto
+                      </ActionButton>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {avatarMsg && <StatusMessage type={avatarMsg.type}>{avatarMsg.text}</StatusMessage>}
+            </section>
+
+            <SettingsDivider />
+
+            <section className="space-y-4">
+              <SectionLabel>Segurança</SectionLabel>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Altere sua senha de acesso. Não compartilhe com ninguém.
+              </p>
+              <div className="space-y-3 max-w-md">
+                <div>
+                  <FieldLabel htmlFor="new-password">Nova senha</FieldLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                      id="new-password"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel htmlFor="confirm-password">Confirmar senha</FieldLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Repita a nova senha"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
+              </div>
+              <ActionButton
+                loading={passwordLoading}
+                disabled={!newPassword && !confirmPassword}
+                onClick={() => void savePassword()}
+              >
+                Alterar senha
+              </ActionButton>
+              {passwordMsg && <StatusMessage type={passwordMsg.type}>{passwordMsg.text}</StatusMessage>}
+            </section>
+
+            {isVerifiedCreator && (
+              <>
+                <SettingsDivider />
+                <section className="space-y-4">
+                  <div>
+                    <SectionLabel>Redes sociais</SectionLabel>
+                    <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                      Exibidas no seu perfil público de criador.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+                      <div key={key}>
+                        <FieldLabel htmlFor={`social-${key}`}>{label}</FieldLabel>
+                        <input
+                          id={`social-${key}`}
+                          type="url"
+                          inputMode="url"
+                          autoComplete="off"
+                          value={socialLinks[key] || ''}
+                          onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
+                          placeholder={placeholder}
+                          className={inputClass}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <ActionButton
+                    loading={socialLoading}
+                    disabled={!socialDirty}
+                    onClick={() => void saveSocialLinks()}
+                  >
+                    Salvar links
+                  </ActionButton>
+                  {socialMsg && <StatusMessage type={socialMsg.type}>{socialMsg.text}</StatusMessage>}
+                </section>
+              </>
+            )}
+
+            <SettingsDivider />
+          </>
+        )}
+
         <section className="space-y-4">
-          <SectionLabel>Aparência</SectionLabel>
+          <SectionLabel>Experiência do site</SectionLabel>
           <div className="flex items-start justify-between gap-6 py-1">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Efeito blur (vidro fosco)</p>
               <p className="text-sm text-zinc-500 mt-1 leading-relaxed">
-                Desativado por padrão para melhor desempenho no celular.
+                Desligado por padrão para rolagem mais rápida no celular.
               </p>
             </div>
             <button
@@ -217,215 +445,9 @@ export default function UserSettings({
             </button>
           </div>
         </section>
-
-        {!user.isLoggedIn ? (
-          <section className="py-2">
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Entre na sua conta para editar foto, bio e senha.
-            </p>
-          </section>
-        ) : (
-          <>
-            <SettingsDivider />
-
-            <section className="space-y-5">
-              <SectionLabel>Seu perfil</SectionLabel>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-                <ProfileAvatar
-                  photoUrl={avatarUrl || user.avatar}
-                  alt={user.nome}
-                  size="lg"
-                  loadout={userLoadout}
-                  isDonor={!!user.isDonor}
-                  lite
-                  className="shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <ProfileNameRow
-                    name={user.nome}
-                    isDonor={!!user.isDonor}
-                    loadout={userLoadout}
-                    nameSize="md"
-                    align="left"
-                    className="w-full"
-                  />
-                  <p className="text-sm text-zinc-500 mt-1 truncate">{user.email}</p>
-                  <div className="mt-3">
-                    {user.isDonor ? (
-                      <div className="space-y-1.5">
-                        <DonorBadge size="sm" />
-                        <p className="text-xs text-zinc-500 leading-relaxed">
-                          Benefícios VIP ativos no perfil e nos comentários.
-                        </p>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={onNavigateToDonations}
-                        className="inline-flex items-center gap-1.5 text-sm text-cine-accent-light hover:text-cine-accent transition-colors cursor-pointer"
-                      >
-                        <Heart className="w-3.5 h-3.5" />
-                        Seja um apoiador
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <SettingsDivider />
-
-            <form onSubmit={handleUpdateProfile} className="space-y-8 md:space-y-10">
-              {errorMsg && (
-                <p className="text-sm text-red-400 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {errorMsg}
-                </p>
-              )}
-              {successMsg && (
-                <p className="text-sm text-emerald-400 flex items-center gap-2">
-                  <Check className="w-4 h-4 shrink-0" />
-                  {successMsg}
-                </p>
-              )}
-
-              <section className="space-y-3">
-                <SectionLabel>Foto de perfil</SectionLabel>
-                <div
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  className={`relative rounded-xl border transition-colors ${
-                    dragActive
-                      ? 'border-cine-accent/40 bg-cine-accent/5'
-                      : 'border-neutral-800/70 bg-neutral-950/30'
-                  }`}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="flex items-center gap-3 px-4 py-4">
-                    <Upload className="w-4 h-4 text-zinc-500 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm text-zinc-300">
-                        Arraste uma imagem ou <span className="text-cine-accent-light">escolha um arquivo</span>
-                      </p>
-                      <p className="text-xs text-zinc-600 mt-0.5">PNG, JPG ou WEBP · máx. 2.5MB</p>
-                    </div>
-                  </div>
-                </div>
-
-                {avatarUrl && (
-                  <div className="flex items-center gap-3 py-1">
-                    <img
-                      src={avatarUrl}
-                      alt="Prévia"
-                      className="w-10 h-10 rounded-full object-cover ring-1 ring-neutral-800"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120';
-                      }}
-                    />
-                    <p className="text-sm text-zinc-400 flex-1 min-w-0 truncate">Nova foto selecionada</p>
-                    <button
-                      type="button"
-                      onClick={() => setAvatarUrl('')}
-                      className="text-xs text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                )}
-              </section>
-
-              <section className="space-y-3">
-                <FieldLabel>Biografia</FieldLabel>
-                <p className="text-sm text-zinc-500 -mt-1 mb-2 leading-relaxed">
-                  Visível na aba do seu perfil.
-                </p>
-                <textarea
-                  placeholder="Conte um pouco sobre você..."
-                  maxLength={180}
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  rows={4}
-                  className={`${inputClass} resize-none leading-relaxed`}
-                />
-                <p className="text-xs text-zinc-600 text-right tabular-nums">{descricao.length}/180</p>
-              </section>
-
-              {isVerifiedCreator && (
-                <section className="space-y-4">
-                  <div>
-                    <SectionLabel>Redes sociais</SectionLabel>
-                    <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
-                      Links exibidos no seu perfil público de criador.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
-                      <div key={key}>
-                        <FieldLabel>{label}</FieldLabel>
-                        <input
-                          type="text"
-                          value={socialLinks[key] || ''}
-                          onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
-                          placeholder={placeholder}
-                          className={inputClass}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <section className="space-y-4">
-                <SectionLabel>Segurança</SectionLabel>
-                <div>
-                  <FieldLabel>Nova senha</FieldLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                    <input
-                      type="password"
-                      placeholder="Deixe em branco para manter a atual"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className={`${inputClass} pl-10`}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <FieldLabel>Confirmar senha</FieldLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                    <input
-                      type="password"
-                      placeholder="Repita a nova senha"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`${inputClass} pl-10`}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-neutral-950 text-sm font-bold cursor-pointer disabled:opacity-50 transition-colors"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar alterações'}
-                </button>
-              </div>
-            </form>
-          </>
-        )}
       </div>
     </div>
   );
 }
+
+export default memo(UserSettings);
