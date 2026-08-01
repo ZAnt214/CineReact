@@ -16,8 +16,7 @@ import {
   getRelatedClips,
   deriveUserPreferences,
 } from './recommendation.ts';
-import { handleGamificationEvent, getPublicProfileForEmail } from '../gamification/serverHelpers.ts';
-import { getPublicUserProfile } from '../gamification/publicUserProfile.ts';
+import { handleGamificationEvent, enrichCommentAuthorProfile } from '../gamification/serverHelpers.ts';
 import { detectClipPlatform, platformLabel } from './platform.ts';
 import {
   downloadAndHostClip,
@@ -29,15 +28,7 @@ import {
 import { exportClipWithBranding } from './exportVideo.ts';
 
 function enrichCineClipComment(comment: CineClipComment) {
-  const userAcct = localDb.findUsuarioByEmailSync(comment.usuarioEmail);
-  const publicProfile = getPublicUserProfile(comment.usuarioEmail);
-  return {
-    ...comment,
-    isDonor: !!userAcct?.isDonor,
-    avatar: userAcct?.avatar || '',
-    profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(comment.usuarioEmail),
-    publicProfile: publicProfile ?? undefined,
-  };
+  return enrichCommentAuthorProfile(comment);
 }
 
 

@@ -5,6 +5,7 @@ import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import ProfileSocialLinks from './profile/ProfileSocialLinks.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
+import { resolveAuthorProfileProps } from '../utils/authorProfileDisplay.ts';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface CommentSectionProps {
@@ -254,26 +255,26 @@ export default function CommentSection({
             {comentarios.map((c) => {
               const isLiked = likedCommentIds.includes(c.id);
               const likesCount = c.likes || 0;
+              const author = resolveAuthorProfileProps(c);
 
               return (
                 <div key={c.id} className="p-4 bg-neutral-950/50 hover:bg-neutral-950/80 rounded-xl space-y-2 flex gap-3.5 relative group transition-colors">
                   <div className="flex-shrink-0 pt-0.5">
                     <ProfileAvatar
-                      photoUrl={c.avatar}
+                      photoUrl={author.avatar}
                       alt={c.usuarioNome}
                       size="md"
-                      profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
-                      loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
-                      lite={!!c.publicProfile?.isVerifiedCreator}
+                      profileDisplay={author.profileDisplay}
+                      isDonor={author.isDonor}
+                      lite={author.isVerifiedCreator}
                     />
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <ProfileNameRow
                       name={c.usuarioNome}
-                      isDonor={!!c.isDonor}
-                      profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
-                      loadout={c.usuarioEmail === user.email ? userLoadout : undefined}
+                      isDonor={author.isDonor}
+                      profileDisplay={author.profileDisplay}
                       timestamp={getFriendlyDate(c.criadoEm)}
                       donorBadgeSize="md"
                     />

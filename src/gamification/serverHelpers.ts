@@ -74,6 +74,19 @@ export function getPublicProfileForEmail(email: string) {
   return resolveUserProfileDisplay(undefined, !!account?.isDonor);
 }
 
+/** Enriquece comentários com cosméticos públicos do autor — mesma visão para todos os espectadores. */
+export function enrichCommentAuthorProfile<T extends { usuarioEmail: string }>(comment: T) {
+  const publicProfile = getPublicUserProfile(comment.usuarioEmail);
+  const userAcct = localDb.findUsuarioByEmailSync(comment.usuarioEmail);
+  return {
+    ...comment,
+    isDonor: !!publicProfile?.isDonor || !!userAcct?.isDonor,
+    avatar: userAcct?.avatar || publicProfile?.avatar || '',
+    profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(comment.usuarioEmail),
+    publicProfile: publicProfile ?? undefined,
+  };
+}
+
 export function purchaseCosmetic(email: string, itemId: string) {
   const profile = localDb.getGamificationProfile(email);
   const result = purchaseReward(profile, itemId);
