@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   Film, Play, User, LogOut, Settings, Bookmark, ShieldAlert,
   ChevronRight, UtensilsCrossed, Trophy, Youtube, Star, Flame, Zap, Palette,
-  X, BadgeCheck, Crown, ArrowRight, Film, Check,
+  X, BadgeCheck, Crown, ArrowRight, Check,
 } from 'lucide-react';
 import GamificationBar from '../GamificationBar.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
@@ -231,7 +231,6 @@ export default function ProfilePanel({
   const loadout = profile?.loadout;
   const isVerifiedCreator = isVerifiedCreatorLoadout(loadout);
   const displayLoadout = applyDonorLoadout(loadout, !!user.isDonor);
-  const tierLabel = gamificationData?.tier || 'Espectador';
 
   const badgeItems = (displayLoadout.badges || [])
     .filter((id) => id !== VERIFIED_PROFILE_BADGE_ID)
@@ -283,19 +282,18 @@ export default function ProfilePanel({
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-cine-accent/5 rounded-full blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-20 border-b border-neutral-800/40 bg-neutral-950/80 backdrop-blur-xl">
-        <div className="cine-container h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Film className="w-4 h-4 text-cine-accent-light" />
-            <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Sua conta</p>
-              <h1 className="text-sm font-bold profile-text">{greeting()}, {firstName}</h1>
-            </div>
+      <header className="sticky top-0 z-20">
+        <div className="cine-container pt-4 pb-2 flex items-start justify-between gap-4">
+          <div className="min-w-0 pt-1">
+            <p className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white leading-none">
+              {greeting()}, <span className="text-cine-accent-light">{firstName}</span>
+            </p>
+            <p className="text-sm text-zinc-500 mt-2 font-medium">Seu espaço na CineReact</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center justify-center w-9 h-9 rounded-xl border border-neutral-800 text-zinc-400 hover:text-white hover:border-zinc-600 hover:bg-neutral-900 transition-colors cursor-pointer"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-neutral-900/80 border border-neutral-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors cursor-pointer shrink-0"
             aria-label="Fechar perfil"
           >
             <X className="w-4 h-4" />
@@ -325,12 +323,12 @@ export default function ProfilePanel({
           </div>
         </div>
       ) : (
-        <div className="cine-container relative py-6 md:py-10 flex-1 space-y-6">
-          <section className="relative overflow-hidden rounded-3xl border border-neutral-800/60 bg-neutral-900/25 backdrop-blur-sm">
-            <div className="absolute inset-0 bg-gradient-to-br from-cine-accent/8 via-transparent to-neutral-950/80 pointer-events-none" />
-            <div className="relative px-5 py-8 md:px-8 md:py-10 flex flex-col items-center text-center">
+        <div className="cine-container relative py-4 md:py-6 flex-1 space-y-6">
+          <section className="relative overflow-hidden rounded-3xl border border-neutral-800/50 bg-neutral-900/20">
+            <div className="absolute inset-0 bg-gradient-to-b from-cine-accent/6 via-transparent to-transparent pointer-events-none" />
+            <div className="relative px-5 py-7 md:px-8 md:py-9 flex flex-col items-center text-center">
               <div className="relative mb-5">
-                <div className="absolute -inset-3 rounded-full bg-cine-accent/15 blur-xl" aria-hidden />
+                <div className="absolute -inset-4 rounded-full bg-cine-accent/10 blur-2xl" aria-hidden />
                 <ProfileAvatar
                   photoUrl={user.avatar}
                   alt={user.nome}
@@ -340,9 +338,6 @@ export default function ProfilePanel({
                   lite
                   className="relative"
                 />
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap px-2.5 py-0.5 rounded-full bg-neutral-950/90 border border-neutral-800 text-[10px] font-bold text-cine-accent-light uppercase tracking-wider">
-                  {tierLabel}
-                </span>
               </div>
 
               <ProfileNameRow
@@ -354,14 +349,12 @@ export default function ProfilePanel({
                 className="w-full max-w-md"
               />
 
-              <p className="text-[11px] text-zinc-600 font-mono mt-2 mb-4">{user.email}</p>
-
               {onUpdateUser && (
                 <ProfileBioEditor
                   bio={user.descricao || ''}
                   email={user.email}
                   onSaved={(descricao) => onUpdateUser({ ...user, descricao })}
-                  className="mx-auto"
+                  className="mx-auto mt-5"
                 />
               )}
 
