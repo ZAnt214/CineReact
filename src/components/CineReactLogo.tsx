@@ -1,4 +1,3 @@
-import { Play } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -41,21 +40,16 @@ function BrandMark({
   }`;
 
   const wordmark = (
-    <>
-      <span className="cine-brand-badge" aria-hidden="true">
-        <Play className="cine-brand-badge-icon" strokeWidth={2.75} />
-      </span>
-      <span className="cine-brand-stack">
-        <span className="cine-brand-title">
-          <span className="cine-brand-word">
-            <span className="cine-brand-cine">CINE</span>
-            <span className="cine-brand-react">REACT</span>
-          </span>
-          <span className="cine-brand-underline" aria-hidden="true" />
+    <span className="cine-brand-stack">
+      <span className="cine-brand-title">
+        <span className="cine-brand-word">
+          <span className="cine-brand-cine">CINE</span>
+          <span className="cine-brand-react">REACT</span>
         </span>
-        {showTagline && <span className="cine-brand-tagline">{tagline}</span>}
+        <span className="cine-brand-underline" aria-hidden="true" />
       </span>
-    </>
+      {showTagline && <span className="cine-brand-tagline">{tagline}</span>}
+    </span>
   );
 
   if (heading) {
