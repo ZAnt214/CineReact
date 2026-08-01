@@ -1003,6 +1003,7 @@ export default function App() {
                 className="w-full flex-1"
               >
                 <PlaybackPage
+                  key={`${selectedObraId}-${selectedReactId ?? 'none'}`}
                   obraId={selectedObraId}
                   initialReactId={selectedReactId}
                   reacts={reacts}
@@ -1012,6 +1013,7 @@ export default function App() {
                   canaisSeguidos={canaisSeguidos}
                   onToggleSeguir={handleToggleSeguir}
                   onUpdateProgress={handleUpdateWatchProgress}
+                  onSelectVideo={handlePlayVideo}
                   onGoToObra={(id) => {
                     setSelectedObraId(id);
                     setCurrentTab('obra');
