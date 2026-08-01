@@ -3,7 +3,6 @@ import { MessageSquare, Heart, Trash2, Send, Star } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
-import ProfileSocialLinks from './profile/ProfileSocialLinks.tsx';
 import { resolveAuthorProfileProps } from '../utils/authorProfileDisplay.ts';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
@@ -64,6 +63,8 @@ const CommentCard = memo(function CommentCard({
               profileDisplay={author.profileDisplay}
               timestamp={getFriendlyDate(c.criadoEm)}
               donorBadgeSize="sm"
+              verifiedDisplay="icon"
+              align="start"
             />
             {canDelete && (
               <button
@@ -76,15 +77,6 @@ const CommentCard = memo(function CommentCard({
               </button>
             )}
           </div>
-
-          {c.publicProfile?.isVerifiedCreator && c.publicProfile.socialLinks && (
-            <ProfileSocialLinks
-              links={c.publicProfile.socialLinks}
-              size="sm"
-              align="start"
-              className="mt-1 max-w-md"
-            />
-          )}
 
           <p className="mt-2 text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{c.texto}</p>
 

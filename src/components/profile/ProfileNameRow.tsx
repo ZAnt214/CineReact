@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { BadgeCheck } from 'lucide-react';
 import { resolveUserProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
@@ -17,6 +18,8 @@ export interface ProfileNameRowProps {
   nameSize?: 'sm' | 'md' | 'lg';
   align?: 'center' | 'start';
   className?: string;
+  /** seal: selo completo (padrão). icon: apenas ícone ao lado do nome (comentários). */
+  verifiedDisplay?: 'seal' | 'icon';
 }
 
 export default function ProfileNameRow({
@@ -29,6 +32,7 @@ export default function ProfileNameRow({
   nameSize = 'sm',
   align = 'center',
   className = '',
+  verifiedDisplay = 'seal',
 }: ProfileNameRowProps) {
   const display = useMemo(
     () => profileDisplay || resolveUserProfileDisplay(loadout, isDonor),
@@ -64,7 +68,7 @@ export default function ProfileNameRow({
 
   return (
     <div className={`flex flex-col w-full min-w-0 gap-3 ${alignClass} ${className}`}>
-      {display.verifiedBadge && (
+      {display.verifiedBadge && verifiedDisplay === 'seal' && (
         <ProfileVerifiedSeal
           name={display.verifiedBadge.name}
           description={display.verifiedBadge.description}
@@ -76,6 +80,11 @@ export default function ProfileNameRow({
 
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         <span className={nameClass}>{name}</span>
+        {display.verifiedBadge && verifiedDisplay === 'icon' && (
+          <span title="Criador verificado" className="inline-flex shrink-0">
+            <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light" strokeWidth={2.5} />
+          </span>
+        )}
         {donorTagEquipped && <DonorBadge size={donorBadgeVariant} />}
         {timestamp && (
           <span className="text-[10px] profile-text-muted font-mono shrink-0">{timestamp}</span>

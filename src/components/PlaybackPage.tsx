@@ -5,7 +5,7 @@ import type { ProfileLoadout } from '../types/gamification.ts';
 import PlaybackSkeleton from './PlaybackSkeleton.tsx';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
-import PlaybackPageHeader from './playback/PlaybackPageHeader.tsx';
+import PlaybackVideoTitle from './playback/PlaybackVideoTitle.tsx';
 import PlaybackMetaPanel from './playback/PlaybackMetaPanel.tsx';
 import PlaybackVideoShelf from './playback/PlaybackVideoShelf.tsx';
 import { PLAYBACK_SHELF_LIMIT, PLAYBACK_SIDEBAR_LIMIT } from '../constants/playback.ts';
@@ -471,8 +471,6 @@ export default function PlaybackPage({
         <div
           className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} space-y-5`}
         >
-          <PlaybackPageHeader obra={activeObra} react={activeReact} />
-
           {/* Player isolado para melhor composição no scroll */}
           <div
             className="relative group/player rounded-xl border border-neutral-800/80 overflow-hidden [contain:layout_style_paint] [transform:translateZ(0)]"
@@ -517,6 +515,8 @@ export default function PlaybackPage({
               </div>
             </div>
           </div>
+
+          <PlaybackVideoTitle obra={activeObra} react={activeReact} />
 
           <PlaybackMetaPanel
             react={activeReact}
