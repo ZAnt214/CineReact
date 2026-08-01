@@ -8,14 +8,13 @@ export default function PlaybackSkeleton() {
     <div className="cine-container pt-24 pb-20 min-h-screen bg-cine-bg w-full animate-pulse">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         <div className="lg:col-span-8 xl:col-span-9 space-y-5">
+          <div className="w-full bg-neutral-900 rounded-xl aspect-video border border-neutral-800/60" />
+
           <div className="space-y-2">
             <div className="h-3 w-24 bg-neutral-800 rounded" />
             <div className="h-7 bg-neutral-800 rounded w-10/12" />
             <div className="h-4 bg-neutral-800 rounded w-1/3" />
-            <div className="h-px bg-neutral-800 mt-4" />
           </div>
-
-          <div className="w-full bg-neutral-900 rounded-xl aspect-video border border-neutral-800/60" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900/80 pb-4">
             <div className="flex items-center gap-3">
