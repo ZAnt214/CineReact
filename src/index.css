@@ -1736,6 +1736,16 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   scroll-behavior: auto;
 }
 
+.catalog-carousel .cine-recomenda-card::before,
+.catalog-carousel .cine-recomenda-card::after {
+  animation: none !important;
+}
+
+.catalog-carousel .catalog-card-duration,
+.catalog-carousel .cine-recomenda-duration {
+  backdrop-filter: none;
+}
+
 @media (pointer: coarse) {
   .catalog-carousel {
     touch-action: pan-x pan-y pinch-zoom;
