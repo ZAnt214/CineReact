@@ -1,22 +1,31 @@
 import React, { memo } from 'react';
-import { GalleryVerticalEnd } from 'lucide-react';
 
 interface HeaderClipsShortcutProps {
   active?: boolean;
   onClick: () => void;
+  className?: string;
+  id?: string;
 }
 
-function HeaderClipsShortcut({ active = false, onClick }: HeaderClipsShortcutProps) {
+function HeaderClipsShortcut({
+  active = false,
+  onClick,
+  className = '',
+  id = 'nav-cineclips',
+}: HeaderClipsShortcutProps) {
   return (
     <button
       type="button"
-      id="nav-cineclips"
+      id={id}
       onClick={onClick}
-      className={`header-clips-pill ${active ? 'header-clips-pill--active' : ''}`}
+      className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer text-xs lg:text-[13px] font-semibold shrink-0 ${className} ${
+        active
+          ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60'
+          : 'text-zinc-400 hover:text-zinc-200 hover:bg-neutral-900/30'
+      }`}
       aria-label="Abrir CineClips"
     >
-      <GalleryVerticalEnd className="header-clips-pill-icon" strokeWidth={2.25} aria-hidden="true" />
-      <span className="header-clips-pill-label">CineClips</span>
+      Clips
     </button>
   );
 }
