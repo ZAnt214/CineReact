@@ -4,6 +4,7 @@ import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
 import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
 import DonorBadge from './DonorBadge.tsx';
+import { DONOR_TAG_ID } from '../../data/rewardsCatalog.ts';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export interface ProfileNameRowProps {
@@ -47,6 +48,18 @@ export default function ProfileNameRow({
         ? 'text-sm font-bold profile-text'
         : 'text-xs font-bold profile-text';
 
+  const donorTagEquipped = useMemo(
+    () =>
+      display.tags.some((tag) => tag.id === DONOR_TAG_ID) ||
+      display.loadout.tags.includes(DONOR_TAG_ID),
+    [display.tags, display.loadout.tags],
+  );
+
+  const visibleTags = useMemo(
+    () => display.tags.filter((tag) => tag.id !== DONOR_TAG_ID),
+    [display.tags],
+  );
+
   const sealSize = nameSize === 'lg' ? 'md' : 'sm';
 
   return (
@@ -63,7 +76,7 @@ export default function ProfileNameRow({
 
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
         <span className={nameClass}>{name}</span>
-        {isDonor && <DonorBadge size={donorBadgeVariant} />}
+        {donorTagEquipped && <DonorBadge size={donorBadgeVariant} />}
         {timestamp && (
           <span className="text-[10px] profile-text-muted font-mono shrink-0">{timestamp}</span>
         )}
@@ -85,9 +98,9 @@ export default function ProfileNameRow({
         </div>
       )}
 
-      {display.tags.length > 0 && (
+      {visibleTags.length > 0 && (
         <div className={`flex flex-wrap gap-1.5 w-full ${rowJustify}`}>
-          {display.tags.map((tag) => (
+          {visibleTags.map((tag) => (
             <CreatorTagVisual
               key={tag.id}
               id={tag.id}

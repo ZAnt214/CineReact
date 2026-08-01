@@ -1,4 +1,4 @@
-import { getRewardById, VERIFIED_PROFILE_BADGE_ID } from '../data/rewardsCatalog.ts';
+import { getRewardById, VERIFIED_PROFILE_BADGE_ID, DONOR_TAG_ID } from '../data/rewardsCatalog.ts';
 import { getVisualStyle, resolveVisualStyle } from '../data/rewardVisualStyles.ts';
 import type {
   ProfileLoadout,

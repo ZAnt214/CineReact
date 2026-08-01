@@ -19,6 +19,7 @@ import {
   saveLoadout,
   unequipReward,
 } from './rewardsEngine.ts';
+import { ensureDonorRewardsSynced } from './donorRewards.ts';
 import type { GamificationEventType, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
 
 export function handleGamificationEvent(
@@ -38,6 +39,13 @@ export function getGamificationMe(email: string) {
   const profile = localDb.getGamificationProfile(email);
   migrateProfile(profile);
   const account = localDb.findUsuarioByEmailSync(email);
+  if (account?.isDonor) {
+    const changed = ensureDonorRewardsSynced(profile, 'vip-sync');
+    if (changed) {
+      profile.updatedAt = new Date().toISOString();
+      localDb.saveGamificationProfile(profile);
+    }
+  }
   ensureOwnerFullUnlock(profile);
   localDb.saveGamificationProfile(profile);
   const allProfiles = localDb.getAllGamificationProfiles();
