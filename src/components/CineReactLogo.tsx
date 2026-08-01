@@ -1,3 +1,4 @@
+import { Play } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export type CineReactLogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -35,35 +36,37 @@ function BrandMark({
   showTagline: boolean;
   align: 'left' | 'center';
 }) {
-  const stackClass = `cine-brand ${sizeClass} ${
+  const stackClass = `cine-brand-lockup ${sizeClass} ${
     align === 'center' ? 'cine-brand--center' : ''
   }`;
 
-  const name = (
-    <span className="cine-brand-name">
-      Cine<span className="cine-brand-react">React</span>
-    </span>
+  const wordmark = (
+    <>
+      <span className="cine-brand-badge" aria-hidden="true">
+        <Play className="cine-brand-badge-icon" strokeWidth={2.75} />
+      </span>
+      <span className="cine-brand-stack">
+        <span className="cine-brand-title">
+          <span className="cine-brand-word">
+            <span className="cine-brand-cine">CINE</span>
+            <span className="cine-brand-react">REACT</span>
+          </span>
+          <span className="cine-brand-underline" aria-hidden="true" />
+        </span>
+        {showTagline && <span className="cine-brand-tagline">{tagline}</span>}
+      </span>
+    </>
   );
-
-  const taglineEl = showTagline ? (
-    <span className="cine-brand-tagline">{tagline}</span>
-  ) : null;
 
   if (heading) {
     return (
       <span className={stackClass}>
-        <h1 className="cine-brand-title">{name}</h1>
-        {taglineEl}
+        <h1 className="cine-brand-heading">{wordmark}</h1>
       </span>
     );
   }
 
-  return (
-    <span className={stackClass}>
-      <span className="cine-brand-title">{name}</span>
-      {taglineEl}
-    </span>
-  );
+  return <span className={stackClass}>{wordmark}</span>;
 }
 
 export default function CineReactLogo({
