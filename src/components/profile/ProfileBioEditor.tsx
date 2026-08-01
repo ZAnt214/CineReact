@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const MAX_BIO = 180;
@@ -10,7 +10,7 @@ export interface ProfileBioEditorProps {
   className?: string;
 }
 
-export default function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEditorProps) {
+function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEditorProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(bio);
   const [saving, setSaving] = useState(false);
@@ -170,3 +170,5 @@ export default function ProfileBioEditor({ bio, email, onSaved, className = '' }
     </button>
   );
 }
+
+export default memo(ProfileBioEditor);

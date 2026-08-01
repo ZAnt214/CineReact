@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   Film, Play, User, LogOut, Settings, Bookmark, ShieldAlert,
   ChevronRight, UtensilsCrossed, Trophy, Youtube, Star, Flame, Zap, Palette,
@@ -41,7 +41,7 @@ interface ProfilePanelProps {
   onUpdateUser?: (user: UserState) => void;
 }
 
-function NavCard({
+const NavCard = memo(function NavCard({
   item,
   active,
   onClick,
@@ -55,9 +55,9 @@ function NavCard({
     <button
       type="button"
       onClick={onClick}
-      className={`group relative overflow-hidden flex flex-col gap-2 p-4 rounded-2xl border text-left transition-all cursor-pointer min-h-[88px] ${
+      className={`group relative overflow-hidden flex flex-col gap-2 p-4 rounded-2xl border text-left cursor-pointer min-h-[88px] transition-colors ${
         active
-          ? 'bg-cine-accent/12 border-cine-accent/35 shadow-lg shadow-cine-accent/10'
+          ? 'bg-cine-accent/12 border-cine-accent/35'
           : item.accent
             ? 'bg-gradient-to-br from-cine-accent/10 to-neutral-900/40 border-cine-accent/20 hover:border-cine-accent/35'
             : 'bg-neutral-900/30 border-neutral-800/70 hover:border-neutral-700 hover:bg-neutral-900/50'
@@ -87,9 +87,9 @@ function NavCard({
       />
     </button>
   );
-}
+});
 
-function SpotlightCard({
+const SpotlightCard = memo(function SpotlightCard({
   title,
   subtitle,
   perks,
@@ -116,19 +116,12 @@ function SpotlightCard({
     <button
       type="button"
       onClick={onClick}
-      className={`group relative overflow-hidden flex flex-col text-left rounded-3xl border p-5 md:p-6 min-h-[220px] transition-all cursor-pointer ${
+      className={`group relative overflow-hidden flex flex-col text-left rounded-3xl border p-5 md:p-6 min-h-[220px] cursor-pointer transition-colors ${
         isDonor
-          ? 'border-amber-400/30 bg-gradient-to-br from-amber-500/15 via-neutral-950/90 to-cine-accent/10 hover:border-amber-400/50 hover:shadow-xl hover:shadow-amber-500/10'
-          : 'border-cine-accent/30 bg-gradient-to-br from-cine-accent/12 via-neutral-950/90 to-violet-500/10 hover:border-cine-accent/50 hover:shadow-xl hover:shadow-cine-accent/10'
+          ? 'border-amber-400/30 bg-gradient-to-br from-amber-500/15 via-neutral-950/90 to-cine-accent/10 hover:border-amber-400/50'
+          : 'border-cine-accent/30 bg-gradient-to-br from-cine-accent/12 via-neutral-950/90 to-violet-500/10 hover:border-cine-accent/50'
       }`}
     >
-      <div
-        className={`pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl ${
-          isDonor ? 'bg-amber-400/20' : 'bg-cine-accent/20'
-        }`}
-        aria-hidden
-      />
-
       <div className="relative flex items-start justify-between gap-3 mb-4">
         <span
           className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl border ${
@@ -174,7 +167,7 @@ function SpotlightCard({
       </div>
 
       <span
-        className={`relative mt-5 inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-xs font-black uppercase tracking-wide transition-all ${
+        className={`relative mt-5 inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-xs font-black uppercase tracking-wide transition-colors ${
           isDonor
             ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-950 group-hover:from-amber-300 group-hover:to-amber-400'
             : 'bg-gradient-to-r from-cine-accent to-cyan-400 text-neutral-950 group-hover:from-cine-accent-light group-hover:to-cyan-300'
@@ -185,9 +178,9 @@ function SpotlightCard({
       </span>
     </button>
   );
-}
+});
 
-function StatPill({
+const StatPill = memo(function StatPill({
   icon: Icon,
   value,
   label,
@@ -199,7 +192,7 @@ function StatPill({
   accent: string;
 }) {
   return (
-    <div className="flex-1 min-w-0 rounded-2xl border border-neutral-800/60 bg-neutral-950/50 px-3 py-3 text-center backdrop-blur-sm">
+    <div className="flex-1 min-w-0 rounded-2xl border border-neutral-800/60 bg-neutral-950/50 px-3 py-3 text-center">
       <div className={`inline-flex items-center justify-center w-8 h-8 rounded-xl mb-1.5 ${accent}`}>
         <Icon className="w-4 h-4" />
       </div>
@@ -207,7 +200,7 @@ function StatPill({
       <p className="text-[9px] text-zinc-500 uppercase tracking-wider font-semibold">{label}</p>
     </div>
   );
-}
+});
 
 export default function ProfilePanel({
   user,
@@ -224,88 +217,103 @@ export default function ProfilePanel({
   const profile = gamificationData?.profile;
   const loadout = profile?.loadout;
   const isVerifiedCreator = isVerifiedCreatorLoadout(loadout);
-  const displayLoadout = applyDonorLoadout(loadout, !!user.isDonor);
+  const displayLoadout = useMemo(
+    () => applyDonorLoadout(loadout, !!user.isDonor),
+    [loadout, user.isDonor]
+  );
 
-  const badgeItems = (displayLoadout.badges || [])
-    .filter((id) => id !== VERIFIED_PROFILE_BADGE_ID)
-    .map((id) => {
-      const fromInventory = gamificationData?.inventory.find((i) => i.id === id);
-      if (fromInventory) return fromInventory;
-      const def = getRewardById(id);
-      return def ? { ...def, owned: true, equipped: true } : null;
-    })
-    .filter((b): b is NonNullable<typeof b> => !!b);
+  const badgeItems = useMemo(
+    () => (displayLoadout.badges || [])
+      .filter((id) => id !== VERIFIED_PROFILE_BADGE_ID)
+      .map((id) => {
+        const fromInventory = gamificationData?.inventory.find((i) => i.id === id);
+        if (fromInventory) return fromInventory;
+        const def = getRewardById(id);
+        return def ? { ...def, owned: true, equipped: true } : null;
+      })
+      .filter((b): b is NonNullable<typeof b> => !!b),
+    [displayLoadout.badges, gamificationData?.inventory]
+  );
 
   const firstName = useMemo(() => user.nome?.split(' ')[0] || 'cinéfilo', [user.nome]);
 
-  const go = (tab: string, extra?: () => void) => {
+  const go = useCallback((tab: string, extra?: () => void) => {
     onNavigate(tab);
     extra?.();
     onClose();
-  };
+  }, [onClose, onNavigate]);
 
-  const navItems: NavItem[] = [
-    { id: 'inicio', label: 'Início', description: 'Catálogo e lançamentos', icon: Film },
-    {
-      id: 'club',
-      label: 'CineReact Club',
-      description: 'Cosméticos, conquistas e rankings',
-      icon: Trophy,
-      onClick: onOpenGamification,
-    },
-    { id: 'canais', label: 'Canais seguidos', description: 'Atualizações dos criadores', icon: Play },
-    { id: 'categoria-almoco', label: 'Hora do almoço', description: 'Sorteie um react aleatório', icon: UtensilsCrossed },
-    { id: 'minha-lista', label: 'Meus favoritos', description: 'Reacts e obras salvos', icon: Bookmark },
-    { id: 'configuracoes', label: 'Configurações', description: 'Conta, senha e avatar', icon: Settings },
-  ];
+  const navItems = useMemo<NavItem[]>(() => {
+    const items: NavItem[] = [
+      { id: 'inicio', label: 'Início', description: 'Catálogo e lançamentos', icon: Film },
+      {
+        id: 'club',
+        label: 'CineReact Club',
+        description: 'Cosméticos, conquistas e rankings',
+        icon: Trophy,
+        onClick: onOpenGamification,
+      },
+      { id: 'canais', label: 'Canais seguidos', description: 'Atualizações dos criadores', icon: Play },
+      { id: 'categoria-almoco', label: 'Hora do almoço', description: 'Sorteie um react aleatório', icon: UtensilsCrossed },
+      { id: 'minha-lista', label: 'Meus favoritos', description: 'Reacts e obras salvos', icon: Bookmark },
+      { id: 'configuracoes', label: 'Configurações', description: 'Conta, senha e avatar', icon: Settings },
+    ];
 
-  if (user.isAdmin) {
-    navItems.push({
-      id: 'admin',
-      label: 'Painel admin',
-      description: 'Gerenciar catálogo e canais',
-      icon: ShieldAlert,
-      accent: true,
-    });
-  }
+    if (user.isAdmin) {
+      items.push({
+        id: 'admin',
+        label: 'Painel admin',
+        description: 'Gerenciar catálogo e canais',
+        icon: ShieldAlert,
+        accent: true,
+      });
+    }
+
+    return items;
+  }, [onOpenGamification, user.isAdmin]);
+
+  const handleBioSaved = useCallback((descricao: string) => {
+    if (onUpdateUser) onUpdateUser({ ...user, descricao });
+  }, [onUpdateUser, user]);
 
   return (
-    <ProfileThemeScope loadout={displayLoadout} isDonor={!!user.isDonor} variant="fullscreen" className="flex-1 flex flex-col min-h-dvh">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[min(100%,520px)] h-64 bg-cine-accent/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-cine-accent/5 rounded-full blur-3xl" />
-      </div>
-
+    <ProfileThemeScope
+      loadout={displayLoadout}
+      isDonor={!!user.isDonor}
+      variant="fullscreen"
+      className="flex flex-col flex-1 min-h-0 h-full"
+    >
       <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
 
-      {!user.isLoggedIn ? (
-        <div className="cine-container relative flex-1 flex items-center justify-center py-20">
-          <div className="max-w-sm w-full text-center space-y-5 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 p-8 backdrop-blur-sm">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cine-accent/20 to-neutral-900 border border-cine-accent/20 flex items-center justify-center mx-auto text-cine-accent-light">
-              <User className="w-8 h-8" />
+      <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y [contain:strict]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-cine-accent/[0.04]" aria-hidden />
+
+        {!user.isLoggedIn ? (
+          <div className="cine-container relative flex min-h-[50vh] items-center justify-center py-16">
+            <div className="max-w-sm w-full text-center space-y-5 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 p-8">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cine-accent/20 to-neutral-900 border border-cine-accent/20 flex items-center justify-center mx-auto text-cine-accent-light">
+                <User className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-white">Entre na sessão</h2>
+                <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                  Favoritos, Club, cosméticos e sua bio personalizada te esperam aqui.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { onClose(); onOpenAuth?.('login'); }}
+                className="w-full py-3 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-bold text-sm cursor-pointer transition-colors"
+              >
+                Entrar ou criar conta
+              </button>
             </div>
-            <div>
-              <h2 className="text-xl font-black text-white">Entre na sessão</h2>
-              <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
-                Favoritos, Club, cosméticos e sua bio personalizada te esperam aqui.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => { onClose(); onOpenAuth?.('login'); }}
-              className="w-full py-3 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white font-bold text-sm cursor-pointer transition-colors shadow-lg shadow-cine-accent/20"
-            >
-              Entrar ou criar conta
-            </button>
           </div>
-        </div>
-      ) : (
-        <div className="cine-container relative py-4 md:py-6 flex-1 space-y-6">
-          <section className="relative overflow-hidden rounded-3xl border border-neutral-800/50 bg-neutral-900/20">
-            <div className="absolute inset-0 bg-gradient-to-b from-cine-accent/6 via-transparent to-transparent pointer-events-none" />
-            <div className="relative px-5 py-7 md:px-8 md:py-9 flex flex-col items-center text-center">
-              <div className="relative mb-5">
-                <div className="absolute -inset-4 rounded-full bg-cine-accent/10 blur-2xl" aria-hidden />
+        ) : (
+          <div className="cine-container relative py-4 md:py-6 space-y-6">
+            <section className="relative overflow-hidden rounded-3xl border border-neutral-800/50 bg-neutral-900/20">
+              <div className="absolute inset-0 bg-gradient-to-b from-cine-accent/6 via-transparent to-transparent pointer-events-none" />
+              <div className="relative px-5 py-7 md:px-8 md:py-9 flex flex-col items-center text-center">
                 <ProfileAvatar
                   photoUrl={user.avatar}
                   alt={user.nome}
@@ -313,172 +321,171 @@ export default function ProfilePanel({
                   loadout={displayLoadout}
                   isDonor={!!user.isDonor}
                   lite
-                  className="relative"
+                  className="mb-5"
+                />
+
+                <ProfileNameRow
+                  name={user.nome}
+                  isDonor={!!user.isDonor}
+                  loadout={displayLoadout}
+                  nameSize="lg"
+                  align="center"
+                  className="w-full max-w-md"
+                />
+
+                {onUpdateUser && (
+                  <ProfileBioEditor
+                    bio={user.descricao || ''}
+                    email={user.email}
+                    onSaved={handleBioSaved}
+                    className="mx-auto mt-5"
+                  />
+                )}
+
+                {isVerifiedCreator && (
+                  <ProfileSocialLinks
+                    links={user.socialLinks}
+                    size="md"
+                    align="center"
+                    className="mt-4"
+                  />
+                )}
+
+                {(badgeItems.length > 0 || user.isAdmin || user.isDonor) && (
+                  <div className="flex flex-wrap justify-center items-center gap-2 mt-5 w-full">
+                    {badgeItems.map((b) => (
+                      <span key={b.id} title={b.name}>
+                        <RewardPreviewThumb item={b} size="sm" lite />
+                      </span>
+                    ))}
+                    {user.isAdmin && (
+                      <span className="px-2.5 py-1 rounded-full bg-cine-accent/10 text-cine-accent-light border border-cine-accent/25 text-[10px] font-bold uppercase tracking-wide">
+                        Admin
+                      </span>
+                    )}
+                    {user.isDonor && <DonorBadge size="md" />}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-3 [content-visibility:auto] [contain-intrinsic-size:auto_480px]">
+              <div className="flex items-end justify-between gap-3 px-1">
+                <div>
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Faça parte</p>
+                  <h2 className="text-base font-black text-white">Apoie ou crie na CineReact</h2>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <SpotlightCard
+                  variant="donor"
+                  icon={Crown}
+                  title={user.isDonor ? 'Você é Apoiador VIP' : 'Seja um Apoiador'}
+                  subtitle={
+                    user.isDonor
+                      ? 'Obrigado por apoiar o projeto! Seus cosméticos exclusivos estão ativos.'
+                      : 'Doação única de R$ 4,99 e desbloqueie tag, moldura, tema e título VIP.'
+                  }
+                  perks={
+                    user.isDonor
+                      ? ['Tag Apoiador no perfil', 'Cosméticos exclusivos equipados', 'Destaque nos comentários']
+                      : ['Tag dourada no perfil', 'Pacote completo de cosméticos', 'Benefícios em até 24h']
+                  }
+                  cta={user.isDonor ? 'Apoiar novamente' : 'Quero ser apoiador'}
+                  completed={!!user.isDonor}
+                  completedLabel="Ativo"
+                  onClick={() => go('doacoes')}
+                />
+                <SpotlightCard
+                  variant="creator"
+                  icon={Youtube}
+                  title={isVerifiedCreator ? 'Criador Verificado' : 'Seja um Criador'}
+                  subtitle={
+                    isVerifiedCreator
+                      ? 'Seu perfil oficial está verificado na plataforma. Obrigado por fazer parte!'
+                      : 'Tem canal de reacts? Entre no catálogo oficial e ganhe visibilidade na comunidade.'
+                  }
+                  perks={
+                    isVerifiedCreator
+                      ? ['Perfil verificado na plataforma', 'Links sociais no perfil', 'Tag de criador oficial']
+                      : ['Canal no catálogo CineReact', 'Perfil público de criador', 'Mais visibilidade para fãs']
+                  }
+                  cta={isVerifiedCreator ? 'Ver meu perfil público' : 'Solicitar meu canal'}
+                  completed={isVerifiedCreator}
+                  completedLabel="Verificado"
+                  onClick={() => {
+                    if (isVerifiedCreator) {
+                      go('configuracoes');
+                    } else {
+                      onRequestCreator();
+                    }
+                  }}
                 />
               </div>
+            </section>
 
-              <ProfileNameRow
-                name={user.nome}
-                isDonor={!!user.isDonor}
-                loadout={displayLoadout}
-                nameSize="lg"
-                align="center"
-                className="w-full max-w-md"
-              />
-
-              {onUpdateUser && (
-                <ProfileBioEditor
-                  bio={user.descricao || ''}
-                  email={user.email}
-                  onSaved={(descricao) => onUpdateUser({ ...user, descricao })}
-                  className="mx-auto mt-5"
-                />
-              )}
-
-              {isVerifiedCreator && (
-                <ProfileSocialLinks
-                  links={user.socialLinks}
-                  size="md"
-                  align="center"
-                  className="mt-4"
-                />
-              )}
-
-              {(badgeItems.length > 0 || user.isAdmin || user.isDonor) && (
-                <div className="flex flex-wrap justify-center items-center gap-2 mt-5 w-full">
-                  {badgeItems.map((b) => (
-                    <span key={b.id} title={b.name}>
-                      <RewardPreviewThumb item={b} size="sm" lite />
-                    </span>
-                  ))}
-                  {user.isAdmin && (
-                    <span className="px-2.5 py-1 rounded-full bg-cine-accent/10 text-cine-accent-light border border-cine-accent/25 text-[10px] font-bold uppercase tracking-wide">
-                      Admin
-                    </span>
-                  )}
-                  {user.isDonor && <DonorBadge size="md" />}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 [content-visibility:auto] [contain-intrinsic-size:auto_120px]">
+              {profile && (
+                <div className="md:col-span-7 flex gap-2">
+                  <StatPill icon={Star} value={profile.spotlight} label="Spotlight" accent="bg-amber-500/15 text-amber-300" />
+                  <StatPill icon={Flame} value={profile.currentStreak} label="Sequência" accent="bg-orange-500/15 text-orange-300" />
+                  <StatPill icon={Zap} value={profile.xp} label="XP" accent="bg-cine-accent/15 text-cine-accent-light" />
                 </div>
               )}
-            </div>
-          </section>
 
-          {/* CTAs em destaque — logo após o hero */}
-          <section className="space-y-3">
-            <div className="flex items-end justify-between gap-3 px-1">
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Faça parte</p>
-                <h2 className="text-base font-black text-white">Apoie ou crie na CineReact</h2>
+              <div className={`flex flex-wrap gap-2 ${profile ? 'md:col-span-5 md:justify-end' : 'md:col-span-12'}`}>
+                <button
+                  type="button"
+                  onClick={() => go('club', onOpenGamification)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold cursor-pointer transition-colors"
+                >
+                  <Palette className="w-4 h-4" />
+                  Personalizar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go('configuracoes')}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-zinc-300 hover:text-white text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                  Conta
+                </button>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-red-400/90 hover:bg-red-500/10 text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-              <SpotlightCard
-                variant="donor"
-                icon={Crown}
-                title={user.isDonor ? 'Você é Apoiador VIP' : 'Seja um Apoiador'}
-                subtitle={
-                  user.isDonor
-                    ? 'Obrigado por apoiar o projeto! Seus cosméticos exclusivos estão ativos.'
-                    : 'Doação única de R$ 4,99 e desbloqueie tag, moldura, tema e título VIP.'
-                }
-                perks={
-                  user.isDonor
-                    ? ['Tag Apoiador no perfil', 'Cosméticos exclusivos equipados', 'Destaque nos comentários']
-                    : ['Tag dourada no perfil', 'Pacote completo de cosméticos', 'Benefícios em até 24h']
-                }
-                cta={user.isDonor ? 'Apoiar novamente' : 'Quero ser apoiador'}
-                completed={!!user.isDonor}
-                completedLabel="Ativo"
-                onClick={() => go('doacoes')}
-              />
-              <SpotlightCard
-                variant="creator"
-                icon={Youtube}
-                title={isVerifiedCreator ? 'Criador Verificado' : 'Seja um Criador'}
-                subtitle={
-                  isVerifiedCreator
-                    ? 'Seu perfil oficial está verificado na plataforma. Obrigado por fazer parte!'
-                    : 'Tem canal de reacts? Entre no catálogo oficial e ganhe visibilidade na comunidade.'
-                }
-                perks={
-                  isVerifiedCreator
-                    ? ['Perfil verificado na plataforma', 'Links sociais no perfil', 'Tag de criador oficial']
-                    : ['Canal no catálogo CineReact', 'Perfil público de criador', 'Mais visibilidade para fãs']
-                }
-                cta={isVerifiedCreator ? 'Ver meu perfil público' : 'Solicitar meu canal'}
-                completed={isVerifiedCreator}
-                completedLabel="Verificado"
-                onClick={() => {
-                  if (isVerifiedCreator) {
-                    go('configuracoes');
-                  } else {
-                    onRequestCreator();
-                  }
-                }}
-              />
-            </div>
-          </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            {profile && (
-              <div className="md:col-span-7 flex gap-2">
-                <StatPill icon={Star} value={profile.spotlight} label="Spotlight" accent="bg-amber-500/15 text-amber-300" />
-                <StatPill icon={Flame} value={profile.currentStreak} label="Sequência" accent="bg-orange-500/15 text-orange-300" />
-                <StatPill icon={Zap} value={profile.xp} label="XP" accent="bg-cine-accent/15 text-cine-accent-light" />
+            {gamificationData && (
+              <div className="rounded-2xl border border-neutral-800/50 bg-neutral-900/20 p-1 overflow-hidden [content-visibility:auto]">
+                <GamificationBar data={gamificationData} animate={false} />
               </div>
             )}
 
-            <div className={`flex flex-wrap gap-2 ${profile ? 'md:col-span-5 md:justify-end' : 'md:col-span-12'}`}>
-              <button
-                type="button"
-                onClick={() => go('club', onOpenGamification)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold cursor-pointer transition-colors shadow-md shadow-cine-accent/20"
-              >
-                <Palette className="w-4 h-4" />
-                Personalizar
-              </button>
-              <button
-                type="button"
-                onClick={() => go('configuracoes')}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-zinc-300 hover:text-white text-xs font-semibold cursor-pointer transition-colors"
-              >
-                <Settings className="w-4 h-4" />
-                Conta
-              </button>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-red-400/90 hover:bg-red-500/10 text-xs font-semibold cursor-pointer transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sair
-              </button>
-            </div>
+            <section className="[content-visibility:auto] [contain-intrinsic-size:auto_320px]">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Explorar</h2>
+                <span className="text-[10px] text-zinc-600 font-mono">{navItems.length} atalhos</span>
+              </div>
+              <nav className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {navItems.map((item) => (
+                  <NavCard
+                    key={item.id}
+                    item={item}
+                    active={currentTab === item.id}
+                    onClick={() => go(item.id, item.onClick)}
+                  />
+                ))}
+              </nav>
+            </section>
           </div>
-
-          {gamificationData && (
-            <div className="rounded-2xl border border-neutral-800/50 bg-neutral-900/20 p-1 overflow-hidden">
-              <GamificationBar data={gamificationData} />
-            </div>
-          )}
-
-          <section>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Explorar</h2>
-              <span className="text-[10px] text-zinc-600 font-mono">{navItems.length} atalhos</span>
-            </div>
-            <nav className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {navItems.map((item) => (
-                <NavCard
-                  key={item.id}
-                  item={item}
-                  active={currentTab === item.id}
-                  onClick={() => go(item.id, item.onClick)}
-                />
-              ))}
-            </nav>
-          </section>
-        </div>
-      )}
+        )}
+      </div>
     </ProfileThemeScope>
   );
 }
