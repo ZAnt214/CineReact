@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import CineReactLogo from './CineReactLogo.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Sparkles, 
   Compass, 
   Users, 
   Tv, 
@@ -71,7 +70,6 @@ export default function LandingPage({ onExplore, isNavigating = false }: Landing
           transition={{ duration: 0.5 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-xs font-semibold mb-6 shadow-inner"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cine-accent-light animate-pulse" />
           <span>O Maior Portal de Reações do Brasil</span>
         </motion.div>
 

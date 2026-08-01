@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Sparkles, Heart, Trash2 } from 'lucide-react';
+import { MessageSquare, Star, Heart, Trash2 } from 'lucide-react';
 import { Comentario, UserState } from '../types.ts';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
@@ -203,7 +203,7 @@ export default function CommentSection({
 
             {user.isDonor && (
               <p className="text-[10px] text-cine-accent-light flex items-center gap-1.5 font-medium">
-                <Sparkles className="w-3 h-3 animate-pulse text-cine-cream" />
+                <Star className="w-3 h-3 animate-pulse text-cine-cream" />
                 Apoiador VIP: Seu comentário ganha destaque especial no topo!
               </p>
             )}

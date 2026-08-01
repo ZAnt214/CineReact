@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, UtensilsCrossed, Sparkles, Play, Clock, Heart } from 'lucide-react';
+import { ArrowLeft, UtensilsCrossed, Zap, Play, Clock, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ReactVideo } from '../types.ts';
 import OptimizedImage from './OptimizedImage.tsx';
@@ -251,7 +251,7 @@ export default function LunchTimePage({
               disabled={!hasVideos}
               className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-cine-accent-dark text-white font-black text-sm transition-all shadow-lg shadow-cine-accent/20 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
             >
-              <Sparkles className="w-4 h-4" />
+              <Zap className="w-4 h-4" />
               {sortearButtonLabel}
             </button>
           )}

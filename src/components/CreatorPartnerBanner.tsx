@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, BadgeCheck, Clapperboard, Sparkles, X } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Clapperboard, X } from 'lucide-react';
 
 interface CreatorPartnerBannerProps {
   onClick: () => void;
@@ -56,7 +56,7 @@ export default function CreatorPartnerBanner({ onClick, onClose }: CreatorPartne
                 <span className="hidden sm:inline">Programa de Criadores Parceiros</span>
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-cine-accent/30 bg-cine-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-cine-accent-light">
-                <Sparkles className="w-2.5 h-2.5" />
+                <BadgeCheck className="w-2.5 h-2.5" />
                 CineReact
               </span>
             </span>

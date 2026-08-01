@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Sparkles, Copy, Check, Mail, Gift } from 'lucide-react';
+import { Heart, Star, Copy, Check, Mail, Gift } from 'lucide-react';
 import { UserState } from '../types.ts';
 import { motion } from 'motion/react';
 
@@ -39,7 +39,7 @@ export default function DonationsPage({ user: _user, onUpdateUser: _onUpdateUser
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              icon: Sparkles,
+              icon: Star,
               title: 'Nome personalizado',
               text: 'Seu nome recebe destaque com a paleta oficial do CineReact em comentários, perfil e interações da plataforma.',
               foot: 'Efeito visual exclusivo',

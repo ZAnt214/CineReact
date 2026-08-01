@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye } from 'lucide-react';
+import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye, Info } from 'lucide-react';
 import { Obra, ReactVideo, Comentario, UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { adminFetch } from '../utils/adminApi.ts';
@@ -1014,7 +1014,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             className="flex items-center justify-between w-full text-zinc-400 hover:text-white transition-colors text-xs font-bold"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cine-accent-light" />
+              <Info className="w-4 h-4 text-cine-accent-light" />
               Como configurar as tabelas e chaves no Supabase?
             </span>
             {showSqlInstructions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -1354,7 +1354,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           {/* GERENCIAR CINEREACT RECOMENDA */}
           <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
-              <Sparkles className="text-cine-accent-light w-5 h-5 animate-pulse" />
+              <Star className="text-cine-accent-light w-5 h-5 animate-pulse" />
               CineReact Recomendado (Escolha dos Editores)
             </h2>
             <p className="text-xs text-zinc-400">
@@ -1364,7 +1364,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             {/* ADD RECOMMENDED VIDEO BY LINK */}
             <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-cine-accent/5 rounded-lg border border-cine-accent/20">
               <label className="block text-cine-accent-light font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Film className="w-3.5 h-3.5" />
                 Adicionar Destaque por Link do YouTube
               </label>
               <div className="flex gap-2">

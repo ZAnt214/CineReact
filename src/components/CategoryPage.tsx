@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Film, Gamepad2, Tv, Clapperboard, ArrowLeft, Search, Hash, Play, Clock, Sparkles, Filter, X } from 'lucide-react';
+import { Film, Gamepad2, Tv, Clapperboard, ArrowLeft, Search, Hash, Play, Clock, Filter, X } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';

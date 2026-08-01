@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import {
-  Sparkles,
+  Star,
   TrendingUp,
   Trophy,
   UserPlus,
@@ -20,7 +20,7 @@ import type { InventoryItemView, UnlockMethod } from '../../types/gamification.t
 
 const METHOD_ICONS: Record<UnlockMethod, React.ElementType> = {
   default: Gift,
-  shop: Sparkles,
+  shop: Star,
   level: TrendingUp,
   achievement: Trophy,
   follow_creator: UserPlus,
@@ -113,7 +113,7 @@ export default function RewardObtainInfo({ item, variant = 'card' }: RewardObtai
           )}
           {!item.owned && method === 'shop' && item.cost > 0 && (
             <p className={`flex items-center gap-1 mt-1.5 text-cine-accent-light font-bold ${isModal ? 'text-xs' : 'text-[10px]'}`}>
-              <Sparkles className="w-3 h-3" />
+              <Star className="w-3 h-3" />
               Custa {item.cost} Spotlight
             </p>
           )}

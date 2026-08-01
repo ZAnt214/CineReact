@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, RotateCcw, Sparkles, Eye, X, Trash2, ChevronDown } from 'lucide-react';
+import { Save, RotateCcw, Palette, Eye, X, Trash2, ChevronDown } from 'lucide-react';
 import { CATEGORY_LABELS, RARITY_STYLES } from '../../data/rewardsCatalog.ts';
 import { RewardPreviewModal, RewardPreviewThumb } from './RewardPreview.tsx';
 import ProfileAvatar from '../profile/ProfileAvatar.tsx';
@@ -135,7 +135,7 @@ export default function ProfileCustomizer({ user, inventory, loadout, onSave }: 
       <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1 custom-scrollbar">
         <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-neutral-950/95 backdrop-blur-sm py-2 -mt-2">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-cine-accent-light" />
+            <Palette className="w-5 h-5 text-cine-accent-light" />
             Cosméticos
           </h2>
           {equippedItems.length > 0 && (

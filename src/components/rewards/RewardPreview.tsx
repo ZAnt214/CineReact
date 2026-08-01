@@ -6,7 +6,6 @@ import {
   Clapperboard,
   Crown,
   Ghost,
-  Sparkles,
   Star,
   Flame,
   Compass,
@@ -54,7 +53,7 @@ const BADGE_ICONS: Record<string, React.ElementType> = {
   'badge-explorador': Compass,
   'badge-curador': Star,
   'badge-lenda': Crown,
-  'badge-spotlight': Sparkles,
+  'badge-spotlight': Star,
   'badge-streak-30': Flame,
   'badge-atelie-visionario': Palette,
   'badge-perfil-verificado-oficial': BadgeCheck,
@@ -107,7 +106,7 @@ const AVATAR_VISUALS: Record<
   spotlight: {
     gradient: 'from-purple-700 via-fuchsia-600 to-cine-accent-light',
     accent: 'text-white',
-    Icon: Sparkles,
+    Icon: Star,
   },
   legend: {
     gradient: 'from-rose-600 via-cine-accent to-cine-cream',
@@ -268,7 +267,7 @@ export function RewardPreviewThumb({
     default:
       return (
         <PremiumRewardSurface visualStyle={visual} size={size} rounded="xl" lite={lite}>
-          <Sparkles className={`${s.icon} ${styleCfg.accent}`} />
+          <Star className={`${s.icon} ${styleCfg.accent}`} />
         </PremiumRewardSurface>
       );
   }

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
@@ -71,7 +71,7 @@ export default function ProfileNameRow({
             <span
               className={`rounded bg-white-light uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}
             >
-              <Sparkles className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
+              <Star className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
             </span>
           </span>
         ) : (

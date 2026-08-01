@@ -11,7 +11,6 @@ import {
   Upload,
   Star,
   BarChart3,
-  Sparkles,
   PlayCircle,
   Users,
 } from 'lucide-react';
@@ -186,7 +185,7 @@ export default function CreatorPartnersContent({ onClose, showCloseActions = tru
       >
         <motion.div className="lg:hidden">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold tracking-wider uppercase mb-4">
-            <Sparkles className="w-3 h-3" />
+            <BadgeCheck className="w-3 h-3" />
             Programa de Parceiros
           </div>
         </motion.div>

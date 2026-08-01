@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Film, Play, User, LogOut, Heart, Settings, Bookmark, ShieldAlert,
-  ChevronRight, UtensilsCrossed, Trophy, Youtube, Send, Sparkles, Flame, Zap, Palette,
+  ChevronRight, UtensilsCrossed, Trophy, Youtube, Send, Star, Flame, Zap, Palette,
 } from 'lucide-react';
 import GamificationBar from '../GamificationBar.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
@@ -252,7 +252,7 @@ export default function ProfilePanel({
               {profile && (
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-xl border border-neutral-800/70 bg-neutral-900/30 px-3 py-3 text-center">
-                    <Sparkles className="w-4 h-4 text-cine-accent-light mx-auto mb-1" />
+                    <Star className="w-4 h-4 text-cine-accent-light mx-auto mb-1" />
                     <p className="text-sm font-bold text-white">{profile.spotlight}</p>
                     <p className="text-[9px] text-zinc-500 uppercase tracking-wide">Spotlight</p>
                   </div>

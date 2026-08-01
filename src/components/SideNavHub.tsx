@@ -11,7 +11,6 @@ import {
   X,
   ChevronDown,
   BadgeCheck,
-  Sparkles,
   Radio,
   Download,
   Zap,
@@ -120,7 +119,7 @@ function CreatorNavRow({
         </p>
         {creator.isDemo ? (
           <p className="text-[10px] text-cine-accent/90 truncate mt-0.5 flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5 shrink-0" />
+            <BadgeCheck className="w-2.5 h-2.5 shrink-0" />
             Exemplo verificado
           </p>
         ) : creator.reactCount > 0 ? (
