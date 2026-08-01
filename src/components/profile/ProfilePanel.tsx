@@ -281,12 +281,12 @@ export default function ProfilePanel({
       loadout={displayLoadout}
       isDonor={!!user.isDonor}
       variant="fullscreen"
-      className="flex flex-col flex-1 min-h-0 h-full w-full"
+      className="flex-1 flex flex-col min-h-dvh"
     >
-      <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
+      <div className="relative flex-1">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-cine-accent/[0.04]" aria-hidden />
 
-      <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-cine-accent/[0.04]" aria-hidden />
+        <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
 
         {!user.isLoggedIn ? (
           <div className="cine-container relative flex min-h-[50vh] items-center justify-center py-16">

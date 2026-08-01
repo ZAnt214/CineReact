@@ -461,23 +461,21 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-hidden flex flex-col bg-neutral-950"
+            className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain flex flex-col bg-neutral-950 touch-pan-y"
           >
-            <Suspense fallback={<div className="flex-1 min-h-0 bg-neutral-950" aria-hidden />}>
-              <div className="flex flex-col flex-1 min-h-0 h-full w-full">
-                <ProfilePanel
-              user={user}
-              currentTab={currentTab}
-              gamificationData={gamificationData}
-              onClose={() => setShowProfileMenu(false)}
-              onNavigate={setCurrentTab}
-              onOpenGamification={onOpenGamification}
-              onLogout={handleLogout}
-              onOpenAuth={onOpenAuth}
-              onRequestCreator={() => setShowRequestModal(true)}
-              onUpdateUser={setUser}
-                />
-              </div>
+            <Suspense fallback={<div className="min-h-dvh bg-neutral-950" aria-hidden />}>
+              <ProfilePanel
+                user={user}
+                currentTab={currentTab}
+                gamificationData={gamificationData}
+                onClose={() => setShowProfileMenu(false)}
+                onNavigate={setCurrentTab}
+                onOpenGamification={onOpenGamification}
+                onLogout={handleLogout}
+                onOpenAuth={onOpenAuth}
+                onRequestCreator={() => setShowRequestModal(true)}
+                onUpdateUser={setUser}
+              />
             </Suspense>
           </motion.div>
         )}
