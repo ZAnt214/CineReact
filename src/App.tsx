@@ -213,10 +213,7 @@ export default function App() {
     }
   };
 
-  const mergeChannelReacts = useCallback(async (
-    canais: Obra[],
-    baseReacts: ReactVideo[],
-  ) => {
+  const mergeChannelReacts = useCallback(async (canais: Obra[]) => {
     const channelPayloads = await Promise.all(
       canais.map((canal) =>
         safeFetchJson(`/api/obras/${encodeURIComponent(canal.id)}`).then((data) => ({
@@ -313,7 +310,7 @@ export default function App() {
       }
 
       if (canais.length > 0) {
-        void mergeChannelReacts(canais, baseReacts);
+        void mergeChannelReacts(canais);
       }
     } catch {
       // Silently handle error
