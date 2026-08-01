@@ -142,18 +142,17 @@
   .cine-brand--xl { font-size: 4.15rem; }
 }
 
-/* Header — atalho CineClips (eco do letreiro) */
-.header-clips-mark {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.05em;
-  flex-shrink: 0;
-  padding: 0.3rem 0.55rem 0.3rem 0.7rem;
-  margin-left: 0.1rem;
-  border: none;
-  border-left: 2px solid rgba(0, 212, 255, 0.28);
-  background: transparent;
+/* Side nav — destaque CineClips */
+.side-nav-clips-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.8rem 0.85rem;
+  margin-bottom: 0.55rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(12, 12, 14, 0.92) 68%);
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -161,64 +160,47 @@
     transform 0.15s ease;
 }
 
-.header-clips-mark:hover {
-  border-left-color: rgba(0, 212, 255, 0.55);
-  background: linear-gradient(90deg, rgba(0, 212, 255, 0.07) 0%, transparent 72%);
+.side-nav-clips-card:hover {
+  border-color: rgba(0, 212, 255, 0.38);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.14) 0%, rgba(12, 12, 14, 0.88) 68%);
 }
 
-.header-clips-mark:active {
-  transform: scale(0.98);
+.side-nav-clips-card--active {
+  border-color: rgba(0, 212, 255, 0.48);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.18) 0%, rgba(0, 212, 255, 0.05) 100%);
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.1);
 }
 
-.header-clips-mark--active {
-  border-left-color: rgba(0, 212, 255, 0.75);
-  background: linear-gradient(90deg, rgba(0, 212, 255, 0.12) 0%, transparent 78%);
-}
-
-.header-clips-mark-cine {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #71717a;
-  transition: color 0.2s ease;
-}
-
-.header-clips-mark-script {
-  font-family: 'Kaushan Script', cursive;
-  font-size: 1rem;
-  line-height: 1;
+.side-nav-clips-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.7rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 212, 255, 0.24);
   color: #67e8f9;
-  transition: color 0.2s ease, filter 0.2s ease;
+  flex-shrink: 0;
 }
 
-.header-clips-mark:hover .header-clips-mark-cine {
+.side-nav-clips-card-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  line-height: 1.15;
+}
+
+.side-nav-clips-card-sub {
+  margin-top: 0.12rem;
+  font-size: 0.68rem;
+  color: #71717a;
+  line-height: 1.2;
+}
+
+.side-nav-clips-card:hover .side-nav-clips-card-sub,
+.side-nav-clips-card--active .side-nav-clips-card-sub {
   color: #a1a1aa;
-}
-
-.header-clips-mark:hover .header-clips-mark-script,
-.header-clips-mark--active .header-clips-mark-script {
-  color: #e0f2fe;
-  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.35));
-}
-
-.header-clips-mark--active .header-clips-mark-cine {
-  color: #a1a1aa;
-}
-
-@media (min-width: 768px) {
-  .header-clips-mark {
-    padding: 0.35rem 0.65rem 0.35rem 0.8rem;
-  }
-
-  .header-clips-mark-cine {
-    font-size: 0.72rem;
-  }
-
-  .header-clips-mark-script {
-    font-size: 1.08rem;
-  }
 }
 
 .font-righteous {
