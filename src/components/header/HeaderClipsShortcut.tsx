@@ -18,14 +18,11 @@ function HeaderClipsShortcut({
       type="button"
       id={id}
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer text-xs lg:text-[13px] font-semibold shrink-0 ${className} ${
-        active
-          ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-neutral-900/30'
-      }`}
+      className={`header-clips-mark group ${active ? 'header-clips-mark--active' : ''} ${className}`}
       aria-label="Abrir CineClips"
     >
-      Clips
+      <span className="header-clips-mark-cine">Cine</span>
+      <span className="header-clips-mark-script">Clips</span>
     </button>
   );
 }
