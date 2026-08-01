@@ -1,6 +1,5 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
-import HeaderClipsShortcut from './header/HeaderClipsShortcut.tsx';
+import { Bell, Play, User, Check, X, Youtube, Heart, Zap } from 'lucide-react';
 import { UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import CineReactLogo from './CineReactLogo.tsx';
@@ -47,6 +46,17 @@ export default function Header({
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const isCineClipsActive =
+    currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-');
+
+  const openCineClips = () => {
+    if (onOpenCineClips) {
+      onOpenCineClips();
+      return;
+    }
+    setCurrentTab('cineclips');
+  };
 
   useEffect(() => {
     if (user.email) {
@@ -209,15 +219,20 @@ export default function Header({
                 />
               </button>
 
-              <HeaderClipsShortcut
-                active={
-                  currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-')
-                }
-                onClick={() => (onOpenCineClips ? onOpenCineClips() : setCurrentTab('cineclips'))}
-              />
-
               {/* DESKTOP NAV */}
               <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
+                <button
+                  id="nav-cineclips"
+                  onClick={openCineClips}
+                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                    isCineClipsActive
+                      ? 'bg-cine-accent/15 text-cine-accent-light border border-cine-accent/35 shadow-sm shadow-cine-accent/10'
+                      : 'border border-transparent hover:text-cine-accent-light hover:bg-cine-accent/10'
+                  }`}
+                >
+                  <Zap className="w-3 h-3" strokeWidth={2.25} />
+                  CineClips
+                </button>
                 <button 
                   id="nav-inicio"
                   onClick={() => setCurrentTab('inicio')} 

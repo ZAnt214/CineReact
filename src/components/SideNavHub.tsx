@@ -32,7 +32,6 @@ export const SIDE_NAV_ITEMS = [
   { id: 'categoria-anime', label: 'Animes', icon: Tv },
   { id: 'categoria-serie', label: 'Séries', icon: Clapperboard },
   { id: 'categoria-almoco', label: 'Hora do Almoço', icon: UtensilsCrossed },
-  { id: 'cineclips', label: 'CineClips', icon: Zap },
   { id: 'club', label: 'CineReact Club', icon: Trophy },
   { id: 'download-logo', label: 'Baixar Logo', icon: Download },
 ] as const;
@@ -198,6 +197,9 @@ function SideNavHub({
     return currentTab === 'canal' && selectedCanalId === creator.id;
   };
 
+  const isCineClipsActive =
+    currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-');
+
   if (typeof document === 'undefined') return null;
 
   const content = (
@@ -250,6 +252,21 @@ function SideNavHub({
         </div>
 
         <nav className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden py-3 px-3 space-y-1">
+          <button
+            type="button"
+            id="side-nav-cineclips"
+            onClick={() => handleNavClick('cineclips')}
+            className={`side-nav-clips-card group ${isCineClipsActive ? 'side-nav-clips-card--active' : ''}`}
+          >
+            <span className="side-nav-clips-card-icon" aria-hidden="true">
+              <Zap className="w-4 h-4" strokeWidth={2.25} />
+            </span>
+            <span className="min-w-0 flex-1 text-left">
+              <span className="side-nav-clips-card-title block truncate">CineClips</span>
+              <span className="side-nav-clips-card-sub block truncate">Feed vertical de reacts</span>
+            </span>
+          </button>
+
           {SIDE_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
