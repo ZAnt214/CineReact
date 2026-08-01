@@ -3,7 +3,7 @@ import path from "path";
 import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
-import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
+import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
 import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
@@ -2188,18 +2188,7 @@ app.get("/api/comentarios", (req, res) => {
     const isAdmin = verifyAdminEmailSync(adminEmail);
     const rawComments = localDb.getComentarios(obraId).filter((c) => isCommentPubliclyVisible(c, isAdmin));
     
-    // Enrich comments with user's isDonor status, avatar URL and equipped cosmetics
-    const enriched = rawComments.map(c => {
-      const userAcct = localDb.findUsuarioByEmailSync(c.usuarioEmail);
-      const publicProfile = getPublicUserProfile(c.usuarioEmail);
-      return {
-        ...c,
-        isDonor: userAcct?.isDonor || (c.usuarioEmail === "mateusvini.t10@gmail.com" ? true : false),
-        avatar: userAcct?.avatar || "",
-        profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(c.usuarioEmail),
-        publicProfile: publicProfile ?? undefined,
-      };
-    });
+    const enriched = rawComments.map((c) => enrichCommentAuthorProfile(c));
     
     res.json(enriched);
   } catch (error: any) {
@@ -2233,14 +2222,8 @@ app.post("/api/comentarios", (req, res) => {
       moderationStatus: 'approved',
     });
     const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
-    const publicProfile = getPublicUserProfile(usuarioEmail);
-    const userAcct = localDb.findUsuarioByEmailSync(usuarioEmail);
     res.status(201).json({
-      ...novo,
-      isDonor: !!userAcct?.isDonor,
-      avatar: userAcct?.avatar || "",
-      profileDisplay: publicProfile?.profileDisplay ?? getPublicProfileForEmail(usuarioEmail),
-      publicProfile: publicProfile ?? undefined,
+      ...enrichCommentAuthorProfile(novo),
       gamificationReward,
     });
   } catch (error: any) {

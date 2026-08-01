@@ -29,6 +29,7 @@ import {
 import { buildClipShareUrl } from '../../cineclips/utils.ts';
 import ProfileAvatar from '../profile/ProfileAvatar.tsx';
 import ProfileNameRow from '../profile/ProfileNameRow.tsx';
+import { resolveAuthorProfileProps } from '../../utils/authorProfileDisplay.ts';
 
 interface CineClipsPageProps {
   user: UserState;
@@ -427,22 +428,24 @@ function CommentsSheet({
               <p className="text-xs font-medium">Seja o primeiro a comentar neste clip!</p>
             </div>
           ) : (
-            comments.map((c) => (
+            comments.map((c) => {
+              const author = resolveAuthorProfileProps(c);
+              return (
               <div key={c.id} className="flex gap-3 text-left">
                 <ProfileAvatar
-                  photoUrl={c.avatar}
+                  photoUrl={author.avatar}
                   alt={c.usuarioNome}
                   size="sm"
-                  profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
-                  isDonor={!!c.isDonor}
+                  profileDisplay={author.profileDisplay}
+                  isDonor={author.isDonor}
                   lite
                   className="flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0 bg-white/5 border border-white/5 rounded-xl p-3">
                   <ProfileNameRow
                     name={c.usuarioNome}
-                    isDonor={!!c.isDonor}
-                    profileDisplay={c.publicProfile?.profileDisplay ?? c.profileDisplay}
+                    isDonor={author.isDonor}
+                    profileDisplay={author.profileDisplay}
                     nameSize="sm"
                   />
                   <p className="text-xs text-zinc-200 mt-1 leading-relaxed break-words">
@@ -450,7 +453,8 @@ function CommentsSheet({
                   </p>
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </div>
 
