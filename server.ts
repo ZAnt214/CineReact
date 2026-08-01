@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, getPublicProfileForEmail } from "./src/gamification/serverHelpers.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
+import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
 import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
@@ -2914,33 +2915,11 @@ app.post("/api/usuario/update", async (req, res) => {
   }
 });
 
-// Registrar doação e conceder tag de Doador VIP
+// Registrar doação — use POST /api/donations/request (fila de aprovação)
 app.post("/api/usuario/donate", async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório." });
-    }
-
-    const user = await localDb.updateUsuario(email, { isDonor: true });
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    // Criar uma notificação no sistema informando a doação de sucesso
-    localDb.addNotificacao({
-      titulo: "🎖️ Doação Confirmada!",
-      mensagem: `Olá ${user.username}, agradecemos imensamente o seu apoio financeiro! Você acaba de receber a Tag Exclusiva de Apoiador/Doador do Cine React! Seu nome agora brilha no chat.`
-    });
-
-    res.json({
-      success: true,
-      user: serializeUserState(user, { isDonor: true }),
-    });
-  } catch (error) {
-    console.error("Erro ao processar doação:", error);
-    res.status(500).json({ error: "Erro interno ao processar doação." });
-  }
+  res.status(410).json({
+    error: "Use o fluxo de doação VIP em /doacoes. Após pagar, aguarde aprovação da equipe.",
+  });
 });
 
 // Lista todos os usuários cadastrados (apenas para exibição no painel admin)
@@ -3123,6 +3102,7 @@ app.get("/api/search", (req, res) => {
 // GAMIFICATION
 // ==========================================
 registerGamificationRoutes(app);
+registerDonationRoutes(app, requireAdmin);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin);
 

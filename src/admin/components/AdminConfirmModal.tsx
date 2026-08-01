@@ -10,6 +10,7 @@ interface AdminConfirmModalProps {
   danger?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  children?: React.ReactNode;
 }
 
 export default function AdminConfirmModal({
@@ -20,6 +21,7 @@ export default function AdminConfirmModal({
   danger = false,
   onConfirm,
   onCancel,
+  children,
 }: AdminConfirmModalProps) {
   return (
     <AnimatePresence>
@@ -46,7 +48,8 @@ export default function AdminConfirmModal({
             </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
             <p className="text-sm text-zinc-400 leading-relaxed mb-6">{message}</p>
-            <div className="flex gap-3 justify-end">
+            {children}
+            <div className={`flex gap-3 justify-end ${children ? 'mt-6' : ''}`}>
               <button type="button" onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white">
                 Cancelar
               </button>
