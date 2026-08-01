@@ -415,7 +415,7 @@ export default function PlaybackPage({
   const isFollowing = canaisSeguidos.includes(activeReact.canalNome);
   const embedOrigin =
     typeof window !== 'undefined' ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
-  const embedSrc = `https://www.youtube-nocookie.com/embed/${activeReact.id}?autoplay=1&controls=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1${embedOrigin}`;
+  const embedSrc = `https://www.youtube.com/embed/${activeReact.id}?autoplay=1&controls=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1${embedOrigin}`;
 
   const hasRealAvatar =
     channelObra?.poster &&
@@ -450,7 +450,7 @@ export default function PlaybackPage({
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
-                referrerPolicy="no-referrer"
+                referrerPolicy="strict-origin-when-cross-origin"
                 onLoad={handleIframeLoad}
                 className="w-full h-full relative z-0 touch-manipulation"
               />
