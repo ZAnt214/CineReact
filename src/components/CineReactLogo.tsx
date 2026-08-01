@@ -41,13 +41,7 @@ function BrandMark({
 
   const wordmark = (
     <span className="cine-brand-stack">
-      <span className="cine-brand-title">
-        <span className="cine-brand-word">
-          <span className="cine-brand-cine">CINE</span>
-          <span className="cine-brand-react">REACT</span>
-        </span>
-        <span className="cine-brand-underline" aria-hidden="true" />
-      </span>
+      <span className="cine-brand-script">React</span>
       {showTagline && <span className="cine-brand-tagline">{tagline}</span>}
     </span>
   );
