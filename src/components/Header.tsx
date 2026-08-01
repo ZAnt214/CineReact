@@ -472,6 +472,7 @@ export default function Header({
               onLogout={handleLogout}
               onOpenAuth={onOpenAuth}
               onRequestCreator={() => setShowRequestModal(true)}
+              onUpdateUser={setUser}
             />
           </motion.div>
         )}
