@@ -13,6 +13,7 @@ import {
   Gift,
   Lock,
   CheckCircle2,
+  Heart,
   Palette,
 } from 'lucide-react';
 import { UNLOCK_METHOD_INFO, formatObtainText } from '../../data/rewardVisualStyles.ts';
@@ -31,6 +32,7 @@ const METHOD_ICONS: Record<UnlockMethod, React.ElementType> = {
   streak: Flame,
   legacy: Gift,
   creator_program_art: Palette,
+  donation: Heart,
 };
 
 interface RewardObtainInfoProps {

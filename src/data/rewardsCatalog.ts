@@ -420,6 +420,16 @@ export const DONOR_VIP_ITEMS: RewardItemDefinition[] = [
   },
 ];
 
+export function getDonorRewardPreviews() {
+  return DONOR_VIP_ITEMS.map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    category: item.category,
+    rarity: item.rarity,
+  }));
+}
+
 export const CREATOR_PROGRAM_ART_ITEMS: RewardItemDefinition[] = [
   {
     id: 'theme-atelie-visionario',
