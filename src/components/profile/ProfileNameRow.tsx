@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { Star } from 'lucide-react';
 import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
 import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
+import DonorBadge from './DonorBadge.tsx';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export interface ProfileNameRowProps {
@@ -38,10 +38,7 @@ export default function ProfileNameRow({
   const alignClass = isCenter ? 'items-center text-center' : 'items-start text-left';
   const rowJustify = isCenter ? 'justify-center' : 'justify-start';
 
-  const donorClass =
-    donorBadgeSize === 'md'
-      ? 'text-[6px] px-1.5 py-0.5'
-      : 'text-[7px] px-1.5 py-0.5';
+  const donorBadgeVariant = donorBadgeSize === 'md' ? 'md' : 'sm';
 
   const nameClass =
     nameSize === 'lg'
@@ -65,19 +62,8 @@ export default function ProfileNameRow({
       )}
 
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 w-full ${rowJustify}`}>
-        {isDonor ? (
-          <span className={`${nameClass} text-cine-cream font-extrabold inline-flex items-center gap-1.5 flex-wrap ${rowJustify}`}>
-            {name}
-            <span
-              className={`rounded bg-white-light uppercase font-black text-black tracking-widest inline-flex items-center gap-0.5 ${donorClass}`}
-            >
-              <Star className="w-1.5 h-1.5 text-black fill-current" /> APOIADOR
-            </span>
-          </span>
-        ) : (
-          <span className={nameClass}>{name}</span>
-        )}
-
+        <span className={nameClass}>{name}</span>
+        {isDonor && <DonorBadge size={donorBadgeVariant} />}
         {timestamp && (
           <span className="text-[10px] profile-text-muted font-mono shrink-0">{timestamp}</span>
         )}
