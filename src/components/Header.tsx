@@ -435,7 +435,7 @@ export default function Header({
                       alt={user.nome}
                       size="sm"
                       loadout={gamificationData?.profile.loadout}
-                      donorBadge={!!user.isDonor}
+                      isDonor={!!user.isDonor}
                     />
                   ) : (
                     <div className="w-7.5 h-7.5 rounded-full bg-neutral-900 border border-neutral-800/80 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-neutral-800/50 transition-all shadow-inner">

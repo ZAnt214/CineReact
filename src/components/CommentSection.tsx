@@ -179,7 +179,7 @@ export default function CommentSection({
                 alt={user.nome}
                 size="sm"
                 loadout={userLoadout}
-                donorBadge={!!user.isDonor}
+                isDonor={!!user.isDonor}
               />
               <div className="min-w-0 flex-1">
                 <ProfileNameRow

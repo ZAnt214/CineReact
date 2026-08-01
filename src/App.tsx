@@ -1423,6 +1423,7 @@ export default function App() {
                   onUpdateUser={setUser} 
                   onNavigateToDonations={() => setCurrentTab('doacoes')}
                   isVerifiedCreator={isVerifiedCreatorLoadout(gamification.data?.profile.loadout)}
+                  userLoadout={gamification.data?.profile.loadout}
                 />
               </motion.div>
             )}

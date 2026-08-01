@@ -5,15 +5,19 @@ import { motion } from 'motion/react';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
 import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
 import DonorBadge from './profile/DonorBadge.tsx';
+import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import ProfileNameRow from './profile/ProfileNameRow.tsx';
+import type { ProfileLoadout } from '../types/gamification.ts';
 
 interface UserSettingsProps {
   user: UserState;
   onUpdateUser: (newUser: UserState) => void;
   onNavigateToDonations: () => void;
   isVerifiedCreator?: boolean;
+  userLoadout?: ProfileLoadout | null;
 }
 
-export default function UserSettings({ user, onUpdateUser, onNavigateToDonations, isVerifiedCreator = false }: UserSettingsProps) {
+export default function UserSettings({ user, onUpdateUser, onNavigateToDonations, isVerifiedCreator = false, userLoadout }: UserSettingsProps) {
   const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
   const [descricao, setDescricao] = useState(user.descricao || '');
   const [socialLinks, setSocialLinks] = useState<CreatorSocialLinks>({
@@ -208,32 +212,27 @@ export default function UserSettings({ user, onUpdateUser, onNavigateToDonations
             
             {/* Profile Avatar Live Preview */}
             <div className="space-y-4">
-              <div className="relative group">
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-neutral-800 bg-neutral-950 flex items-center justify-center mx-auto">
-                  {avatarUrl ? (
-                    <img 
-                      src={avatarUrl} 
-                      alt="Avatar Preview" 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        // Fallback on image error
-                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120";
-                      }}
-                    />
-                  ) : (
-                    <User className="w-12 h-12 text-zinc-600" />
-                  )}
-                </div>
+              <div className="relative group flex justify-center">
+                <ProfileAvatar
+                  photoUrl={avatarUrl || user.avatar}
+                  alt={user.nome}
+                  size="xl"
+                  loadout={userLoadout}
+                  isDonor={!!user.isDonor}
+                  lite
+                />
               </div>
 
-              {/* User Name with customization based on Donor Status */}
               <div>
-                <h3 className="text-lg font-black tracking-wide flex items-center justify-center gap-2 text-white flex-wrap">
-                  {user.nome}
-                  {user.isDonor && <DonorBadge size="md" />}
-                </h3>
-                <p className="text-zinc-500 text-[10px] font-mono">{user.email}</p>
+                <ProfileNameRow
+                  name={user.nome}
+                  isDonor={!!user.isDonor}
+                  loadout={userLoadout}
+                  nameSize="md"
+                  align="center"
+                  className="w-full"
+                />
+                <p className="text-zinc-500 text-[10px] font-mono mt-2">{user.email}</p>
               </div>
             </div>
 

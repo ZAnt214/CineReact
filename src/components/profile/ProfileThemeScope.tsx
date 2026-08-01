@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { getVisualStyle } from '../../data/rewardVisualStyles.ts';
-import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
+import { resolvePublicProfileDisplay, resolveUserProfileDisplay } from '../../gamification/profileDisplay.ts';
 import type { ProfileLoadout, PublicProfileDisplay } from '../../types/gamification.ts';
 
 export type ProfileThemeTone = 'dark' | 'light';
@@ -14,6 +14,7 @@ export function useProfileThemeTone() {
 export interface ProfileThemeScopeProps {
   loadout?: ProfileLoadout | null;
   profileDisplay?: PublicProfileDisplay | null;
+  isDonor?: boolean;
   variant?: 'default' | 'fullscreen' | 'lite';
   className?: string;
   children: React.ReactNode;
@@ -22,13 +23,14 @@ export interface ProfileThemeScopeProps {
 export default function ProfileThemeScope({
   loadout,
   profileDisplay,
+  isDonor = false,
   variant = 'default',
   className = '',
   children,
 }: ProfileThemeScopeProps) {
   const display = useMemo(
-    () => profileDisplay || resolvePublicProfileDisplay(loadout),
-    [profileDisplay, loadout]
+    () => profileDisplay || resolveUserProfileDisplay(loadout, isDonor),
+    [profileDisplay, loadout, isDonor]
   );
 
   const tone = display.themeTone ?? 'dark';

@@ -309,6 +309,7 @@ export interface LeaderboardEntry {
   tier: InfluenceTier;
   influenceIndex: number;
   isInfluencer: boolean;
+  isDonor?: boolean;
   profileDisplay?: PublicProfileDisplay;
   publicProfile?: import('../types.ts').PublicUserProfile;
 }

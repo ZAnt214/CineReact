@@ -13,6 +13,7 @@ import RewardObtainInfo from './RewardObtainInfo.tsx';
 import ProfileAvatar from '../profile/ProfileAvatar.tsx';
 import ProfileSurface from '../profile/ProfileSurface.tsx';
 import ProfileNameRow from '../profile/ProfileNameRow.tsx';
+import { applyDonorLoadout } from '../../gamification/profileDisplay.ts';
 import type { InventoryItemView, ProfileLoadout, RewardCategory } from '../../types/gamification.ts';
 import { ACTIVE_COSMETIC_CATEGORIES, LOADOUT_SLOTS } from '../../types/gamification.ts';
 import type { UserState } from '../../types.ts';
@@ -110,16 +111,21 @@ export default function ProfileCosmeticsHub({
     setRedeeming(false);
   };
 
+  const displayLoadout = useMemo(
+    () => applyDonorLoadout(loadout, !!user.isDonor),
+    [loadout, user.isDonor],
+  );
+
   return (
     <div className="relative z-0 space-y-6">
-      <ProfileSurface loadout={loadout} variant="preview" lite className="min-h-0">
+      <ProfileSurface loadout={displayLoadout} isDonor={!!user.isDonor} variant="preview" lite className="min-h-0">
         <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 py-2">
-          <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={loadout} lite className="shrink-0" />
+          <ProfileAvatar photoUrl={user.avatar} alt={user.nome} size="lg" loadout={displayLoadout} isDonor={!!user.isDonor} lite className="shrink-0" />
           <div className="flex-1 text-center sm:text-left min-w-0">
             <p className="text-[10px] font-mono uppercase tracking-widest text-cine-accent/70 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
               <Palette className="w-3.5 h-3.5" /> Prévia do perfil
             </p>
-            <ProfileNameRow name={user.nome} loadout={loadout} nameSize="md" align="center" className="w-full" />
+            <ProfileNameRow name={user.nome} loadout={displayLoadout} isDonor={!!user.isDonor} nameSize="md" align="center" className="w-full" />
             {loadout.badges.length > 0 && (
               <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
                 {loadout.badges.filter((id) => id !== VERIFIED_PROFILE_BADGE_ID).map((id) => {

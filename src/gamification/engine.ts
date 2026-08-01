@@ -19,8 +19,9 @@ import {
   incrementCreatorWatch,
   checkCreatorFollowReward,
 } from './rewardsEngine.ts';
-import { resolvePublicProfileDisplay } from './profileDisplay.ts';
+import { resolveUserProfileDisplay } from './profileDisplay.ts';
 import { getPublicUserProfile } from './publicUserProfile.ts';
+import { localDb } from '../db/local_db.ts';
 import type {
   AchievementDefinition,
   GamificationEventType,
@@ -610,6 +611,9 @@ export function buildLeaderboard(
 
   return sorted.slice(0, limit).map((p, i) => {
     const user = usernames[p.email.toLowerCase()] || { username: p.email.split('@')[0] };
+    const account = localDb.findUsuarioByEmailSync(p.email);
+    const isDonor = !!account?.isDonor;
+    const publicProfile = getPublicUserProfile(p.email) ?? undefined;
     return {
       rank: i + 1,
       email: p.email,
@@ -619,8 +623,9 @@ export function buildLeaderboard(
       tier: getTierFromXp(p.xp).tier,
       influenceIndex: p.influenceIndex,
       isInfluencer: p.featuredInfluencer,
-      profileDisplay: resolvePublicProfileDisplay(p.loadout),
-      publicProfile: getPublicUserProfile(p.email) ?? undefined,
+      isDonor,
+      profileDisplay: publicProfile?.profileDisplay ?? resolveUserProfileDisplay(p.loadout, isDonor),
+      publicProfile,
     };
   });
 }

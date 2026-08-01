@@ -46,6 +46,7 @@ export interface PublicUserProfile {
   descricao?: string;
   socialLinks?: CreatorSocialLinks;
   isVerifiedCreator: boolean;
+  isDonor?: boolean;
   profileDisplay: PublicProfileDisplay;
 }
 

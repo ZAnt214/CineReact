@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { resolvePublicProfileDisplay } from '../../gamification/profileDisplay.ts';
+import { resolveUserProfileDisplay } from '../../gamification/profileDisplay.ts';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorTagVisual from '../rewards/CreatorTagVisual.tsx';
 import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
@@ -30,8 +30,8 @@ export default function ProfileNameRow({
   className = '',
 }: ProfileNameRowProps) {
   const display = useMemo(
-    () => profileDisplay || resolvePublicProfileDisplay(loadout),
-    [profileDisplay, loadout]
+    () => profileDisplay || resolveUserProfileDisplay(loadout, isDonor),
+    [profileDisplay, loadout, isDonor]
   );
 
   const isCenter = align === 'center';
