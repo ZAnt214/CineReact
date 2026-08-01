@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
 import { UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
 import GamificationBar from './GamificationBar.tsx';
-import ProfilePanel from './profile/ProfilePanel.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import type { GamificationMeResponse } from '../types/gamification.ts';
+
+const ProfilePanel = lazy(() => import('./profile/ProfilePanel.tsx'));
 
 interface HeaderProps {
   currentTab: string;
@@ -460,9 +461,10 @@ export default function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain flex flex-col bg-neutral-950 touch-pan-y"
+            className="fixed inset-0 z-[100] overflow-hidden flex flex-col bg-neutral-950"
           >
-            <ProfilePanel
+            <Suspense fallback={<div className="flex-1 bg-neutral-950" aria-hidden />}>
+              <ProfilePanel
               user={user}
               currentTab={currentTab}
               gamificationData={gamificationData}
@@ -473,7 +475,8 @@ export default function Header({
               onOpenAuth={onOpenAuth}
               onRequestCreator={() => setShowRequestModal(true)}
               onUpdateUser={setUser}
-            />
+              />
+            </Suspense>
           </motion.div>
         )}
       </AnimatePresence>

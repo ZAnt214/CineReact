@@ -7,15 +7,23 @@ import type { GamificationMeResponse } from '../types/gamification.ts';
 interface GamificationBarProps {
   data: GamificationMeResponse | null;
   compact?: boolean;
+  animate?: boolean;
   onClick?: () => void;
 }
 
-export default function GamificationBar({ data, compact = false, onClick }: GamificationBarProps) {
+export default function GamificationBar({ data, compact = false, animate = true, onClick }: GamificationBarProps) {
   if (!data?.profile) return null;
 
   const { profile, tier } = data;
   const progress = getXpProgress(profile.xp);
   const tierDef = getTierFromXp(profile.xp);
+
+  const progressBar = (
+    <div
+      className="h-full bg-cine-accent transition-[width] duration-700 ease-out"
+      style={{ width: `${progress.percent}%` }}
+    />
+  );
 
   if (compact) {
     return (
@@ -27,12 +35,16 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
         <div className="flex flex-col items-end min-w-[72px]">
           <span className="text-[9px] font-mono uppercase tracking-widest text-cine-accent/80">{tier}</span>
           <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden mt-0.5">
-            <motion.div
-              className="h-full bg-cine-accent"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress.percent}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            />
+            {animate ? (
+              <motion.div
+                className="h-full bg-cine-accent"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress.percent}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+              />
+            ) : (
+              progressBar
+            )}
           </div>
         </div>
         {profile.currentStreak > 0 && (
@@ -49,12 +61,8 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
     );
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-neutral-800/70 bg-neutral-900/30 p-4"
-    >
+  const body = (
+    <>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Índice de Influência</p>
@@ -73,12 +81,16 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
         <span>{progress.percent}%</span>
       </div>
       <div className="h-2 bg-neutral-800/80 rounded-full overflow-hidden mb-3">
-        <motion.div
-          className="h-full bg-cine-accent"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress.percent}%` }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-        />
+        {animate ? (
+          <motion.div
+            className="h-full bg-cine-accent"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress.percent}%` }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+          />
+        ) : (
+          progressBar
+        )}
       </div>
 
       <div className="flex items-center gap-4 text-xs">
@@ -100,6 +112,24 @@ export default function GamificationBar({ data, compact = false, onClick }: Gami
         )}
       </div>
       <p className="text-[10px] text-zinc-600 mt-2 leading-snug">{tierDef.description}</p>
+    </>
+  );
+
+  if (!animate) {
+    return (
+      <div className="rounded-2xl border border-neutral-800/70 bg-neutral-900/30 p-4">
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl border border-neutral-800/70 bg-neutral-900/30 p-4"
+    >
+      {body}
     </motion.div>
   );
 }
