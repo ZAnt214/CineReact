@@ -632,6 +632,97 @@
   pointer-events: none;
 }
 
+.cineclips-slide-scrim--light {
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 10, 0.12) 0%,
+    transparent 32%,
+    transparent 72%,
+    rgba(8, 8, 10, 0.5) 88%,
+    rgba(8, 8, 10, 0.72) 100%
+  );
+}
+
+.cineclips-header-minimal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(0.55rem + env(safe-area-inset-top, 0px)) 0.85rem 0.35rem;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent);
+  pointer-events: none;
+}
+
+.cineclips-header-minimal-btn {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease;
+}
+
+.cineclips-header-minimal-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cineclips-slide-ui--minimal {
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.cineclips-meta--minimal {
+  gap: 0.2rem;
+  max-width: calc(100% - 3.75rem);
+}
+
+.cineclips-title--minimal {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cineclips-rail--minimal {
+  gap: 1.35rem;
+  padding-bottom: 0.15rem;
+}
+
+.cineclips-rail--minimal .cineclips-action-orb {
+  width: 2.65rem;
+  height: 2.65rem;
+}
+
+.cineclips-rail--minimal .cineclips-action-svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.cineclips-rail--minimal .cineclips-action--share .cineclips-action-orb::before {
+  background: radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 72%);
+  box-shadow: none;
+}
+
+.cineclips-rail--minimal .cineclips-action--share .cineclips-action-orb {
+  color: #fff;
+}
+
+.cineclips-rail--minimal .cineclips-action--share .cineclips-action-svg {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+
 .cineclips-slide-ui {
   position: absolute;
   inset: 0;
