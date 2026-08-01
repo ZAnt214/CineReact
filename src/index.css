@@ -33,7 +33,7 @@
   font-family: 'Sora', 'Inter', system-ui, sans-serif;
 }
 
-/* CineReact — letreiro script "CineReact" */
+/* CineReact — letreiro: Cine (display) + React (script) */
 .cine-brand-lockup {
   display: inline-flex;
   align-items: center;
@@ -67,16 +67,34 @@
   min-width: 0;
 }
 
-.cine-brand-script {
-  display: block;
+.cine-brand-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.04em;
+  white-space: nowrap;
+}
+
+.cine-brand-cine {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.72em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+  transform: translateY(-0.04em);
+}
+
+.cine-brand-react {
   font-family: 'Kaushan Script', cursive;
   font-weight: 400;
-  font-style: normal;
-  line-height: 0.95;
+  font-size: 1em;
+  line-height: 0.92;
   letter-spacing: 0.01em;
-  color: #fafafa;
-  white-space: nowrap;
-  text-shadow: 0 1px 18px rgba(0, 212, 255, 0.14);
+  background: linear-gradient(100deg, #e0f2fe 0%, #67e8f9 38%, #00d4ff 72%, #a5f3fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(0, 212, 255, 0.22));
 }
 
 .cine-brand-tagline {
@@ -97,11 +115,11 @@
   text-align: center;
 }
 
-.cine-brand--xs { font-size: 1.2rem; }
-.cine-brand--sm { font-size: 1.55rem; }
-.cine-brand--md { font-size: 2.1rem; }
-.cine-brand--lg { font-size: 2.85rem; }
-.cine-brand--xl { font-size: 3.55rem; }
+.cine-brand--xs { font-size: 1.35rem; }
+.cine-brand--sm { font-size: 1.7rem; }
+.cine-brand--md { font-size: 2.25rem; }
+.cine-brand--lg { font-size: 3rem; }
+.cine-brand--xl { font-size: 3.75rem; }
 
 .cine-brand--xs .cine-brand-tagline,
 .cine-brand--sm .cine-brand-tagline {
@@ -118,10 +136,89 @@
 }
 
 @media (min-width: 640px) {
-  .cine-brand--sm { font-size: 1.8rem; }
-  .cine-brand--md { font-size: 2.4rem; }
-  .cine-brand--lg { font-size: 3.15rem; }
-  .cine-brand--xl { font-size: 3.95rem; }
+  .cine-brand--sm { font-size: 1.95rem; }
+  .cine-brand--md { font-size: 2.55rem; }
+  .cine-brand--lg { font-size: 3.35rem; }
+  .cine-brand--xl { font-size: 4.15rem; }
+}
+
+/* Header — atalho CineClips (eco do letreiro) */
+.header-clips-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.05em;
+  flex-shrink: 0;
+  padding: 0.3rem 0.55rem 0.3rem 0.7rem;
+  margin-left: 0.1rem;
+  border: none;
+  border-left: 2px solid rgba(0, 212, 255, 0.28);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.header-clips-mark:hover {
+  border-left-color: rgba(0, 212, 255, 0.55);
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.07) 0%, transparent 72%);
+}
+
+.header-clips-mark:active {
+  transform: scale(0.98);
+}
+
+.header-clips-mark--active {
+  border-left-color: rgba(0, 212, 255, 0.75);
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.12) 0%, transparent 78%);
+}
+
+.header-clips-mark-cine {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+  transition: color 0.2s ease;
+}
+
+.header-clips-mark-script {
+  font-family: 'Kaushan Script', cursive;
+  font-size: 1rem;
+  line-height: 1;
+  color: #67e8f9;
+  transition: color 0.2s ease, filter 0.2s ease;
+}
+
+.header-clips-mark:hover .header-clips-mark-cine {
+  color: #a1a1aa;
+}
+
+.header-clips-mark:hover .header-clips-mark-script,
+.header-clips-mark--active .header-clips-mark-script {
+  color: #e0f2fe;
+  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.35));
+}
+
+.header-clips-mark--active .header-clips-mark-cine {
+  color: #a1a1aa;
+}
+
+@media (min-width: 768px) {
+  .header-clips-mark {
+    padding: 0.35rem 0.65rem 0.35rem 0.8rem;
+  }
+
+  .header-clips-mark-cine {
+    font-size: 0.72rem;
+  }
+
+  .header-clips-mark-script {
+    font-size: 1.08rem;
+  }
 }
 
 .font-righteous {

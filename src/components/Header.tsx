@@ -210,7 +210,6 @@ export default function Header({
               </button>
 
               <HeaderClipsShortcut
-                className="md:hidden"
                 active={
                   currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-')
                 }
@@ -219,13 +218,6 @@ export default function Header({
 
               {/* DESKTOP NAV */}
               <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
-                <HeaderClipsShortcut
-                  id="nav-cineclips-desktop"
-                  active={
-                    currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-')
-                  }
-                  onClick={() => (onOpenCineClips ? onOpenCineClips() : setCurrentTab('cineclips'))}
-                />
                 <button 
                   id="nav-inicio"
                   onClick={() => setCurrentTab('inicio')} 
