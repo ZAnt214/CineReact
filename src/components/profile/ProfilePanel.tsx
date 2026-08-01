@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import {
-  Film, Play, User, LogOut, Heart, Settings, Bookmark, ShieldAlert,
-  ChevronRight, UtensilsCrossed, Trophy, Youtube, Send, Star, Flame, Zap, Palette,
-  Sparkles, X,
+  Film, Play, User, LogOut, Settings, Bookmark, ShieldAlert,
+  ChevronRight, UtensilsCrossed, Trophy, Youtube, Star, Flame, Zap, Palette,
+  Sparkles, X, BadgeCheck, Crown, ArrowRight,
 } from 'lucide-react';
 import GamificationBar from '../GamificationBar.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
@@ -95,6 +95,104 @@ function NavCard({
   );
 }
 
+function SpotlightCard({
+  title,
+  subtitle,
+  perks,
+  cta,
+  onClick,
+  icon: Icon,
+  variant,
+  completed,
+  completedLabel,
+}: {
+  title: string;
+  subtitle: string;
+  perks: string[];
+  cta: string;
+  onClick: () => void;
+  icon: React.ElementType;
+  variant: 'donor' | 'creator';
+  completed?: boolean;
+  completedLabel?: string;
+}) {
+  const isDonor = variant === 'donor';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative overflow-hidden flex flex-col text-left rounded-3xl border p-5 md:p-6 min-h-[220px] transition-all cursor-pointer ${
+        isDonor
+          ? 'border-amber-400/30 bg-gradient-to-br from-amber-500/15 via-neutral-950/90 to-cine-accent/10 hover:border-amber-400/50 hover:shadow-xl hover:shadow-amber-500/10'
+          : 'border-cine-accent/30 bg-gradient-to-br from-cine-accent/12 via-neutral-950/90 to-violet-500/10 hover:border-cine-accent/50 hover:shadow-xl hover:shadow-cine-accent/10'
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl ${
+          isDonor ? 'bg-amber-400/20' : 'bg-cine-accent/20'
+        }`}
+        aria-hidden
+      />
+
+      <div className="relative flex items-start justify-between gap-3 mb-4">
+        <span
+          className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl border ${
+            isDonor
+              ? 'bg-amber-500/15 border-amber-400/30 text-amber-200'
+              : 'bg-cine-accent/15 border-cine-accent/30 text-cine-accent-light'
+          }`}
+        >
+          <Icon className="w-6 h-6" />
+        </span>
+        {completed ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold uppercase tracking-wide text-emerald-300">
+            <BadgeCheck className="w-3.5 h-3.5" />
+            {completedLabel}
+          </span>
+        ) : (
+          <span
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isDonor
+                ? 'bg-amber-400/10 text-amber-200 border border-amber-400/20'
+                : 'bg-cine-accent/10 text-cine-accent-light border border-cine-accent/20'
+            }`}
+          >
+            Destaque
+          </span>
+        )}
+      </div>
+
+      <div className="relative flex-1">
+        <h3 className={`text-lg md:text-xl font-black leading-tight ${isDonor ? 'text-amber-50' : 'text-white'}`}>
+          {title}
+        </h3>
+        <p className="text-xs md:text-sm text-zinc-400 mt-2 leading-relaxed max-w-sm">{subtitle}</p>
+
+        <ul className="mt-4 space-y-1.5">
+          {perks.map((perk) => (
+            <li key={perk} className="flex items-center gap-2 text-[11px] text-zinc-300">
+              <Sparkles className={`w-3 h-3 shrink-0 ${isDonor ? 'text-amber-300' : 'text-cine-accent-light'}`} />
+              {perk}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <span
+        className={`relative mt-5 inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-xs font-black uppercase tracking-wide transition-all ${
+          isDonor
+            ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-950 group-hover:from-amber-300 group-hover:to-amber-400'
+            : 'bg-gradient-to-r from-cine-accent to-cyan-400 text-neutral-950 group-hover:from-cine-accent-light group-hover:to-cyan-300'
+        }`}
+      >
+        {cta}
+        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </button>
+  );
+}
+
 function StatPill({
   icon: Icon,
   value,
@@ -166,7 +264,6 @@ export default function ProfilePanel({
     { id: 'categoria-almoco', label: 'Hora do almoço', description: 'Sorteie um react aleatório', icon: UtensilsCrossed },
     { id: 'minha-lista', label: 'Meus favoritos', description: 'Reacts e obras salvos', icon: Bookmark },
     { id: 'configuracoes', label: 'Configurações', description: 'Conta, senha e avatar', icon: Settings },
-    { id: 'doacoes', label: 'Apoiar o projeto', description: 'Doações e benefícios VIP', icon: Heart },
   ];
 
   if (user.isAdmin) {
@@ -295,6 +392,62 @@ export default function ProfilePanel({
             </div>
           </section>
 
+          {/* CTAs em destaque — logo após o hero */}
+          <section className="space-y-3">
+            <div className="flex items-end justify-between gap-3 px-1">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Faça parte</p>
+                <h2 className="text-base font-black text-white">Apoie ou crie na CineReact</h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <SpotlightCard
+                variant="donor"
+                icon={Crown}
+                title={user.isDonor ? 'Você é Apoiador VIP' : 'Seja um Apoiador'}
+                subtitle={
+                  user.isDonor
+                    ? 'Obrigado por apoiar o projeto! Seus cosméticos exclusivos estão ativos.'
+                    : 'Doação única de R$ 4,99 e desbloqueie tag, moldura, tema e título VIP.'
+                }
+                perks={
+                  user.isDonor
+                    ? ['Tag Apoiador no perfil', 'Cosméticos exclusivos equipados', 'Destaque nos comentários']
+                    : ['Tag dourada no perfil', 'Pacote completo de cosméticos', 'Benefícios em até 24h']
+                }
+                cta={user.isDonor ? 'Apoiar novamente' : 'Quero ser apoiador'}
+                completed={!!user.isDonor}
+                completedLabel="Ativo"
+                onClick={() => go('doacoes')}
+              />
+              <SpotlightCard
+                variant="creator"
+                icon={Youtube}
+                title={isVerifiedCreator ? 'Criador Verificado' : 'Seja um Criador'}
+                subtitle={
+                  isVerifiedCreator
+                    ? 'Seu perfil oficial está verificado na plataforma. Obrigado por fazer parte!'
+                    : 'Tem canal de reacts? Entre no catálogo oficial e ganhe visibilidade na comunidade.'
+                }
+                perks={
+                  isVerifiedCreator
+                    ? ['Perfil verificado na plataforma', 'Links sociais no perfil', 'Tag de criador oficial']
+                    : ['Canal no catálogo CineReact', 'Perfil público de criador', 'Mais visibilidade para fãs']
+                }
+                cta={isVerifiedCreator ? 'Ver meu perfil público' : 'Solicitar meu canal'}
+                completed={isVerifiedCreator}
+                completedLabel="Verificado"
+                onClick={() => {
+                  if (isVerifiedCreator) {
+                    go('configuracoes');
+                  } else {
+                    onRequestCreator();
+                  }
+                }}
+              />
+            </div>
+          </section>
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {profile && (
               <div className="md:col-span-7 flex gap-2">
@@ -354,38 +507,6 @@ export default function ProfilePanel({
               ))}
             </nav>
           </section>
-
-          <section className="rounded-2xl border border-neutral-800/60 bg-gradient-to-r from-neutral-900/60 to-neutral-950/80 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-cine-accent/80 flex items-center gap-1.5 mb-1">
-                <Youtube className="w-3.5 h-3.5" />
-                Criadores
-              </p>
-              <h3 className="text-sm font-bold text-white">Tem um canal de reacts?</h3>
-              <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                Peça para entrar no catálogo oficial da CineReact.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onRequestCreator}
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold cursor-pointer transition-colors"
-            >
-              <Send className="w-3.5 h-3.5" />
-              Solicitar canal
-            </button>
-          </section>
-
-          {!user.isDonor && (
-            <button
-              type="button"
-              onClick={() => go('doacoes')}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-neutral-900/40 to-cine-accent/10 hover:border-amber-400/35 text-amber-100 text-xs font-bold cursor-pointer transition-all"
-            >
-              <Heart className="w-4 h-4 fill-amber-400/30 text-amber-300" />
-              Apoie o CineReact e desbloqueie cosméticos exclusivos
-            </button>
-          )}
         </div>
       )}
     </ProfileThemeScope>
