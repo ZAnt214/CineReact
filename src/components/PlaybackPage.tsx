@@ -108,6 +108,7 @@ interface PlaybackPageProps {
   onOpenAuth?: () => void;
   onUpdateUser?: (updatedUser: UserState) => void;
   userLoadout?: ProfileLoadout | null;
+  onSelectVideo?: (reactId: string, obraId: string) => void;
 }
 
 function topReactsByViews(
@@ -180,8 +181,9 @@ export default function PlaybackPage({
   onUpdateProgress,
   onOpenAuth,
   userLoadout,
+  onSelectVideo,
 }: PlaybackPageProps) {
-  const [activeReactId, setActiveReactId] = useState<string | null>(initialReactId);
+  const reactId = initialReactId;
   const [shareFeedback, setShareFeedback] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
@@ -200,17 +202,13 @@ export default function PlaybackPage({
       clearTimeout(deferredTimer);
       clearTimeout(safetyTimer);
     };
-  }, [activeReactId]);
-
-  useEffect(() => {
-    setActiveReactId(initialReactId);
-  }, [initialReactId]);
+  }, [reactId]);
 
   useEffect(() => {
     setAvatarError(false);
-  }, [activeReactId]);
+  }, [reactId]);
 
-  const activeReact = reacts.find((r) => r.id === activeReactId);
+  const activeReact = reacts.find((r) => r.id === reactId);
 
   const channelObra = activeReact
     ? obras.find(
@@ -236,7 +234,7 @@ export default function PlaybackPage({
   }, [activeReact]);
 
   useEffect(() => {
-    const currentReactId = activeReactId;
+    const currentReactId = reactId;
     const currentReact = activeReactRef.current;
     if (!currentReactId || !currentReact) return;
 
@@ -262,7 +260,7 @@ export default function PlaybackPage({
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [activeReactId]);
+  }, [reactId]);
 
   const [isFavorited, setIsFavorited] = useState(() => {
     try {
@@ -287,12 +285,12 @@ export default function PlaybackPage({
   const [videoLikesCount, setVideoLikesCount] = useState<number>(0);
 
   useEffect(() => {
-    if (!activeReactId) return;
+    if (!reactId) return;
 
     try {
       const favorites = localStorage.getItem('cine_react_favorites');
       const parsed = favorites ? JSON.parse(favorites) : [];
-      setIsFavorited(Array.isArray(parsed) && parsed.includes(activeReactId));
+      setIsFavorited(Array.isArray(parsed) && parsed.includes(reactId));
     } catch {
       setIsFavorited(false);
     }
@@ -300,18 +298,18 @@ export default function PlaybackPage({
     try {
       const stored = localStorage.getItem('cine_react_liked_video_ids');
       const ids = stored ? JSON.parse(stored) : [];
-      setVideoLiked(Array.isArray(ids) && ids.includes(activeReactId));
+      setVideoLiked(Array.isArray(ids) && ids.includes(reactId));
     } catch {
       setVideoLiked(false);
     }
-  }, [activeReactId]);
+  }, [reactId]);
 
   useEffect(() => {
     if (activeReact) setVideoLikesCount(activeReact.likes ?? 0);
   }, [activeReact]);
 
   const handleToggleVideoLike = useCallback(async () => {
-    if (!activeReactId) return;
+    if (!reactId) return;
     const nextState = !videoLiked;
     const action = nextState ? 'like' : 'unlike';
 
@@ -323,9 +321,9 @@ export default function PlaybackPage({
       let arr = stored ? JSON.parse(stored) : [];
       if (!Array.isArray(arr)) arr = [];
       if (nextState) {
-        if (!arr.includes(activeReactId)) arr.push(activeReactId);
+        if (!arr.includes(reactId)) arr.push(reactId);
       } else {
-        arr = arr.filter((id: string) => id !== activeReactId);
+        arr = arr.filter((id: string) => id !== reactId);
       }
       localStorage.setItem('cine_react_liked_video_ids', JSON.stringify(arr));
     } catch (e) {
@@ -333,7 +331,7 @@ export default function PlaybackPage({
     }
 
     try {
-      const res = await fetch(`/api/reacts/${activeReactId}/like`, {
+      const res = await fetch(`/api/reacts/${reactId}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -345,10 +343,10 @@ export default function PlaybackPage({
     } catch (e) {
       console.error('Erro ao curtir vídeo:', e);
     }
-  }, [activeReactId, videoLiked]);
+  }, [reactId, videoLiked]);
 
   const handleToggleFavorite = useCallback(() => {
-    if (!activeReactId) return;
+    if (!reactId) return;
     setIsFavorited((prev) => {
       const next = !prev;
       try {
@@ -356,9 +354,9 @@ export default function PlaybackPage({
         let arr = favorites ? JSON.parse(favorites) : [];
         if (!Array.isArray(arr)) arr = [];
         if (next) {
-          if (!arr.includes(activeReactId)) arr.push(activeReactId);
+          if (!arr.includes(reactId)) arr.push(reactId);
         } else {
-          arr = arr.filter((id: string) => id !== activeReactId);
+          arr = arr.filter((id: string) => id !== reactId);
         }
         localStorage.setItem('cine_react_favorites', JSON.stringify(arr));
       } catch {
@@ -366,20 +364,26 @@ export default function PlaybackPage({
       }
       return next;
     });
-  }, [activeReactId]);
+  }, [reactId]);
 
   const handleShareVideo = useCallback(() => {
-    if (!activeReactId) return;
-    const shareUrl = `${window.location.origin}/?reactId=${activeReactId}`;
+    if (!reactId) return;
+    const shareUrl = `${window.location.origin}/?reactId=${reactId}`;
     navigator.clipboard.writeText(shareUrl).finally(() => {
       setShareFeedback(true);
       setTimeout(() => setShareFeedback(false), 2400);
     });
-  }, [activeReactId]);
+  }, [reactId]);
 
-  const handleSelectReact = useCallback((id: string) => {
-    setActiveReactId(id);
-  }, []);
+  const handleSelectReact = useCallback(
+    (id: string) => {
+      if (id === reactId) return;
+      const react = reacts.find((r) => r.id === id);
+      if (!react) return;
+      onSelectVideo?.(react.id, react.obraId);
+    },
+    [reactId, reacts, onSelectVideo]
+  );
 
   const handleIframeLoad = useCallback(() => {
     setIframeLoading(false);
@@ -393,20 +397,20 @@ export default function PlaybackPage({
     () =>
       topReactsByViews(
         reacts.filter((r) => r.obraId === activeObra?.id),
-        activeReactId,
+        reactId,
         PLAYBACK_SHELF_LIMIT
       ),
-    [reacts, activeObra?.id, activeReactId]
+    [reacts, activeObra?.id, reactId]
   );
 
   const reactsDesteCriador = useMemo(
     () =>
       topReactsByViews(
         reacts.filter((r) => r.canalNome === activeReact?.canalNome),
-        activeReactId,
+        reactId,
         PLAYBACK_SHELF_LIMIT
       ),
-    [reacts, activeReact?.canalNome, activeReactId]
+    [reacts, activeReact?.canalNome, reactId]
   );
 
   const reactsSemelhantes = useMemo(() => {
@@ -414,14 +418,14 @@ export default function PlaybackPage({
     const similarObrasIds = new Set(similarObras.map((o) => o.id));
     return topReactsByViews(
       reacts.filter((r) => similarObrasIds.has(r.obraId)),
-      activeReactId,
+      reactId,
       PLAYBACK_SHELF_LIMIT
     );
-  }, [reacts, obras, activeObra?.tipo, activeObra?.id, activeReactId]);
+  }, [reacts, obras, activeObra?.tipo, activeObra?.id, reactId]);
 
   const sidebarRecommendations = useMemo(
-    () => topReactsByViews(reacts, activeReactId, PLAYBACK_SIDEBAR_LIMIT),
-    [reacts, activeReactId]
+    () => topReactsByViews(reacts, reactId, PLAYBACK_SIDEBAR_LIMIT),
+    [reacts, reactId]
   );
 
   const goToChannel = useCallback(() => {
