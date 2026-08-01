@@ -1,24 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
-import {
-  Play,
-  Eye,
-  ExternalLink,
-  Share2,
-  Heart,
-  ThumbsUp,
-  Film,
-  User,
-  Tv,
-  Clock,
-  Layers,
-  Check,
-} from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy, memo } from 'react';
+import { Play, Film, Tv } from 'lucide-react';
 import { Obra, ReactVideo, UserState } from '../types.ts';
 import type { ProfileLoadout } from '../types/gamification.ts';
 import PlaybackSkeleton from './PlaybackSkeleton.tsx';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import PlaybackPageHeader from './playback/PlaybackPageHeader.tsx';
+import PlaybackMetaPanel from './playback/PlaybackMetaPanel.tsx';
 import PlaybackVideoShelf from './playback/PlaybackVideoShelf.tsx';
 import { PLAYBACK_SHELF_LIMIT, PLAYBACK_SIDEBAR_LIMIT } from '../constants/playback.ts';
 import { isChannelVerifiedOnClient } from '../utils/channelVerification.ts';
@@ -27,11 +15,13 @@ const CommentSectionLazy = lazy(() => import('./CommentSection.tsx'));
 
 function CommentSkeleton() {
   return (
-    <div className="pt-4 border-t border-neutral-900/80 space-y-3 animate-pulse">
-      <div className="h-4 w-36 bg-neutral-800 rounded" />
-      <div className="h-11 w-full bg-neutral-900/60 rounded-lg" />
-      <div className="h-14 bg-neutral-900/40 rounded-lg" />
-      <div className="h-14 bg-neutral-900/40 rounded-lg" />
+    <div className="pt-6 border-t border-neutral-900/80 space-y-3 animate-pulse">
+      <div className="h-3 w-24 bg-neutral-800 rounded" />
+      <div className="h-5 w-48 bg-neutral-800 rounded" />
+      <div className="flex gap-3 mt-4">
+        <div className="w-8 h-8 rounded-full bg-neutral-800" />
+        <div className="flex-1 h-16 bg-neutral-900/50 rounded-xl" />
+      </div>
     </div>
   );
 }
@@ -67,6 +57,42 @@ function SidebarSkeleton() {
     </div>
   );
 }
+
+interface SidebarRecProps {
+  react: ReactVideo;
+  onSelect: (id: string) => void;
+}
+
+const SidebarRecommendation = memo(function SidebarRecommendation({
+  react,
+  onSelect,
+}: SidebarRecProps) {
+  const handleClick = useCallback(() => onSelect(react.id), [onSelect, react.id]);
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="flex gap-3 text-left group rounded-lg p-1.5 -mx-1.5 hover:bg-neutral-900/40 transition-colors"
+    >
+      <div className="relative w-32 sm:w-36 aspect-video flex-shrink-0 rounded-lg overflow-hidden bg-neutral-950 border border-neutral-800/80">
+        <OptimizedImage src={react.thumbnailUrl} alt={react.titulo} lite />
+        <span className="absolute bottom-1 right-1 bg-black/80 text-[9px] font-mono px-1 py-0.5 rounded text-zinc-200">
+          {react.duracao}
+        </span>
+        <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+          <Play className="w-4 h-4 fill-white text-white" />
+        </div>
+      </div>
+      <div className="flex flex-col min-w-0 flex-1 py-0.5">
+        <span className="text-xs font-medium text-zinc-200 line-clamp-2 leading-snug group-hover:text-cine-accent-light transition-colors">
+          {react.titulo}
+        </span>
+        <span className="text-[11px] text-zinc-500 mt-1 truncate">{react.canalNome}</span>
+      </div>
+    </button>
+  );
+});
 
 interface PlaybackPageProps {
   obraId: string;
@@ -167,7 +193,7 @@ export default function PlaybackPage({
     setIframeLoading(true);
     setLoadDeferredSections(false);
 
-    const deferredTimer = window.setTimeout(() => setLoadDeferredSections(true), 120);
+    const deferredTimer = window.setTimeout(() => setLoadDeferredSections(true), 200);
     const safetyTimer = window.setTimeout(() => setIframeLoading(false), 10_000);
 
     return () => {
@@ -359,6 +385,8 @@ export default function PlaybackPage({
     setIframeLoading(false);
   }, []);
 
+  const handleAvatarError = useCallback(() => setAvatarError(true), []);
+
   const activeObra = obras.find((o) => o.id === (activeReact?.obraId || obraId));
 
   const reactsDestaObra = useMemo(
@@ -401,6 +429,10 @@ export default function PlaybackPage({
     if (cId) onGoToCanal(cId);
   }, [channelObra?.id, activeReact?.canalId, onGoToCanal]);
 
+  const handleToggleFollow = useCallback(() => {
+    if (activeReact) onToggleSeguir(activeReact.canalNome);
+  }, [activeReact, onToggleSeguir]);
+
   if (!activeReact) {
     if (reacts.length === 0) return <PlaybackSkeleton />;
     return (
@@ -422,6 +454,8 @@ export default function PlaybackPage({
     !channelObra.poster.includes('unsplash.com') &&
     !channelObra.poster.includes('photo-1616469829581');
 
+  const channelPoster = hasRealAvatar ? channelObra!.poster : undefined;
+
   const similarTitle =
     activeObra?.tipo === 'filme'
       ? 'Filmes'
@@ -439,7 +473,10 @@ export default function PlaybackPage({
         >
           <PlaybackPageHeader obra={activeObra} react={activeReact} />
 
-          <div className="relative group/player rounded-xl border border-neutral-800/80 overflow-hidden">
+          {/* Player isolado para melhor composição no scroll */}
+          <div
+            className="relative group/player rounded-xl border border-neutral-800/80 overflow-hidden [contain:layout_style_paint] [transform:translateZ(0)]"
+          >
             <div className="relative w-full bg-black aspect-video">
               <iframe
                 key={activeReact.id}
@@ -481,204 +518,45 @@ export default function PlaybackPage({
             </div>
           </div>
 
-          <div className="space-y-4">
-            {activeObra && activeObra.tipo !== 'canal' && activeObra.titulo && (
-              <button
-                type="button"
-                onClick={() => onGoToObra(activeObra.id)}
-                className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-zinc-500 hover:text-cine-accent-light transition-colors"
-              >
-                <Film className="w-3 h-3" />
-                Ver obra · {activeObra.titulo}
-              </button>
-            )}
+          <PlaybackMetaPanel
+            react={activeReact}
+            obra={activeObra}
+            channelPoster={channelPoster}
+            avatarError={avatarError}
+            isChannelVerified={isChannelVerified}
+            isFollowing={isFollowing}
+            videoLiked={videoLiked}
+            isFavorited={isFavorited}
+            videoLikesCount={videoLikesCount}
+            shareFeedback={shareFeedback}
+            onAvatarError={handleAvatarError}
+            onGoToChannel={goToChannel}
+            onToggleFollow={handleToggleFollow}
+            onToggleLike={handleToggleVideoLike}
+            onToggleFavorite={handleToggleFavorite}
+            onShare={handleShareVideo}
+            onGoToObra={onGoToObra}
+            formatViews={formatViews}
+            formatDate={getFriendlyDate}
+          />
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1 border-b border-neutral-900/80 pb-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <button
-                  type="button"
-                  onClick={goToChannel}
-                  className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center border border-neutral-700/60 overflow-hidden shrink-0"
-                >
-                  {hasRealAvatar && !avatarError ? (
-                    <img
-                      src={channelObra!.poster}
-                      alt={activeReact.canalNome}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                      onError={() => setAvatarError(true)}
-                    />
-                  ) : (
-                    <User className="w-5 h-5 text-zinc-400" />
-                  )}
-                </button>
+          {loadDeferredSections ? (
+            <Suspense fallback={<CommentSkeleton />}>
+              <CommentSectionLazy
+                obraId={activeReact.obraId}
+                user={user}
+                userLoadout={userLoadout}
+                onOpenAuth={onOpenAuth}
+                getFriendlyDate={getFriendlyDate}
+              />
+            </Suspense>
+          ) : (
+            <CommentSkeleton />
+          )}
 
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <button
-                      type="button"
-                      onClick={goToChannel}
-                      className="font-semibold text-white text-sm truncate hover:text-cine-accent-light transition-colors"
-                    >
-                      {activeReact.canalNome}
-                    </button>
-                    {isChannelVerified && (
-                      <span
-                        className="w-3.5 h-3.5 rounded-full bg-cine-accent/10 text-cine-accent-light flex items-center justify-center border border-cine-accent/20 shrink-0"
-                        title="Criador verificado"
-                      >
-                        <Check className="w-2 h-2 stroke-[3]" />
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">
-                    {formatViews(activeReact.visualizacoes)} visualizações
-                    {activeReact.publicadoEm ? ` · ${getFriendlyDate(activeReact.publicadoEm)}` : ''}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onToggleSeguir(activeReact.canalNome)}
-                  className={`ml-1 px-4 py-1.5 rounded-full text-xs font-semibold transition-colors shrink-0 ${
-                    isFollowing
-                      ? 'bg-neutral-900 text-zinc-400 hover:text-white border border-neutral-800'
-                      : 'bg-cine-accent text-white hover:bg-cine-accent-dark'
-                  }`}
-                >
-                  {isFollowing ? 'Inscrito' : 'Seguir'}
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleToggleVideoLike}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                    videoLiked
-                      ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-cream'
-                      : 'bg-neutral-900/50 border-neutral-800 text-zinc-300 hover:text-white'
-                  }`}
-                >
-                  <ThumbsUp
-                    className={`w-3.5 h-3.5 ${videoLiked ? 'fill-cine-accent-light text-cine-accent-light' : ''}`}
-                  />
-                  {formatViews(videoLikesCount)}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleToggleFavorite}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                    isFavorited
-                      ? 'bg-cine-accent/15 border-cine-accent/30 text-cine-cream'
-                      : 'bg-neutral-900/50 border-neutral-800 text-zinc-300 hover:text-white'
-                  }`}
-                >
-                  <Heart
-                    className={`w-3.5 h-3.5 ${isFavorited ? 'fill-cine-accent-light text-cine-accent-light' : ''}`}
-                  />
-                  {isFavorited ? 'Salvo' : 'Salvar'}
-                </button>
-
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={handleShareVideo}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border bg-neutral-900/50 border-neutral-800 text-zinc-300 hover:text-white transition-colors"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Compartilhar
-                  </button>
-                  {shareFeedback && (
-                    <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-neutral-950 text-white border border-cine-accent/30 text-[10px] py-1 px-2.5 rounded whitespace-nowrap flex items-center gap-1 z-50">
-                      <Check className="w-3 h-3 text-cine-accent-light" />
-                      Link copiado
-                    </span>
-                  )}
-                </div>
-
-                <a
-                  href={`https://www.youtube.com/watch?v=${activeReact.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-cine-accent/25 bg-cine-accent/10 text-cine-accent-light hover:bg-cine-accent/20 transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  YouTube
-                </a>
-              </div>
-            </div>
-
-            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3 text-xs border-b border-neutral-900/80 pb-5">
-              <div>
-                <dt className="text-zinc-500 flex items-center gap-1 mb-0.5">
-                  <ThumbsUp className="w-3 h-3" /> Curtidas
-                </dt>
-                <dd className="text-zinc-200 font-medium">{formatViews(videoLikesCount)}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 flex items-center gap-1 mb-0.5">
-                  <Eye className="w-3 h-3" /> Visualizações
-                </dt>
-                <dd className="text-zinc-200 font-medium">{formatViews(activeReact.visualizacoes)}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 flex items-center gap-1 mb-0.5">
-                  <Clock className="w-3 h-3" /> Duração
-                </dt>
-                <dd className="text-zinc-200 font-medium">{activeReact.duracao || '—'}</dd>
-              </div>
-              {activeObra && (
-                <>
-                  <div>
-                    <dt className="text-zinc-500 flex items-center gap-1 mb-0.5">
-                      <Film className="w-3 h-3" /> Categoria
-                    </dt>
-                    <dd className="text-zinc-200 font-medium capitalize">
-                      {activeObra.tipo === 'serie'
-                        ? 'Série'
-                        : activeObra.tipo === 'jogo'
-                          ? 'Jogo'
-                          : activeObra.tipo === 'canal'
-                            ? 'Canal'
-                            : activeObra.tipo}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-zinc-500 flex items-center gap-1 mb-0.5">
-                      <Layers className="w-3 h-3" /> Obra
-                    </dt>
-                    <dd>
-                      <button
-                        type="button"
-                        onClick={() => onGoToObra(activeObra.id)}
-                        className="text-cine-accent-light font-medium hover:underline text-left line-clamp-1"
-                      >
-                        {activeObra.titulo}
-                      </button>
-                    </dd>
-                  </div>
-                </>
-              )}
-            </dl>
-
-            {loadDeferredSections ? (
-              <Suspense fallback={<CommentSkeleton />}>
-                <CommentSectionLazy
-                  obraId={activeReact.obraId}
-                  user={user}
-                  userLoadout={userLoadout}
-                  onOpenAuth={onOpenAuth}
-                  getFriendlyDate={getFriendlyDate}
-                />
-              </Suspense>
-            ) : (
-              <CommentSkeleton />
-            )}
-          </div>
-
-          <div className="space-y-2">
+          <div
+            className="space-y-2 [content-visibility:auto] [contain-intrinsic-size:auto_360px]"
+          >
             {!loadDeferredSections ? (
               <ShelfSkeleton />
             ) : (
@@ -704,7 +582,9 @@ export default function PlaybackPage({
         </div>
 
         <aside
-          className={`${isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'} space-y-4`}
+          className={`${
+            isTheaterMode ? 'lg:col-span-12' : 'lg:col-span-4 xl:col-span-3'
+          } lg:sticky lg:top-24 lg:self-start space-y-4 [content-visibility:auto]`}
         >
           <div className="border-b border-neutral-900/80 pb-3">
             <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
@@ -713,40 +593,18 @@ export default function PlaybackPage({
             <p className="text-sm text-zinc-500 mt-1">Populares na plataforma</p>
           </div>
 
-          <div className="flex flex-col gap-2 lg:max-h-[120vh] lg:overflow-y-auto lg:scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800">
+          <div className="flex flex-col gap-2">
             {!loadDeferredSections ? (
               <SidebarSkeleton />
             ) : sidebarRecommendations.length === 0 ? (
               <p className="text-zinc-500 text-xs py-4">Nenhuma recomendação disponível.</p>
             ) : (
               sidebarRecommendations.map((react) => (
-                <button
+                <SidebarRecommendation
                   key={react.id}
-                  type="button"
-                  onClick={() => handleSelectReact(react.id)}
-                  className="flex gap-3 text-left group rounded-lg p-1.5 -mx-1.5 hover:bg-neutral-900/40 transition-colors"
-                >
-                  <div className="relative w-32 sm:w-36 aspect-video flex-shrink-0 rounded-lg overflow-hidden bg-neutral-950 border border-neutral-800/80">
-                    <OptimizedImage
-                      src={react.thumbnailUrl}
-                      alt={react.titulo}
-                      lite
-                      className="md:group-hover:scale-[1.03] md:transition-transform md:duration-300"
-                    />
-                    <span className="absolute bottom-1 right-1 bg-black/80 text-[9px] font-mono px-1 py-0.5 rounded text-zinc-200">
-                      {react.duracao}
-                    </span>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <Play className="w-4 h-4 fill-white text-white" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col min-w-0 flex-1 py-0.5">
-                    <span className="text-xs font-medium text-zinc-200 line-clamp-2 leading-snug group-hover:text-cine-accent-light transition-colors">
-                      {react.titulo}
-                    </span>
-                    <span className="text-[11px] text-zinc-500 mt-1 truncate">{react.canalNome}</span>
-                  </div>
-                </button>
+                  react={react}
+                  onSelect={handleSelectReact}
+                />
               ))
             )}
           </div>
