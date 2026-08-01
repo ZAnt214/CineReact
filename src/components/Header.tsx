@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Bell, Play, User, Check, X, Youtube, Heart, Zap } from 'lucide-react';
+import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
+import HeaderClipsShortcut from './header/HeaderClipsShortcut.tsx';
 import { UserState, Notificacao } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import CineReactLogo from './CineReactLogo.tsx';
@@ -201,23 +202,19 @@ export default function Header({
                 onClick={() => setCurrentTab('inicio')}
                 className="group focus:outline-none cursor-pointer py-1 shrink-0"
               >
-                <CineReactLogo size="sm" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+                <CineReactLogo
+                  size="sm"
+                  showTagline={false}
+                  className="transition-transform duration-300 group-hover:-translate-y-0.5"
+                />
               </button>
 
-              <button
-                type="button"
-                id="nav-cineclips"
-                onClick={() => (onOpenCineClips ? onOpenCineClips() : setCurrentTab('cineclips'))}
-                className={`flex items-center gap-1.5 shrink-0 rounded-full border px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              <HeaderClipsShortcut
+                active={
                   currentTab === 'cineclips' || currentTab.startsWith('cineclips-hashtag-')
-                    ? 'bg-cine-accent/15 text-cine-accent-light border-cine-accent/35 shadow-sm shadow-cine-accent/10'
-                    : 'border-neutral-800/80 bg-neutral-900/40 text-zinc-300 hover:text-white hover:border-cine-accent/30 hover:bg-cine-accent/10'
-                }`}
-                aria-label="Abrir CineClips"
-              >
-                <Zap className="w-3.5 h-3.5 text-cine-accent-light" strokeWidth={2.25} />
-                <span>Clips</span>
-              </button>
+                }
+                onClick={() => (onOpenCineClips ? onOpenCineClips() : setCurrentTab('cineclips'))}
+              />
 
               {/* DESKTOP NAV */}
               <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
