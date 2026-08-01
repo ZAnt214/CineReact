@@ -4,33 +4,24 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  Bookmark,
-  Flag,
-  Flame,
   X,
   Send,
   Loader2,
-  Download,
   Play,
   Pause,
   Volume2,
   VolumeX,
   Sparkles,
-  Music,
   CheckCircle2,
   AlertCircle,
-  ChevronUp,
-  Plus,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
 import type { UserState } from '../types.ts';
 import {
   clipAction,
-  downloadClipVideo,
   fetchClipComments,
   postClipComment,
-  reportClip,
   useCineClipsFeed,
 } from '../../hooks/useCineClips.ts';
 import { buildClipShareUrl } from '../../cineclips/utils.ts';
@@ -90,23 +81,6 @@ function CineClipsBetaNotice({ onDismiss }: { onDismiss: () => void }) {
         </button>
       </motion.div>
     </div>
-  );
-}
-
-function SwipeHint({ visible }: { visible: boolean }) {
-  if (!visible) return null;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
-      className="absolute bottom-14 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-[11px] font-semibold text-white/90 pointer-events-none"
-    >
-      <motion.span animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-        <ChevronUp className="w-4 h-4" />
-      </motion.span>
-      Deslize para ver mais
-    </motion.div>
   );
 }
 
@@ -296,64 +270,19 @@ function ClipPlayer({
   );
 }
 
-/** Avatar + seguir no topo do rail (TikTok-native) */
-function RailCreatorAvatar({
-  name,
-  isFollowing,
-  onAvatarClick,
-  onFollowClick,
-}: {
-  name: string;
-  isFollowing: boolean;
-  onAvatarClick: () => void;
-  onFollowClick: () => void;
-}) {
-  return (
-    <div className="cineclips-rail-creator">
-      <button
-        type="button"
-        className="cineclips-rail-avatar"
-        onClick={(e) => {
-          e.stopPropagation();
-          onAvatarClick();
-        }}
-        aria-label={`Perfil de @${name}`}
-      >
-        <span>{name.charAt(0).toUpperCase()}</span>
-      </button>
-      {!isFollowing && (
-        <motion.button
-          type="button"
-          className="cineclips-rail-follow"
-          onClick={(e) => {
-            e.stopPropagation();
-            onFollowClick();
-          }}
-          whileTap={{ scale: 0.9 }}
-          aria-label="Seguir criador"
-        >
-          <Plus className="w-3 h-3" strokeWidth={3} />
-        </motion.button>
-      )}
-    </div>
-  );
-}
-
-/** Botão de ação — skill identidade (orb rail) */
+/** Botão de ação — skill identidade (orb rail, modo limpo) */
 function ActionBtn({
   icon: Icon,
   label,
   onClick,
   variant,
   active,
-  spinning,
 }: {
   icon: React.ElementType;
   label: string;
   onClick: () => void;
-  variant: 'like' | 'comment' | 'favorite' | 'share' | 'download' | 'report';
+  variant: 'like' | 'comment' | 'share';
   active?: boolean;
-  spinning?: boolean;
 }) {
   return (
     <motion.button
@@ -364,13 +293,13 @@ function ActionBtn({
       }}
       whileTap={{ scale: 0.9 }}
       className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
-      aria-label={label || variant}
+      aria-label={label || (variant === 'share' ? 'Enviar' : variant)}
     >
       <span className="cineclips-action-orb">
         <Icon
-          className={`cineclips-action-svg ${spinning ? 'animate-spin' : ''}`}
-          strokeWidth={variant === 'report' ? 1.75 : 2}
-          fill={active && (variant === 'like' || variant === 'favorite') ? 'currentColor' : 'none'}
+          className="cineclips-action-svg"
+          strokeWidth={2}
+          fill={active && variant === 'like' ? 'currentColor' : 'none'}
         />
       </span>
       {label !== '' && <span className="cineclips-action-label">{label}</span>}
@@ -523,119 +452,22 @@ function CommentsSheet({
   );
 }
 
-/** Modal de Denúncia Customizado */
-function ReportModal({
-  onClose,
-  onSubmit,
-}: {
-  onClose: () => void;
-  onSubmit: (reason: string) => void;
-}) {
-  const [selectedReason, setSelectedReason] = useState('spam');
-
-  const REASONS = [
-    { id: 'spam', label: 'Spam ou conteúdo enganoso' },
-    { id: 'inappropriate', label: 'Conteúdo impróprio ou ofensivo' },
-    { id: 'copyright', label: 'Violação de direitos autorais' },
-    { id: 'other', label: 'Outro motivo' },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="w-full max-w-sm rounded-2xl bg-zinc-900 border border-white/15 p-5 text-white shadow-2xl space-y-4"
-      >
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <div className="flex items-center gap-2">
-            <Flag className="w-4 h-4 text-rose-400" />
-            <h3 className="text-sm font-bold">Denunciar este Clip</h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-zinc-400 hover:text-white"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <p className="text-xs text-zinc-400">
-          Selecione o motivo da denúncia para análise da nossa moderação:
-        </p>
-
-        <div className="space-y-2">
-          {REASONS.map((r) => (
-            <label
-              key={r.id}
-              onClick={() => setSelectedReason(r.id)}
-              className={`flex items-center gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-all ${
-                selectedReason === r.id
-                  ? 'bg-rose-500/15 border-rose-500/50 text-white font-semibold'
-                  : 'bg-white/5 border-white/5 text-zinc-300 hover:bg-white/10'
-              }`}
-            >
-              <input
-                type="radio"
-                name="reportReason"
-                checked={selectedReason === r.id}
-                onChange={() => setSelectedReason(r.id)}
-                className="accent-rose-500"
-              />
-              <span>{r.label}</span>
-            </label>
-          ))}
-        </div>
-
-        <div className="flex gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-2 rounded-full border border-white/10 text-xs text-zinc-300 hover:bg-white/10 font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => onSubmit(selectedReason)}
-            className="flex-1 py-2 rounded-full bg-rose-500 hover:bg-rose-600 text-xs text-white font-bold shadow-lg shadow-rose-500/20"
-          >
-            Enviar Denúncia
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
 export default function CineClipsPage({
   user,
   onBack,
-  onOpenHashtag,
   onFollowCreator,
   initialClipId,
 }: CineClipsPageProps) {
-  const { clips, trending, loading, error, loadMore, nextCursor } = useCineClipsFeed(
-    user.email
-  );
+  const { clips, loading, error, loadMore, nextCursor } = useCineClipsFeed(user.email);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [feedTab, setFeedTab] = useState<'forYou' | 'trending'>('forYou');
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-  const [favIds, setFavIds] = useState<Set<string>>(new Set());
-  const [followedCreators, setFollowedCreators] = useState<Set<string>>(new Set());
   const [commentsClipId, setCommentsClipId] = useState<string | null>(null);
-  const [reportingClip, setReportingClip] = useState<CineClip | null>(null);
-  const [downloadingClipId, setDownloadingClipId] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'info' | 'error' } | null>(
     null
   );
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([]);
-  const [expandedDesc, setExpandedDesc] = useState<Record<string, boolean>>({});
   const [showBetaNotice, setShowBetaNotice] = useState(true);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
 
   const feedRef = useRef<HTMLDivElement>(null);
   const slideHeightRef = useRef(0);
@@ -658,7 +490,6 @@ export default function CineClipsPage({
     scrollingRef.current = true;
     feed.scrollTo({ top: index * h, behavior: smooth ? 'smooth' : 'auto' });
     setActiveIndex(index);
-    if (index > 0) setShowSwipeHint(false);
     window.setTimeout(() => {
       scrollingRef.current = false;
     }, smooth ? 350 : 50);
@@ -701,7 +532,6 @@ export default function CineClipsPage({
       if (clamped !== activeIndexRef.current) {
         activeIndexRef.current = clamped;
         setActiveIndex(clamped);
-        if (clamped > 0) setShowSwipeHint(false);
       }
       if (clamped >= clips.length - 3 && nextCursor) loadMore();
     };
@@ -727,10 +557,6 @@ export default function CineClipsPage({
       if (watchTimers.current[clip.id]) clearTimeout(watchTimers.current[clip.id]);
     };
   }, [activeIndex, clips, user.email, user.isLoggedIn]);
-
-  useEffect(() => {
-    if (clips.length <= 1) setShowSwipeHint(false);
-  }, [clips.length]);
 
   const handleLike = async (clip: CineClip) => {
     if (!user.isLoggedIn) {
@@ -766,26 +592,6 @@ export default function CineClipsPage({
     }
   };
 
-  const handleFavorite = async (clip: CineClip) => {
-    if (!user.isLoggedIn) {
-      showToast('Faça login para salvar clips', 'info');
-      return;
-    }
-    const isFav = favIds.has(clip.id);
-    try {
-      await clipAction(clip.id, isFav ? 'unfavorite' : 'favorite', { email: user.email });
-      setFavIds((prev) => {
-        const next = new Set(prev);
-        if (isFav) next.delete(clip.id);
-        else next.add(clip.id);
-        return next;
-      });
-      showToast(isFav ? 'Removido dos salvos' : 'Clip salvo com sucesso!', 'success');
-    } catch {
-      /* ignore */
-    }
-  };
-
   const handleShare = async (clip: CineClip) => {
     const url = buildClipShareUrl(clip.id);
     try {
@@ -801,49 +607,6 @@ export default function CineClipsPage({
     }
   };
 
-  const handleDownload = async (clip: CineClip) => {
-    setDownloadingClipId(clip.id);
-    showToast('Iniciando download do vídeo...', 'info');
-    try {
-      await downloadClipVideo(clip.id);
-      showToast('Download concluído!', 'success');
-    } catch (err: any) {
-      showToast(err.message || 'Não foi possível baixar o vídeo.', 'error');
-    } finally {
-      setDownloadingClipId(null);
-    }
-  };
-
-  const handleReportSubmit = async (reason: string) => {
-    if (!reportingClip || !user.isLoggedIn) return;
-    try {
-      await reportClip(reportingClip.id, user.email, user.nome, reason);
-      showToast('Denúncia recebida. Obrigado por colaborar!', 'success');
-    } catch {
-      showToast('Erro ao enviar denúncia.', 'error');
-    } finally {
-      setReportingClip(null);
-    }
-  };
-
-  const toggleFollow = (creatorName: string) => {
-    setFollowedCreators((prev) => {
-      const next = new Set(prev);
-      const isFollowing = next.has(creatorName);
-      if (isFollowing) {
-        next.delete(creatorName);
-        showToast(`Deixou de seguir @${creatorName}`, 'info');
-      } else {
-        next.add(creatorName);
-        showToast(`Você agora está seguindo @${creatorName}!`, 'success');
-      }
-      return next;
-    });
-    onFollowCreator?.(creatorName);
-  };
-
-  const activeClip = clips[activeIndex];
-
   return (
     <div className="cineclips-shell fixed inset-0 z-[60] bg-zinc-950 text-white flex items-center justify-center overflow-hidden">
       {/* Toast Notification */}
@@ -851,76 +614,23 @@ export default function CineClipsPage({
         {toast && <ToastNotification message={toast.message} type={toast.type} />}
       </AnimatePresence>
 
-      {/* Desktop Ambient Blurred Poster Background */}
-      {activeClip?.thumbnailUrl && (
-        <div
-          className="hidden md:block absolute inset-0 bg-cover bg-center opacity-30 filter blur-3xl scale-110 pointer-events-none transition-all duration-700"
-          style={{ backgroundImage: `url(${activeClip.thumbnailUrl})` }}
-        />
-      )}
-
-      {/* Main 9:16 Vertical Shell Container */}
-      <div className="relative w-full h-full md:max-w-[420px] md:h-[92vh] md:rounded-3xl border-0 md:border md:border-white/15 bg-black shadow-2xl overflow-hidden flex flex-col">
+      {/* Desktop shell — sem blur ambiente para visual mais limpo */}
+      <div className="relative w-full h-full md:max-w-[420px] md:h-[92vh] md:rounded-3xl border-0 md:border md:border-white/10 bg-black shadow-2xl overflow-hidden flex flex-col">
         {/* Floating Top Header */}
-        <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-md">
-          {/* Back Button */}
+        <header className="cineclips-header-minimal">
           <button
             type="button"
             onClick={onBack}
-            className="w-9 h-9 rounded-full bg-black/40 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer"
+            className="cineclips-header-minimal-btn"
             aria-label="Voltar"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          {/* Center Feed Tabs */}
-          <div className="flex items-center gap-1 bg-black/50 border border-white/15 rounded-full p-1 backdrop-blur-xl">
-            <span className="px-2 text-[9px] font-extrabold uppercase tracking-wider text-cyan-300/90 hidden sm:inline">
-              Beta
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setFeedTab('forYou');
-                scrollToIndex(0, true);
-              }}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                feedTab === 'forYou'
-                  ? 'bg-cyan-400 text-black shadow-md'
-                  : 'text-zinc-300 hover:text-white'
-              }`}
-            >
-              Para Você
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setFeedTab('trending');
-                if (trending.length > 0) {
-                  const idx = clips.findIndex((c) => c.id === trending[0].id);
-                  if (idx >= 0) scrollToIndex(idx, true);
-                }
-              }}
-              className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                feedTab === 'trending'
-                  ? 'bg-rose-500 text-white shadow-md'
-                  : 'text-zinc-300 hover:text-white'
-              }`}
-            >
-              <Flame className="w-3 h-3 fill-current" />
-              Em Alta
-            </button>
-          </div>
-
-          {/* Audio Sound Toggle */}
           <button
             type="button"
             onClick={() => setMuted((m) => !m)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              muted
-                ? 'bg-rose-500/20 border border-rose-500/50 text-rose-400'
-                : 'bg-black/40 border border-white/15 text-white hover:bg-white/20'
-            }`}
+            className="cineclips-header-minimal-btn"
             aria-label={muted ? 'Ativar som' : 'Silenciar'}
           >
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -964,178 +674,74 @@ export default function CineClipsPage({
           </div>
         ) : (
           <div ref={feedRef} className="cineclips-feed w-full h-full flex-1">
-            {clips.map((clip, index) => {
-              const isFollowing = followedCreators.has(clip.criadorNome);
-              const isExpanded = expandedDesc[clip.id];
+            {clips.map((clip, index) => (
+              <article key={clip.id} className="cineclips-slide">
+                <div className="cineclips-slide-media">
+                  <ClipPlayer
+                    clip={clip}
+                    isActive={index === activeIndex}
+                    muted={muted}
+                    onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
+                  />
+                </div>
 
-              return (
-                <article key={clip.id} className="cineclips-slide">
-                  <div className="cineclips-slide-media">
-                    <ClipPlayer
-                      clip={clip}
-                      isActive={index === activeIndex}
-                      muted={muted}
-                      onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
+                <div className="cineclips-slide-scrim cineclips-slide-scrim--light" aria-hidden />
+
+                <AnimatePresence>
+                  {floatingHearts.map((h) => (
+                    <motion.div
+                      key={h.id}
+                      initial={{ opacity: 1, scale: 0.4, y: 0 }}
+                      animate={{ opacity: 0, scale: 1.8, y: -80 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      style={{ left: h.x - 24, top: h.y - 24 }}
+                      className="absolute z-40 pointer-events-none"
+                    >
+                      <Heart className="w-12 h-12 text-rose-500 fill-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+
+                <div className="cineclips-slide-ui cineclips-slide-ui--minimal">
+                  <div className="cineclips-meta cineclips-meta-copy cineclips-meta--minimal">
+                    <button
+                      type="button"
+                      onClick={() => onFollowCreator?.(clip.criadorNome)}
+                      className="cineclips-creator-handle"
+                    >
+                      @{clip.criadorNome}
+                    </button>
+                    <h2 className="cineclips-title cineclips-title--minimal">{clip.titulo}</h2>
+                  </div>
+
+                  <div className="cineclips-rail cineclips-rail--minimal">
+                    <ActionBtn
+                      icon={Heart}
+                      label={formatCount(clip.likes)}
+                      variant="like"
+                      active={likedIds.has(clip.id)}
+                      onClick={() => handleLike(clip)}
+                    />
+                    <ActionBtn
+                      icon={MessageCircle}
+                      label={formatCount(clip.commentsCount)}
+                      variant="comment"
+                      onClick={() => setCommentsClipId(clip.id)}
+                    />
+                    <ActionBtn
+                      icon={Share2}
+                      label=""
+                      variant="share"
+                      onClick={() => handleShare(clip)}
                     />
                   </div>
-
-                  <div className="cineclips-slide-scrim" aria-hidden />
-
-                  {/* Floating Double-Tap Hearts */}
-                  <AnimatePresence>
-                    {floatingHearts.map((h) => (
-                      <motion.div
-                        key={h.id}
-                        initial={{ opacity: 1, scale: 0.4, y: 0 }}
-                        animate={{ opacity: 0, scale: 1.8, y: -80 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                        style={{ left: h.x - 24, top: h.y - 24 }}
-                        className="absolute z-40 pointer-events-none"
-                      >
-                        <Heart className="w-12 h-12 text-rose-500 fill-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-
-                  <div className="cineclips-slide-ui">
-                    <div className="cineclips-meta cineclips-meta-copy">
-                      {clip.isTrending && (
-                        <span className="cineclips-trending-badge">
-                          <Flame className="w-3 h-3 fill-current" />
-                          Em Alta
-                        </span>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => onFollowCreator?.(clip.criadorNome)}
-                        className="cineclips-creator-handle"
-                      >
-                        @{clip.criadorNome}
-                      </button>
-
-                      <h2 className="cineclips-title">{clip.titulo}</h2>
-
-                      {clip.descricao && (
-                        <div className="cineclips-desc-block">
-                          <p className={`cineclips-desc ${isExpanded ? '' : 'line-clamp-2'}`}>
-                            {clip.descricao}
-                          </p>
-                          {clip.descricao.length > 70 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setExpandedDesc((prev) => ({
-                                  ...prev,
-                                  [clip.id]: !prev[clip.id],
-                                }))
-                              }
-                              className="cineclips-desc-more"
-                            >
-                              {isExpanded ? 'mostrar menos' : 'mais'}
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {clip.hashtags.length > 0 && (
-                        <div className="cineclips-tags cineclips-tags--text">
-                          {clip.hashtags.slice(0, 3).map((tag) => (
-                            <button
-                              key={tag}
-                              type="button"
-                              onClick={() => onOpenHashtag?.(tag)}
-                            >
-                              #{tag.replace(/^#/, '')}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="cineclips-audio">
-                        <Music className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
-                        <span>Som original - @{clip.criadorNome}</span>
-                      </div>
-                    </div>
-
-                    <div className="cineclips-rail">
-                      <RailCreatorAvatar
-                        name={clip.criadorNome}
-                        isFollowing={isFollowing}
-                        onAvatarClick={() => onFollowCreator?.(clip.criadorNome)}
-                        onFollowClick={() => toggleFollow(clip.criadorNome)}
-                      />
-                      <ActionBtn
-                        icon={Heart}
-                        label={formatCount(clip.likes)}
-                        variant="like"
-                        active={likedIds.has(clip.id)}
-                        onClick={() => handleLike(clip)}
-                      />
-                      <ActionBtn
-                        icon={MessageCircle}
-                        label={formatCount(clip.commentsCount)}
-                        variant="comment"
-                        onClick={() => setCommentsClipId(clip.id)}
-                      />
-                      <ActionBtn
-                        icon={Bookmark}
-                        label={formatCount(clip.favorites)}
-                        variant="favorite"
-                        active={favIds.has(clip.id)}
-                        onClick={() => handleFavorite(clip)}
-                      />
-                      <ActionBtn
-                        icon={Share2}
-                        label="Enviar"
-                        variant="share"
-                        onClick={() => handleShare(clip)}
-                      />
-                      {clip.videoUrl && (
-                        <ActionBtn
-                          icon={downloadingClipId === clip.id ? Loader2 : Download}
-                          label="Baixar"
-                          variant="download"
-                          onClick={() => handleDownload(clip)}
-                          spinning={downloadingClipId === clip.id}
-                        />
-                      )}
-                      <ActionBtn
-                        icon={Flag}
-                        label=""
-                        variant="report"
-                        onClick={() => {
-                          if (!user.isLoggedIn) {
-                            showToast('Faça login para denunciar', 'info');
-                            return;
-                          }
-                          setReportingClip(clip);
-                        }}
-                      />
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-
-        <SwipeHint visible={showSwipeHint && clips.length > 1 && !showBetaNotice} />
-
-        {/* Bottom Progress Bar Indicator */}
-        {clips.length > 1 && (
-          <div className="absolute bottom-1 left-0 right-0 z-30 flex justify-center gap-1 px-4 pointer-events-none">
-            {clips.slice(0, Math.min(clips.length, 10)).map((clip, i) => (
-              <span
-                key={clip.id}
-                className={`h-0.5 rounded-full transition-all duration-300 ${
-                  i === activeIndex ? 'w-5 bg-cyan-400' : 'w-2 bg-white/30'
-                }`}
-              />
+                </div>
+              </article>
             ))}
           </div>
         )}
+
       </div>
 
       {/* Slide-Up Comments Drawer */}
@@ -1152,16 +758,6 @@ export default function CineClipsPage({
       {/* Beta Notice */}
       <AnimatePresence>
         {showBetaNotice && <CineClipsBetaNotice onDismiss={() => setShowBetaNotice(false)} />}
-      </AnimatePresence>
-
-      {/* Report Modal */}
-      <AnimatePresence>
-        {reportingClip && (
-          <ReportModal
-            onClose={() => setReportingClip(null)}
-            onSubmit={handleReportSubmit}
-          />
-        )}
       </AnimatePresence>
     </div>
   );
