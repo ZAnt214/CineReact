@@ -1037,7 +1037,13 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="space-y-8 pb-24 pt-24 w-full flex-1"
               >
-                <CatalogPageHeader />
+                <CatalogPageHeader
+                  onOpenClips={() => {
+                    setCineClipsInitialClipId(undefined);
+                    setCurrentTab('cineclips');
+                    window.scrollTo(0, 0);
+                  }}
+                />
 
                 <div className="space-y-10 relative z-20">
                   {user.isLoggedIn && continueWatchingReacts.length > 0 && (
