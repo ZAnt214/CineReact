@@ -3503,6 +3503,35 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   transform: scale(0.98);
 }
 
+.creator-premium-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(18, 18, 20, 0.92), rgba(18, 18, 20, 0.92)) padding-box,
+    linear-gradient(90deg, rgba(201, 169, 98, 0.45), rgba(0, 212, 255, 0.4)) border-box;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--premium-gold-light);
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.creator-premium-btn-secondary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.12);
+}
+
+.creator-premium-btn-secondary:active {
+  transform: scale(0.98);
+}
+
 .creator-premium-divider {
   border-top: 1px solid transparent;
   border-image: linear-gradient(

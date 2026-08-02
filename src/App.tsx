@@ -1343,6 +1343,14 @@ export default function App() {
                 <CreatorProfilePage
                   creatorEmail={parseCreatorProfileTab(currentTab)!}
                   onBack={() => setCurrentTab('inicio')}
+                  showVerifyCta={!isVerifiedCreatorLoadout(gamification.data?.profile.loadout)}
+                  onVerifyProfile={() => {
+                    if (!user.isLoggedIn) {
+                      openAuthModal('login');
+                      return;
+                    }
+                    setCurrentTab('verificar-perfil');
+                  }}
                 />
               </motion.div>
             )}

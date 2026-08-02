@@ -8,9 +8,16 @@ import type { PublicUserProfile } from '../types.ts';
 interface CreatorProfilePageProps {
   creatorEmail: string;
   onBack: () => void;
+  showVerifyCta?: boolean;
+  onVerifyProfile?: () => void;
 }
 
-export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProfilePageProps) {
+export default function CreatorProfilePage({
+  creatorEmail,
+  onBack,
+  showVerifyCta = false,
+  onVerifyProfile,
+}: CreatorProfilePageProps) {
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -117,7 +124,12 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       {!loading && profile && (
         <div className="max-w-3xl">
           {isVerified ? (
-            <VerifiedCreatorProfile profile={profile} showDemoExtras={isDemo} />
+            <VerifiedCreatorProfile
+              profile={profile}
+              showDemoExtras={isDemo}
+              showVerifyCta={isDemo && showVerifyCta}
+              onVerifyProfile={onVerifyProfile}
+            />
           ) : (
             <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
           )}
