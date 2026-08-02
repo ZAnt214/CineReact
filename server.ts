@@ -37,7 +37,6 @@ import {
   handlePasswordUpdate,
 } from "./src/security/authHandlers.ts";
 import { createSession } from "./src/security/sessions.ts";
-import { isProductionRuntime } from "./src/utils/runtimeEnv.ts";
 
 dotenv.config();
 
@@ -52,7 +51,7 @@ app.use(express.json({ limit: "2mb" }));
 const cineClipsUploadDir = getClipsStorageDir();
 fs.mkdirSync(cineClipsUploadDir, { recursive: true });
 app.use("/uploads/cineclips", express.static(cineClipsUploadDir, {
-  maxAge: isProductionRuntime() ? "7d" : 0,
+  maxAge: process.env.NODE_ENV === "production" ? "7d" : 0,
   setHeaders(res) {
     res.setHeader("Accept-Ranges", "bytes");
     res.setHeader("Cache-Control", "public, max-age=604800");
@@ -3051,7 +3050,8 @@ async function ensureBootstrapAdmin() {
 }
 
 async function startServer() {
-  if (!isProductionRuntime()) {
+  await ensureBootstrapAdmin();
+  if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -3071,7 +3071,6 @@ async function startServer() {
         }
       },
     }));
-    // SPA fallback — never return HTML for missing hashed bundles (stale cache after deploy).
     app.get('*', (req, res, next) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/uploads/')) {
         return next();
@@ -3086,32 +3085,7 @@ async function startServer() {
     });
   }
 
-  try {
-    ensureDemoCreatorProfile();
-  } catch (err: any) {
-    console.warn("[Demo] Falha ao garantir perfil demo:", err?.message || err);
-  }
-
-  const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
-    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
-  });
-
-  server.on("error", (err) => {
-    console.error("Falha ao abrir porta HTTP:", err);
-    process.exit(1);
-  });
-
-  ensureBootstrapAdmin().catch((err) => {
-    console.warn("[Security] Falha ao criar admin inicial:", err?.message || err);
-  });
-
-  syncChannelAvatars().catch(err => {
-    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
-  });
-  prefillDefaultReacts().catch(err => {
-    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
-  });
+  ensureDemoCreatorProfile();
 
   try {
     await localDb.ensureCineClipsRestored();
@@ -3128,6 +3102,18 @@ async function startServer() {
   } catch (err: any) {
     console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
   }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
+    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
+
+  syncChannelAvatars().catch(err => {
+    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
+  });
+  prefillDefaultReacts().catch(err => {
+    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
+  });
 }
 
 startServer().catch((err) => {
