@@ -3,7 +3,9 @@ builder = "nixpacks"
 buildCommand = "bun run build"
 
 [deploy]
-startCommand = "NODE_ENV=production CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node dist/server.cjs"
+startCommand = "CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node dist/server.cjs"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
 
