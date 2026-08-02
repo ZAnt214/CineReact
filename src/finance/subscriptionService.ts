@@ -20,9 +20,9 @@ function uid(prefix: string) {
 
 function mpLink(plan: SubscriptionPlan): string {
   if (plan === 'global') {
-    return process.env.SUBSCRIPTION_GLOBAL_MP_LINK || 'https://mpago.la/1aUV7Gc';
+    return process.env.SUBSCRIPTION_GLOBAL_MP_LINK || 'https://mpago.la/1ZuYNe6';
   }
-  return process.env.SUBSCRIPTION_EXCLUSIVE_MP_LINK || 'https://mpago.la/1aUV7Gc';
+  return process.env.SUBSCRIPTION_EXCLUSIVE_MP_LINK || 'https://mpago.la/1sDBJXu';
 }
 
 function addDays(iso: string, days: number): string {
