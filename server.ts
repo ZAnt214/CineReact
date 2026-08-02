@@ -3032,7 +3032,26 @@ app.get("/api/user/account-status", (req, res) => {
 // VITE MIDDLEWARE & STATIC ASSET SERVING
 // ==========================================
 
+async function ensureBootstrapAdmin() {
+  const email = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase().trim();
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  if (!email || !password) return;
+  const existing = await localDb.findUsuarioByEmail(email);
+  if (existing) return;
+  const { hashPassword } = await import("./src/security/password.ts");
+  await localDb.addUsuario({
+    username: "Administrador",
+    email,
+    password: await hashPassword(password),
+    isAdmin: true,
+    role: "admin",
+    isDonor: false,
+  });
+  console.log("[Security] Conta administrativa inicial criada via variáveis de ambiente.");
+}
+
 async function startServer() {
+  await ensureBootstrapAdmin();
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
