@@ -10,7 +10,7 @@ import {
   simulateMonthClose,
   updatePayoutStatus,
 } from './financeEngine.ts';
-import { seedFinanceDataIfEmpty } from './financeSeed.ts';
+import { purgeFinanceDemoData } from './purgeFinanceDemoData.ts';
 import type { PayoutStatus } from '../types/finance.ts';
 
 type RequireAdminFn = (req: Request, res: Response) => Promise<string | null>;
@@ -26,7 +26,7 @@ function toCsv(rows: Record<string, string | number>[]): string {
 }
 
 export function registerFinanceRoutes(app: Express, requireAdmin: RequireAdminFn) {
-  seedFinanceDataIfEmpty();
+  purgeFinanceDemoData();
 
   app.get('/api/admin/finance/dashboard', async (req, res) => {
     if (!(await requireAdmin(req, res))) return;

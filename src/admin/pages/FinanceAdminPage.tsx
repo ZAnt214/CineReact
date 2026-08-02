@@ -260,6 +260,11 @@ export default function FinanceAdminPage({ email }: { email: string }) {
         <>
           {tab === 'dashboard' && dashboard && (
             <div className="space-y-6">
+              {dashboard.grossTotal === 0 && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 px-4 py-3 text-sm text-zinc-500">
+                  Nenhuma receita registrada ainda. Os valores aparecerão aqui quando assinaturas forem confirmadas via Mercado Pago ou aprovação manual no admin.
+                </div>
+              )}
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                 <AdminStatCard label="Receita bruta total" value={formatBRL(dashboard.grossTotal)} icon={DollarSign} accent="text-amber-400" />
                 <AdminStatCard label="Hoje" value={formatBRL(dashboard.grossToday)} sub={<GrowthBadge value={dashboard.growthDay} />} icon={TrendingUp} />
@@ -437,7 +442,10 @@ export default function FinanceAdminPage({ email }: { email: string }) {
                 </button>
               </div>
               <div className="space-y-2">
-                {creators.map((c) => (
+                {creators.length === 0 ? (
+                  <p className="text-sm text-zinc-500 text-center py-8">Nenhum repasse pendente — aguardando assinaturas reais.</p>
+                ) : (
+                  creators.map((c) => (
                   <button
                     key={c.creatorEmail}
                     type="button"
@@ -467,7 +475,8 @@ export default function FinanceAdminPage({ email }: { email: string }) {
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 hidden sm:block" />
                   </button>
-                ))}
+                ))
+                )}
               </div>
             </div>
           )}

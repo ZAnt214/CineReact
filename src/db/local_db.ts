@@ -1633,6 +1633,53 @@ export const localDb = {
     return checkout;
   },
 
+  purgeFinanceDemoSeedData: (isDemoSubscriber: (email?: string) => boolean): boolean => {
+    let changed = false;
+
+    const filterBySubscriber = <T extends { subscriberEmail: string }>(items: T[] | undefined): T[] =>
+      (items || []).filter((item) => !isDemoSubscriber(item.subscriberEmail));
+
+    const nextTransactions = filterBySubscriber(dbCache.financeTransactions);
+    if (nextTransactions.length !== (dbCache.financeTransactions || []).length) {
+      dbCache.financeTransactions = nextTransactions;
+      changed = true;
+    }
+
+    const nextSubscriptions = filterBySubscriber(dbCache.platformSubscriptions);
+    if (nextSubscriptions.length !== (dbCache.platformSubscriptions || []).length) {
+      dbCache.platformSubscriptions = nextSubscriptions;
+      changed = true;
+    }
+
+    const nextCheckouts = filterBySubscriber(dbCache.subscriptionCheckouts);
+    if (nextCheckouts.length !== (dbCache.subscriptionCheckouts || []).length) {
+      dbCache.subscriptionCheckouts = nextCheckouts;
+      changed = true;
+    }
+
+    const removedLikes = (dbCache.cineClipLikes || []).filter((like) =>
+      isDemoSubscriber(like.usuarioEmail)
+    );
+    if (removedLikes.length > 0) {
+      dbCache.cineClipLikes = (dbCache.cineClipLikes || []).filter(
+        (like) => !isDemoSubscriber(like.usuarioEmail)
+      );
+      for (const like of removedLikes) {
+        const clip = (dbCache.cineClips || []).find((c) => c.id === like.clipId);
+        if (clip) clip.likes = Math.max(0, (clip.likes || 0) - 1);
+      }
+      changed = true;
+    }
+
+    if (changed) {
+      dbCache.creatorPayouts = [];
+      dbCache.monthlyCloses = [];
+      saveDb(dbCache, true);
+    }
+
+    return changed;
+  },
+
   exportDbSnapshot: (): DbSchema => {
     return JSON.parse(JSON.stringify(dbCache));
   },
