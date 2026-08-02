@@ -1,5 +1,3 @@
-import type { ReactVideo } from '../types.ts';
-
 export interface CreatorReactGoal {
   id: string;
   title: string;
@@ -35,11 +33,3 @@ export const DEMO_CREATOR_REACT_GOALS: CreatorReactGoal[] = [
     status: 'upcoming',
   },
 ];
-
-/** Destaques de exemplo — usa reacts reais da plataforma quando disponíveis. */
-export function pickDemoFeaturedReacts(reacts: ReactVideo[], limit = 3): ReactVideo[] {
-  const pool = reacts.filter((r) => r.moderationStatus !== 'rejected' && r.moderationStatus !== 'hidden');
-  const pinned = pool.filter((r) => r.isPinnedHome || r.isRecomendado);
-  const source = pinned.length > 0 ? pinned : pool;
-  return source.slice(0, limit);
-}
