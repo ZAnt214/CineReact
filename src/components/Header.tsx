@@ -1,8 +1,10 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Bell, Play, User, Check, X, Youtube, Heart } from 'lucide-react';
+import { Heart, User, X, Youtube } from 'lucide-react';
 import HeaderNotificationButton from './header/HeaderNotificationButton.tsx';
 import HeaderClipsButton from './header/HeaderClipsButton.tsx';
-import { UserState, Notificacao } from '../types.ts';
+import NotificationPanel from './header/NotificationPanel.tsx';
+import { useNotifications } from '../hooks/useNotifications.ts';
+import { UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import CineReactLogo from './CineReactLogo.tsx';
 import SideNavToggleButton from './SideNavToggleButton.tsx';
@@ -38,7 +40,17 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState<Notificacao[]>([]);
+  const {
+    notifications,
+    unreadCount,
+    loading: notificationsLoading,
+    markAsRead,
+    markAllAsRead,
+    clearNotifications,
+  } = useNotifications({
+    email: user.email,
+    isOpen: showNotifications,
+  });
 
   // Solicitar adição de canal states
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -146,45 +158,6 @@ export default function Header({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch notifications
-  const fetchNotifications = async () => {
-    try {
-      const url = user.email ? `/api/notificacoes?email=${encodeURIComponent(user.email)}` : '/api/notificacoes';
-      const res = await fetch(url).catch(() => null);
-      if (res && res.ok) {
-        const data = await res.json().catch(() => []);
-        setNotifications(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // refresh notifications
-    return () => clearInterval(interval);
-  }, [user.email]);
-
-  const markAsRead = async (id: string) => {
-    try {
-      await fetch(`/api/notificacoes/${id}/ler`, { method: 'POST' });
-      fetchNotifications();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const clearNotifications = async () => {
-    try {
-      const url = user.email ? `/api/notificacoes?email=${encodeURIComponent(user.email)}` : '/api/notificacoes';
-      await fetch(url, { method: 'DELETE' });
-      setNotifications([]);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleLogout = () => {
     setUser({
       isLoggedIn: false,
@@ -194,8 +167,6 @@ export default function Header({
     setCurrentTab('inicio');
     setShowProfileMenu(false);
   };
-
-  const unreadCount = notifications.filter(n => !n.lida).length;
 
   return (
     <>
@@ -316,111 +287,16 @@ export default function Header({
                   }}
                 />
 
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 12, scale: 0.97 }}
-                      transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="fixed md:absolute top-[4.5rem] md:top-12 left-4 md:left-auto right-4 md:right-0 w-auto max-w-[calc(100vw-32px)] md:w-96 bg-cine-surface/98 backdrop-blur-2xl border border-cine-border/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-50 divide-y divide-cine-border/50"
-                    >
-                      <div className="px-4 py-3.5 flex justify-between items-center bg-neutral-900/20">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-[13px] text-zinc-100 uppercase tracking-wider font-sans">Notificações</h3>
-                          {unreadCount > 0 && (
-                            <span className="px-2 py-0.5 text-[9px] bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light font-bold rounded-full font-mono">
-                              {unreadCount} novas
-                            </span>
-                          )}
-                        </div>
-                        {notifications.length > 0 && (
-                          <button 
-                            onClick={clearNotifications} 
-                            className="text-[10px] text-zinc-500 hover:text-cine-accent-light transition-all font-semibold hover:underline"
-                          >
-                            Limpar Tudo
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="max-h-80 overflow-y-auto divide-y divide-neutral-900/40 scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800">
-                        {notifications.length === 0 ? (
-                          <div className="py-12 px-4 flex flex-col items-center justify-center text-center">
-                            <div className="w-10 h-10 rounded-full bg-neutral-900/50 flex items-center justify-center border border-neutral-800/40 mb-3 animate-pulse">
-                              <Bell className="w-5 h-5 text-zinc-600 stroke-[1.5]" />
-                            </div>
-                            <p className="text-zinc-400 font-semibold text-xs leading-none">Tudo limpo por aqui!</p>
-                            <p className="text-[10px] text-zinc-500 mt-1 max-w-[200px] leading-relaxed">
-                              Avisaremos você quando novos reacts de canais seguidos forem lançados.
-                            </p>
-                          </div>
-                        ) : (
-                          notifications.map((n) => {
-                            const isUnread = !n.lida;
-                            const isNewReact = n.titulo.toLowerCase().includes('react') || n.mensagem.toLowerCase().includes('vídeo');
-                            const isApoio = n.titulo.toLowerCase().includes('apoiador') || n.mensagem.toLowerCase().includes('vip') || n.titulo.toLowerCase().includes('doação');
-
-                            return (
-                              <div 
-                                key={n.id} 
-                                className={`p-3.5 text-xs flex gap-3 transition-all relative ${
-                                  isUnread 
-                                    ? 'bg-cine-surface/10 hover:bg-cine-surface/20' 
-                                    : 'bg-transparent hover:bg-neutral-900/30'
-                                }`}
-                              >
-                                {isUnread && (
-                                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-cine-accent" />
-                                )}
-
-                                <div className="flex-shrink-0 mt-0.5">
-                                  {isApoio ? (
-                                    <div className="w-7 h-7 rounded-full bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center">
-                                      <Heart className="w-3.5 h-3.5 text-cine-accent-light fill-current" />
-                                    </div>
-                                  ) : isNewReact ? (
-                                    <div className="w-7 h-7 rounded-full bg-cine-accent/10 border border-cine-accent/20 flex items-center justify-center">
-                                      <Play className="w-3.5 h-3.5 text-cine-accent-light fill-current ml-0.5" />
-                                    </div>
-                                  ) : (
-                                    <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
-                                      <Bell className="w-3.5 h-3.5 text-zinc-400" />
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-1">
-                                    <p className={`font-semibold leading-tight text-zinc-100 ${isUnread ? 'text-white' : 'text-zinc-300'}`}>
-                                      {n.titulo}
-                                    </p>
-                                    <span className="text-[9px] text-zinc-500 font-mono flex-shrink-0 whitespace-nowrap mt-0.5">
-                                      {new Date(n.criadoEm).toLocaleDateString('pt-BR')}
-                                    </span>
-                                  </div>
-                                  <p className="text-zinc-400 mt-1 leading-relaxed text-[11px] font-medium pr-2">
-                                    {n.mensagem}
-                                  </p>
-                                </div>
-
-                                {isUnread && (
-                                  <button 
-                                    onClick={() => markAsRead(n.id)} 
-                                    title="Marcar como lida"
-                                    className="text-zinc-500 hover:text-cine-accent-light self-center p-1.5 rounded-lg hover:bg-neutral-900 transition-all border border-transparent hover:border-neutral-800 flex-shrink-0"
-                                  >
-                                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                                  </button>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <NotificationPanel
+                  open={showNotifications}
+                  notifications={notifications}
+                  unreadCount={unreadCount}
+                  loading={notificationsLoading}
+                  onClose={() => setShowNotifications(false)}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onClearAll={clearNotifications}
+                />
               </div>
 
               {user.isLoggedIn && (
