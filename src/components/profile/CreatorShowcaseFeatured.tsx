@@ -1,30 +1,23 @@
 import React from 'react';
-import { BadgeCheck } from 'lucide-react';
 
 const SKELETON_COUNT = 3;
 
-function FeaturedSkeletonCard({ index }: { index: number }) {
+function FeaturedSkeletonCard() {
   return (
     <article
-      className="creator-showcase-featured-card cine-recomenda-card"
+      className="shrink-0 w-[200px] sm:w-[220px] rounded-2xl overflow-hidden border border-neutral-800/60 bg-neutral-950/40"
       aria-hidden
-      data-skeleton-index={index}
     >
-      <div className="creator-showcase-featured-thumb cine-recomenda-thumb">
-        <div className="creator-showcase-skeleton-shine" />
-        <span className="cine-recomenda-tag">
-          <span className="cine-recomenda-tag-label">Destacado</span>
+      <div className="relative aspect-video bg-neutral-900/80 animate-pulse">
+        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-cine-accent/15 border border-cine-accent/25 text-[9px] font-bold uppercase tracking-wider text-cine-accent-light">
+          Destacado
         </span>
-        <span className="creator-showcase-skeleton-duration" />
+        <span className="absolute bottom-2 right-2 w-10 h-4 rounded bg-neutral-800/90" />
       </div>
-      <div className="p-3.5 sm:p-4 cine-recomenda-body">
-        <div className="creator-showcase-skeleton-lines">
-          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--lg" />
-          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--sm" />
-        </div>
-        <div className="creator-showcase-skeleton-footer cine-recomenda-footer">
-          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--channel" />
-        </div>
+      <div className="p-3 space-y-2 animate-pulse">
+        <div className="h-3 bg-neutral-800 rounded w-[92%]" />
+        <div className="h-3 bg-neutral-800 rounded w-[68%]" />
+        <div className="h-2.5 bg-neutral-800/70 rounded w-[40%] mt-2" />
       </div>
     </article>
   );
@@ -32,33 +25,22 @@ function FeaturedSkeletonCard({ index }: { index: number }) {
 
 export default function CreatorShowcaseFeatured() {
   return (
-    <section
-      className="creator-showcase-section"
-      aria-labelledby="creator-showcase-featured-heading"
-    >
-      <div className="creator-showcase-section-head">
-        <h2 id="creator-showcase-featured-heading" className="creator-showcase-section-title">
-          Vídeos em destaque
-        </h2>
-        <p className="creator-showcase-section-sub">
-          Exemplo de como os reacts do criador aparecem em evidência após a verificação
-        </p>
-      </div>
+    <section className="pt-8 border-t border-neutral-800/60" aria-labelledby="creator-featured-title">
+      <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">Catálogo</p>
+      <h2 id="creator-featured-title" className="font-display text-lg sm:text-xl font-bold text-white mt-1">
+        Reacts em destaque
+      </h2>
+      <p className="text-sm text-zinc-500 mt-1 mb-4">Fixados pelo criador após verificação</p>
 
       <div
-        className="creator-showcase-featured-grid"
+        className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin"
         role="img"
-        aria-label="Prévia ilustrativa: três cards de vídeo em destaque com esqueleto de carregamento"
+        aria-label="Prévia de cards em destaque"
       >
         {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-          <FeaturedSkeletonCard key={index} index={index} />
+          <FeaturedSkeletonCard key={index} />
         ))}
       </div>
-
-      <p className="creator-showcase-featured-note">
-        <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light shrink-0" strokeWidth={2.5} />
-        Criadores verificados podem fixar reacts no catálogo e na home da plataforma.
-      </p>
     </section>
   );
 }
