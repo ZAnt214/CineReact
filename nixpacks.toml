@@ -9,4 +9,4 @@ cmds = ["bun install --frozen-lockfile"]
 cmds = ["bun run build"]
 
 [start]
-cmd = "CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node dist/server.cjs"
+cmd = "CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node scripts/railway-boot.mjs"

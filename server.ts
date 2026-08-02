@@ -3049,17 +3049,12 @@ async function ensureBootstrapAdmin() {
   console.log("[Security] Conta administrativa inicial criada via variáveis de ambiente.");
 }
 
-async function startServer() {
-  await ensureBootstrapAdmin();
-  if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
+async function installFrontendMiddleware(): Promise<void> {
+  const distPath = path.join(process.cwd(), 'dist');
+  const distIndex = path.join(distPath, 'index.html');
+  const hasBuiltFrontend = fs.existsSync(distIndex);
+
+  const installStaticFrontend = () => {
     app.use(express.static(distPath, {
       setHeaders(res, filePath) {
         if (filePath.endsWith('index.html')) {
@@ -3081,39 +3076,74 @@ async function startServer() {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(distIndex);
     });
+  };
+
+  if (hasBuiltFrontend || process.env.NODE_ENV === 'production') {
+    if (!hasBuiltFrontend) {
+      console.error('[BOOT] dist/index.html ausente — frontend estático indisponível');
+    } else {
+      console.log('[BOOT] Servindo frontend estático de', distPath);
+    }
+    installStaticFrontend();
+    return;
   }
 
+  try {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+    console.log('[BOOT] Vite middleware ativo (modo desenvolvimento)');
+  } catch (err: any) {
+    console.warn('[BOOT] Vite indisponível, usando dist/ se existir:', err?.message || err);
+    if (hasBuiltFrontend) {
+      installStaticFrontend();
+      return;
+    }
+    throw err;
+  }
+}
+
+async function startServer() {
+  await installFrontendMiddleware();
+
   ensureDemoCreatorProfile();
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[BOOT] Cine React em http://0.0.0.0:${PORT} (cwd=${process.cwd()})`);
+    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
+
+  ensureBootstrapAdmin().catch((err) => {
+    console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);
+  });
+
+  syncChannelAvatars().catch(err => {
+    console.warn('Aviso ao sincronizar avatares dos canais:', err?.message || err);
+  });
+  prefillDefaultReacts().catch(err => {
+    console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
+  });
 
   try {
     await localDb.ensureCineClipsRestored();
     if (localDb.isSupabaseActive()) {
-      console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
+      console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
       const success = await localDb.syncFromSupabase();
       ensureDemoCreatorProfile();
       if (success) {
-        console.log("[Supabase] Sincronização inicial na inicialização concluída!");
+        console.log('[Supabase] Sincronização inicial na inicialização concluída!');
       } else {
-        console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
+        console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
       }
     }
   } catch (err: any) {
-    console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
+    console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
-    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
-  });
-
-  syncChannelAvatars().catch(err => {
-    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
-  });
-  prefillDefaultReacts().catch(err => {
-    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
-  });
 }
 
 startServer().catch((err) => {
