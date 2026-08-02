@@ -12,11 +12,16 @@ export interface VerifiedCreatorProfileProps {
   profile: PublicUserProfile;
   /** Exibe seções de exemplo (destaques skeleton + metas demo). */
   showDemoExtras?: boolean;
+  /** Exibe CTA para o visitante iniciar verificação do próprio perfil (perfil demo). */
+  showVerifyCta?: boolean;
+  onVerifyProfile?: () => void;
 }
 
 export default function VerifiedCreatorProfile({
   profile,
   showDemoExtras = false,
+  showVerifyCta = false,
+  onVerifyProfile,
 }: VerifiedCreatorProfileProps) {
   const display = profile.profileDisplay;
   const [supportSent, setSupportSent] = useState(false);
@@ -74,6 +79,16 @@ export default function VerifiedCreatorProfile({
                 <Heart className="w-4 h-4" strokeWidth={2.25} />
                 Apoiar criador
               </button>
+              {showDemoExtras && showVerifyCta && onVerifyProfile && (
+                <button
+                  type="button"
+                  onClick={onVerifyProfile}
+                  className="creator-premium-btn-secondary"
+                >
+                  <BadgeCheck className="w-4 h-4" strokeWidth={2.25} />
+                  Verificar perfil
+                </button>
+              )}
               {supportSent && (
                 <p className="text-xs text-[var(--premium-muted)] sm:pl-1" role="status">
                   Apoio registrado.
@@ -94,6 +109,29 @@ export default function VerifiedCreatorProfile({
         <>
           <CreatorShowcaseFeatured />
           <CreatorShowcaseGoals goals={DEMO_CREATOR_FUNDING_GOALS} />
+          {showVerifyCta && onVerifyProfile && (
+            <section className="creator-premium-section mt-2">
+              <div className="creator-premium-card p-5 sm:p-6 text-center sm:text-left">
+                <p className="text-[11px] uppercase tracking-[0.28em] font-semibold creator-premium-label">
+                  Seu canal também
+                </p>
+                <h2 className="font-display text-lg sm:text-xl font-bold text-[var(--premium-cream)] mt-2">
+                  Quer um perfil verificado como este?
+                </h2>
+                <p className="text-sm text-[var(--premium-muted)] mt-2 max-w-xl leading-relaxed mx-auto sm:mx-0">
+                  Adicione um código na descrição do seu canal no YouTube e seja verificado na CineReact em até 24 horas.
+                </p>
+                <button
+                  type="button"
+                  onClick={onVerifyProfile}
+                  className="creator-premium-btn-primary mt-4 w-full sm:w-auto"
+                >
+                  <BadgeCheck className="w-4 h-4" strokeWidth={2.25} />
+                  Verificar perfil
+                </button>
+              </div>
+            </section>
+          )}
         </>
       )}
     </div>
