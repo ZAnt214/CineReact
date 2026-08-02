@@ -1,6 +1,5 @@
 import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
 import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
@@ -3051,8 +3050,8 @@ async function ensureBootstrapAdmin() {
 }
 
 async function startServer() {
-  await ensureBootstrapAdmin();
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -3093,6 +3092,10 @@ async function startServer() {
     console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
   });
 
+  ensureBootstrapAdmin().catch((err) => {
+    console.warn("[Security] Falha ao criar admin inicial:", err?.message || err);
+  });
+
   syncChannelAvatars().catch(err => {
     console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
   });
@@ -3117,4 +3120,7 @@ async function startServer() {
   }
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("Falha fatal ao iniciar o servidor:", err);
+  process.exit(1);
+});
