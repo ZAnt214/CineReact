@@ -289,39 +289,46 @@ function initDb(): DbSchema {
   return initialDb;
 }
 
-let dbCache: DbSchema = {
-  obras: [],
-  reacts: [],
-  comentarios: [],
-  favoritos: [],
-  canaisSeguidos: [],
-  listas: [],
-  notificacoes: [],
-  gamificationProfiles: {},
-  adminConfig: createDefaultAdminConfig(),
-  usuarios: [],
-  cineClips: [],
-  cineClipComments: [],
-  cineClipLikes: [],
-  cineClipFavorites: [],
-  cineClipShares: [],
-  cineClipReports: [],
-  cineClipImportJobs: [],
-  cineClipWatchHistory: [],
-  donationRequests: [],
-  creatorVerificationRequests: [],
-  financeTransactions: [],
-  platformSubscriptions: [],
-  creatorPayouts: [],
-  monthlyCloses: [],
-  subscriptionCheckouts: [],
-  authSessions: [],
-  loginAttempts: [],
-  captchaChallenges: [],
-  securityAlerts: [],
-  idempotencyKeys: [],
-  financialAuditLog: [],
-};
+let dbCache: DbSchema;
+try {
+  dbCache = initDb();
+} catch (error) {
+  console.error('[DB] Falha crítica ao inicializar banco local, usando seed vazio:', error);
+  dbCache = {
+    obras: [...OBRAS_INICIAIS],
+    reacts: [...VIDEOS_INICIAIS],
+    comentarios: [],
+    favoritos: [],
+    canaisSeguidos: [],
+    listas: [],
+    notificacoes: [],
+    gamificationProfiles: {},
+    adminConfig: createDefaultAdminConfig(),
+    usuarios: [],
+    cineClips: [],
+    cineClipComments: [],
+    cineClipLikes: [],
+    cineClipFavorites: [],
+    cineClipShares: [],
+    cineClipReports: [],
+    cineClipImportJobs: [],
+    cineClipWatchHistory: [],
+    donationRequests: [],
+    creatorVerificationRequests: [],
+    financeTransactions: [],
+    platformSubscriptions: [],
+    creatorPayouts: [],
+    monthlyCloses: [],
+    subscriptionCheckouts: [],
+    authSessions: [],
+    loginAttempts: [],
+    captchaChallenges: [],
+    securityAlerts: [],
+    idempotencyKeys: [],
+    financialAuditLog: [],
+  };
+  setImmediate(() => saveDb(dbCache, true));
+}
 
 let saveDbTimer: NodeJS.Timeout | null = null;
 let pendingSave = false;
@@ -374,8 +381,6 @@ async function doSaveAsync() {
     }
   }
 }
-
-dbCache = initDb();
 
 // Supabase Client lazy setup
 const supabaseUrl = process.env.SUPABASE_URL || '';
