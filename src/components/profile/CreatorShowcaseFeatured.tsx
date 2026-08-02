@@ -1,62 +1,64 @@
-import React, { memo } from 'react';
-import { Play, Clock } from 'lucide-react';
-import type { ReactVideo } from '../../types.ts';
+import React from 'react';
+import { BadgeCheck } from 'lucide-react';
 
-export interface CreatorShowcaseFeaturedProps {
-  videos: ReactVideo[];
-  onPlay?: (reactId: string, obraId: string) => void;
+const SKELETON_COUNT = 3;
+
+function FeaturedSkeletonCard({ index }: { index: number }) {
+  return (
+    <article
+      className="creator-showcase-featured-card cine-recomenda-card"
+      aria-hidden
+      data-skeleton-index={index}
+    >
+      <div className="creator-showcase-featured-thumb cine-recomenda-thumb">
+        <div className="creator-showcase-skeleton-shine" />
+        <span className="cine-recomenda-tag">
+          <span className="cine-recomenda-tag-label">Destacado</span>
+        </span>
+        <span className="creator-showcase-skeleton-duration" />
+      </div>
+      <div className="p-3.5 sm:p-4 cine-recomenda-body">
+        <div className="creator-showcase-skeleton-lines">
+          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--lg" />
+          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--sm" />
+        </div>
+        <div className="creator-showcase-skeleton-footer cine-recomenda-footer">
+          <span className="creator-showcase-skeleton-line creator-showcase-skeleton-line--channel" />
+        </div>
+      </div>
+    </article>
+  );
 }
 
-const ShowcaseVideoCard = memo(function ShowcaseVideoCard({
-  video,
-  onPlay,
-}: {
-  video: ReactVideo;
-  onPlay?: (reactId: string, obraId: string) => void;
-}) {
+export default function CreatorShowcaseFeatured() {
   return (
-    <button
-      type="button"
-      onClick={() => onPlay?.(video.id, video.obraId)}
-      className="creator-showcase-video group text-left"
+    <section
+      className="creator-showcase-section"
+      aria-labelledby="creator-showcase-featured-heading"
     >
-      <div className="creator-showcase-video-thumb">
-        <img
-          src={video.thumbnailUrl}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          className="creator-showcase-video-img"
-        />
-        <span className="creator-showcase-video-play" aria-hidden>
-          <Play className="w-4 h-4 fill-current ml-0.5" />
-        </span>
-        <span className="creator-showcase-video-duration">
-          <Clock className="w-3 h-3" />
-          {video.duracao}
-        </span>
-      </div>
-      <p className="creator-showcase-video-title">{video.titulo}</p>
-    </button>
-  );
-});
-
-export default function CreatorShowcaseFeatured({ videos, onPlay }: CreatorShowcaseFeaturedProps) {
-  if (videos.length === 0) return null;
-
-  return (
-    <section className="creator-showcase-section" aria-labelledby="creator-showcase-featured-heading">
       <div className="creator-showcase-section-head">
         <h2 id="creator-showcase-featured-heading" className="creator-showcase-section-title">
-          Destaques na plataforma
+          Vídeos em destaque
         </h2>
-        <p className="creator-showcase-section-sub">Reacts em evidência do catálogo CineReact</p>
+        <p className="creator-showcase-section-sub">
+          Exemplo de como os reacts do criador aparecem em evidência após a verificação
+        </p>
       </div>
-      <div className="creator-showcase-video-grid">
-        {videos.map((video) => (
-          <ShowcaseVideoCard key={video.id} video={video} onPlay={onPlay} />
+
+      <div
+        className="creator-showcase-featured-grid"
+        role="img"
+        aria-label="Prévia ilustrativa: três cards de vídeo em destaque com esqueleto de carregamento"
+      >
+        {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+          <FeaturedSkeletonCard key={index} index={index} />
         ))}
       </div>
+
+      <p className="creator-showcase-featured-note">
+        <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light shrink-0" strokeWidth={2.5} />
+        Criadores verificados podem fixar reacts no catálogo e na home da plataforma.
+      </p>
     </section>
   );
 }

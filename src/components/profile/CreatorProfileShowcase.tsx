@@ -1,12 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { BadgeCheck, Frame, Heart, Palette } from 'lucide-react';
-import type { PublicUserProfile, ReactVideo } from '../../types.ts';
+import type { PublicUserProfile } from '../../types.ts';
 import { getRewardById } from '../../data/rewardsCatalog.ts';
-import {
-  DEMO_CREATOR_REACT_GOALS,
-  pickDemoFeaturedReacts,
-} from '../../constants/demoCreatorShowcase.ts';
-import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
+import { DEMO_CREATOR_REACT_GOALS } from '../../constants/demoCreatorShowcase.ts';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorShowcaseFeatured from './CreatorShowcaseFeatured.tsx';
@@ -14,8 +10,6 @@ import CreatorShowcaseGoals from './CreatorShowcaseGoals.tsx';
 
 export interface CreatorProfileShowcaseProps {
   profile: PublicUserProfile;
-  reacts?: ReactVideo[];
-  onPlayVideo?: (reactId: string, obraId: string) => void;
 }
 
 function ShowcasePerk({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
@@ -27,11 +21,7 @@ function ShowcasePerk({ icon: Icon, label }: { icon: React.ElementType; label: s
   );
 }
 
-export default function CreatorProfileShowcase({
-  profile,
-  reacts = [],
-  onPlayVideo,
-}: CreatorProfileShowcaseProps) {
+export default function CreatorProfileShowcase({ profile }: CreatorProfileShowcaseProps) {
   const display = profile.profileDisplay;
   const loadout = display.loadout;
   const [supportAck, setSupportAck] = useState(false);
@@ -45,8 +35,6 @@ export default function CreatorProfileShowcase({
     if (!loadout.theme) return null;
     return getRewardById(loadout.theme)?.name ?? null;
   }, [loadout.theme]);
-
-  const featuredVideos = useMemo(() => pickDemoFeaturedReacts(reacts, 3), [reacts]);
 
   return (
     <article className="creator-showcase">
@@ -66,21 +54,13 @@ export default function CreatorProfileShowcase({
                   decoding="async"
                   className="creator-showcase-avatar"
                 />
-                <BadgeCheck
-                  className="creator-showcase-avatar-badge"
-                  strokeWidth={2.5}
-                  aria-hidden
-                />
               </div>
 
               {display.verifiedBadge && (
-                <ProfileVerifiedSeal
-                  name={display.verifiedBadge.name}
-                  description={display.verifiedBadge.description}
-                  size="md"
-                  align="start"
-                  layout="beside"
-                />
+                <span className="creator-showcase-verified-pill" title={display.verifiedBadge.description}>
+                  <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light shrink-0" strokeWidth={2.5} />
+                  <span>{display.verifiedBadge.name}</span>
+                </span>
               )}
             </div>
 
@@ -134,7 +114,7 @@ export default function CreatorProfileShowcase({
         </div>
       </div>
 
-      <CreatorShowcaseFeatured videos={featuredVideos} onPlay={onPlayVideo} />
+      <CreatorShowcaseFeatured />
       <CreatorShowcaseGoals goals={DEMO_CREATOR_REACT_GOALS} />
 
       <footer className="creator-showcase-foot">
