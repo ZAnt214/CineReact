@@ -42,7 +42,7 @@ import { createSession } from "./src/security/sessions.ts";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 const security = installSecurity(app);
 const requireAdmin = security.requireAdmin;
@@ -3071,7 +3071,14 @@ async function startServer() {
         }
       },
     }));
-    app.get('*', (req, res) => {
+    // SPA fallback — never return HTML for missing hashed bundles (stale cache after deploy).
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/uploads/')) {
+        return next();
+      }
+      if (req.path.includes('.')) {
+        return res.status(404).send('Not found');
+      }
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
@@ -3080,6 +3087,18 @@ async function startServer() {
   }
 
   ensureDemoCreatorProfile();
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
+    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
+
+  syncChannelAvatars().catch(err => {
+    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
+  });
+  prefillDefaultReacts().catch(err => {
+    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
+  });
 
   try {
     await localDb.ensureCineClipsRestored();
@@ -3096,18 +3115,6 @@ async function startServer() {
   } catch (err: any) {
     console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
-    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
-  });
-
-  syncChannelAvatars().catch(err => {
-    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
-  });
-  prefillDefaultReacts().catch(err => {
-    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
-  });
 }
 
 startServer();

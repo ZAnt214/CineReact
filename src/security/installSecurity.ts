@@ -39,7 +39,23 @@ export function installSecurity(app: Express): SecurityContext {
 
   app.use(
     helmet({
-      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+        directives: {
+          defaultSrc: ["'self'"],
+          baseUri: ["'self'"],
+          fontSrc: ["'self'", 'https:', 'data:'],
+          formAction: ["'self'"],
+          frameAncestors: ["'self'"],
+          frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+          imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+          objectSrc: ["'none'"],
+          scriptSrc: ["'self'"],
+          scriptSrcAttr: ["'none'"],
+          styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+          connectSrc: ["'self'", 'https:'],
+          upgradeInsecureRequests: [],
+        },
+      } : false,
       crossOriginEmbedderPolicy: false,
       frameguard: { action: 'deny' },
       hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
