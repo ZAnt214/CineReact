@@ -7,6 +7,7 @@ export interface ProfileSocialLinksProps {
   links?: CreatorSocialLinks | null;
   size?: 'sm' | 'md';
   align?: 'center' | 'start';
+  variant?: 'default' | 'neutral';
   className?: string;
 }
 
@@ -92,11 +93,13 @@ export default function ProfileSocialLinks({
   links,
   size = 'md',
   align = 'center',
+  variant = 'default',
   className = '',
 }: ProfileSocialLinksProps) {
   if (!hasSocialLinks(links)) return null;
 
   const isCenter = align === 'center';
+  const isNeutral = variant === 'neutral';
   const cfg = SIZE_CONFIG[size];
   const activePlatforms = SOCIAL_PLATFORMS.filter(({ key }) => links?.[key]?.trim());
 
@@ -108,7 +111,7 @@ export default function ProfileSocialLinks({
         <p className={`profile-social-heading ${cfg.heading} leading-tight`}>
           Onde me encontrar
         </p>
-        <p className="mt-0.5 text-[10px] text-cine-accent/45 font-medium tracking-wide">
+        <p className={`mt-0.5 text-[10px] font-medium tracking-wide ${isNeutral ? 'text-zinc-500' : 'text-cine-accent/45'}`}>
           Minhas redes oficiais
         </p>
       </div>
@@ -127,7 +130,11 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-cine-accent/10 bg-neutral-950/75 backdrop-blur-sm transition-all hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(56, 189, 248,0.1)] ${cfg.strip}`}
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border backdrop-blur-sm transition-all ${cfg.strip} ${
+                isNeutral
+                  ? 'border-neutral-800/80 bg-neutral-950/60 hover:border-neutral-700 hover:bg-neutral-900/70'
+                  : 'border-cine-accent/10 bg-neutral-950/75 hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(56,189,248,0.1)]'
+              }`}
             >
               <span
                 className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${style.accent} opacity-80`}
@@ -139,7 +146,9 @@ export default function ProfileSocialLinks({
               </span>
 
               <span
-                className={`shrink-0 font-semibold uppercase tracking-[0.12em] text-cine-accent/55 ${cfg.platform}`}
+                className={`shrink-0 font-semibold uppercase tracking-[0.12em] ${cfg.platform} ${
+                  isNeutral ? 'text-zinc-500' : 'text-cine-accent/55'
+                }`}
               >
                 {style.label}
               </span>
@@ -149,7 +158,11 @@ export default function ProfileSocialLinks({
               </span>
 
               <ArrowUpRight
-                className={`shrink-0 text-cine-accent/35 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cine-accent-light/80 ${cfg.arrow}`}
+                className={`shrink-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${cfg.arrow} ${
+                  isNeutral
+                    ? 'text-zinc-600 group-hover:text-zinc-400'
+                    : 'text-cine-accent/35 group-hover:text-cine-accent-light/80'
+                }`}
               />
             </a>
           );
