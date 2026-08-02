@@ -115,7 +115,7 @@ const CreatorNavRow = React.memo(function CreatorNavRow({
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="side-nav-creator-name">{creator.nome}</p>
         {creator.isDemo ? (
-          <p className="side-nav-creator-meta">Exemplo verificado</p>
+          <p className="side-nav-creator-meta">Criador verificado</p>
         ) : creator.reactCount > 0 ? (
           <p className="side-nav-creator-meta side-nav-creator-meta--muted">
             {creator.reactCount} reacts
