@@ -25,7 +25,7 @@ function ProfileGreetingHeader({ firstName, onClose }: ProfileGreetingHeaderProp
           </p>
           <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
             Olá,{' '}
-            <span className="text-cine-accent-light">{firstName}</span>
+            <span className="text-zinc-100">{firstName}</span>
           </h1>
           <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
             Sua sessão na CineReact
@@ -42,7 +42,7 @@ function ProfileGreetingHeader({ firstName, onClose }: ProfileGreetingHeaderProp
         </button>
       </div>
 
-      <div className="mt-4 h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent" aria-hidden />
+      <div className="mt-4 h-px bg-gradient-to-r from-neutral-700/35 via-neutral-800/70 to-transparent" aria-hidden />
     </header>
   );
 }

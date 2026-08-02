@@ -284,8 +284,6 @@ export default function ProfilePanel({
       className="flex-1 flex flex-col min-h-dvh"
     >
       <div className="relative flex-1">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-cine-accent/[0.04]" aria-hidden />
-
         <ProfileGreetingHeader firstName={firstName} onClose={onClose} />
 
         {!user.isLoggedIn ? (
@@ -312,7 +310,6 @@ export default function ProfilePanel({
         ) : (
           <div className="cine-container relative py-4 md:py-6 space-y-6">
             <section className="relative overflow-hidden rounded-3xl border border-neutral-800/50 bg-neutral-900/20">
-              <div className="absolute inset-0 bg-gradient-to-b from-cine-accent/6 via-transparent to-transparent pointer-events-none" />
               <div className="relative px-5 py-7 md:px-8 md:py-9 flex flex-col items-center text-center">
                 <ProfileAvatar
                   photoUrl={user.avatar}
