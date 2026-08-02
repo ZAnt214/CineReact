@@ -50,27 +50,31 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
   const isDemo = creatorEmail.toLowerCase() === DEMO_CREATOR_EMAIL.toLowerCase();
 
   return (
-    <div className="cine-container pt-24 pb-20 min-h-screen w-full">
+    <div className={`cine-container pt-24 pb-20 min-h-screen w-full ${isDemo ? 'creator-profile-premium' : ''}`}>
       <button
         type="button"
         onClick={onBack}
-        className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/80 hover:bg-cine-accent/20 text-zinc-300 hover:text-cine-accent-light border border-neutral-800 hover:border-cine-accent/40 text-xs font-black uppercase tracking-wider transition-colors mb-8 cursor-pointer"
+        className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-colors mb-8 cursor-pointer ${
+          isDemo
+            ? 'creator-premium-back'
+            : 'bg-neutral-900/80 hover:bg-cine-accent/20 text-zinc-300 hover:text-cine-accent-light border border-neutral-800 hover:border-cine-accent/40'
+        }`}
       >
-        <ArrowLeft className="w-4 h-4 text-cine-accent-light group-hover:-translate-x-0.5 transition-transform" />
+        <ArrowLeft className={`w-4 h-4 group-hover:-translate-x-0.5 transition-transform ${isDemo ? 'text-[var(--premium-gold-light)]' : 'text-cine-accent-light'}`} />
         Voltar
       </button>
 
-      <header className={`relative pb-2 md:pb-4 mb-6 ${isDemo ? 'creator-profile-premium' : ''}`}>
+      <header className={`relative pb-2 md:pb-4 mb-6 ${isDemo ? 'creator-premium-page-header' : ''}`}>
         <p className={`text-[11px] uppercase tracking-[0.32em] font-semibold ${isDemo ? 'creator-premium-label' : 'text-zinc-500'}`}>
           {isDemo ? 'Criadores' : 'Perfil'}
         </p>
-        <h1 className={`font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight mt-1 ${isDemo ? 'text-[var(--premium-cream)]' : 'text-white'}`}>
+        <h1 className={`font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight mt-1 ${isDemo ? 'creator-premium-page-title' : 'text-white'}`}>
           {loading ? 'Carregando…' : profile?.nome ?? 'Criador'}
         </h1>
         {isDemo && (
-          <p className="text-sm text-[var(--premium-muted,#a1a1aa)] mt-1.5 leading-relaxed">
+          <p className="text-sm text-[var(--premium-muted)] mt-1.5 leading-relaxed">
             Canal verificado na{' '}
-            <span className="text-[var(--premium-gold-light,#e8d5b5)]">CineReact</span>
+            <span className="creator-premium-brand">CineReact</span>
           </p>
         )}
         <div
@@ -81,7 +85,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
-          <Loader2 className="w-6 h-6 animate-spin mb-3 text-cine-accent/70" />
+          <Loader2 className={`w-6 h-6 animate-spin mb-3 ${isDemo ? 'creator-premium-spinner' : 'text-cine-accent/70'}`} />
           <p className="text-sm">Carregando perfil…</p>
         </div>
       )}
@@ -93,7 +97,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       )}
 
       {!loading && profile && (
-        <div className={`max-w-3xl ${isDemo ? 'creator-profile-premium' : ''}`}>
+        <div className="max-w-3xl">
           {isDemo ? (
             <CreatorProfileShowcase profile={profile} />
           ) : (
