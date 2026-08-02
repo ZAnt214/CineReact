@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { BadgeCheck, Heart } from 'lucide-react';
 import type { PublicUserProfile } from '../../types.ts';
-import ProfileAvatar from './ProfileAvatar.tsx';
+import { DEMO_CREATOR_FUNDING_GOALS } from '../../constants/demoCreatorShowcase.ts';
+import VerifiedCreatorAvatar from './VerifiedCreatorAvatar.tsx';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorShowcaseFeatured from './CreatorShowcaseFeatured.tsx';
 import CreatorShowcaseGoals from './CreatorShowcaseGoals.tsx';
 
-export interface CreatorProfileShowcaseProps {
+export interface VerifiedCreatorProfileProps {
   profile: PublicUserProfile;
+  /** Exibe seções de exemplo (destaques skeleton + metas demo). */
+  showDemoExtras?: boolean;
 }
 
-export default function CreatorProfileShowcase({ profile }: CreatorProfileShowcaseProps) {
+export default function VerifiedCreatorProfile({
+  profile,
+  showDemoExtras = false,
+}: VerifiedCreatorProfileProps) {
   const display = profile.profileDisplay;
   const [supportSent, setSupportSent] = useState(false);
 
@@ -19,14 +25,10 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
     <div className="space-y-0">
       <section className="creator-premium-card p-5 sm:p-6 md:p-7">
         <div className="flex flex-col sm:flex-row gap-5 sm:gap-6">
-          <ProfileAvatar
+          <VerifiedCreatorAvatar
             photoUrl={profile.avatar}
             alt={profile.nome}
             size="xl"
-            profileDisplay={display}
-            isDonor={!!profile.isDonor}
-            lite
-            showEffect={false}
             className="shrink-0 mx-auto sm:mx-0"
           />
 
@@ -81,15 +83,19 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
           </div>
         </div>
 
-        {profile.isVerifiedCreator && profile.socialLinks && (
+        {profile.socialLinks && (
           <div className="creator-premium-divider creator-premium-social mt-6 pt-6">
             <ProfileSocialLinks links={profile.socialLinks} size="md" align="start" className="max-w-none" />
           </div>
         )}
       </section>
 
-      <CreatorShowcaseFeatured />
-      <CreatorShowcaseGoals />
+      {showDemoExtras && (
+        <>
+          <CreatorShowcaseFeatured />
+          <CreatorShowcaseGoals goals={DEMO_CREATOR_FUNDING_GOALS} />
+        </>
+      )}
     </div>
   );
 }

@@ -3401,6 +3401,54 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
     0 16px 40px rgba(0, 0, 0, 0.45);
 }
 
+.creator-premium-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.creator-premium-avatar-ring {
+  padding: 3px;
+  border-radius: 9999px;
+  background: var(--premium-dual-gradient);
+  box-shadow:
+    0 0 22px rgba(0, 212, 255, 0.18),
+    0 0 18px rgba(201, 169, 98, 0.14);
+}
+
+.creator-premium-avatar-inner {
+  padding: 2px;
+  border-radius: 9999px;
+  background: var(--premium-bg);
+}
+
+.creator-premium-avatar-inner img,
+.creator-premium-avatar-fallback {
+  display: block;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: var(--premium-surface);
+}
+
+.creator-premium-avatar--xl .creator-premium-avatar-inner img,
+.creator-premium-avatar--xl .creator-premium-avatar-fallback {
+  width: 6rem;
+  height: 6rem;
+}
+
+@media (min-width: 640px) {
+  .creator-premium-avatar--xl .creator-premium-avatar-inner img,
+  .creator-premium-avatar--xl .creator-premium-avatar-fallback {
+    width: 7rem;
+    height: 7rem;
+  }
+}
+
+.creator-premium-avatar--lg .creator-premium-avatar-inner img,
+.creator-premium-avatar--lg .creator-premium-avatar-fallback {
+  width: 5rem;
+  height: 5rem;
+}
+
 .creator-premium-verified {
   display: inline-flex;
   align-items: center;
