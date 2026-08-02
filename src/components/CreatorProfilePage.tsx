@@ -10,6 +10,8 @@ interface CreatorProfilePageProps {
   onBack: () => void;
   showVerifyCta?: boolean;
   onVerifyProfile?: () => void;
+  onSubscribe?: (creatorEmail: string) => void;
+  viewerEmail?: string;
 }
 
 export default function CreatorProfilePage({
@@ -17,6 +19,8 @@ export default function CreatorProfilePage({
   onBack,
   showVerifyCta = false,
   onVerifyProfile,
+  onSubscribe,
+  viewerEmail,
 }: CreatorProfilePageProps) {
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,6 +133,11 @@ export default function CreatorProfilePage({
               showDemoExtras={isDemo}
               showVerifyCta={isDemo && showVerifyCta}
               onVerifyProfile={onVerifyProfile}
+              onSubscribe={
+                onSubscribe && viewerEmail?.toLowerCase() !== creatorEmail.toLowerCase()
+                  ? () => onSubscribe(creatorEmail)
+                  : undefined
+              }
             />
           ) : (
             <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />

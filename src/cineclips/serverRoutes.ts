@@ -26,6 +26,7 @@ import {
   withResolvedMediaUrls,
 } from './downloader.ts';
 import { exportClipWithBranding } from './exportVideo.ts';
+import { maskClipForViewer, canUserViewClip } from '../finance/clipAccess.ts';
 
 function enrichCineClipComment(comment: CineClipComment) {
   return enrichCommentAuthorProfile(comment);
@@ -214,6 +215,9 @@ function buildClipFromPayload(payload: any, id?: string): CineClip {
     trendingScore: 0,
     isTrending: false,
     status: payload.status || 'published',
+    accessLevel: payload.accessLevel || 'public',
+    exclusiveUntil: payload.exclusiveUntil,
+    participatesInGlobal: payload.participatesInGlobal ?? false,
     publicadoEm: payload.publicadoEm || now,
     criadoEm: payload.criadoEm || now,
     atualizadoEm: now,
@@ -425,9 +429,9 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       const trending = getTrendingClips(localDb.getCineClips(), 8);
 
       res.json({
-        clips: items.map(withResolvedMediaUrls),
+        clips: items.map((c) => maskClipForViewer(withResolvedMediaUrls(c), email)),
         nextCursor: nextCursor !== null ? String(nextCursor) : null,
-        trending: trending.map(withResolvedMediaUrls),
+        trending: trending.map((c) => maskClipForViewer(withResolvedMediaUrls(c), email)),
       });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Erro ao carregar feed.' });
@@ -474,9 +478,12 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
         return res.status(404).json({ error: 'Clip não encontrado.' });
       }
       const email = String(req.query.email || '').trim().toLowerCase();
+      const resolved = withResolvedMediaUrls(clip);
       res.json({
-        clip: withResolvedMediaUrls(clip),
-        related: getRelatedClips(clip, localDb.getCineClips()).map(withResolvedMediaUrls),
+        clip: maskClipForViewer(resolved, email || undefined),
+        related: getRelatedClips(clip, localDb.getCineClips()).map((c) =>
+          maskClipForViewer(withResolvedMediaUrls(c), email || undefined)
+        ),
         liked: email ? localDb.isClipLikedBy(clip.id, email) : false,
         favorited: email ? localDb.isClipFavoritedBy(clip.id, email) : false,
       });
@@ -508,6 +515,12 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
     try {
       const { email, watchSeconds = 0, completed = false } = req.body || {};
       if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
+
+      const clip = localDb.getCineClipById(req.params.id);
+      if (!clip) return res.status(404).json({ error: 'Clip não encontrado.' });
+      if (!canUserViewClip(String(email), clip)) {
+        return res.status(403).json({ error: 'Conteúdo exclusivo para assinantes.', code: 'SUBSCRIPTION_REQUIRED' });
+      }
 
       localDb.recordClipWatch({
         usuarioEmail: email,

@@ -27,6 +27,7 @@ import type {
   FinanceDashboard,
   GlobalDistributionSummary,
   MonthCloseSimulation,
+  SubscriptionCheckout,
 } from '../../types/finance.ts';
 import {
   EXCLUSIVE_CREATOR_SHARE,
@@ -117,19 +118,23 @@ export default function FinanceAdminPage({ email }: { email: string }) {
   });
   const [closing, setClosing] = useState(false);
   const [simulating, setSimulating] = useState(false);
+  const [pendingCheckouts, setPendingCheckouts] = useState<SubscriptionCheckout[]>([]);
+  const [approvingCheckout, setApprovingCheckout] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [dash, global, payments] = await Promise.all([
+    const [dash, global, payments, checkoutsRes] = await Promise.all([
       request<FinanceDashboard>('/api/admin/finance/dashboard'),
       request<GlobalDistributionSummary>(`/api/admin/finance/global-distribution?month=${periodMonth}`),
       request<{ creators: CreatorFinanceSummary[] }>(
         `/api/admin/finance/creator-payments${search ? `?q=${encodeURIComponent(search)}` : ''}`
       ),
+      request<{ checkouts: SubscriptionCheckout[] }>('/api/admin/subscriptions/checkouts?status=pending'),
     ]);
     if (dash) setDashboard(dash);
     if (global) setGlobalDist(global);
     if (payments) setCreators(payments.creators || []);
+    if (checkoutsRes) setPendingCheckouts(checkoutsRes.checkouts || []);
     setLoading(false);
   }, [request, periodMonth, search]);
 
@@ -167,6 +172,17 @@ export default function FinanceAdminPage({ email }: { email: string }) {
     }, `Mês ${periodMonth} fechado com sucesso.`);
     setClosing(false);
     setSimulation(null);
+    load();
+  };
+
+  const approveCheckout = async (id: string) => {
+    setApprovingCheckout(id);
+    await request(
+      `/api/admin/subscriptions/checkouts/${id}/approve`,
+      { method: 'POST' },
+      'Assinatura ativada com sucesso.'
+    );
+    setApprovingCheckout(null);
     load();
   };
 
@@ -314,6 +330,34 @@ export default function FinanceAdminPage({ email }: { email: string }) {
                     <p className="text-xs text-zinc-500 mt-2">{subs.activeGlobal} ativas × {formatBRL(GLOBAL_SUBSCRIPTION_PRICE)}</p>
                   </div>
                 </div>
+              </AdminPanelCard>
+              <AdminPanelCard title={`Checkouts pendentes (${pendingCheckouts.length})`} description="Confirme pagamentos do Mercado Pago ou aprove manualmente">
+                {pendingCheckouts.length === 0 ? (
+                  <p className="text-sm text-zinc-500">Nenhum checkout aguardando.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingCheckouts.map((c) => (
+                      <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-neutral-800 bg-neutral-950/60">
+                        <div>
+                          <p className="text-sm font-bold text-white capitalize">{c.plan}</p>
+                          <p className="text-xs text-zinc-500">{c.subscriberEmail}</p>
+                          <p className="text-[10px] text-zinc-600 font-mono mt-1">Ref: {c.externalReference}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-black text-cine-accent-light">{formatBRL(c.amount)}</span>
+                          <button
+                            type="button"
+                            disabled={approvingCheckout === c.id}
+                            onClick={() => approveCheckout(c.id)}
+                            className="px-4 py-2 rounded-lg bg-cine-accent text-black text-xs font-bold disabled:opacity-50"
+                          >
+                            {approvingCheckout === c.id ? '...' : 'Aprovar'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </AdminPanelCard>
             </div>
           )}

@@ -21,6 +21,7 @@ import type {
   FinanceTransaction,
   MonthlyCloseRecord,
   PlatformSubscription,
+  SubscriptionCheckout,
 } from '../types/finance.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
@@ -89,6 +90,7 @@ interface DbSchema {
   platformSubscriptions: PlatformSubscription[];
   creatorPayouts: CreatorPayout[];
   monthlyCloses: MonthlyCloseRecord[];
+  subscriptionCheckouts: SubscriptionCheckout[];
 }
 
 function initDb(): DbSchema {
@@ -160,6 +162,7 @@ function initDb(): DbSchema {
       if (!parsed.platformSubscriptions) parsed.platformSubscriptions = [];
       if (!parsed.creatorPayouts) parsed.creatorPayouts = [];
       if (!parsed.monthlyCloses) parsed.monthlyCloses = [];
+      if (!parsed.subscriptionCheckouts) parsed.subscriptionCheckouts = [];
 
       return parsed;
     }
@@ -231,6 +234,7 @@ function initDb(): DbSchema {
     platformSubscriptions: [],
     creatorPayouts: [],
     monthlyCloses: [],
+    subscriptionCheckouts: [],
   };
 
   saveDb(initialDb);
@@ -262,6 +266,7 @@ let dbCache: DbSchema = {
   platformSubscriptions: [],
   creatorPayouts: [],
   monthlyCloses: [],
+  subscriptionCheckouts: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1615,6 +1620,17 @@ export const localDb = {
     dbCache.monthlyCloses.unshift(record);
     saveDb(dbCache, true);
     return record;
+  },
+
+  getSubscriptionCheckouts: (): SubscriptionCheckout[] => dbCache.subscriptionCheckouts || [],
+
+  saveSubscriptionCheckout: (checkout: SubscriptionCheckout): SubscriptionCheckout => {
+    if (!dbCache.subscriptionCheckouts) dbCache.subscriptionCheckouts = [];
+    const idx = dbCache.subscriptionCheckouts.findIndex((c) => c.id === checkout.id);
+    if (idx >= 0) dbCache.subscriptionCheckouts[idx] = checkout;
+    else dbCache.subscriptionCheckouts.unshift(checkout);
+    saveDb(dbCache, true);
+    return checkout;
   },
 
   exportDbSnapshot: (): DbSchema => {

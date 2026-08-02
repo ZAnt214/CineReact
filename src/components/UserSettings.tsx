@@ -4,6 +4,7 @@ import { UserState, CreatorSocialLinks } from '../types.ts';
 import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
 import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
 import DonorBadge from './profile/DonorBadge.tsx';
+import CreatorClipAccessPanel from './creator/CreatorClipAccessPanel.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
 
@@ -410,6 +411,17 @@ function UserSettings({
                     Salvar links
                   </ActionButton>
                   {socialMsg && <StatusMessage type={socialMsg.type}>{socialMsg.text}</StatusMessage>}
+                </section>
+
+                <SettingsDivider />
+                <section className="space-y-4">
+                  <div>
+                    <SectionLabel>Conteúdo exclusivo</SectionLabel>
+                    <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                      Defina quais vídeos no CineClips são públicos ou exclusivos para assinantes.
+                    </p>
+                  </div>
+                  <CreatorClipAccessPanel email={user.email} />
                 </section>
               </>
             )}

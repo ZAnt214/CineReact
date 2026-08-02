@@ -15,6 +15,7 @@ import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
 import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
 import CreatorVerificationPage from './components/CreatorVerificationPage.tsx';
+import SubscriptionsPage from './components/SubscriptionsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
 import CreatorPartnersPage from './components/CreatorPartnersPage.tsx';
 import LogoDownloadPage from './components/LogoDownloadPage.tsx';
@@ -131,6 +132,8 @@ export default function App() {
       isAdmin: false
     };
   });
+
+  const [subscriptionCreatorEmail, setSubscriptionCreatorEmail] = useState<string | undefined>();
 
   const isUserAuthenticated = Boolean(user.isLoggedIn && user.email?.trim());
   const { settings: platformSettings, loading: platformSettingsLoading } = usePlatformSettings();
@@ -746,7 +749,7 @@ export default function App() {
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
   const showCreatorBanner =
     isCreatorBannerVisible &&
-    !['landing', 'admin', 'doacoes', 'verificar-perfil', 'criadores-parceiros', 'download-logo', 'cineclips'].includes(currentTab) &&
+    !['landing', 'admin', 'doacoes', 'verificar-perfil', 'assinaturas', 'criadores-parceiros', 'download-logo', 'cineclips'].includes(currentTab) &&
     !currentTab.startsWith('cineclips-hashtag-');
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
@@ -1351,6 +1354,11 @@ export default function App() {
                     }
                     setCurrentTab('verificar-perfil');
                   }}
+                  onSubscribe={(creatorEmail) => {
+                    setSubscriptionCreatorEmail(creatorEmail);
+                    setCurrentTab('assinaturas');
+                  }}
+                  viewerEmail={user.email}
                 />
               </motion.div>
             )}
@@ -1407,6 +1415,22 @@ export default function App() {
               </motion.div>
             )}
 
+            {currentTab === 'assinaturas' && (
+              <motion.div
+                key="assinaturas-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <SubscriptionsPage
+                  user={user}
+                  creatorEmail={subscriptionCreatorEmail}
+                  onOpenAuth={() => openAuthModal('login')}
+                />
+              </motion.div>
+            )}
+
             {currentTab === 'criadores-parceiros' && (
               <motion.div
                 key="criadores-parceiros-view"
@@ -1442,6 +1466,10 @@ export default function App() {
                 }}
                 onOpenHashtag={(tag) => setCurrentTab(`cineclips-hashtag-${tag.replace(/^#/, '')}`)}
                 onFollowCreator={handleToggleSeguir}
+                onSubscribe={(creatorEmail) => {
+                  setSubscriptionCreatorEmail(creatorEmail);
+                  setCurrentTab('assinaturas');
+                }}
               />
             )}
 
