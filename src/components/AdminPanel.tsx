@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye, Info } from 'lucide-react';
+import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye, Info, BadgeCheck, Clock, ExternalLink } from 'lucide-react';
 import { Obra, ReactVideo, Comentario, UserState, Notificacao } from '../types.ts';
+import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import { adminFetch } from '../utils/adminApi.ts';
 
@@ -21,6 +22,8 @@ export default function AdminPanel({ user, onSelectObra, forcedTab, embedded = f
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<AdminTab>(forcedTab || 'catalogo');
   const [solicitacoes, setSolicitacoes] = useState<Notificacao[]>([]);
+  const [verificationRequests, setVerificationRequests] = useState<CreatorVerificationRequest[]>([]);
+  const [processingVerification, setProcessingVerification] = useState<string | null>(null);
   const [editingObra, setEditingObra] = useState<Obra | null>(null);
   const [savingObra, setSavingObra] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -259,6 +262,18 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     }
   }, [user.email]);
 
+  const fetchVerificationRequests = useCallback(async () => {
+    try {
+      const res = await adminFetch(user.email, '/api/admin/creator-verification?status=pending');
+      if (res.ok) {
+        const data = await res.json();
+        setVerificationRequests(data.requests || []);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar verificações:', e);
+    }
+  }, [user.email]);
+
   const fetchAdminData = useCallback(async () => {
     try {
       setLoading(true);
@@ -300,8 +315,9 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
       fetchAdminData();
       fetchSupabaseStatus();
       fetchSolicitacoes();
+      fetchVerificationRequests();
     }
-  }, [user.isAdmin, fetchAdminData, fetchSolicitacoes]);
+  }, [user.isAdmin, fetchAdminData, fetchSolicitacoes, fetchVerificationRequests]);
 
   const handleCreateObra = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -680,10 +696,60 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     }
   };
 
+  const handleApproveVerification = async (request: CreatorVerificationRequest) => {
+    if (processingVerification) return;
+    setProcessingVerification(request.id);
+    try {
+      const res = await adminFetch(user.email, `/api/admin/creator-verification/${request.id}/approve`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage({
+          type: 'success',
+          text: `Perfil de ${request.usuarioNome} verificado com sucesso.`,
+        });
+        fetchVerificationRequests();
+      } else {
+        setActionMessage({ type: 'error', text: data.error || 'Erro ao aprovar verificação.' });
+      }
+    } catch (e) {
+      console.error(e);
+      setActionMessage({ type: 'error', text: 'Erro de conexão ao aprovar verificação.' });
+    } finally {
+      setProcessingVerification(null);
+    }
+  };
+
+  const handleRejectVerification = async (request: CreatorVerificationRequest) => {
+    if (processingVerification) return;
+    const note = window.prompt('Motivo da rejeição (opcional):') || undefined;
+    setProcessingVerification(request.id);
+    try {
+      const res = await adminFetch(user.email, `/api/admin/creator-verification/${request.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage({ type: 'success', text: 'Solicitação de verificação rejeitada.' });
+        fetchVerificationRequests();
+      } else {
+        setActionMessage({ type: 'error', text: data.error || 'Erro ao rejeitar verificação.' });
+      }
+    } catch (e) {
+      console.error(e);
+      setActionMessage({ type: 'error', text: 'Erro de conexão ao rejeitar verificação.' });
+    } finally {
+      setProcessingVerification(null);
+    }
+  };
+
   const tabs: { id: AdminTab; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'catalogo', label: 'Catálogo', icon: Link2 },
     { id: 'conteudo', label: 'Conteúdo', icon: LayoutGrid },
-    { id: 'criadores', label: 'Criadores', icon: Inbox, badge: solicitacoes.length },
+    { id: 'criadores', label: 'Criadores', icon: Inbox, badge: solicitacoes.length + verificationRequests.length },
     { id: 'moderacao', label: 'Moderação', icon: MessageSquare },
     { id: 'sistema', label: 'Sistema', icon: Database },
   ];
@@ -716,7 +782,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           <p className="text-xs text-zinc-500 mt-1">Gerencie catálogo, criadores, usuários e integrações</p>
         </div>
         <button
-          onClick={() => { fetchAdminData(); fetchSolicitacoes(); fetchSupabaseStatus(); }}
+          onClick={() => { fetchAdminData(); fetchSolicitacoes(); fetchVerificationRequests(); fetchSupabaseStatus(); }}
           disabled={loading}
           className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white disabled:opacity-50"
         >
@@ -1070,6 +1136,94 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
       {!loading && activeTab === 'criadores' && (
         <div className="space-y-6">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-400/25 space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-200 flex items-center gap-2">
+              <BadgeCheck className="w-4 h-4" />
+              Verificação de perfil ({verificationRequests.length})
+            </h2>
+            <p className="text-xs text-zinc-500">
+              Criadores que pediram o selo verificado. Confira se o código está na descrição do canal no YouTube antes de aprovar.
+            </p>
+            {verificationRequests.length === 0 ? (
+              <p className="text-xs text-zinc-500">Nenhuma solicitação de verificação pendente.</p>
+            ) : (
+              <motion.div className="space-y-3">
+                {verificationRequests.map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white">{req.usuarioNome}</p>
+                        <p className="text-xs text-zinc-500 truncate">{req.usuarioEmail}</p>
+                        {req.channelTitle && (
+                          <p className="text-xs text-zinc-400 mt-1">{req.channelTitle}</p>
+                        )}
+                      </div>
+                      {req.codeFoundInDescription ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold uppercase">
+                          <CheckCircle2 className="w-3 h-3" /> Código OK
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[10px] font-bold uppercase">
+                          <Clock className="w-3 h-3" /> Aguardando
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="rounded-lg border border-amber-400/20 bg-black/30 px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">
+                        Código na descrição
+                      </p>
+                      <p className="font-mono text-sm text-amber-200">{req.verificationCode}</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
+                      <span>Pedido em {new Date(req.requestedAt).toLocaleString('pt-BR')}</span>
+                      <span>·</span>
+                      <span>Expira em {new Date(req.expiresAt).toLocaleString('pt-BR')}</span>
+                      {req.descriptionCheckedAt && (
+                        <>
+                          <span>·</span>
+                          <span>Checado em {new Date(req.descriptionCheckedAt).toLocaleString('pt-BR')}</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={req.youtubeChannelUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-300 text-xs font-bold hover:text-white"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Ver canal
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleApproveVerification(req)}
+                        disabled={processingVerification === req.id}
+                        className="flex-1 min-w-[120px] px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                      >
+                        {processingVerification === req.id ? 'Aprovando...' : 'Aprovar verificação'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRejectVerification(req)}
+                        disabled={processingVerification === req.id}
+                        className="px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
+                      >
+                        Rejeitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
           <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <Inbox className="w-4 h-4" />

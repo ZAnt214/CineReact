@@ -15,6 +15,7 @@ import type {
 import { GamificationProfile } from '../types/gamification.ts';
 import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/admin.ts';
 import type { DonationRequest } from '../types/donations.ts';
+import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
@@ -77,6 +78,7 @@ interface DbSchema {
   cineClipImportJobs: CineClipImportJob[];
   cineClipWatchHistory: CineClipWatchEvent[];
   donationRequests: DonationRequest[];
+  creatorVerificationRequests: CreatorVerificationRequest[];
 }
 
 function initDb(): DbSchema {
@@ -136,6 +138,11 @@ function initDb(): DbSchema {
 
       if (!parsed.donationRequests) {
         parsed.donationRequests = [];
+        saveDb(parsed);
+      }
+
+      if (!parsed.creatorVerificationRequests) {
+        parsed.creatorVerificationRequests = [];
         saveDb(parsed);
       }
 
@@ -204,6 +211,7 @@ function initDb(): DbSchema {
     cineClipImportJobs: [],
     cineClipWatchHistory: [],
     donationRequests: [],
+    creatorVerificationRequests: [],
   };
 
   saveDb(initialDb);
@@ -230,6 +238,7 @@ let dbCache: DbSchema = {
   cineClipImportJobs: [],
   cineClipWatchHistory: [],
   donationRequests: [],
+  creatorVerificationRequests: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1454,6 +1463,91 @@ export const localDb = {
     dbCache.donationRequests[idx] = { ...dbCache.donationRequests[idx], ...updates };
     saveDb(dbCache, true);
     return dbCache.donationRequests[idx];
+  },
+
+  createCreatorVerificationRequest: (
+    data: Omit<
+      CreatorVerificationRequest,
+      'id' | 'requestedAt' | 'status' | 'verificationCode' | 'expiresAt'
+    > & { verificationCode: string; expiresAt: string }
+  ): CreatorVerificationRequest => {
+    if (!dbCache.creatorVerificationRequests) dbCache.creatorVerificationRequests = [];
+    const request: CreatorVerificationRequest = {
+      ...data,
+      id: `cvr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+    };
+    dbCache.creatorVerificationRequests.unshift(request);
+    saveDb(dbCache, true);
+    return request;
+  },
+
+  getCreatorVerificationRequests: (
+    status?: CreatorVerificationRequest['status']
+  ): CreatorVerificationRequest[] => {
+    const list = dbCache.creatorVerificationRequests || [];
+    if (!status) return [...list];
+    return list.filter((r) => r.status === status);
+  },
+
+  getLatestCreatorVerificationRequestForUser: (email: string): CreatorVerificationRequest | null => {
+    const key = email.toLowerCase();
+    const list = dbCache.creatorVerificationRequests || [];
+    return list.find((r) => r.usuarioEmail.toLowerCase() === key) || null;
+  },
+
+  getPendingCreatorVerificationRequestForUser: (email: string): CreatorVerificationRequest | null => {
+    const key = email.toLowerCase();
+    const list = dbCache.creatorVerificationRequests || [];
+    return (
+      list.find(
+        (r) =>
+          r.usuarioEmail.toLowerCase() === key &&
+          r.status === 'pending' &&
+          new Date(r.expiresAt).getTime() > Date.now()
+      ) || null
+    );
+  },
+
+  updateCreatorVerificationRequest: (
+    id: string,
+    updates: Partial<
+      Pick<
+        CreatorVerificationRequest,
+        | 'status'
+        | 'reviewedAt'
+        | 'reviewedBy'
+        | 'adminNote'
+        | 'codeFoundInDescription'
+        | 'descriptionCheckedAt'
+        | 'youtubeChannelId'
+        | 'channelTitle'
+      >
+    >
+  ): CreatorVerificationRequest | null => {
+    if (!dbCache.creatorVerificationRequests) dbCache.creatorVerificationRequests = [];
+    const idx = dbCache.creatorVerificationRequests.findIndex((r) => r.id === id);
+    if (idx < 0) return null;
+    dbCache.creatorVerificationRequests[idx] = {
+      ...dbCache.creatorVerificationRequests[idx],
+      ...updates,
+    };
+    saveDb(dbCache, true);
+    return dbCache.creatorVerificationRequests[idx];
+  },
+
+  expireStaleCreatorVerificationRequests: (): number => {
+    if (!dbCache.creatorVerificationRequests) return 0;
+    const now = Date.now();
+    let count = 0;
+    dbCache.creatorVerificationRequests = dbCache.creatorVerificationRequests.map((r) => {
+      if (r.status !== 'pending' || new Date(r.expiresAt).getTime() > now) return r;
+      count++;
+      return { ...r, status: 'expired' as const };
+    });
+    if (count > 0) saveDb(dbCache, true);
+    return count;
   },
 
   exportDbSnapshot: (): DbSchema => {

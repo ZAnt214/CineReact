@@ -396,25 +396,25 @@ export default function ProfilePanel({
                 <SpotlightCard
                   variant="creator"
                   icon={Youtube}
-                  title={isVerifiedCreator ? 'Criador Verificado' : 'Seja um Criador'}
+                  title={isVerifiedCreator ? 'Criador Verificado' : 'Verificar meu perfil'}
                   subtitle={
                     isVerifiedCreator
                       ? 'Seu perfil oficial está verificado na plataforma. Obrigado por fazer parte!'
-                      : 'Tem canal de reacts? Entre no catálogo oficial e ganhe visibilidade na comunidade.'
+                      : 'Prove que é dono do canal: adicione um código na descrição do YouTube e seja verificado em até 24h.'
                   }
                   perks={
                     isVerifiedCreator
                       ? ['Perfil verificado na plataforma', 'Links sociais no perfil', 'Tag de criador oficial']
-                      : ['Canal no catálogo CineReact', 'Perfil público de criador', 'Mais visibilidade para fãs']
+                      : ['Selo de criador verificado', 'Perfil público premium', 'Links sociais no perfil']
                   }
-                  cta={isVerifiedCreator ? 'Ver meu perfil público' : 'Solicitar meu canal'}
+                  cta={isVerifiedCreator ? 'Ver meu perfil público' : 'Verificar perfil'}
                   completed={isVerifiedCreator}
                   completedLabel="Verificado"
                   onClick={() => {
                     if (isVerifiedCreator) {
                       go('configuracoes');
                     } else {
-                      onRequestCreator();
+                      go('verificar-perfil');
                     }
                   }}
                 />
