@@ -11,7 +11,7 @@ import type { GamificationProfile } from '../types/gamification.ts';
 import type { UserAccount } from '../types.ts';
 
 export { DEMO_CREATOR_EMAIL };
-export const DEMO_CREATOR_ID = 'demo-creator-pedro-no-sofa';
+export const DEMO_CREATOR_ID = 'demo-creator-lucas-marques';
 
 const DEMO_SOCIAL_LINKS = {
   youtube: `https://youtube.com/@${DEMO_CREATOR_HANDLE}`,
@@ -23,11 +23,11 @@ function buildDemoGamificationProfile(): GamificationProfile {
   const now = new Date().toISOString();
   const profile: GamificationProfile = {
     email: DEMO_CREATOR_EMAIL,
-    xp: 2840,
-    spotlight: 127,
-    influenceIndex: 312,
-    currentStreak: 11,
-    longestStreak: 19,
+    xp: 3120,
+    spotlight: 148,
+    influenceIndex: 356,
+    currentStreak: 14,
+    longestStreak: 22,
     lastActiveDate: now.slice(0, 10),
     unlockedAchievements: [],
     unlockedSeals: [],
@@ -38,20 +38,20 @@ function buildDemoGamificationProfile(): GamificationProfile {
         unlockMethod: 'creator_verified',
       },
       {
-        itemId: 'frame-amber',
+        itemId: 'frame-royal',
         unlockedAt: now,
         unlockMethod: 'shop',
       },
       {
-        itemId: 'title-comentarista',
+        itemId: 'title-cinefilo',
         unlockedAt: now,
         unlockMethod: 'achievement',
       },
     ],
     loadout: {
-      theme: 'theme-midnight',
-      frame: 'frame-amber',
-      title: 'title-comentarista',
+      theme: 'theme-icone',
+      frame: 'frame-royal',
+      title: 'title-cinefilo',
       avatar: '',
       badges: [VERIFIED_PROFILE_BADGE_ID],
       tags: [],
@@ -60,16 +60,16 @@ function buildDemoGamificationProfile(): GamificationProfile {
     missionProgress: {},
     completedMissions: {},
     stats: {
-      commentsCount: 47,
-      reactsWatched: 186,
+      commentsCount: 53,
+      reactsWatched: 214,
       creatorsDiscovered: [],
-      listsCreated: 3,
-      sharesCount: 9,
-      totalWatchTimeMinutes: 1240,
+      listsCreated: 4,
+      sharesCount: 11,
+      totalWatchTimeMinutes: 1385,
       creatorWatchCounts: {},
       watchedReacts: {},
-      commentLikesReceived: 18,
-      listEngagement: 4,
+      commentLikesReceived: 24,
+      listEngagement: 6,
     },
     earlyAccess: false,
     featuredInfluencer: false,
@@ -94,7 +94,7 @@ export function ensureDemoCreatorProfile(): void {
     isDonor: false,
     continueWatching: [],
     descricao:
-      'Reagindo a filme, série e gameplay desde 2019. Spoiler: eu pauso pra comentar tudo. Canal verificado na CineReact.',
+      'Reajo a filme e série desde 2019. Pauso pra comentar tudo e esqueço de voltar pro vídeo. Canal verificado na CineReact.',
     socialLinks: { ...DEMO_SOCIAL_LINKS },
   };
 

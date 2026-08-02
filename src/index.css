@@ -3238,13 +3238,26 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 
 .verified-creator-seal {
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.12) inset,
-    0 0 20px rgba(56, 189, 248, 0.14),
-    0 4px 16px rgba(0, 0, 0, 0.35);
+    0 0 0 1px rgba(251, 191, 36, 0.08) inset,
+    0 2px 14px rgba(0, 0, 0, 0.35);
 }
 
 .verified-creator-seal-icon {
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.28);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.15);
+}
+
+.public-creator-profile-shell {
+  contain: layout style;
+}
+
+.public-creator-profile-frame {
+  isolation: isolate;
+}
+
+.public-creator-profile-card {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 48px rgba(0, 0, 0, 0.42);
 }
 
 .creator-tag-visual {

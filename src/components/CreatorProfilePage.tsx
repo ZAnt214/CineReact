@@ -60,19 +60,19 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       </button>
 
       {isDemo && (
-        <div className="max-w-2xl mb-8 rounded-2xl border border-neutral-800/70 bg-neutral-900/30 px-4 py-3.5">
+        <div className="max-w-3xl mb-8 rounded-2xl border border-neutral-800/70 bg-neutral-900/30 px-4 py-3.5">
           <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-semibold mb-1">
             Perfil de referência
           </p>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            Criador fictício para mostrar como fica um canal verificado na CineReact — bio, selo e links sociais.
+            Exemplo de como fica um canal verificado — com tema, moldura, selo e links sociais ativos.
           </p>
         </div>
       )}
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-          <Loader2 className="w-7 h-7 animate-spin mb-3 text-cine-accent-light" />
+          <Loader2 className="w-7 h-7 animate-spin mb-3 text-zinc-400" />
           <p className="text-sm">Carregando perfil...</p>
         </div>
       )}
@@ -84,12 +84,12 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       )}
 
       {!loading && profile && (
-        <div className="max-w-2xl space-y-4">
+        <div className="max-w-3xl space-y-5">
           <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
           {profile.isVerifiedCreator && (
-            <p className="flex items-center gap-2 text-xs text-zinc-500 pt-1">
-              <BadgeCheck className="w-3.5 h-3.5 text-zinc-400" />
-              Criador verificado na CineReact
+            <p className="flex items-center gap-2 text-xs text-zinc-500 pl-1">
+              <BadgeCheck className="w-3.5 h-3.5 text-amber-400/80" />
+              Identidade confirmada pela equipe CineReact
             </p>
           )}
         </div>
