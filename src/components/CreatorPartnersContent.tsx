@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import CineReactLogo from './CineReactLogo.tsx';
+import CreatorSubscriptionExplainer from './creator/CreatorSubscriptionExplainer.tsx';
 
 export const CREATOR_PARTNERS_EMAIL = 'atendimentocinereact@gmail.com';
 
@@ -40,7 +41,7 @@ const upcomingFeatures = [
   {
     icon: Crown,
     title: 'Clube de Assinaturas',
-    text: 'Ofereça planos mensais com benefícios exclusivos para seus fãs.',
+    text: 'Receba repasses via assinatura exclusiva (R$ 8,90/sub) e pelo ranking global mensal.',
   },
   {
     icon: Gift,
@@ -223,6 +224,8 @@ export default function CreatorPartnersContent({ onClose, showCloseActions = tru
             </div>
           </motion.div>
         </div>
+
+        <CreatorSubscriptionExplainer />
 
         <section>
           <motion.div className="flex items-center justify-between flex-wrap gap-2 mb-4">
