@@ -37,6 +37,7 @@ import {
   handlePasswordUpdate,
 } from "./src/security/authHandlers.ts";
 import { createSession } from "./src/security/sessions.ts";
+import { isProductionRuntime } from "./src/utils/runtimeEnv.ts";
 
 dotenv.config();
 
@@ -51,7 +52,7 @@ app.use(express.json({ limit: "2mb" }));
 const cineClipsUploadDir = getClipsStorageDir();
 fs.mkdirSync(cineClipsUploadDir, { recursive: true });
 app.use("/uploads/cineclips", express.static(cineClipsUploadDir, {
-  maxAge: process.env.NODE_ENV === "production" ? "7d" : 0,
+  maxAge: isProductionRuntime() ? "7d" : 0,
   setHeaders(res) {
     res.setHeader("Accept-Ranges", "bytes");
     res.setHeader("Cache-Control", "public, max-age=604800");
@@ -3050,7 +3051,7 @@ async function ensureBootstrapAdmin() {
 }
 
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProductionRuntime()) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -3085,11 +3086,20 @@ async function startServer() {
     });
   }
 
-  ensureDemoCreatorProfile();
+  try {
+    ensureDemoCreatorProfile();
+  } catch (err: any) {
+    console.warn("[Demo] Falha ao garantir perfil demo:", err?.message || err);
+  }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
     console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
+
+  server.on("error", (err) => {
+    console.error("Falha ao abrir porta HTTP:", err);
+    process.exit(1);
   });
 
   ensureBootstrapAdmin().catch((err) => {

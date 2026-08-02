@@ -146,7 +146,7 @@ function recoverDbFromBackups(): DbSchema | null {
     const parsed = loadDbFromPath(candidate);
     if (!parsed) continue;
     console.warn(`[DB] Recuperado a partir de ${candidate}`);
-    saveDb(parsed, true);
+    setImmediate(() => saveDb(parsed, true));
     return parsed;
   }
 
