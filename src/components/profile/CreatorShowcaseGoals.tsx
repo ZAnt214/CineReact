@@ -1,5 +1,4 @@
 import React from 'react';
-import { Target, Users } from 'lucide-react';
 import type { CreatorReactGoal } from '../../constants/demoCreatorShowcase.ts';
 
 export interface CreatorShowcaseGoalsProps {
@@ -10,34 +9,34 @@ function formatVotes(value: number): string {
   return value.toLocaleString('pt-BR');
 }
 
-function GoalCard({ goal }: { goal: CreatorReactGoal }) {
+function GoalRow({ goal }: { goal: CreatorReactGoal }) {
   const progress = Math.min(100, Math.round((goal.currentVotes / goal.targetVotes) * 100));
-  const isUpcoming = goal.status === 'upcoming';
 
   return (
-    <article className={`creator-showcase-goal ${isUpcoming ? 'creator-showcase-goal--upcoming' : ''}`}>
-      <div className="creator-showcase-goal-head">
-        <span className="creator-showcase-goal-icon" aria-hidden>
-          <Target className="w-3.5 h-3.5" strokeWidth={2.25} />
-        </span>
+    <li className="rounded-xl border border-neutral-800/60 bg-neutral-950/35 px-4 py-3.5">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="creator-showcase-goal-title">{goal.title}</h3>
-          <p className="creator-showcase-goal-sub">{goal.subtitle}</p>
+          <p className="text-sm font-semibold text-zinc-100 leading-snug">{goal.title}</p>
+          <p className="text-xs text-zinc-500 mt-0.5">{goal.subtitle}</p>
         </div>
+        <span className="text-xs font-mono font-bold text-cine-accent shrink-0">{progress}%</span>
       </div>
-
-      <div className="creator-showcase-goal-bar" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-        <span className="creator-showcase-goal-bar-fill" style={{ width: `${progress}%` }} />
+      <div
+        className="mt-3 h-1 rounded-full bg-neutral-800 overflow-hidden"
+        role="progressbar"
+        aria-valuenow={progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="h-full rounded-full bg-cine-accent"
+          style={{ width: `${progress}%` }}
+        />
       </div>
-
-      <p className="creator-showcase-goal-meta">
-        <Users className="w-3 h-3 shrink-0" />
-        <span>
-          {formatVotes(goal.currentVotes)} / {formatVotes(goal.targetVotes)} votos da comunidade
-        </span>
-        <span className="creator-showcase-goal-pct">{progress}%</span>
+      <p className="mt-2 text-[11px] text-zinc-500">
+        {formatVotes(goal.currentVotes)} de {formatVotes(goal.targetVotes)} votos
       </p>
-    </article>
+    </li>
   );
 }
 
@@ -45,20 +44,18 @@ export default function CreatorShowcaseGoals({ goals }: CreatorShowcaseGoalsProp
   if (goals.length === 0) return null;
 
   return (
-    <section className="creator-showcase-section" aria-labelledby="creator-showcase-goals-heading">
-      <div className="creator-showcase-section-head">
-        <h2 id="creator-showcase-goals-heading" className="creator-showcase-section-title">
-          Metas para reagir
-        </h2>
-        <p className="creator-showcase-section-sub">
-          A comunidade vota no que o criador reage em seguida
-        </p>
-      </div>
-      <div className="creator-showcase-goals">
+    <section className="pt-8 border-t border-neutral-800/60" aria-labelledby="creator-goals-title">
+      <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">Comunidade</p>
+      <h2 id="creator-goals-title" className="font-display text-lg sm:text-xl font-bold text-white mt-1">
+        Próximos reacts
+      </h2>
+      <p className="text-sm text-zinc-500 mt-1 mb-4">Votação aberta na plataforma</p>
+
+      <ul className="space-y-2.5">
         {goals.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} />
+          <GoalRow key={goal.id} goal={goal} />
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

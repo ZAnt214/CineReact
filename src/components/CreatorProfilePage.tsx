@@ -50,32 +50,39 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
   const isDemo = creatorEmail.toLowerCase() === DEMO_CREATOR_EMAIL.toLowerCase();
 
   return (
-    <div className="cine-container pt-24 pb-16 min-h-screen">
+    <div className="cine-container pt-24 pb-20 min-h-screen w-full">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors mb-8 cursor-pointer"
+        className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/80 hover:bg-cine-accent/20 text-zinc-300 hover:text-cine-accent-light border border-neutral-800 hover:border-cine-accent/40 text-xs font-black uppercase tracking-wider transition-colors mb-8 cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 text-cine-accent-light group-hover:-translate-x-0.5 transition-transform" />
         Voltar
       </button>
 
-      {isDemo && (
-        <header className="creator-showcase-intro max-w-2xl mb-6">
-          <p className="creator-showcase-intro-label">Perfil de referência</p>
-          <h2 className="creator-showcase-intro-title">
-            É assim que um criador verificado aparece na CineReact
-          </h2>
-          <p className="creator-showcase-intro-copy">
-            Selo ao lado da foto, redes oficiais, destaques em skeleton, metas da comunidade e botão de apoio.
+      <header className="relative pb-2 md:pb-4 mb-6">
+        <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
+          {isDemo ? 'Criadores' : 'Perfil'}
+        </p>
+        <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
+          {loading ? 'Carregando…' : profile?.nome ?? 'Criador'}
+        </h1>
+        {isDemo && (
+          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
+            Canal verificado na{' '}
+            <span className="text-cine-accent-light">CineReact</span>
           </p>
-        </header>
-      )}
+        )}
+        <div
+          className="mt-4 h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent"
+          aria-hidden
+        />
+      </header>
 
       {loading && (
-        <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-          <Loader2 className="w-7 h-7 animate-spin mb-3 text-cine-accent/70" />
-          <p className="text-sm">Carregando perfil...</p>
+        <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
+          <Loader2 className="w-6 h-6 animate-spin mb-3 text-cine-accent/70" />
+          <p className="text-sm">Carregando perfil…</p>
         </div>
       )}
 
@@ -86,7 +93,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       )}
 
       {!loading && profile && (
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
           {isDemo ? (
             <CreatorProfileShowcase profile={profile} />
           ) : (
