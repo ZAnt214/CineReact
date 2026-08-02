@@ -16,6 +16,9 @@ export const DEMO_CREATOR_ID = 'demo-creator-lucas-marques';
 const DEMO_SOCIAL_LINKS = {
   youtube: `https://youtube.com/@${DEMO_CREATOR_HANDLE}`,
   instagram: `https://instagram.com/${DEMO_CREATOR_HANDLE}`,
+  x: `https://x.com/${DEMO_CREATOR_HANDLE}`,
+  tiktok: `https://tiktok.com/@${DEMO_CREATOR_HANDLE}`,
+  discord: `https://discord.gg/${DEMO_CREATOR_HANDLE}`,
   twitch: `https://twitch.tv/${DEMO_CREATOR_HANDLE}`,
 };
 

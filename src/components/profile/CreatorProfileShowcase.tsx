@@ -1,13 +1,21 @@
-import React, { useMemo } from 'react';
-import { BadgeCheck, Frame, Palette } from 'lucide-react';
-import type { PublicUserProfile } from '../../types.ts';
+import React, { useMemo, useState } from 'react';
+import { BadgeCheck, Frame, Heart, Palette } from 'lucide-react';
+import type { PublicUserProfile, ReactVideo } from '../../types.ts';
 import { getRewardById } from '../../data/rewardsCatalog.ts';
+import {
+  DEMO_CREATOR_REACT_GOALS,
+  pickDemoFeaturedReacts,
+} from '../../constants/demoCreatorShowcase.ts';
 import ProfileVerifiedSeal from './ProfileVerifiedSeal.tsx';
 import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
+import CreatorShowcaseFeatured from './CreatorShowcaseFeatured.tsx';
+import CreatorShowcaseGoals from './CreatorShowcaseGoals.tsx';
 
 export interface CreatorProfileShowcaseProps {
   profile: PublicUserProfile;
+  reacts?: ReactVideo[];
+  onPlayVideo?: (reactId: string, obraId: string) => void;
 }
 
 function ShowcasePerk({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
@@ -19,9 +27,14 @@ function ShowcasePerk({ icon: Icon, label }: { icon: React.ElementType; label: s
   );
 }
 
-export default function CreatorProfileShowcase({ profile }: CreatorProfileShowcaseProps) {
+export default function CreatorProfileShowcase({
+  profile,
+  reacts = [],
+  onPlayVideo,
+}: CreatorProfileShowcaseProps) {
   const display = profile.profileDisplay;
   const loadout = display.loadout;
+  const [supportAck, setSupportAck] = useState(false);
 
   const frameName = useMemo(() => {
     if (!loadout.frame) return null;
@@ -33,36 +46,62 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
     return getRewardById(loadout.theme)?.name ?? null;
   }, [loadout.theme]);
 
+  const featuredVideos = useMemo(() => pickDemoFeaturedReacts(reacts, 3), [reacts]);
+
   return (
     <article className="creator-showcase">
       <div className="creator-showcase-bg" aria-hidden />
 
       <div className="creator-showcase-frame">
         <div className="creator-showcase-card">
-          {display.verifiedBadge && (
-            <ProfileVerifiedSeal
-              name={display.verifiedBadge.name}
-              description={display.verifiedBadge.description}
-              size="md"
-              align="start"
-            />
-          )}
+          <div className="creator-showcase-hero">
+            <div className="creator-showcase-identity">
+              <div className="creator-showcase-avatar-wrap">
+                <img
+                  src={profile.avatar}
+                  alt={profile.nome}
+                  width={88}
+                  height={88}
+                  loading="lazy"
+                  decoding="async"
+                  className="creator-showcase-avatar"
+                />
+                <BadgeCheck
+                  className="creator-showcase-avatar-badge"
+                  strokeWidth={2.5}
+                  aria-hidden
+                />
+              </div>
 
-          <div className="creator-showcase-main">
-            <div className="creator-showcase-avatar-wrap">
-              <img
-                src={profile.avatar}
-                alt={profile.nome}
-                width={88}
-                height={88}
-                loading="lazy"
-                decoding="async"
-                className="creator-showcase-avatar"
-              />
+              {display.verifiedBadge && (
+                <ProfileVerifiedSeal
+                  name={display.verifiedBadge.name}
+                  description={display.verifiedBadge.description}
+                  size="md"
+                  align="start"
+                  layout="beside"
+                />
+              )}
             </div>
 
             <div className="creator-showcase-copy">
-              <h1 className="creator-showcase-name">{profile.nome}</h1>
+              <div className="creator-showcase-name-row">
+                <h1 className="creator-showcase-name">{profile.nome}</h1>
+                <button
+                  type="button"
+                  onClick={() => setSupportAck(true)}
+                  className="creator-showcase-support-btn"
+                >
+                  <Heart className="w-4 h-4" strokeWidth={2.25} />
+                  Apoiar criador
+                </button>
+              </div>
+
+              {supportAck && (
+                <p className="creator-showcase-support-note" role="status">
+                  Obrigado pelo apoio! Em breve criadores receberão contribuições diretas na plataforma.
+                </p>
+              )}
 
               {display.title && (
                 <TitleRewardVisual
@@ -73,9 +112,7 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
                 />
               )}
 
-              {profile.descricao && (
-                <p className="creator-showcase-bio">{profile.descricao}</p>
-              )}
+              {profile.descricao && <p className="creator-showcase-bio">{profile.descricao}</p>}
             </div>
           </div>
 
@@ -97,13 +134,16 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
         </div>
       </div>
 
+      <CreatorShowcaseFeatured videos={featuredVideos} onPlay={onPlayVideo} />
+      <CreatorShowcaseGoals goals={DEMO_CREATOR_REACT_GOALS} />
+
       <footer className="creator-showcase-foot">
         <p className="creator-showcase-foot-note">
           <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light shrink-0" strokeWidth={2.5} />
           Identidade confirmada pela equipe CineReact
         </p>
         <p className="creator-showcase-foot-cta">
-          Seu canal pode ter selo, moldura, tema e links oficiais — assim.
+          Selo, moldura, destaques, metas e apoio — tudo que um canal verificado pode ter.
         </p>
       </footer>
     </article>

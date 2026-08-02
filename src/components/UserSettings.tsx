@@ -103,6 +103,8 @@ function UserSettings({
     instagram: user.socialLinks?.instagram || '',
     youtube: user.socialLinks?.youtube || '',
     x: user.socialLinks?.x || '',
+    tiktok: user.socialLinks?.tiktok || '',
+    discord: user.socialLinks?.discord || '',
     twitch: user.socialLinks?.twitch || '',
   });
   const [newPassword, setNewPassword] = useState('');
@@ -122,6 +124,8 @@ function UserSettings({
       instagram: user.socialLinks?.instagram || '',
       youtube: user.socialLinks?.youtube || '',
       x: user.socialLinks?.x || '',
+      tiktok: user.socialLinks?.tiktok || '',
+      discord: user.socialLinks?.discord || '',
       twitch: user.socialLinks?.twitch || '',
     });
   }, [user.avatar, user.socialLinks]);

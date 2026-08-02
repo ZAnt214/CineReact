@@ -2,6 +2,8 @@ export interface CreatorSocialLinks {
   instagram?: string;
   youtube?: string;
   x?: string;
+  tiktok?: string;
+  discord?: string;
   twitch?: string;
 }
 
@@ -13,9 +15,11 @@ export const SOCIAL_PLATFORMS: {
   placeholder: string;
   baseUrl: string;
 }[] = [
-  { key: 'instagram', label: 'Instagram', placeholder: 'usuario ou URL completa', baseUrl: 'https://instagram.com/' },
   { key: 'youtube', label: 'YouTube', placeholder: '@canal ou URL completa', baseUrl: 'https://youtube.com/' },
-  { key: 'x', label: 'X (Twitter)', placeholder: 'usuario ou URL completa', baseUrl: 'https://x.com/' },
+  { key: 'instagram', label: 'Instagram', placeholder: 'usuario ou URL completa', baseUrl: 'https://instagram.com/' },
+  { key: 'x', label: 'X', placeholder: 'usuario ou URL completa', baseUrl: 'https://x.com/' },
+  { key: 'tiktok', label: 'TikTok', placeholder: '@usuario ou URL completa', baseUrl: 'https://tiktok.com/@' },
+  { key: 'discord', label: 'Discord', placeholder: 'convite ou URL completa', baseUrl: 'https://discord.gg/' },
   { key: 'twitch', label: 'Twitch', placeholder: 'usuario ou URL completa', baseUrl: 'https://twitch.tv/' },
 ];
 
