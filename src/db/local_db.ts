@@ -37,7 +37,7 @@ import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
-import { getDataDir, migrateLegacyFile } from './dataPaths.ts';
+import { getDataDir, isValidJsonFile, migrateLegacyFile } from './dataPaths.ts';
 import {
   persistCineClipsToSupabase,
   restoreCineClipsOnStartup,
@@ -70,8 +70,11 @@ const DB_PATH = path.join(getDataDir(), 'db_cine_react.json');
 
 migrateLegacyFile(DB_PATH, [
   path.join('/tmp', 'db_cine_react.json'),
+  path.join(process.cwd(), 'db_cine_react.json.bak'),
   path.join(process.cwd(), 'db_cine_react.json'),
   path.join(process.cwd(), 'data', 'db_cine_react.json'),
+  '/app/db_cine_react.json.bak',
+  '/app/db_cine_react.json',
   '/app/data/db_cine_react.json',
 ]);
 
@@ -109,11 +112,54 @@ interface DbSchema {
   financialAuditLog: FinancialAuditEntry[];
 }
 
+function loadDbFromPath(filePath: string): DbSchema | null {
+  try {
+    if (!isValidJsonFile(filePath)) return null;
+    const data = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(data) as DbSchema;
+  } catch {
+    return null;
+  }
+}
+
+function quarantineCorruptDb(filePath: string): void {
+  if (!fs.existsSync(filePath)) return;
+  const quarantinePath = `${filePath}.corrupt.${Date.now()}`;
+  try {
+    fs.renameSync(filePath, quarantinePath);
+    console.warn(`[DB] Arquivo corrompido movido para ${quarantinePath}`);
+  } catch (err) {
+    console.warn('[DB] Não foi possível isolar arquivo corrompido:', err);
+  }
+}
+
+function recoverDbFromBackups(): DbSchema | null {
+  const candidates = [
+    `${DB_PATH}.bak`,
+    path.join(process.cwd(), 'db_cine_react.json.bak'),
+    '/app/db_cine_react.json.bak',
+    path.join(process.cwd(), 'db_cine_react.json'),
+    '/app/db_cine_react.json',
+  ];
+
+  for (const candidate of candidates) {
+    const parsed = loadDbFromPath(candidate);
+    if (!parsed) continue;
+    console.warn(`[DB] Recuperado a partir de ${candidate}`);
+    saveDb(parsed, true);
+    return parsed;
+  }
+
+  return null;
+}
+
 function initDb(): DbSchema {
   try {
     if (fs.existsSync(DB_PATH)) {
-      const data = fs.readFileSync(DB_PATH, 'utf-8');
-      const parsed = JSON.parse(data);
+      const parsed = loadDbFromPath(DB_PATH);
+      if (!parsed) {
+        throw new SyntaxError(`JSON inválido em ${DB_PATH}`);
+      }
       
       // Auto-migrate to include usuarios if not exists
       if (!parsed.usuarios) {
@@ -181,17 +227,9 @@ function initDb(): DbSchema {
     }
   } catch (error) {
     console.error('Erro ao ler banco de dados local:', error);
-    const backupPath = `${DB_PATH}.bak`;
-    if (fs.existsSync(backupPath)) {
-      try {
-        const backupData = fs.readFileSync(backupPath, 'utf-8');
-        const parsed = JSON.parse(backupData);
-        console.warn('[DB] Recuperado a partir de backup .bak');
-        return parsed;
-      } catch (backupError) {
-        console.error('[DB] Backup também inválido:', backupError);
-      }
-    }
+    quarantineCorruptDb(DB_PATH);
+    const recovered = recoverDbFromBackups();
+    if (recovered) return recovered;
   }
 
   const initialDb: DbSchema = {
