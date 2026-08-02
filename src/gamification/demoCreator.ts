@@ -38,7 +38,7 @@ function buildDemoGamificationProfile(): GamificationProfile {
         unlockMethod: 'creator_verified',
       },
       {
-        itemId: 'frame-royal',
+        itemId: 'frame-neon',
         unlockedAt: now,
         unlockMethod: 'shop',
       },
@@ -49,8 +49,8 @@ function buildDemoGamificationProfile(): GamificationProfile {
       },
     ],
     loadout: {
-      theme: 'theme-icone',
-      frame: 'frame-royal',
+      theme: 'theme-midnight',
+      frame: 'frame-neon',
       title: 'title-cinefilo',
       avatar: '',
       badges: [VERIFIED_PROFILE_BADGE_ID],
