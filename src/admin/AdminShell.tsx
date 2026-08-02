@@ -15,6 +15,7 @@ import {
   SecurityAdminPage,
 } from './pages/AdminPages.tsx';
 import CineClipsAdminPage from './pages/CineClipsAdminPage.tsx';
+import FinanceAdminPage from './pages/FinanceAdminPage.tsx';
 
 interface AdminShellProps {
   user: UserState;
@@ -50,6 +51,8 @@ export function AdminShell({ user, onClose, onSelectObra }: AdminShellProps) {
         return <AnalyticsAdminPage email={email} />;
       case 'monetizacao':
         return <MonetizationAdminPage email={email} />;
+      case 'financeiro':
+        return <FinanceAdminPage email={email} />;
       case 'configuracoes':
         return <SettingsAdminPage email={email} />;
       case 'sistema':

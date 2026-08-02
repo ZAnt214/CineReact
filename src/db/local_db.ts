@@ -16,6 +16,12 @@ import { GamificationProfile } from '../types/gamification.ts';
 import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/admin.ts';
 import type { DonationRequest } from '../types/donations.ts';
 import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
+import type {
+  CreatorPayout,
+  FinanceTransaction,
+  MonthlyCloseRecord,
+  PlatformSubscription,
+} from '../types/finance.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
@@ -79,6 +85,10 @@ interface DbSchema {
   cineClipWatchHistory: CineClipWatchEvent[];
   donationRequests: DonationRequest[];
   creatorVerificationRequests: CreatorVerificationRequest[];
+  financeTransactions: FinanceTransaction[];
+  platformSubscriptions: PlatformSubscription[];
+  creatorPayouts: CreatorPayout[];
+  monthlyCloses: MonthlyCloseRecord[];
 }
 
 function initDb(): DbSchema {
@@ -146,6 +156,11 @@ function initDb(): DbSchema {
         saveDb(parsed);
       }
 
+      if (!parsed.financeTransactions) parsed.financeTransactions = [];
+      if (!parsed.platformSubscriptions) parsed.platformSubscriptions = [];
+      if (!parsed.creatorPayouts) parsed.creatorPayouts = [];
+      if (!parsed.monthlyCloses) parsed.monthlyCloses = [];
+
       return parsed;
     }
   } catch (error) {
@@ -212,6 +227,10 @@ function initDb(): DbSchema {
     cineClipWatchHistory: [],
     donationRequests: [],
     creatorVerificationRequests: [],
+    financeTransactions: [],
+    platformSubscriptions: [],
+    creatorPayouts: [],
+    monthlyCloses: [],
   };
 
   saveDb(initialDb);
@@ -239,6 +258,10 @@ let dbCache: DbSchema = {
   cineClipWatchHistory: [],
   donationRequests: [],
   creatorVerificationRequests: [],
+  financeTransactions: [],
+  platformSubscriptions: [],
+  creatorPayouts: [],
+  monthlyCloses: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1349,6 +1372,10 @@ export const localDb = {
       .filter((c) => c.clipId === clipId && c.moderationStatus !== 'hidden' && c.moderationStatus !== 'rejected')
       .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()),
 
+  getAllCineClipComments: (): CineClipComment[] => dbCache.cineClipComments || [],
+
+  getAllCineClipLikes: (): CineClipLike[] => dbCache.cineClipLikes || [],
+
   addCineClipComment: (comment: CineClipComment): CineClipComment => {
     if (!dbCache.cineClipComments) dbCache.cineClipComments = [];
     dbCache.cineClipComments.push(comment);
@@ -1548,6 +1575,46 @@ export const localDb = {
     });
     if (count > 0) saveDb(dbCache, true);
     return count;
+  },
+
+  getFinanceTransactions: (): FinanceTransaction[] => dbCache.financeTransactions || [],
+
+  saveFinanceTransaction: (tx: FinanceTransaction): FinanceTransaction => {
+    if (!dbCache.financeTransactions) dbCache.financeTransactions = [];
+    dbCache.financeTransactions.unshift(tx);
+    saveDb(dbCache, true);
+    return tx;
+  },
+
+  getPlatformSubscriptions: (): PlatformSubscription[] => dbCache.platformSubscriptions || [],
+
+  savePlatformSubscription: (sub: PlatformSubscription): PlatformSubscription => {
+    if (!dbCache.platformSubscriptions) dbCache.platformSubscriptions = [];
+    const idx = dbCache.platformSubscriptions.findIndex((s) => s.id === sub.id);
+    if (idx >= 0) dbCache.platformSubscriptions[idx] = sub;
+    else dbCache.platformSubscriptions.push(sub);
+    saveDb(dbCache, true);
+    return sub;
+  },
+
+  getCreatorPayouts: (): CreatorPayout[] => dbCache.creatorPayouts || [],
+
+  saveCreatorPayout: (payout: CreatorPayout): CreatorPayout => {
+    if (!dbCache.creatorPayouts) dbCache.creatorPayouts = [];
+    const idx = dbCache.creatorPayouts.findIndex((p) => p.id === payout.id);
+    if (idx >= 0) dbCache.creatorPayouts[idx] = payout;
+    else dbCache.creatorPayouts.push(payout);
+    saveDb(dbCache, true);
+    return payout;
+  },
+
+  getMonthlyCloses: (): MonthlyCloseRecord[] => dbCache.monthlyCloses || [],
+
+  saveMonthlyClose: (record: MonthlyCloseRecord): MonthlyCloseRecord => {
+    if (!dbCache.monthlyCloses) dbCache.monthlyCloses = [];
+    dbCache.monthlyCloses.unshift(record);
+    saveDb(dbCache, true);
+    return record;
   },
 
   exportDbSnapshot: (): DbSchema => {

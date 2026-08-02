@@ -32,6 +32,12 @@ export interface CineClip {
   trendingScore: number;
   isTrending: boolean;
   status: CineClipStatus;
+  /** public | exclusive | timed_exclusive */
+  accessLevel?: 'public' | 'exclusive' | 'timed_exclusive';
+  /** Quando accessLevel = timed_exclusive, data em que vira público */
+  exclusiveUntil?: string;
+  /** Participa da assinatura global */
+  participatesInGlobal?: boolean;
   publicadoEm: string;
   criadoEm: string;
   atualizadoEm: string;
