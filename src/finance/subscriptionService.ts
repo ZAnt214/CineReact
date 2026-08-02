@@ -151,10 +151,30 @@ export function createSubscriptionCheckout(
 
 export function activateSubscriptionFromCheckout(
   checkoutId: string,
-  providerPaymentId?: string
+  providerPaymentId?: string,
+  actorEmail?: string
 ): PlatformSubscription {
   const checkout = localDb.getSubscriptionCheckouts().find((c) => c.id === checkoutId);
   if (!checkout) throw new Error('Checkout não encontrado.');
+
+  if (providerPaymentId) {
+    const idemKey = `mp-payment:${providerPaymentId}`;
+    if (localDb.hasIdempotencyKey('subscription', idemKey)) {
+      const existing = localDb
+        .getPlatformSubscriptions()
+        .find((s) => s.providerPaymentId === providerPaymentId || s.checkoutId === checkoutId);
+      if (existing) return existing;
+      throw new Error('Pagamento já processado.');
+    }
+    if (!localDb.claimIdempotencyKey('subscription', idemKey, checkoutId)) {
+      const existing = localDb
+        .getPlatformSubscriptions()
+        .find((s) => s.providerPaymentId === providerPaymentId || s.checkoutId === checkoutId);
+      if (existing) return existing;
+      throw new Error('Pagamento já processado.');
+    }
+  }
+
   if (checkout.status === 'completed') {
     const existing = localDb
       .getPlatformSubscriptions()
@@ -198,6 +218,21 @@ export function activateSubscriptionFromCheckout(
     periodEnd: expiresAt,
   };
   localDb.saveFinanceTransaction(tx);
+
+  localDb.appendFinancialAuditLog({
+    action: 'subscription_activated',
+    actorEmail,
+    targetType: 'subscription',
+    targetId: subscription.id,
+    amount: checkout.amount,
+    currency: checkout.currency,
+    metadata: JSON.stringify({
+      checkoutId: checkout.id,
+      plan: checkout.plan,
+      providerPaymentId,
+      subscriberEmail: checkout.subscriberEmail,
+    }),
+  });
 
   localDb.saveSubscriptionCheckout({
     ...checkout,

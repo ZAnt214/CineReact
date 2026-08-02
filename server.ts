@@ -1,6 +1,5 @@
 import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
-import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
@@ -31,14 +30,24 @@ import {
   findBlockedWord,
 } from "./src/utils/platformEnforcement.ts";
 import { autoLiftExpiredSuspensions, processScheduledPublications } from "./src/utils/adminJobs.ts";
+import { installSecurity, setSessionCookie } from "./src/security/installSecurity.ts";
+import {
+  registerSecurityRoutes,
+  handleRegister,
+  handleLogin,
+  handlePasswordUpdate,
+} from "./src/security/authHandlers.ts";
+import { createSession } from "./src/security/sessions.ts";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+const security = installSecurity(app);
+const requireAdmin = security.requireAdmin;
+
+app.use(express.json({ limit: "2mb" }));
 
 const cineClipsUploadDir = getClipsStorageDir();
 fs.mkdirSync(cineClipsUploadDir, { recursive: true });
@@ -626,40 +635,8 @@ async function prefillDefaultReacts() {
 }
 
 // ==========================================
-// ADMIN AUTH HELPERS
+// SECURITY — sessões, RBAC e auditoria via installSecurity()
 // ==========================================
-
-function getAdminEmailFromRequest(req: ExpressRequest): string | undefined {
-  const header = req.headers["x-admin-email"];
-  if (typeof header === "string" && header.trim()) return header.trim();
-  const query = req.query.adminEmail;
-  if (typeof query === "string" && query.trim()) return query.trim();
-  const body = req.body?.adminEmail;
-  if (typeof body === "string" && body.trim()) return body.trim();
-  return undefined;
-}
-
-function verifyAdminEmailSync(email: string | undefined): boolean {
-  if (!email) return false;
-  const clean = email.toLowerCase().trim();
-  if (clean === "mateusvini.t10@gmail.com") return true;
-  const user = localDb.findUsuarioByEmailSync(clean);
-  return !!user?.isAdmin;
-}
-
-function sanitizeUsuario(u: UserAccount) {
-  const { password, ...rest } = u;
-  return rest;
-}
-
-async function requireAdmin(req: ExpressRequest, res: ExpressResponse): Promise<string | null> {
-  const email = getAdminEmailFromRequest(req);
-  if (!verifyAdminEmailSync(email)) {
-    res.status(403).json({ error: "Acesso negado. Privilégios de administrador necessários." });
-    return null;
-  }
-  return email!;
-}
 
 async function discoverReactsFromYouTube(query: string, obraId: string, limit = 8): Promise<number> {
   const apiKey = process.env.YOUTUBE_API_KEY;
@@ -2437,6 +2414,10 @@ app.post("/api/solicitacoes-canal", (req, res) => {
 
 // Cadastro de novos usuários
 app.post("/api/cadastro", async (req, res) => {
+  if (!localDb.isSupabaseActive()) {
+    return handleRegister(req, res);
+  }
+
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -2448,64 +2429,46 @@ app.post("/api/cadastro", async (req, res) => {
       return res.status(400).json({ error: "Este e-mail já está cadastrado." });
     }
 
-    const isSupabase = localDb.isSupabaseActive();
-    let novoUsuario;
-    let requiresVerification = false;
+    const supabase = localDb.getSupabaseClient();
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
+    });
 
-    if (isSupabase) {
-      const supabase = localDb.getSupabaseClient();
-      // SignUp using Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username
-          }
-        }
-      });
-
-      if (authError) {
-        console.error("Erro ao registrar no Supabase Auth:", authError);
-        let errorMsg = `Erro no Supabase Auth: ${authError.message}`;
-        if (authError.message.toLowerCase().includes("rate limit") || authError.message.toLowerCase().includes("limiar")) {
-          errorMsg = "Limite de envio de e-mails excedido no Supabase (limite padrão de 3 e-mails por hora). Para facilitar os testes e liberar acesso instantâneo sem precisar confirmar e-mail, acesse o painel do Supabase -> Authentication -> Providers -> Email e DESATIVE a opção 'Confirm email'.";
-        }
-        return res.status(400).json({ error: errorMsg });
+    if (authError) {
+      console.error("Erro ao registrar no Supabase Auth:", authError);
+      let errorMsg = `Erro no Supabase Auth: ${authError.message}`;
+      if (authError.message.toLowerCase().includes("rate limit") || authError.message.toLowerCase().includes("limiar")) {
+        errorMsg = "Limite de envio de e-mails excedido no Supabase. Tente novamente mais tarde.";
       }
+      return res.status(400).json({ error: errorMsg });
+    }
 
-      const userId = authData.user?.id || Math.random().toString(36).substring(2);
+    const userId = authData.user?.id || Math.random().toString(36).substring(2);
+    const requiresVerification = !authData.session && authData.user && !authData.user.confirmed_at;
+    const bootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase() === email.toLowerCase();
 
-      // Check if registration requires email verification
-      if (!authData.session && authData.user && !authData.user.confirmed_at) {
-        requiresVerification = true;
-      }
+    const novoUsuario = await localDb.addUsuario({
+      username,
+      email,
+      password: '',
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+      isAdmin: bootstrapAdmin,
+      role: bootstrapAdmin ? 'admin' : 'user',
+      isDonor: false,
+    }, userId);
 
-      // Now create profile in public table
-      novoUsuario = await localDb.addUsuario({
-        username,
-        email,
-        password,
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
-        isDonor: false
-      }, userId);
-    } else {
-      novoUsuario = await localDb.addUsuario({
-        username,
-        email,
-        password,
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
-        isDonor: false
-      });
+    if (!requiresVerification) {
+      const { token } = createSession(novoUsuario.id, novoUsuario.email, req);
+      setSessionCookie(res, token);
     }
 
     res.status(201).json({
       success: true,
       requiresVerification,
       email: novoUsuario.email,
-      user: requiresVerification ? null : serializeUserState(novoUsuario)
+      user: requiresVerification ? null : serializeUserState(novoUsuario),
     });
   } catch (error: any) {
     console.error("Erro no cadastro de usuário:", error);
@@ -2515,6 +2478,10 @@ app.post("/api/cadastro", async (req, res) => {
 
 // Login de usuários
 app.post("/api/login", async (req, res) => {
+  if (!localDb.isSupabaseActive()) {
+    return handleLogin(req, res, security);
+  }
+
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -2522,112 +2489,57 @@ app.post("/api/login", async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const supabase = localDb.getSupabaseClient();
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password,
+    });
 
-    // Master admin credentials check for mateusvini.t10@gmail.com
-    if (cleanEmail === "mateusvini.t10@gmail.com" && (password === "admin" || password === "Zantnoar12")) {
-      let dbAdmin = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!dbAdmin) {
-        dbAdmin = await localDb.addUsuario({
-          username: "Mateus Vinícius",
-          email: "mateusvini.t10@gmail.com",
-          password: password,
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: true,
-          isDonor: false
-        });
-      } else {
-        if (!dbAdmin.isAdmin || dbAdmin.password !== password) {
-          await localDb.updateUsuario(cleanEmail, { isAdmin: true, password });
-        }
-      }
-      return res.json({
-        success: true,
-        user: serializeUserState(dbAdmin, { isAdmin: true }),
-      });
-    }
-
-    const isSupabase = localDb.isSupabaseActive();
-
-    if (isSupabase) {
-      const supabase = localDb.getSupabaseClient();
-      // Login using Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password
-      });
-
-      if (authError) {
-        console.error("Erro ao autenticar no Supabase Auth:", authError);
-        let errorMsg = 'E-mail ou senha incorretos. Verifique e tente novamente.';
-        if (authError.message.toLowerCase().includes("confirm")) {
-          return res.status(401).json({
-            error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
-            requiresVerification: true,
-            email: cleanEmail
-          });
-        }
-        return res.status(401).json({ error: errorMsg });
-      }
-
-      // Fetch user profile from public table
-      let user = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!user) {
-        // Fallback user profile creation if they exist in auth but not public table
-        user = await localDb.addUsuario({
-          username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
+    if (authError) {
+      if (authError.message.toLowerCase().includes("confirm")) {
+        return res.status(401).json({
+          error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
+          requiresVerification: true,
           email: cleanEmail,
-          password: password,
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: cleanEmail === "mateusvini.t10@gmail.com",
-          isDonor: false
-        }, authData.user?.id);
-      }
-
-      const restriction = getAccountRestriction(user);
-      if (restriction.blocked) {
-        return res.status(403).json({
-          error: restriction.message,
-          accountBlocked: true,
-          code: restriction.code,
         });
       }
+      return res.status(401).json({ error: "E-mail ou senha incorretos. Verifique e tente novamente." });
+    }
 
-      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
+    let user = await localDb.findUsuarioByEmail(cleanEmail);
+    if (!user) {
+      user = await localDb.addUsuario({
+        username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
+        email: cleanEmail,
+        password: '',
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+        isDonor: false,
+      }, authData.user?.id);
+    }
 
-      return res.json({
-        success: true,
-        user: serializeUserState(user, {
-          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-        }),
-      });
-    } else {
-      const user = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!user) {
-        return res.status(401).json({ error: "E-mail não cadastrado." });
-      }
-
-      if (user.password !== password) {
-        return res.status(401).json({ error: "Senha incorreta." });
-      }
-
-      const restriction = getAccountRestriction(user);
-      if (restriction.blocked) {
-        return res.status(403).json({
-          error: restriction.message,
-          accountBlocked: true,
-          code: restriction.code,
-        });
-      }
-
-      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
-
-      res.json({
-        success: true,
-        user: serializeUserState(user, {
-          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-        }),
+    const restriction = getAccountRestriction(user);
+    if (restriction.blocked) {
+      return res.status(403).json({
+        error: restriction.message,
+        accountBlocked: true,
+        code: restriction.code,
       });
     }
+
+    await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
+    const { token } = createSession(user.id, user.email, req);
+    setSessionCookie(res, token);
+    security.audit(req, {
+      actorEmail: user.email,
+      action: 'login',
+      targetType: 'user',
+      targetId: user.email,
+    });
+
+    return res.json({
+      success: true,
+      user: serializeUserState(user, { isAdmin: !!user.isAdmin }),
+    });
   } catch (error) {
     console.error("Erro no login de usuário:", error);
     res.status(500).json({ error: "Erro interno no servidor ao realizar login." });
@@ -2672,6 +2584,9 @@ app.post("/api/verificar-codigo", async (req, res) => {
         isDonor: false
       }, authData.user?.id);
     }
+
+    const { sessionToken } = createSession(user!.id, user!.email, req);
+    setSessionCookie(res, sessionToken);
 
     res.json({
       success: true,
@@ -2861,44 +2776,32 @@ app.get("/api/canais/:canalId/perfil-oficial", (req, res) => {
 // Atualizar perfil do usuário (Avatar, Descricao & Senha)
 app.post("/api/usuario/update", async (req, res) => {
   try {
-    const { email, avatar, descricao, password, socialLinks } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório para identificação." });
+    const authEmail = security.getAuthEmail(req);
+    if (!authEmail) {
+      return res.status(401).json({ error: "Autenticação necessária." });
     }
 
-    const existingUser = await localDb.findUsuarioByEmail(email);
-    if (!existingUser) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    const updates: Partial<UserAccount> = {};
-    if (avatar !== undefined) updates.avatar = avatar;
-    if (descricao !== undefined) updates.descricao = descricao;
-    if (password) updates.password = password;
-
+    const { socialLinks } = req.body || {};
     if (socialLinks !== undefined) {
-      const gamification = localDb.getGamificationProfile(email);
+      const gamification = localDb.getGamificationProfile(authEmail);
       migrateProfile(gamification);
       const canEditSocialLinks =
         isVerifiedCreatorLoadout(gamification.loadout) ||
         hasReward(gamification, VERIFIED_PROFILE_BADGE_ID);
-      if (canEditSocialLinks) {
-        updates.socialLinks = {
+      if (!canEditSocialLinks) {
+        return res.status(403).json({ error: "Links sociais disponíveis apenas para criadores verificados." });
+      }
+      const existingUser = await localDb.findUsuarioByEmail(authEmail);
+      if (!existingUser) return res.status(404).json({ error: "Usuário não encontrado." });
+      await localDb.updateUsuario(authEmail, {
+        socialLinks: {
           ...sanitizeSocialLinks(existingUser.socialLinks),
           ...sanitizeSocialLinks(socialLinks),
-        };
-      }
+        },
+      });
     }
 
-    const user = await localDb.updateUsuario(email, updates);
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    res.json({
-      success: true,
-      user: serializeUserState(user),
-    });
+    await handlePasswordUpdate(req, res, security);
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
     res.status(500).json({ error: "Erro interno ao atualizar perfil." });
@@ -3098,10 +3001,11 @@ app.get("/api/search", (req, res) => {
 // GAMIFICATION
 // ==========================================
 registerGamificationRoutes(app);
+registerSecurityRoutes(app, security);
 registerDonationRoutes(app, requireAdmin);
 registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel);
 registerFinanceRoutes(app, requireAdmin);
-registerSubscriptionRoutes(app, requireAdmin);
+registerSubscriptionRoutes(app, requireAdmin, security);
 registerCreatorClipRoutes(app);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin);

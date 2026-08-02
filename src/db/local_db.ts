@@ -23,6 +23,16 @@ import type {
   PlatformSubscription,
   SubscriptionCheckout,
 } from '../types/finance.ts';
+import type {
+  AuthSession,
+  CaptchaChallenge,
+  FinancialAuditEntry,
+  IdempotencyRecord,
+  LoginAttempt,
+  SecurityAlert,
+} from '../security/types.ts';
+import { hashPasswordIfNeeded } from '../security/password.ts';
+import { hashToken } from '../security/crypto.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
@@ -91,6 +101,12 @@ interface DbSchema {
   creatorPayouts: CreatorPayout[];
   monthlyCloses: MonthlyCloseRecord[];
   subscriptionCheckouts: SubscriptionCheckout[];
+  authSessions: AuthSession[];
+  loginAttempts: LoginAttempt[];
+  captchaChallenges: CaptchaChallenge[];
+  securityAlerts: SecurityAlert[];
+  idempotencyKeys: IdempotencyRecord[];
+  financialAuditLog: FinancialAuditEntry[];
 }
 
 function initDb(): DbSchema {
@@ -101,16 +117,7 @@ function initDb(): DbSchema {
       
       // Auto-migrate to include usuarios if not exists
       if (!parsed.usuarios) {
-        parsed.usuarios = [
-          {
-            id: 'admin',
-            username: 'Mateus Vinícius',
-            email: 'mateusvini.t10@gmail.com',
-            password: 'Zantnoar12',
-            createdAt: new Date().toISOString(),
-            isAdmin: true
-          }
-        ];
+        parsed.usuarios = [];
         saveDb(parsed);
       }
 
@@ -163,6 +170,12 @@ function initDb(): DbSchema {
       if (!parsed.creatorPayouts) parsed.creatorPayouts = [];
       if (!parsed.monthlyCloses) parsed.monthlyCloses = [];
       if (!parsed.subscriptionCheckouts) parsed.subscriptionCheckouts = [];
+      if (!parsed.authSessions) parsed.authSessions = [];
+      if (!parsed.loginAttempts) parsed.loginAttempts = [];
+      if (!parsed.captchaChallenges) parsed.captchaChallenges = [];
+      if (!parsed.securityAlerts) parsed.securityAlerts = [];
+      if (!parsed.idempotencyKeys) parsed.idempotencyKeys = [];
+      if (!parsed.financialAuditLog) parsed.financialAuditLog = [];
 
       return parsed;
     }
@@ -210,16 +223,7 @@ function initDb(): DbSchema {
     notificacoes: [],
     gamificationProfiles: {},
     adminConfig: createDefaultAdminConfig(),
-    usuarios: [
-      {
-        id: 'admin',
-        username: 'Mateus Vinícius',
-        email: 'mateusvini.t10@gmail.com',
-        password: 'Zantnoar12',
-        createdAt: new Date().toISOString(),
-        isAdmin: true
-      }
-    ],
+    usuarios: [],
     cineClips: [],
     cineClipComments: [],
     cineClipLikes: [],
@@ -235,6 +239,12 @@ function initDb(): DbSchema {
     creatorPayouts: [],
     monthlyCloses: [],
     subscriptionCheckouts: [],
+    authSessions: [],
+    loginAttempts: [],
+    captchaChallenges: [],
+    securityAlerts: [],
+    idempotencyKeys: [],
+    financialAuditLog: [],
   };
 
   saveDb(initialDb);
@@ -267,6 +277,12 @@ let dbCache: DbSchema = {
   creatorPayouts: [],
   monthlyCloses: [],
   subscriptionCheckouts: [],
+  authSessions: [],
+  loginAttempts: [],
+  captchaChallenges: [],
+  securityAlerts: [],
+  idempotencyKeys: [],
+  financialAuditLog: [],
 };
 
 let saveDbTimer: NodeJS.Timeout | null = null;
@@ -1091,8 +1107,12 @@ export const localDb = {
 
   addUsuario: async (usuario: Omit<UserAccount, 'id' | 'createdAt'>, forcedId?: string) => {
     if (!dbCache.usuarios) dbCache.usuarios = [];
+    const hashedPassword = usuario.password
+      ? await hashPasswordIfNeeded(usuario.password)
+      : usuario.password;
     const novo: UserAccount = {
       ...usuario,
+      password: hashedPassword,
       id: forcedId || Math.random().toString(36).substring(2),
       createdAt: new Date().toISOString()
     };
@@ -1174,6 +1194,10 @@ export const localDb = {
   },
 
   updateUsuario: async (email: string, updates: Partial<UserAccount>) => {
+    const nextUpdates = { ...updates };
+    if (nextUpdates.password) {
+      nextUpdates.password = await hashPasswordIfNeeded(nextUpdates.password);
+    }
     if (!dbCache.usuarios) dbCache.usuarios = [];
     const idx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
     let current: UserAccount | null = null;
@@ -1181,7 +1205,7 @@ export const localDb = {
     if (idx >= 0) {
       dbCache.usuarios[idx] = {
         ...dbCache.usuarios[idx],
-        ...updates
+        ...nextUpdates
       };
       current = dbCache.usuarios[idx];
       saveDb(dbCache);
@@ -1190,10 +1214,10 @@ export const localDb = {
       if (dbUser) {
         const cacheIdx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
         if (cacheIdx >= 0) {
-          dbCache.usuarios[cacheIdx] = { ...dbCache.usuarios[cacheIdx], ...updates };
+          dbCache.usuarios[cacheIdx] = { ...dbCache.usuarios[cacheIdx], ...nextUpdates };
           current = dbCache.usuarios[cacheIdx];
         } else {
-          current = { ...dbUser, ...updates };
+          current = { ...dbUser, ...nextUpdates };
           dbCache.usuarios.push(current);
         }
         saveDb(dbCache);
@@ -1274,7 +1298,7 @@ export const localDb = {
       id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       createdAt: new Date().toISOString(),
     };
-    dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 500);
+    dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 5000);
     saveDb(dbCache);
     return entry;
   },
@@ -1680,7 +1704,159 @@ export const localDb = {
     return changed;
   },
 
+  saveAuthSession: (session: AuthSession): AuthSession => {
+    if (!dbCache.authSessions) dbCache.authSessions = [];
+    dbCache.authSessions = dbCache.authSessions.filter((s) => s.id !== session.id);
+    dbCache.authSessions.unshift(session);
+    saveDb(dbCache, true);
+    return session;
+  },
+
+  getAuthSessionByTokenHash: (tokenHash: string): AuthSession | null =>
+    (dbCache.authSessions || []).find((s) => s.tokenHash === tokenHash && !s.revokedAt) || null,
+
+  getAuthSessionById: (id: string): AuthSession | null =>
+    (dbCache.authSessions || []).find((s) => s.id === id) || null,
+
+  getAuthSessionsForUser: (email: string): AuthSession[] =>
+    (dbCache.authSessions || []).filter(
+      (s) => s.userEmail === email.toLowerCase() && !s.revokedAt
+    ),
+
+  touchAuthSession: (id: string): void => {
+    const session = (dbCache.authSessions || []).find((s) => s.id === id);
+    if (!session) return;
+    session.lastActivityAt = new Date().toISOString();
+    saveDb(dbCache);
+  },
+
+  revokeAuthSession: (id: string): void => {
+    const session = (dbCache.authSessions || []).find((s) => s.id === id);
+    if (!session) return;
+    session.revokedAt = new Date().toISOString();
+    saveDb(dbCache, true);
+  },
+
+  revokeAuthSessionsForUser: (email: string, exceptSessionId?: string): number => {
+    let count = 0;
+    for (const session of dbCache.authSessions || []) {
+      if (session.userEmail !== email.toLowerCase() || session.revokedAt) continue;
+      if (exceptSessionId && session.id === exceptSessionId) continue;
+      session.revokedAt = new Date().toISOString();
+      count++;
+    }
+    if (count > 0) saveDb(dbCache, true);
+    return count;
+  },
+
+  cleanupAuthSessions: (): number => {
+    const now = Date.now();
+    let count = 0;
+    dbCache.authSessions = (dbCache.authSessions || []).filter((s) => {
+      const expired = new Date(s.expiresAt).getTime() <= now || !!s.revokedAt;
+      if (expired) count++;
+      return !expired;
+    });
+    if (count > 0) saveDb(dbCache);
+    return count;
+  },
+
+  appendLoginAttempt: (attempt: LoginAttempt): void => {
+    if (!dbCache.loginAttempts) dbCache.loginAttempts = [];
+    dbCache.loginAttempts.unshift(attempt);
+    dbCache.loginAttempts = dbCache.loginAttempts.slice(0, 5000);
+    saveDb(dbCache);
+  },
+
+  countRecentLoginFailures: (ip: string, windowMs: number): number => {
+    const since = Date.now() - windowMs;
+    return (dbCache.loginAttempts || []).filter(
+      (a) => a.ip === ip && !a.success && new Date(a.createdAt).getTime() >= since
+    ).length;
+  },
+
+  saveCaptchaChallenge: (challenge: CaptchaChallenge): void => {
+    if (!dbCache.captchaChallenges) dbCache.captchaChallenges = [];
+    dbCache.captchaChallenges.unshift(challenge);
+    dbCache.captchaChallenges = dbCache.captchaChallenges.slice(0, 200);
+    saveDb(dbCache);
+  },
+
+  consumeCaptchaChallenge: (id: string, answer: string): boolean => {
+    const challenge = (dbCache.captchaChallenges || []).find((c) => c.id === id && !c.used);
+    if (!challenge) return false;
+    if (new Date(challenge.expiresAt).getTime() < Date.now()) return false;
+    const answerHash = hashToken(`${id}:${String(answer).trim()}`);
+    if (answerHash !== challenge.answerHash) return false;
+    challenge.used = true;
+    saveDb(dbCache);
+    return true;
+  },
+
+  appendSecurityAlert: (alert: SecurityAlert): void => {
+    if (!dbCache.securityAlerts) dbCache.securityAlerts = [];
+    dbCache.securityAlerts.unshift(alert);
+    dbCache.securityAlerts = dbCache.securityAlerts.slice(0, 1000);
+    saveDb(dbCache, true);
+  },
+
+  getSecurityAlerts: (): SecurityAlert[] => dbCache.securityAlerts || [],
+
+  claimIdempotencyKey: (scope: string, key: string, resultRef?: string): boolean => {
+    if (!dbCache.idempotencyKeys) dbCache.idempotencyKeys = [];
+    const composite = `${scope}:${key}`;
+    if (dbCache.idempotencyKeys.some((r) => r.key === composite)) return false;
+    dbCache.idempotencyKeys.unshift({
+      key: composite,
+      scope,
+      resultRef,
+      createdAt: new Date().toISOString(),
+    });
+    dbCache.idempotencyKeys = dbCache.idempotencyKeys.slice(0, 10000);
+    saveDb(dbCache, true);
+    return true;
+  },
+
+  hasIdempotencyKey: (scope: string, key: string): boolean =>
+    (dbCache.idempotencyKeys || []).some((r) => r.key === `${scope}:${key}`),
+
+  appendFinancialAuditLog: (entry: Omit<FinancialAuditEntry, 'id' | 'createdAt'>): FinancialAuditEntry => {
+    if (!dbCache.financialAuditLog) dbCache.financialAuditLog = [];
+    const row: FinancialAuditEntry = {
+      ...entry,
+      id: `fin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    };
+    dbCache.financialAuditLog.unshift(row);
+    saveDb(dbCache, true);
+    return row;
+  },
+
+  getFinancialAuditLog: (): FinancialAuditEntry[] => dbCache.financialAuditLog || [],
+
+  saveBackupRecord: (record: import('../types/admin.ts').BackupRecord & { fileName?: string }): void => {
+    if (!dbCache.adminConfig) dbCache.adminConfig = createDefaultAdminConfig();
+    dbCache.adminConfig.backups = [record, ...(dbCache.adminConfig.backups || [])].slice(0, 50);
+    saveDb(dbCache, true);
+  },
+
+  getBackupRecords: () => dbCache.adminConfig?.backups || [],
+
   exportDbSnapshot: (): DbSchema => {
     return JSON.parse(JSON.stringify(dbCache));
+  },
+
+  exportDbSnapshotRedacted: (): DbSchema => {
+    const snapshot = JSON.parse(JSON.stringify(dbCache)) as DbSchema;
+    snapshot.usuarios = (snapshot.usuarios || []).map((u) => ({
+      ...u,
+      password: u.password ? '[REDACTED]' : u.password,
+      twoFactorSecretEnc: u.twoFactorSecretEnc ? '[REDACTED]' : undefined,
+    }));
+    snapshot.authSessions = (snapshot.authSessions || []).map((s) => ({
+      ...s,
+      tokenHash: '[REDACTED]',
+    }));
+    return snapshot;
   },
 };
