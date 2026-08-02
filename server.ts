@@ -8,6 +8,7 @@ import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
 import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
 import { registerCreatorVerificationRoutes } from "./src/creatorVerification/registerCreatorVerificationRoutes.ts";
+import { registerFinanceRoutes } from "./src/finance/registerFinanceRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
 import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
@@ -3097,6 +3098,7 @@ app.get("/api/search", (req, res) => {
 registerGamificationRoutes(app);
 registerDonationRoutes(app, requireAdmin);
 registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel);
+registerFinanceRoutes(app, requireAdmin);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin);
 

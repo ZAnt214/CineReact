@@ -17,6 +17,7 @@ import {
   LogOut,
   Pin,
   Zap,
+  Wallet,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { UserState } from '../types.ts';
@@ -32,6 +33,7 @@ export type AdminSection =
   | 'gamificacao'
   | 'analytics'
   | 'monetizacao'
+  | 'financeiro'
   | 'configuracoes'
   | 'sistema'
   | 'cineclips';
@@ -48,6 +50,7 @@ const NAV: { id: AdminSection; label: string; icon: React.ElementType; group: st
   { id: 'gamificacao', label: 'Gamificação', icon: Trophy, group: 'Engajamento' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, group: 'Engajamento' },
   { id: 'monetizacao', label: 'Monetização', icon: CreditCard, group: 'Negócio' },
+  { id: 'financeiro', label: 'Financeiro', icon: Wallet, group: 'Negócio' },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, group: 'Sistema' },
   { id: 'sistema', label: 'Sistema & Backup', icon: Database, group: 'Sistema' },
 ];
