@@ -3,14 +3,21 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import PublicCreatorProfile from './profile/PublicCreatorProfile.tsx';
 import CreatorProfileShowcase from './profile/CreatorProfileShowcase.tsx';
 import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
-import type { PublicUserProfile } from '../types.ts';
+import type { PublicUserProfile, ReactVideo } from '../types.ts';
 
 interface CreatorProfilePageProps {
   creatorEmail: string;
   onBack: () => void;
+  reacts?: ReactVideo[];
+  onPlayVideo?: (reactId: string, obraId: string) => void;
 }
 
-export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProfilePageProps) {
+export default function CreatorProfilePage({
+  creatorEmail,
+  onBack,
+  reacts = [],
+  onPlayVideo,
+}: CreatorProfilePageProps) {
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,7 +74,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
             É assim que um criador verificado aparece na CineReact
           </h2>
           <p className="creator-showcase-intro-copy">
-            Selo, moldura, tema e links oficiais — tudo na paleta do site, leve e pronto para inspirar.
+            Selo ao lado da foto, redes oficiais, destaques, metas da comunidade e botão de apoio.
           </p>
         </header>
       )}
@@ -88,7 +95,11 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       {!loading && profile && (
         <div className="max-w-2xl">
           {isDemo ? (
-            <CreatorProfileShowcase profile={profile} />
+            <CreatorProfileShowcase
+              profile={profile}
+              reacts={reacts}
+              onPlayVideo={onPlayVideo}
+            />
           ) : (
             <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
           )}

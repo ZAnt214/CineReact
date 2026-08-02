@@ -1342,6 +1342,8 @@ export default function App() {
                 <CreatorProfilePage
                   creatorEmail={parseCreatorProfileTab(currentTab)!}
                   onBack={() => setCurrentTab('inicio')}
+                  reacts={reacts}
+                  onPlayVideo={handlePlayVideo}
                 />
               </motion.div>
             )}
