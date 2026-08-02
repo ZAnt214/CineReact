@@ -36,6 +36,7 @@ interface CineClipsPageProps {
   onBack: () => void;
   onOpenHashtag?: (tag: string) => void;
   onFollowCreator?: (creatorName: string) => void;
+  onSubscribe?: (creatorEmail?: string) => void;
   initialClipId?: string;
 }
 
@@ -160,12 +161,14 @@ const ClipPlayer = memo(function ClipPlayer({
   shouldLoad,
   muted,
   onDoubleTapHeart,
+  onSubscribe,
 }: {
   clip: CineClip;
   isActive: boolean;
   shouldLoad: boolean;
   muted: boolean;
   onDoubleTapHeart: (x: number, y: number) => void;
+  onSubscribe?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
@@ -231,7 +234,43 @@ const ClipPlayer = memo(function ClipPlayer({
     }
   };
 
-  const showHostedVideo = isHosted && !videoFailed;
+  const showHostedVideo = isHosted && !videoFailed && !clip.isLocked;
+
+  if (clip.isLocked && shouldLoad) {
+    return (
+      <div className="relative w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden p-6 text-center">
+        {clip.thumbnailUrl && (
+          <img
+            src={clip.thumbnailUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm"
+          />
+        )}
+        <div className="relative z-10 space-y-4 max-w-xs">
+          <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center">
+            <BadgeCheck className="w-7 h-7 text-amber-300" />
+          </div>
+          <p className="text-lg font-black text-white">Conteúdo exclusivo</p>
+          <p className="text-sm text-zinc-400">
+            Assine para desbloquear este vídeo
+            {clip.requiresSubscription === 'global' ? ' (assinatura global)' : ''}.
+          </p>
+          {onSubscribe && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSubscribe();
+              }}
+              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-cyan-400 text-black text-sm font-extrabold"
+            >
+              Ver planos
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (!shouldLoad) {
     return (
@@ -517,6 +556,7 @@ export default function CineClipsPage({
   user,
   onBack,
   onFollowCreator,
+  onSubscribe,
   initialClipId,
 }: CineClipsPageProps) {
   const { clips, loading, error, loadMore, nextCursor } = useCineClipsFeed(user.email);
@@ -786,6 +826,7 @@ export default function CineClipsPage({
                     shouldLoad={shouldLoad}
                     muted={muted}
                     onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
+                    onSubscribe={() => onSubscribe?.(clip.criadorEmail)}
                   />
                 </div>
 

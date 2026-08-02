@@ -9,6 +9,8 @@ import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.t
 import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
 import { registerCreatorVerificationRoutes } from "./src/creatorVerification/registerCreatorVerificationRoutes.ts";
 import { registerFinanceRoutes } from "./src/finance/registerFinanceRoutes.ts";
+import { registerSubscriptionRoutes } from "./src/finance/registerSubscriptionRoutes.ts";
+import { registerCreatorClipRoutes } from "./src/finance/registerCreatorClipRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
 import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
@@ -3099,6 +3101,8 @@ registerGamificationRoutes(app);
 registerDonationRoutes(app, requireAdmin);
 registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel);
 registerFinanceRoutes(app, requireAdmin);
+registerSubscriptionRoutes(app, requireAdmin);
+registerCreatorClipRoutes(app);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin);
 

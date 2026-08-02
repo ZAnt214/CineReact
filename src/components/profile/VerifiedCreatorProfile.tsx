@@ -15,6 +15,8 @@ export interface VerifiedCreatorProfileProps {
   /** Exibe CTA para o visitante iniciar verificação do próprio perfil (perfil demo). */
   showVerifyCta?: boolean;
   onVerifyProfile?: () => void;
+  /** CTA para assinar este criador (visitantes). */
+  onSubscribe?: () => void;
 }
 
 export default function VerifiedCreatorProfile({
@@ -22,6 +24,7 @@ export default function VerifiedCreatorProfile({
   showDemoExtras = false,
   showVerifyCta = false,
   onVerifyProfile,
+  onSubscribe,
 }: VerifiedCreatorProfileProps) {
   const display = profile.profileDisplay;
   const [supportSent, setSupportSent] = useState(false);
@@ -79,6 +82,16 @@ export default function VerifiedCreatorProfile({
                 <Heart className="w-4 h-4" strokeWidth={2.25} />
                 Apoiar criador
               </button>
+              {onSubscribe && (
+                <button
+                  type="button"
+                  onClick={onSubscribe}
+                  className="creator-premium-btn-secondary"
+                >
+                  <BadgeCheck className="w-4 h-4" strokeWidth={2.25} />
+                  Assinar exclusiva
+                </button>
+              )}
               {showDemoExtras && showVerifyCta && onVerifyProfile && (
                 <button
                   type="button"

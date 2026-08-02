@@ -28,6 +28,8 @@ export interface PlatformSubscription {
   cancelledAt?: string;
   expiresAt?: string;
   lastPaymentAt: string;
+  checkoutId?: string;
+  providerPaymentId?: string;
 }
 
 export interface CreatorPayout {
@@ -146,4 +148,29 @@ export interface MonthCloseSimulation {
     rankingPoints: number;
     rankingSharePercent: number;
   }[];
+}
+
+export type SubscriptionCheckoutStatus = 'pending' | 'completed' | 'cancelled' | 'expired';
+
+export interface SubscriptionCheckout {
+  id: string;
+  plan: SubscriptionPlan;
+  subscriberEmail: string;
+  creatorEmail?: string;
+  amount: number;
+  currency: 'BRL';
+  status: SubscriptionCheckoutStatus;
+  paymentProvider: 'mercado_pago';
+  externalReference: string;
+  paymentLink: string;
+  providerPaymentId?: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface SubscriberEntitlements {
+  global: boolean;
+  exclusiveCreators: string[];
+  checkouts: SubscriptionCheckout[];
+  subscriptions: PlatformSubscription[];
 }

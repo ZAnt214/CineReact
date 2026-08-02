@@ -38,6 +38,10 @@ export interface CineClip {
   exclusiveUntil?: string;
   /** Participa da assinatura global */
   participatesInGlobal?: boolean;
+  /** Preenchido pelo servidor para viewers sem acesso */
+  isLocked?: boolean;
+  requiresSubscription?: 'exclusive' | 'global';
+  effectiveAccessLevel?: 'public' | 'exclusive' | 'timed_exclusive';
   publicadoEm: string;
   criadoEm: string;
   atualizadoEm: string;
