@@ -23,7 +23,6 @@ import {
 } from './rateLimit.ts';
 import { startAutoBackupScheduler } from './backup.ts';
 import type { StaffRole } from '../types/admin.ts';
-import { isProductionRuntime } from '../utils/runtimeEnv.ts';
 
 function readSessionToken(req: Request): string | null {
   const cookieToken = req.cookies?.[SESSION_COOKIE];
@@ -37,30 +36,12 @@ function readSessionToken(req: Request): string | null {
 
 export function installSecurity(app: Express): SecurityContext {
   app.set('trust proxy', 1);
-  const isProduction = isProductionRuntime();
-
   app.use(
     helmet({
-      contentSecurityPolicy: isProduction ? {
-        directives: {
-          defaultSrc: ["'self'"],
-          baseUri: ["'self'"],
-          fontSrc: ["'self'", 'https:', 'data:'],
-          formAction: ["'self'"],
-          frameAncestors: ["'self'"],
-          frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
-          imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
-          objectSrc: ["'none'"],
-          scriptSrc: ["'self'"],
-          scriptSrcAttr: ["'none'"],
-          styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
-          connectSrc: ["'self'", 'https:'],
-          upgradeInsecureRequests: [],
-        },
-      } : false,
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
       crossOriginEmbedderPolicy: false,
       frameguard: { action: 'deny' },
-      hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true } : false,
+      hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     })
   );
@@ -173,7 +154,7 @@ export function installSecurity(app: Express): SecurityContext {
 export function setSessionCookie(res: Response, token: string): void {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: isProductionRuntime(),
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
