@@ -48,7 +48,7 @@ function GoalRow({
 
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-[var(--premium-muted)]">
-          <span className="text-[var(--premium-gold-light)] font-semibold">
+          <span className="creator-premium-amount-current font-semibold">
             {formatReais(goal.currentReais)}
           </span>
           {' '}de {formatReais(goal.targetReais)}

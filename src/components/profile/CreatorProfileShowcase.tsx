@@ -16,7 +16,7 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
   const [supportSent, setSupportSent] = useState(false);
 
   return (
-    <div className="creator-profile-premium space-y-0">
+    <div className="space-y-0">
       <section className="creator-premium-card p-5 sm:p-6 md:p-7">
         <div className="flex flex-col sm:flex-row gap-5 sm:gap-6">
           <ProfileAvatar
@@ -82,7 +82,7 @@ export default function CreatorProfileShowcase({ profile }: CreatorProfileShowca
         </div>
 
         {profile.isVerifiedCreator && profile.socialLinks && (
-          <div className="creator-premium-divider mt-6 pt-6">
+          <div className="creator-premium-divider creator-premium-social mt-6 pt-6">
             <ProfileSocialLinks links={profile.socialLinks} size="md" align="start" className="max-w-none" />
           </div>
         )}
