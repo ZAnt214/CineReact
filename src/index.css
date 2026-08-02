@@ -3238,12 +3238,12 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 
 .verified-creator-seal {
   box-shadow:
-    0 0 0 1px rgba(251, 191, 36, 0.08) inset,
-    0 2px 14px rgba(0, 0, 0, 0.35);
+    0 0 0 1px rgba(0, 212, 255, 0.08) inset,
+    0 2px 12px rgba(0, 0, 0, 0.32);
 }
 
 .verified-creator-seal-icon {
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.18);
 }
 
 .public-creator-profile-shell {
@@ -3258,6 +3258,194 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
     0 24px 48px rgba(0, 0, 0, 0.42);
+}
+
+/* Perfil demo — showcase leve na paleta CineReact */
+.creator-showcase {
+  position: relative;
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
+.creator-showcase-bg {
+  position: absolute;
+  inset: -0.5rem -0.25rem auto;
+  height: 12rem;
+  background: radial-gradient(
+    ellipse 85% 100% at 50% 0%,
+    rgba(0, 212, 255, 0.11) 0%,
+    rgba(0, 153, 255, 0.04) 42%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+.creator-showcase-intro-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-cine-accent);
+}
+
+.creator-showcase-intro-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--color-cine-cream);
+}
+
+.creator-showcase-intro-copy {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-cine-muted);
+}
+
+.creator-showcase-frame {
+  position: relative;
+  padding: 2px;
+  border-radius: 1.3rem;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.45) 0%,
+    rgba(0, 153, 255, 0.22) 48%,
+    rgba(102, 255, 255, 0.35) 100%
+  );
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+}
+
+.creator-showcase-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.35rem 1.35rem 1.5rem;
+  border-radius: 1.22rem;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-cine-surface) 96%, transparent) 0%,
+    color-mix(in srgb, var(--color-cine-bg) 98%, transparent) 100%
+  );
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.creator-showcase-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+
+.creator-showcase-avatar-wrap {
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #00d4ff, #0099ff, #66ffff);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.creator-showcase-avatar {
+  display: block;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: var(--color-cine-surface);
+}
+
+.creator-showcase-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.15rem;
+}
+
+.creator-showcase-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-cine-cream);
+}
+
+.creator-showcase-bio {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-cine-muted);
+}
+
+.creator-showcase-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.creator-showcase-perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 212, 255, 0.14);
+  background: rgba(0, 212, 255, 0.04);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-cine-accent-light);
+}
+
+.creator-showcase-social {
+  max-width: none;
+  padding-top: 0.15rem;
+  border-top: 1px solid rgba(63, 63, 70, 0.55);
+}
+
+.creator-showcase-foot {
+  margin-top: 1rem;
+  padding: 0 0.15rem;
+}
+
+.creator-showcase-foot-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #71717a;
+}
+
+.creator-showcase-foot-cta {
+  margin: 0.45rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-cine-accent);
+}
+
+@media (max-width: 480px) {
+  .creator-showcase-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .creator-showcase-copy {
+    align-items: center;
+  }
+
+  .creator-showcase-bio {
+    max-width: 20rem;
+  }
 }
 
 .creator-tag-visual {

@@ -25,13 +25,13 @@ export default function ProfileVerifiedSeal({
       title={description}
     >
       <span
-        className={`verified-creator-seal inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-gradient-to-r from-neutral-900/95 via-neutral-950/98 to-neutral-900/95 text-amber-100/90 ${
+        className={`verified-creator-seal inline-flex items-center gap-1.5 rounded-full border border-cine-accent/25 bg-cine-surface/90 text-cine-accent-light ${
           isMd ? 'px-3 py-1' : 'px-2.5 py-0.5'
         }`}
       >
-        <span className="verified-creator-seal-icon inline-flex items-center justify-center rounded-full bg-amber-500/10 border border-amber-400/25 p-0.5">
+        <span className="verified-creator-seal-icon inline-flex items-center justify-center rounded-full bg-cine-accent/10 border border-cine-accent/30 p-0.5">
           <BadgeCheck
-            className={isMd ? 'w-3.5 h-3.5 text-amber-300 shrink-0' : 'w-3 h-3 text-amber-300 shrink-0'}
+            className={isMd ? 'w-3.5 h-3.5 text-cine-accent-light shrink-0' : 'w-3 h-3 text-cine-accent-light shrink-0'}
             strokeWidth={2.5}
           />
         </span>
@@ -40,7 +40,7 @@ export default function ProfileVerifiedSeal({
         </span>
       </span>
       {description && isMd && (
-        <p className={`profile-text-muted leading-snug max-w-[300px] text-[10px] ${isCenter ? '' : ''}`}>
+        <p className="text-[10px] text-zinc-500 leading-snug max-w-[300px]">
           {description}
         </p>
       )}

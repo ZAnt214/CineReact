@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, BadgeCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import PublicCreatorProfile from './profile/PublicCreatorProfile.tsx';
+import CreatorProfileShowcase from './profile/CreatorProfileShowcase.tsx';
 import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
 import type { PublicUserProfile } from '../types.ts';
 
@@ -60,19 +61,20 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       </button>
 
       {isDemo && (
-        <div className="max-w-3xl mb-8 rounded-2xl border border-neutral-800/70 bg-neutral-900/30 px-4 py-3.5">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-semibold mb-1">
-            Perfil de referência
+        <header className="creator-showcase-intro max-w-2xl mb-6">
+          <p className="creator-showcase-intro-label">Perfil de referência</p>
+          <h2 className="creator-showcase-intro-title">
+            É assim que um criador verificado aparece na CineReact
+          </h2>
+          <p className="creator-showcase-intro-copy">
+            Selo, moldura, tema e links oficiais — tudo na paleta do site, leve e pronto para inspirar.
           </p>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            Exemplo de como fica um canal verificado — com tema, moldura, selo e links sociais ativos.
-          </p>
-        </div>
+        </header>
       )}
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-          <Loader2 className="w-7 h-7 animate-spin mb-3 text-zinc-400" />
+          <Loader2 className="w-7 h-7 animate-spin mb-3 text-cine-accent/70" />
           <p className="text-sm">Carregando perfil...</p>
         </div>
       )}
@@ -84,13 +86,11 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       )}
 
       {!loading && profile && (
-        <div className="max-w-3xl space-y-5">
-          <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
-          {profile.isVerifiedCreator && (
-            <p className="flex items-center gap-2 text-xs text-zinc-500 pl-1">
-              <BadgeCheck className="w-3.5 h-3.5 text-amber-400/80" />
-              Identidade confirmada pela equipe CineReact
-            </p>
+        <div className="max-w-2xl">
+          {isDemo ? (
+            <CreatorProfileShowcase profile={profile} />
+          ) : (
+            <PublicCreatorProfile profile={profile} size="md" align="start" showBio lite={false} />
           )}
         </div>
       )}

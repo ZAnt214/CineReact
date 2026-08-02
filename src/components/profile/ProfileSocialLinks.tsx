@@ -130,10 +130,10 @@ export default function ProfileSocialLinks({
               target="_blank"
               rel="noopener noreferrer"
               title={`${style.label}: ${handle}`}
-              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border backdrop-blur-sm transition-all ${cfg.strip} ${
+              className={`group relative flex w-full min-w-0 items-center overflow-hidden rounded-lg border transition-colors ${cfg.strip} ${
                 isNeutral
-                  ? 'border-neutral-800/80 bg-neutral-950/60 hover:border-neutral-700 hover:bg-neutral-900/70'
-                  : 'border-cine-accent/10 bg-neutral-950/75 hover:border-cine-accent/30 hover:bg-neutral-900/80 hover:shadow-[0_0_18px_rgba(56,189,248,0.1)]'
+                  ? 'border-neutral-800/80 bg-neutral-950 hover:border-neutral-700 hover:bg-neutral-900/80'
+                  : 'border-cine-accent/12 bg-cine-card-deep hover:border-cine-accent/28 hover:bg-cine-surface'
               }`}
             >
               <span

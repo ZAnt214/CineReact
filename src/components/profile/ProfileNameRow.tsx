@@ -82,7 +82,7 @@ export default function ProfileNameRow({
         <span className={nameClass}>{name}</span>
         {display.verifiedBadge && verifiedDisplay === 'icon' && (
           <span title="Criador verificado" className="inline-flex shrink-0">
-            <BadgeCheck className="w-3.5 h-3.5 text-amber-300/90" strokeWidth={2.5} />
+            <BadgeCheck className="w-3.5 h-3.5 text-cine-accent-light" strokeWidth={2.5} />
           </span>
         )}
         {donorTagEquipped && <DonorBadge size={donorBadgeVariant} />}
