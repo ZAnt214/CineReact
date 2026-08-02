@@ -7,6 +7,7 @@ import ProfileSocialLinks from './ProfileSocialLinks.tsx';
 import TitleRewardVisual from '../rewards/TitleRewardVisual.tsx';
 import CreatorShowcaseFeatured from './CreatorShowcaseFeatured.tsx';
 import CreatorShowcaseGoals from './CreatorShowcaseGoals.tsx';
+import CreatorSubscriptionExplainer from '../creator/CreatorSubscriptionExplainer.tsx';
 
 export interface VerifiedCreatorProfileProps {
   profile: PublicUserProfile;
@@ -122,6 +123,7 @@ export default function VerifiedCreatorProfile({
         <>
           <CreatorShowcaseFeatured />
           <CreatorShowcaseGoals goals={DEMO_CREATOR_FUNDING_GOALS} />
+          <CreatorSubscriptionExplainer variant="premium" className="mt-2" />
           {showVerifyCta && onVerifyProfile && (
             <section className="creator-premium-section mt-2">
               <div className="creator-premium-card p-5 sm:p-6 text-center sm:text-left">
