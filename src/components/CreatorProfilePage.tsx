@@ -60,21 +60,21 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
         Voltar
       </button>
 
-      <header className="relative pb-2 md:pb-4 mb-6">
-        <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
+      <header className={`relative pb-2 md:pb-4 mb-6 ${isDemo ? 'creator-profile-premium' : ''}`}>
+        <p className={`text-[11px] uppercase tracking-[0.32em] font-semibold ${isDemo ? 'creator-premium-label' : 'text-zinc-500'}`}>
           {isDemo ? 'Criadores' : 'Perfil'}
         </p>
-        <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
+        <h1 className={`font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight mt-1 ${isDemo ? 'text-[var(--premium-cream)]' : 'text-white'}`}>
           {loading ? 'Carregando…' : profile?.nome ?? 'Criador'}
         </h1>
         {isDemo && (
-          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
+          <p className="text-sm text-[var(--premium-muted,#a1a1aa)] mt-1.5 leading-relaxed">
             Canal verificado na{' '}
-            <span className="text-cine-accent-light">CineReact</span>
+            <span className="text-[var(--premium-gold-light,#e8d5b5)]">CineReact</span>
           </p>
         )}
         <div
-          className="mt-4 h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent"
+          className={`mt-4 h-px ${isDemo ? 'creator-premium-header-rule' : 'bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent'}`}
           aria-hidden
         />
       </header>
@@ -93,7 +93,7 @@ export default function CreatorProfilePage({ creatorEmail, onBack }: CreatorProf
       )}
 
       {!loading && profile && (
-        <div className="max-w-3xl">
+        <div className={`max-w-3xl ${isDemo ? 'creator-profile-premium' : ''}`}>
           {isDemo ? (
             <CreatorProfileShowcase profile={profile} />
           ) : (
