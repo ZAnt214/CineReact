@@ -38,7 +38,7 @@ export default function PublicCreatorProfile({
         themed={false}
         lite
         rounded="rounded-2xl"
-        className="border-cine-accent/20 bg-gradient-to-br from-neutral-950/90 via-neutral-950/70 to-cine-accent/[0.04]"
+        className="border-neutral-800/60 bg-neutral-950/35"
         innerClassName={`flex flex-col gap-3 ${isCenter ? 'items-center text-center' : 'items-start text-left'}`}
       >
         <div className={`flex w-full gap-4 ${isCenter ? 'flex-col items-center' : 'flex-row items-center'}`}>
