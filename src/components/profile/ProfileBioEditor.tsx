@@ -81,11 +81,11 @@ function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEdi
   if (editing) {
     return (
       <div className={`w-full max-w-lg ${className}`}>
-        <div className="relative rounded-2xl overflow-hidden ring-1 ring-cine-accent/35 bg-neutral-950/90 shadow-xl shadow-black/25">
-          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-cine-accent via-cine-accent-light to-cine-accent-dark" aria-hidden />
+        <div className="relative rounded-2xl overflow-hidden ring-1 ring-neutral-800/80 bg-neutral-950/90 shadow-xl shadow-black/25">
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-neutral-600/50 via-neutral-700/25 to-transparent" aria-hidden />
           <div className="pl-5 pr-4 py-4 md:pl-6 md:pr-5 md:py-5">
             <div className="flex items-center justify-between gap-2 mb-3">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-cine-accent-light font-bold">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 font-bold">
                 Editando bio
               </p>
               <span className={`text-[10px] tabular-nums ${draft.length >= MAX_BIO - 20 ? 'text-amber-400' : 'text-zinc-600'}`}>
@@ -99,7 +99,7 @@ function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEdi
               onKeyDown={handleKeyDown}
               rows={4}
               placeholder="Filmes favoritos, criadores que acompanha, o que curte assistir..."
-              className="w-full bg-neutral-900/60 rounded-xl border border-neutral-800/80 px-3.5 py-3 text-sm text-zinc-100 placeholder-zinc-600 resize-none focus:outline-none focus:border-cine-accent/45 focus:ring-1 focus:ring-cine-accent/25 leading-relaxed"
+              className="w-full bg-neutral-900/60 rounded-xl border border-neutral-800/80 px-3.5 py-3 text-sm text-zinc-100 placeholder-zinc-600 resize-none focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700/60 leading-relaxed"
             />
             <div className="flex items-center justify-between gap-2 mt-3">
               <p className="text-[10px] text-zinc-600 hidden sm:block">Esc para cancelar</p>
@@ -135,11 +135,11 @@ function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEdi
       type="button"
       onClick={() => setEditing(true)}
       aria-label="Editar bio"
-      className={`group w-full max-w-lg text-left rounded-2xl overflow-hidden ring-1 ring-neutral-800/70 bg-gradient-to-br from-neutral-900/50 to-neutral-950/40 hover:from-neutral-900/70 hover:to-neutral-950/60 hover:ring-cine-accent/30 transition-all cursor-pointer shadow-sm hover:shadow-lg hover:shadow-black/20 ${className}`}
+      className={`group w-full max-w-lg text-left rounded-2xl overflow-hidden ring-1 ring-neutral-800/70 bg-gradient-to-br from-neutral-900/50 to-neutral-950/40 hover:from-neutral-900/70 hover:to-neutral-950/60 hover:ring-neutral-700/80 transition-all cursor-pointer shadow-sm hover:shadow-lg hover:shadow-black/20 ${className}`}
     >
       <div className="flex min-h-[92px]">
         <div
-          className="w-1 shrink-0 bg-gradient-to-b from-cine-accent/80 via-cine-accent/35 to-transparent group-hover:from-cine-accent group-hover:via-cine-accent-light transition-all duration-300"
+          className="w-px shrink-0 bg-gradient-to-b from-neutral-600/45 via-neutral-700/20 to-transparent group-hover:from-neutral-500/55 group-hover:via-neutral-600/30 transition-all duration-300"
           aria-hidden
         />
         <div className="flex-1 px-4 py-4 md:px-5 md:py-5">
