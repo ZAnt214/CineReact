@@ -9,6 +9,7 @@ coverage/
 uploads/cineclips/
 uploads/cineclips-exports/
 /data/
+db_cine_react.json
 bin/yt-dlp
 bin/yt-dlp_linux
 bin/yt-dlp_linux_arm64
