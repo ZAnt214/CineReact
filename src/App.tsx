@@ -38,6 +38,7 @@ import { CATALOG_ROW_LIMIT } from './constants/catalog.ts';
 import { hasSocialLinks } from './utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from './data.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiFetch } from './utils/apiClient.ts';
 import { Play, X, ExternalLink, Calendar, Compass, Clock } from 'lucide-react';
 
 export default function App() {
@@ -155,8 +156,26 @@ export default function App() {
       localStorage.removeItem('cine_react_user');
       localStorage.removeItem('cine_react_continue_watching');
       setContinueWatching([]);
+      apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch('/api/auth/me')
+      .then(async (res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled || !data?.success || !data.user) return;
+        setUser(data.user);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!user.isLoggedIn || !user.email || user.isAdmin) {

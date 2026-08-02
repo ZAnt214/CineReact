@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { apiFetch } from '../utils/apiClient.ts';
 import {
   X,
   Mail,
@@ -237,7 +238,7 @@ export default function AuthModal({
         ? { username: username.trim(), email: email.trim(), password }
         : { email: email.trim(), password };
 
-      const res = await fetch(endpoint, {
+      const res = await apiFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload)
