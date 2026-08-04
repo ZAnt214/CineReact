@@ -2411,139 +2411,11 @@ app.post("/api/solicitacoes-canal", (req, res) => {
   }
 });
 
-// Cadastro de novos usuários
-app.post("/api/cadastro", async (req, res) => {
-  if (!localDb.isSupabaseActive()) {
-    return handleRegister(req, res);
-  }
+// Cadastro de novos usuários (auth local com bcrypt — Supabase é só backup de dados)
+app.post("/api/cadastro", (req, res) => handleRegister(req, res));
 
-  try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
-    }
-
-    const existing = await localDb.findUsuarioByEmail(email);
-    if (existing) {
-      return res.status(400).json({ error: "Este e-mail já está cadastrado." });
-    }
-
-    const supabase = localDb.getSupabaseClient();
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { username } },
-    });
-
-    if (authError) {
-      console.error("Erro ao registrar no Supabase Auth:", authError);
-      let errorMsg = `Erro no Supabase Auth: ${authError.message}`;
-      if (authError.message.toLowerCase().includes("rate limit") || authError.message.toLowerCase().includes("limiar")) {
-        errorMsg = "Limite de envio de e-mails excedido no Supabase. Tente novamente mais tarde.";
-      }
-      return res.status(400).json({ error: errorMsg });
-    }
-
-    const userId = authData.user?.id || Math.random().toString(36).substring(2);
-    const requiresVerification = !authData.session && authData.user && !authData.user.confirmed_at;
-    const bootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase() === email.toLowerCase();
-
-    const novoUsuario = await localDb.addUsuario({
-      username,
-      email,
-      password: '',
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-      isAdmin: bootstrapAdmin,
-      role: bootstrapAdmin ? 'admin' : 'user',
-      isDonor: false,
-    }, userId);
-
-    if (!requiresVerification) {
-      const { token } = createSession(novoUsuario.id, novoUsuario.email, req);
-      setSessionCookie(res, token);
-    }
-
-    res.status(201).json({
-      success: true,
-      requiresVerification,
-      email: novoUsuario.email,
-      user: requiresVerification ? null : serializeUserState(novoUsuario),
-    });
-  } catch (error: any) {
-    console.error("Erro no cadastro de usuário:", error);
-    res.status(500).json({ error: error.message || "Erro interno no servidor ao realizar cadastro." });
-  }
-});
-
-// Login de usuários
-app.post("/api/login", async (req, res) => {
-  if (!localDb.isSupabaseActive()) {
-    return handleLogin(req, res, security);
-  }
-
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const supabase = localDb.getSupabaseClient();
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password,
-    });
-
-    if (authError) {
-      if (authError.message.toLowerCase().includes("confirm")) {
-        return res.status(401).json({
-          error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
-          requiresVerification: true,
-          email: cleanEmail,
-        });
-      }
-      return res.status(401).json({ error: "E-mail ou senha incorretos. Verifique e tente novamente." });
-    }
-
-    let user = await localDb.findUsuarioByEmail(cleanEmail);
-    if (!user) {
-      user = await localDb.addUsuario({
-        username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
-        email: cleanEmail,
-        password: '',
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isDonor: false,
-      }, authData.user?.id);
-    }
-
-    const restriction = getAccountRestriction(user);
-    if (restriction.blocked) {
-      return res.status(403).json({
-        error: restriction.message,
-        accountBlocked: true,
-        code: restriction.code,
-      });
-    }
-
-    await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
-    const { token } = createSession(user.id, user.email, req);
-    setSessionCookie(res, token);
-    security.audit(req, {
-      actorEmail: user.email,
-      action: 'login',
-      targetType: 'user',
-      targetId: user.email,
-    });
-
-    return res.json({
-      success: true,
-      user: serializeUserState(user, { isAdmin: !!user.isAdmin }),
-    });
-  } catch (error) {
-    console.error("Erro no login de usuário:", error);
-    res.status(500).json({ error: "Erro interno no servidor ao realizar login." });
-  }
-});
+// Login de usuários (auth local com bcrypt, 2FA, CAPTCHA e rate limit)
+app.post("/api/login", (req, res) => handleLogin(req, res, security));
 
 // Verificar código de e-mail OTP do Supabase
 app.post("/api/verificar-codigo", async (req, res) => {
@@ -2584,7 +2456,7 @@ app.post("/api/verificar-codigo", async (req, res) => {
       }, authData.user?.id);
     }
 
-    const { sessionToken } = createSession(user!.id, user!.email, req);
+    const { token: sessionToken } = createSession(user!.id, user!.email, req);
     setSessionCookie(res, sessionToken);
 
     res.json({
