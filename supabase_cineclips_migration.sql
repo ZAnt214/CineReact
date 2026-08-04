@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS cineclips_payload (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE cineclips_payload DISABLE ROW LEVEL SECURITY;
+ALTER TABLE cineclips_payload ENABLE ROW LEVEL SECURITY;

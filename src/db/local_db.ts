@@ -384,7 +384,10 @@ async function doSaveAsync() {
 
 // Supabase Client lazy setup
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  '';
 let supabaseClient: any = null;
 
 const supabaseFetchWithTimeout = async (input: any, init?: any) => {
@@ -408,10 +411,16 @@ const supabaseFetchWithTimeout = async (input: any, init?: any) => {
   }
 };
 
-if (supabaseUrl && supabaseAnonKey && supabaseUrl !== "" && supabaseAnonKey !== "") {
+if (supabaseUrl && supabaseKey && supabaseUrl !== "" && supabaseKey !== "") {
   try {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false },
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn(
+        "[Supabase] SUPABASE_SERVICE_ROLE_KEY ausente — usando anon key. " +
+        "Após habilitar RLS, configure a service role key no Railway."
+      );
+    }
+    supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
       global: {
         fetch: supabaseFetchWithTimeout
       }
