@@ -54,8 +54,7 @@ process.on('uncaughtException', (err) => {
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('[BOOT] unhandledRejection:', err);
-  process.exit(1);
+  console.error('[BOOT] unhandledRejection (processo continua):', err);
 });
 
 await prepareDataDir();

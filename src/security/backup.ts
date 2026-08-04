@@ -55,7 +55,7 @@ export function startAutoBackupScheduler(): void {
   };
 
   setInterval(tick, 15 * 60 * 1000);
-  tick();
+  setTimeout(tick, 2 * 60 * 1000);
 }
 
 export function createCaptchaChallenge(): { id: string; question: string } {

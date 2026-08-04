@@ -619,6 +619,17 @@ async function prefillDefaultReacts() {
     return;
   }
 
+  const skipOnRailway =
+    process.env.RAILWAY_ENVIRONMENT &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
+  if (skipOnRailway) {
+    console.log(
+      "[YouTube API] Pré-carregamento adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar)."
+    );
+    return;
+  }
+
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
   if (canais.length === 0) return;
@@ -634,7 +645,9 @@ async function prefillDefaultReacts() {
     console.warn('Aviso ao executar pré-carregamento inicial:', (err as Error)?.message || err);
   } finally {
     localDb.resumeSupabaseBackgroundSync();
-    void localDb.flushSupabaseBackgroundSync();
+    localDb.flushSupabaseBackgroundSync().catch((err) => {
+      console.warn('[Supabase] Falha ao enviar sync pós-prefill:', (err as Error)?.message || err);
+    });
   }
 }
 
@@ -3006,21 +3019,25 @@ async function startServer() {
     console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
   });
 
-  try {
-    await localDb.ensureCineClipsRestored();
-    if (localDb.isSupabaseActive()) {
-      console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
-      const success = await localDb.syncFromSupabase();
-      ensureDemoCreatorProfile();
-      if (success) {
-        console.log('[Supabase] Sincronização inicial na inicialização concluída!');
-      } else {
-        console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
+  setImmediate(() => {
+    void (async () => {
+      try {
+        await localDb.ensureCineClipsRestored();
+        if (localDb.isSupabaseActive()) {
+          console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
+          const success = await localDb.syncFromSupabase();
+          ensureDemoCreatorProfile();
+          if (success) {
+            console.log('[Supabase] Sincronização inicial na inicialização concluída!');
+          } else {
+            console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
+          }
+        }
+      } catch (err: any) {
+        console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
       }
-    }
-  } catch (err: any) {
-    console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
-  }
+    })();
+  });
 }
 
 startServer().catch((err) => {
