@@ -364,7 +364,8 @@ async function doSaveAsync() {
 
   try {
     const tempPath = `${DB_PATH}.tmp`;
-    const jsonStr = JSON.stringify(dbCache, null, 2);
+    const compact = process.env.NODE_ENV === 'production';
+    const jsonStr = compact ? JSON.stringify(dbCache) : JSON.stringify(dbCache, null, 2);
     await fs.promises.writeFile(tempPath, jsonStr, 'utf-8');
     await fs.promises.rename(tempPath, DB_PATH);
     try {
