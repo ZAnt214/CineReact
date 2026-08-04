@@ -231,14 +231,14 @@ CREATE TABLE usuarios (
   "continueWatching" JSONB DEFAULT '[]'::jsonb
 );
 
-ALTER TABLE obras DISABLE ROW LEVEL SECURITY;
-ALTER TABLE reacts DISABLE ROW LEVEL SECURITY;
-ALTER TABLE comentarios DISABLE ROW LEVEL SECURITY;
-ALTER TABLE favoritos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE canais_seguidos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE listas DISABLE ROW LEVEL SECURITY;
-ALTER TABLE notificacoes DISABLE ROW LEVEL SECURITY;
-ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
+ALTER TABLE obras ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE favoritos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE canais_seguidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE listas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notificacoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;`;
 
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);
@@ -1099,10 +1099,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 </p>
                 <div className="bg-neutral-900 p-3 rounded-lg font-mono text-[10px] text-zinc-300 space-y-1 border border-neutral-800">
                   <div>SUPABASE_URL = "https://seu-projeto.supabase.co"</div>
-                  <div>SUPABASE_ANON_KEY = "sua-anon-key-secreta"</div>
+                  <div>SUPABASE_SERVICE_ROLE_KEY = "sua-service-role-key"</div>
                 </div>
                 <p className="text-[10px] text-cine-accent-light/80">
-                  * Após salvar as chaves, a reinicialização do servidor é automática e a integração com o Supabase ficará ativa imediatamente!
+                  * Use a <strong>service_role</strong> (Settings → API), nunca a anon key no servidor. Após salvar, reinicie o deploy no Railway.
                 </p>
               </div>
 
