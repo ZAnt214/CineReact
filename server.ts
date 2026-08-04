@@ -43,6 +43,10 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
 const security = installSecurity(app);
 const requireAdmin = security.requireAdmin;
 
@@ -588,6 +592,17 @@ async function fetchRealChannelAvatar(channelId: string, pageUrl?: string): Prom
 }
 
 async function syncChannelAvatars() {
+  const skipOnRailway =
+    process.env.RAILWAY_ENVIRONMENT &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
+  if (skipOnRailway) {
+    console.log(
+      '[Avatar Sync] Adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar).'
+    );
+    return;
+  }
+
   console.log("[Avatar Sync] Iniciando sincronização de fotos de perfil dos canais...");
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
@@ -761,11 +776,6 @@ Formato:
 // ==========================================
 // API ROUTES
 // ==========================================
-
-// Health Check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
-});
 
 // Config Check
 app.get("/api/config", (req, res) => {
