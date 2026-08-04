@@ -413,20 +413,19 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     if (validReacts.length > 0) {
       const existingReacts = localDb.getReacts();
       const existingMap = new Map(existingReacts.map(r => [r.id, r]));
-
-      for (const valid of validReacts) {
+      const mergedReacts = validReacts.map((valid) => {
         const existing = existingMap.get(valid.id);
         if (existing) {
-          localDb.saveReact({
+          return {
             ...valid,
             isRecomendado: existing.isRecomendado || valid.isRecomendado,
-            likes: Math.max(existing.likes || 0, valid.likes || 0)
-          });
-        } else {
-          localDb.saveReact(valid);
+            likes: Math.max(existing.likes || 0, valid.likes || 0),
+          };
         }
-      }
+        return valid;
+      });
 
+      localDb.saveReactsBatch(mergedReacts);
       console.log(`[YouTube API] Sincronização concluída: ${validReacts.length} vídeos salvos para o canal ${channelId}.`);
     }
 
@@ -622,14 +621,20 @@ async function prefillDefaultReacts() {
 
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
+  if (canais.length === 0) return;
 
-  for (const canal of canais) {
-    if (canal.channelId) {
+  localDb.pauseSupabaseBackgroundSync();
+  try {
+    for (const canal of canais) {
+      if (!canal.channelId) continue;
       console.log(`[YouTube API] Sincronizando catálogo completo para o canal ${canal.titulo}...`);
-      syncChannelVideos(canal.channelId, canal.id).catch(err => {
-        console.error(`[YouTube API] Erro ao pré-carregar canal ${canal.titulo}:`, err);
-      });
+      await syncChannelVideos(canal.channelId, canal.id);
     }
+  } catch (err) {
+    console.warn('Aviso ao executar pré-carregamento inicial:', (err as Error)?.message || err);
+  } finally {
+    localDb.resumeSupabaseBackgroundSync();
+    void localDb.flushSupabaseBackgroundSync();
   }
 }
 
