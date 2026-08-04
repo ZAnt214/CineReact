@@ -56,13 +56,29 @@ export function installSecurity(app: Express): SecurityContext {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
+  const railwayPublicDomain = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
 
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        if (!origin) {
           callback(null, true);
           return;
+        }
+        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        if (railwayPublicDomain) {
+          try {
+            const host = new URL(origin).hostname;
+            if (host === railwayPublicDomain || host.endsWith(`.${railwayPublicDomain}`)) {
+              callback(null, true);
+              return;
+            }
+          } catch {
+            /* ignore malformed origin */
+          }
         }
         callback(new Error('CORS bloqueado'));
       },
