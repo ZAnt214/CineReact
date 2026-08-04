@@ -18,6 +18,7 @@ export const globalApiLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/health' || req.path.endsWith('/health'),
   keyGenerator: (req) => getClientIp(req),
   handler: limitHandler,
 });
