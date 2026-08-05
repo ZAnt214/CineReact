@@ -15,6 +15,8 @@ import {
   confirmEmailWithTokenHash,
   createAdminConfirmedUser,
   getAppPublicUrl,
+  getEmailConfirmRedirectUrl,
+  getEmailVerificationSetupHint,
   isSupabaseEmailAuthEnabled,
   isSupabaseEmailConfirmed,
   resendVerificationEmail,
@@ -152,6 +154,10 @@ export function registerSecurityRoutes(app: import('express').Express, security:
   app.post('/api/auth/resend-verification', async (req, res) => {
     await handleResendVerification(req, res);
   });
+
+  app.get('/api/auth/verification-setup', (_req, res) => {
+    res.json(getEmailVerificationSetupHint());
+  });
 }
 
 export async function handleRegister(req: Request, res: Response): Promise<void> {
@@ -192,7 +198,10 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
         : await signUpWithEmailVerification(cleanEmail, String(password), trimmedUsername);
 
       if (!supResult.ok) {
-        res.status(400).json({ error: supResult.error });
+        res.status(400).json({
+          error: supResult.error,
+          setupRedirectUrl: getEmailConfirmRedirectUrl(),
+        });
         return;
       }
 

@@ -34,9 +34,55 @@ export function getSupabaseAdminAuthClient(): SupabaseClient | null {
   return adminAuthClient;
 }
 
+const PLACEHOLDER_APP_URL_MARKERS = ['my_app_url', 'your-domain', 'example.com', 'changeme'];
+
+function isUsablePublicUrl(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (PLACEHOLDER_APP_URL_MARKERS.some((marker) => lower.includes(marker))) {
+    return false;
+  }
+
+  try {
+    const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    const parsed = new URL(withScheme);
+    return parsed.hostname.includes('.');
+  } catch {
+    return false;
+  }
+}
+
+/** URL pública do app — ignora placeholders como MY_APP_URL no Railway. */
+export function resolvePublicAppUrl(): string {
+  const configured = process.env.APP_URL?.trim();
+  if (configured && isUsablePublicUrl(configured)) {
+    return configured.replace(/\/$/, '');
+  }
+
+  const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
+  if (railwayDomain) {
+    return `https://${railwayDomain.replace(/\/$/, '')}`;
+  }
+
+  const staticUrl = process.env.RAILWAY_STATIC_URL?.trim();
+  if (staticUrl && isUsablePublicUrl(staticUrl)) {
+    return staticUrl.replace(/\/$/, '');
+  }
+
+  if (configured && (process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production')) {
+    console.warn(
+      `[Auth] APP_URL inválido ou placeholder ("${configured}"). ` +
+        'Defina APP_URL=https://cinereactoficial.up.railway.app no Railway ou use RAILWAY_PUBLIC_DOMAIN.'
+    );
+  }
+
+  return 'http://localhost:3000';
+}
+
 export function getEmailConfirmRedirectUrl(): string {
-  const base = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-  return `${base}/api/auth/confirm-email`;
+  return `${resolvePublicAppUrl()}/api/auth/confirm-email`;
 }
 
 const SUPABASE_CODE_MESSAGES: Record<string, string> = {
@@ -49,8 +95,7 @@ const SUPABASE_CODE_MESSAGES: Record<string, string> = {
   email_exists: 'Este e-mail já está cadastrado.',
   unexpected_failure:
     'Falha no Supabase Auth. Verifique Redirect URLs (inclua /api/auth/confirm-email) e SMTP.',
-  validation_failed:
-    'Configuração inválida no Supabase Auth. Adicione a URL de confirmação em Redirect URLs.',
+  validation_failed: '', // mensagem dinâmica em formatSupabaseAuthError
 };
 
 export function formatSupabaseAuthError(error: AuthError | null | undefined): string {
@@ -60,6 +105,9 @@ export function formatSupabaseAuthError(error: AuthError | null | undefined): st
   if (message && message !== '{}') return message;
 
   const code = error.code || '';
+  if (code === 'validation_failed') {
+    return `URL de confirmação não permitida no Supabase. Adicione em Redirect URLs: ${getEmailConfirmRedirectUrl()}`;
+  }
   if (code && SUPABASE_CODE_MESSAGES[code]) return SUPABASE_CODE_MESSAGES[code];
 
   const lower = message.toLowerCase();
@@ -294,5 +342,30 @@ export async function deleteSupabaseUser(userId: string): Promise<void> {
 }
 
 export function getAppPublicUrl(): string {
-  return (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  return resolvePublicAppUrl();
+}
+
+export function getEmailVerificationSetupHint(): {
+  supabaseEmailAuthEnabled: boolean;
+  publicAppUrl: string;
+  confirmRedirectUrl: string;
+  appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost';
+} {
+  const configured = process.env.APP_URL?.trim();
+  let appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost' = 'localhost';
+
+  if (configured && isUsablePublicUrl(configured)) {
+    appUrlSource = 'APP_URL';
+  } else if (process.env.RAILWAY_PUBLIC_DOMAIN?.trim()) {
+    appUrlSource = 'RAILWAY_PUBLIC_DOMAIN';
+  } else if (process.env.RAILWAY_STATIC_URL?.trim() && isUsablePublicUrl(process.env.RAILWAY_STATIC_URL)) {
+    appUrlSource = 'RAILWAY_STATIC_URL';
+  }
+
+  return {
+    supabaseEmailAuthEnabled: isSupabaseEmailAuthEnabled(),
+    publicAppUrl: resolvePublicAppUrl(),
+    confirmRedirectUrl: getEmailConfirmRedirectUrl(),
+    appUrlSource,
+  };
 }
