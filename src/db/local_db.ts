@@ -64,6 +64,11 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   if (local.lastActiveAt) merged.lastActiveAt = local.lastActiveAt;
   if (local.emailVerified !== undefined) merged.emailVerified = local.emailVerified;
   if (local.supabaseAuthId) merged.supabaseAuthId = local.supabaseAuthId;
+  if (local.oauthProvider) merged.oauthProvider = local.oauthProvider;
+  if (local.discordId) merged.discordId = local.discordId;
+  if (local.discordUsername) merged.discordUsername = local.discordUsername;
+  if (local.providerEmail) merged.providerEmail = local.providerEmail;
+  if (local.termsAcceptedAt) merged.termsAcceptedAt = local.termsAcceptedAt;
 
   return merged;
 }
@@ -572,6 +577,11 @@ async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boo
           socialLinks: u.socialLinks || {},
           emailVerified: u.emailVerified ?? true,
           supabaseAuthId: u.supabaseAuthId || null,
+          oauthProvider: u.oauthProvider || null,
+          discordId: u.discordId || null,
+          discordUsername: u.discordUsername || null,
+          providerEmail: u.providerEmail || null,
+          termsAcceptedAt: u.termsAcceptedAt || null,
         }))
       );
     }

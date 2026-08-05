@@ -134,5 +134,15 @@ export interface UserAccount {
   emailVerified?: boolean;
   /** ID do usuário em auth.users (Supabase) */
   supabaseAuthId?: string;
+  /** Provedor OAuth usado no cadastro/login */
+  oauthProvider?: 'discord';
+  /** ID da conta Discord */
+  discordId?: string;
+  /** Nome de usuário no Discord */
+  discordUsername?: string;
+  /** E-mail retornado pelo Discord (quando disponível) */
+  providerEmail?: string;
+  /** Data/hora da aceitação dos Termos de Uso */
+  termsAcceptedAt?: string;
 }
 
