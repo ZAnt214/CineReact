@@ -2946,14 +2946,30 @@ async function startServer() {
 
   ensureDemoCreatorProfile();
 
-  const server = app.listen(PORT, BIND_HOST, () => {
-    console.log(`[BOOT] Cine React em http://${BIND_HOST}:${PORT} (cwd=${process.cwd()})`);
-    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
-  });
-  server.on('error', (err) => {
-    console.error('[BOOT] Falha ao abrir porta:', err);
-    process.exit(1);
-  });
+  const onRailway = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
+  const portsToTry = onRailway
+    ? [...new Set([PORT, 3000, 8080])]
+    : [PORT];
+
+  for (const port of portsToTry) {
+    const server = app.listen(port, BIND_HOST, () => {
+      console.log(`[BOOT] Cine React em http://${BIND_HOST}:${port} (cwd=${process.cwd()})`);
+      if (port === PORT) {
+        console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+      }
+    });
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (port === PORT) {
+        console.error('[BOOT] Falha ao abrir porta principal:', err);
+        process.exit(1);
+      }
+      console.warn(`[BOOT] Porta auxiliar ${port} indisponível:`, err.message);
+    });
+  }
+
+  if (onRailway) {
+    console.log(`[BOOT] Railway: escutando em ${portsToTry.join(', ')} (Target Port pode ser 3000 ou 8080)`);
+  }
 
   ensureBootstrapAdmin().catch((err) => {
     console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);

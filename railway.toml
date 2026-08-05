@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "bun run build"
 
 [deploy]
-startCommand = "DISABLE_AUTO_BACKUP=1 CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node scripts/railway-boot.mjs"
+startCommand = "DISABLE_AUTO_BACKUP=1 CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
