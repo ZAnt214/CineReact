@@ -23,21 +23,11 @@ import type {
   PlatformSubscription,
   SubscriptionCheckout,
 } from '../types/finance.ts';
-import type {
-  AuthSession,
-  CaptchaChallenge,
-  FinancialAuditEntry,
-  IdempotencyRecord,
-  LoginAttempt,
-  SecurityAlert,
-} from '../security/types.ts';
-import { hashPasswordIfNeeded } from '../security/password.ts';
-import { hashToken } from '../security/crypto.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
-import { getDataDir, isValidJsonFile, migrateLegacyFile } from './dataPaths.ts';
+import { getDataDir, migrateLegacyFile } from './dataPaths.ts';
 import {
   persistCineClipsToSupabase,
   restoreCineClipsOnStartup,
@@ -70,11 +60,8 @@ const DB_PATH = path.join(getDataDir(), 'db_cine_react.json');
 
 migrateLegacyFile(DB_PATH, [
   path.join('/tmp', 'db_cine_react.json'),
-  path.join(process.cwd(), 'db_cine_react.json.bak'),
   path.join(process.cwd(), 'db_cine_react.json'),
   path.join(process.cwd(), 'data', 'db_cine_react.json'),
-  '/app/db_cine_react.json.bak',
-  '/app/db_cine_react.json',
   '/app/data/db_cine_react.json',
 ]);
 
@@ -104,66 +91,26 @@ interface DbSchema {
   creatorPayouts: CreatorPayout[];
   monthlyCloses: MonthlyCloseRecord[];
   subscriptionCheckouts: SubscriptionCheckout[];
-  authSessions: AuthSession[];
-  loginAttempts: LoginAttempt[];
-  captchaChallenges: CaptchaChallenge[];
-  securityAlerts: SecurityAlert[];
-  idempotencyKeys: IdempotencyRecord[];
-  financialAuditLog: FinancialAuditEntry[];
-}
-
-function loadDbFromPath(filePath: string): DbSchema | null {
-  try {
-    if (!isValidJsonFile(filePath)) return null;
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data) as DbSchema;
-  } catch {
-    return null;
-  }
-}
-
-function quarantineCorruptDb(filePath: string): void {
-  if (!fs.existsSync(filePath)) return;
-  const quarantinePath = `${filePath}.corrupt.${Date.now()}`;
-  try {
-    fs.renameSync(filePath, quarantinePath);
-    console.warn(`[DB] Arquivo corrompido movido para ${quarantinePath}`);
-  } catch (err) {
-    console.warn('[DB] Não foi possível isolar arquivo corrompido:', err);
-  }
-}
-
-function recoverDbFromBackups(): DbSchema | null {
-  const candidates = [
-    `${DB_PATH}.bak`,
-    path.join(process.cwd(), 'db_cine_react.json.bak'),
-    '/app/db_cine_react.json.bak',
-    path.join(process.cwd(), 'db_cine_react.json'),
-    '/app/db_cine_react.json',
-  ];
-
-  for (const candidate of candidates) {
-    const parsed = loadDbFromPath(candidate);
-    if (!parsed) continue;
-    console.warn(`[DB] Recuperado a partir de ${candidate}`);
-    setImmediate(() => saveDb(parsed, true));
-    return parsed;
-  }
-
-  return null;
 }
 
 function initDb(): DbSchema {
   try {
     if (fs.existsSync(DB_PATH)) {
-      const parsed = loadDbFromPath(DB_PATH);
-      if (!parsed) {
-        throw new SyntaxError(`JSON inválido em ${DB_PATH}`);
-      }
+      const data = fs.readFileSync(DB_PATH, 'utf-8');
+      const parsed = JSON.parse(data);
       
       // Auto-migrate to include usuarios if not exists
       if (!parsed.usuarios) {
-        parsed.usuarios = [];
+        parsed.usuarios = [
+          {
+            id: 'admin',
+            username: 'Mateus Vinícius',
+            email: 'mateusvini.t10@gmail.com',
+            password: 'Zantnoar12',
+            createdAt: new Date().toISOString(),
+            isAdmin: true
+          }
+        ];
         saveDb(parsed);
       }
 
@@ -216,20 +163,22 @@ function initDb(): DbSchema {
       if (!parsed.creatorPayouts) parsed.creatorPayouts = [];
       if (!parsed.monthlyCloses) parsed.monthlyCloses = [];
       if (!parsed.subscriptionCheckouts) parsed.subscriptionCheckouts = [];
-      if (!parsed.authSessions) parsed.authSessions = [];
-      if (!parsed.loginAttempts) parsed.loginAttempts = [];
-      if (!parsed.captchaChallenges) parsed.captchaChallenges = [];
-      if (!parsed.securityAlerts) parsed.securityAlerts = [];
-      if (!parsed.idempotencyKeys) parsed.idempotencyKeys = [];
-      if (!parsed.financialAuditLog) parsed.financialAuditLog = [];
 
       return parsed;
     }
   } catch (error) {
     console.error('Erro ao ler banco de dados local:', error);
-    quarantineCorruptDb(DB_PATH);
-    const recovered = recoverDbFromBackups();
-    if (recovered) return recovered;
+    const backupPath = `${DB_PATH}.bak`;
+    if (fs.existsSync(backupPath)) {
+      try {
+        const backupData = fs.readFileSync(backupPath, 'utf-8');
+        const parsed = JSON.parse(backupData);
+        console.warn('[DB] Recuperado a partir de backup .bak');
+        return parsed;
+      } catch (backupError) {
+        console.error('[DB] Backup também inválido:', backupError);
+      }
+    }
   }
 
   const initialDb: DbSchema = {
@@ -261,7 +210,16 @@ function initDb(): DbSchema {
     notificacoes: [],
     gamificationProfiles: {},
     adminConfig: createDefaultAdminConfig(),
-    usuarios: [],
+    usuarios: [
+      {
+        id: 'admin',
+        username: 'Mateus Vinícius',
+        email: 'mateusvini.t10@gmail.com',
+        password: 'Zantnoar12',
+        createdAt: new Date().toISOString(),
+        isAdmin: true
+      }
+    ],
     cineClips: [],
     cineClipComments: [],
     cineClipLikes: [],
@@ -277,58 +235,39 @@ function initDb(): DbSchema {
     creatorPayouts: [],
     monthlyCloses: [],
     subscriptionCheckouts: [],
-    authSessions: [],
-    loginAttempts: [],
-    captchaChallenges: [],
-    securityAlerts: [],
-    idempotencyKeys: [],
-    financialAuditLog: [],
   };
 
   saveDb(initialDb);
   return initialDb;
 }
 
-let dbCache: DbSchema;
-try {
-  dbCache = initDb();
-} catch (error) {
-  console.error('[DB] Falha crítica ao inicializar banco local, usando seed vazio:', error);
-  dbCache = {
-    obras: [...OBRAS_INICIAIS],
-    reacts: [...VIDEOS_INICIAIS],
-    comentarios: [],
-    favoritos: [],
-    canaisSeguidos: [],
-    listas: [],
-    notificacoes: [],
-    gamificationProfiles: {},
-    adminConfig: createDefaultAdminConfig(),
-    usuarios: [],
-    cineClips: [],
-    cineClipComments: [],
-    cineClipLikes: [],
-    cineClipFavorites: [],
-    cineClipShares: [],
-    cineClipReports: [],
-    cineClipImportJobs: [],
-    cineClipWatchHistory: [],
-    donationRequests: [],
-    creatorVerificationRequests: [],
-    financeTransactions: [],
-    platformSubscriptions: [],
-    creatorPayouts: [],
-    monthlyCloses: [],
-    subscriptionCheckouts: [],
-    authSessions: [],
-    loginAttempts: [],
-    captchaChallenges: [],
-    securityAlerts: [],
-    idempotencyKeys: [],
-    financialAuditLog: [],
-  };
-  setImmediate(() => saveDb(dbCache, true));
-}
+let dbCache: DbSchema = {
+  obras: [],
+  reacts: [],
+  comentarios: [],
+  favoritos: [],
+  canaisSeguidos: [],
+  listas: [],
+  notificacoes: [],
+  gamificationProfiles: {},
+  adminConfig: createDefaultAdminConfig(),
+  usuarios: [],
+  cineClips: [],
+  cineClipComments: [],
+  cineClipLikes: [],
+  cineClipFavorites: [],
+  cineClipShares: [],
+  cineClipReports: [],
+  cineClipImportJobs: [],
+  cineClipWatchHistory: [],
+  donationRequests: [],
+  creatorVerificationRequests: [],
+  financeTransactions: [],
+  platformSubscriptions: [],
+  creatorPayouts: [],
+  monthlyCloses: [],
+  subscriptionCheckouts: [],
+};
 
 let saveDbTimer: NodeJS.Timeout | null = null;
 let pendingSave = false;
@@ -364,8 +303,7 @@ async function doSaveAsync() {
 
   try {
     const tempPath = `${DB_PATH}.tmp`;
-    const compact = process.env.NODE_ENV === 'production';
-    const jsonStr = compact ? JSON.stringify(dbCache) : JSON.stringify(dbCache, null, 2);
+    const jsonStr = JSON.stringify(dbCache, null, 2);
     await fs.promises.writeFile(tempPath, jsonStr, 'utf-8');
     await fs.promises.rename(tempPath, DB_PATH);
     try {
@@ -383,251 +321,38 @@ async function doSaveAsync() {
   }
 }
 
+dbCache = initDb();
+
 // Supabase Client lazy setup
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 let supabaseClient: any = null;
-
-const SUPABASE_FETCH_TIMEOUT_MS = Number(process.env.SUPABASE_FETCH_TIMEOUT_MS || 15000);
-const SUPABASE_SYNC_DEBOUNCE_MS = Number(process.env.SUPABASE_SYNC_DEBOUNCE_MS || 30000);
-const SUPABASE_UPSERT_CHUNK_SIZE = 200;
-
-let supabaseSyncPaused = 0;
-let supabaseSyncTimer: NodeJS.Timeout | null = null;
-let supabaseSyncDirty = false;
-let lastSupabaseIssueLogAt = 0;
-
-function logSupabaseBackgroundIssue(kind: 'timeout' | 'offline') {
-  const now = Date.now();
-  if (now - lastSupabaseIssueLogAt < 60_000) return;
-  lastSupabaseIssueLogAt = now;
-  console.warn(
-    kind === 'timeout'
-      ? '[Supabase] Requisições em background com timeout. Mantendo operação local.'
-      : '[Supabase] Operações em background off-line. Mantendo operação local.'
-  );
-}
 
 const supabaseFetchWithTimeout = async (input: any, init?: any) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), SUPABASE_FETCH_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
   try {
     const response = await fetch(input, { ...init, signal: controller.signal });
     return response;
   } catch (err: any) {
     if (err.name === 'AbortError') {
-      logSupabaseBackgroundIssue('timeout');
+      console.warn("[Supabase] Requisição em background cancelada por timeout (4s). Mantendo operação local.");
     } else {
-      logSupabaseBackgroundIssue('offline');
+      console.warn("[Supabase] Operação em background off-line. Mantendo operação local.");
     }
-    return new Response(JSON.stringify({ message: 'supabase_unreachable' }), {
-      status: 504,
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify([]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
   } finally {
     clearTimeout(timeoutId);
   }
 };
 
-async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boolean> {
-  if (!supabaseClient) return false;
+if (supabaseUrl && supabaseAnonKey && supabaseUrl !== "" && supabaseAnonKey !== "") {
   try {
-    if (!options?.quiet) {
-      console.log('[Supabase] Enviando dados do cache local para o Supabase...');
-    }
-
-    const upsertInChunks = async (table: string, rows: Record<string, unknown>[]) => {
-      for (let i = 0; i < rows.length; i += SUPABASE_UPSERT_CHUNK_SIZE) {
-        const chunk = rows.slice(i, i + SUPABASE_UPSERT_CHUNK_SIZE);
-        const { error } = await supabaseClient.from(table).upsert(chunk);
-        if (error) {
-          console.error(`[Supabase Upload] Erro em ${table}:`, error);
-          return false;
-        }
-      }
-      return true;
-    };
-
-    if (dbCache.obras.length > 0) {
-      await upsertInChunks(
-        'obras',
-        dbCache.obras.map((o) => ({
-          id: o.id,
-          titulo: o.titulo,
-          sinopse: o.sinopse,
-          synopsis: o.synopsis || '',
-          poster: o.poster,
-          banner: o.banner,
-          ano: o.ano,
-          generos: o.generos || [],
-          tipo: o.tipo,
-          channelId: o.channelId,
-          trailerUrl: o.trailerUrl,
-          destacado: !!o.destacado,
-        }))
-      );
-    }
-
-    if (dbCache.reacts.length > 0) {
-      await upsertInChunks(
-        'reacts',
-        dbCache.reacts.map((r) => ({
-          id: r.id,
-          obraId: r.obraId,
-          titulo: r.titulo,
-          videoUrl: 'https://www.youtube.com/watch?v=' + r.id,
-          thumbnailUrl: r.thumbnailUrl || '',
-          duracao: r.duracao,
-          canalNome: r.canalNome,
-          visualizacoes: r.visualizacoes || 0,
-          isRecomendado: !!r.isRecomendado,
-        }))
-      );
-    }
-
-    if (dbCache.comentarios.length > 0) {
-      await upsertInChunks(
-        'comentarios',
-        dbCache.comentarios.map((c) => ({
-          id: c.id,
-          obraId: c.obraId,
-          usuarioNome: c.usuarioNome,
-          usuarioEmail: c.usuarioEmail,
-          texto: c.texto,
-          nota: c.nota,
-          criadoEm: c.criadoEm,
-        }))
-      );
-    }
-
-    if (dbCache.favoritos.length > 0) {
-      await supabaseClient.from('favoritos').delete().neq('id', 0);
-      const { error } = await supabaseClient.from('favoritos').insert(
-        dbCache.favoritos.map((f) => ({
-          usuarioEmail: f.usuarioEmail,
-          obraId: f.obraId,
-        }))
-      );
-      if (error) console.error('[Supabase Upload] Erro nos favoritos:', error);
-    }
-
-    if (dbCache.canaisSeguidos.length > 0) {
-      await supabaseClient.from('canais_seguidos').delete().neq('id', 0);
-      const { error } = await supabaseClient.from('canais_seguidos').insert(
-        dbCache.canaisSeguidos.map((c) => ({
-          usuarioEmail: c.usuarioEmail,
-          canalNome: c.canalNome,
-        }))
-      );
-      if (error) console.error('[Supabase Upload] Erro nos canais seguidos:', error);
-    }
-
-    if (dbCache.listas.length > 0) {
-      await upsertInChunks(
-        'listas',
-        dbCache.listas.map((l) => ({
-          id: l.id,
-          nome: l.nome,
-          descricao: l.descricao,
-          usuarioEmail: l.usuarioEmail,
-          obraIds: l.obraIds || [],
-        }))
-      );
-    }
-
-    if (dbCache.notificacoes.length > 0) {
-      await upsertInChunks(
-        'notificacoes',
-        dbCache.notificacoes.map((n) => ({
-          id: n.id,
-          titulo: n.titulo,
-          mensagem: n.mensagem,
-          lida: !!n.lida,
-          criadoEm: n.criadoEm,
-          canalNome: n.canalNome,
-          usuarioEmail: n.usuarioEmail,
-        }))
-      );
-    }
-
-    if (dbCache.usuarios.length > 0) {
-      await upsertInChunks(
-        'usuarios',
-        dbCache.usuarios.map((u) => ({
-          email: u.email,
-          id: u.id,
-          username: u.username,
-          password: u.password,
-          createdAt: u.createdAt,
-          avatar: u.avatar,
-          isAdmin: !!u.isAdmin,
-          isDonor: !!u.isDonor,
-          continueWatching: u.continueWatching || [],
-          descricao: u.descricao || '',
-          socialLinks: u.socialLinks || {},
-        }))
-      );
-    }
-
-    if ((dbCache.cineClips || []).length > 0) {
-      await persistCineClipsToSupabase(supabaseClient, dbCache, { immediate: true });
-    }
-
-    if (!options?.quiet) {
-      console.log('[Supabase] Upload de dados concluído.');
-    }
-    return true;
-  } catch (error) {
-    console.error('[Supabase] Erro ao enviar dados:', error);
-    return false;
-  }
-}
-
-function scheduleSupabaseBackgroundSync() {
-  if (!supabaseClient) return;
-  supabaseSyncDirty = true;
-  if (supabaseSyncPaused > 0 || supabaseSyncTimer) return;
-  supabaseSyncTimer = setTimeout(() => {
-    supabaseSyncTimer = null;
-    void flushSupabaseBackgroundSync();
-  }, SUPABASE_SYNC_DEBOUNCE_MS);
-}
-
-async function flushSupabaseBackgroundSync(): Promise<boolean> {
-  if (!supabaseClient || !supabaseSyncDirty || supabaseSyncPaused > 0) return false;
-  supabaseSyncDirty = false;
-  const ok = await uploadCacheToSupabase({ quiet: true });
-  if (!ok) {
-    supabaseSyncDirty = true;
-    scheduleSupabaseBackgroundSync();
-  }
-  return ok;
-}
-
-function pauseSupabaseBackgroundSync(): void {
-  supabaseSyncPaused++;
-}
-
-function resumeSupabaseBackgroundSync(): void {
-  supabaseSyncPaused = Math.max(0, supabaseSyncPaused - 1);
-  if (supabaseSyncPaused === 0 && supabaseSyncDirty) {
-    scheduleSupabaseBackgroundSync();
-  }
-}
-
-if (supabaseUrl && supabaseKey && supabaseUrl !== "" && supabaseKey !== "") {
-  try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.warn(
-        "[Supabase] SUPABASE_SERVICE_ROLE_KEY ausente — usando anon key. " +
-        "Após habilitar RLS, configure a service role key no Railway."
-      );
-    }
-    supabaseClient = createClient(supabaseUrl, supabaseKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false },
       global: {
         fetch: supabaseFetchWithTimeout
       }
@@ -687,11 +412,6 @@ export const localDb = {
         return false;
       }
 
-      if (!obras || !reacts) {
-        console.warn("[Supabase] Resposta incompleta ao sincronizar — mantendo dados locais.");
-        return false;
-      }
-
       // If remote Supabase is completely empty, upload local data automatically!
       if (obras.length === 0 && reacts.length === 0) {
         console.log("[Supabase] Banco de dados Supabase vazio. Enviando dados locais...");
@@ -733,11 +453,151 @@ export const localDb = {
   },
 
   // Export local JSON cache up to Supabase manually
-  uploadLocalDataToSupabase: () => uploadCacheToSupabase(),
+  uploadLocalDataToSupabase: async () => {
+    if (!supabaseClient) return false;
+    try {
+      console.log("[Supabase] Enviando dados do cache local para o Supabase...");
 
-  pauseSupabaseBackgroundSync,
-  resumeSupabaseBackgroundSync,
-  flushSupabaseBackgroundSync,
+      // 1. Obras
+      if (dbCache.obras.length > 0) {
+        const { error } = await supabaseClient.from('obras').upsert(
+          dbCache.obras.map(o => ({
+            id: o.id,
+            titulo: o.titulo,
+            sinopse: o.sinopse,
+            synopsis: o.synopsis || '',
+            poster: o.poster,
+            banner: o.banner,
+            ano: o.ano,
+            generos: o.generos || [],
+            tipo: o.tipo,
+            channelId: o.channelId,
+            trailerUrl: o.trailerUrl,
+            destacado: !!o.destacado
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nas obras:", error);
+      }
+
+      // 2. Reacts
+      if (dbCache.reacts.length > 0) {
+        const { error } = await supabaseClient.from('reacts').upsert(
+          dbCache.reacts.map(r => ({
+            id: r.id,
+            obraId: r.obraId,
+            titulo: r.titulo,
+            videoUrl: 'https://www.youtube.com/watch?v=' + r.id,
+            thumbnailUrl: r.thumbnailUrl || '',
+            duracao: r.duracao,
+            canalNome: r.canalNome,
+            visualizacoes: r.visualizacoes || 0,
+            isRecomendado: !!r.isRecomendado
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nos reacts:", error);
+      }
+
+      // 3. Comentarios
+      if (dbCache.comentarios.length > 0) {
+        const { error } = await supabaseClient.from('comentarios').upsert(
+          dbCache.comentarios.map(c => ({
+            id: c.id,
+            obraId: c.obraId,
+            usuarioNome: c.usuarioNome,
+            usuarioEmail: c.usuarioEmail,
+            texto: c.texto,
+            nota: c.nota,
+            criadoEm: c.criadoEm
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nos comentarios:", error);
+      }
+
+      // 4. Favoritos
+      if (dbCache.favoritos.length > 0) {
+        await supabaseClient.from('favoritos').delete().neq('id', 0);
+        const { error } = await supabaseClient.from('favoritos').insert(
+          dbCache.favoritos.map(f => ({
+            usuarioEmail: f.usuarioEmail,
+            obraId: f.obraId
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nos favoritos:", error);
+      }
+
+      // 5. Canais Seguidos
+      if (dbCache.canaisSeguidos.length > 0) {
+        await supabaseClient.from('canais_seguidos').delete().neq('id', 0);
+        const { error } = await supabaseClient.from('canais_seguidos').insert(
+          dbCache.canaisSeguidos.map(c => ({
+            usuarioEmail: c.usuarioEmail,
+            canalNome: c.canalNome
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nos canais seguidos:", error);
+      }
+
+      // 6. Listas
+      if (dbCache.listas.length > 0) {
+        const { error } = await supabaseClient.from('listas').upsert(
+          dbCache.listas.map(l => ({
+            id: l.id,
+            nome: l.nome,
+            descricao: l.descricao,
+            usuarioEmail: l.usuarioEmail,
+            obraIds: l.obraIds || []
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nas listas:", error);
+      }
+
+      // 7. Notificações
+      if (dbCache.notificacoes.length > 0) {
+        const { error } = await supabaseClient.from('notificacoes').upsert(
+          dbCache.notificacoes.map(n => ({
+            id: n.id,
+            titulo: n.titulo,
+            mensagem: n.mensagem,
+            lida: !!n.lida,
+            criadoEm: n.criadoEm,
+            canalNome: n.canalNome,
+            usuarioEmail: n.usuarioEmail
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nas notificacoes:", error);
+      }
+
+      // 8. Usuários
+      if (dbCache.usuarios.length > 0) {
+        const { error } = await supabaseClient.from('usuarios').upsert(
+          dbCache.usuarios.map(u => ({
+            email: u.email,
+            id: u.id,
+            username: u.username,
+            password: u.password,
+            createdAt: u.createdAt,
+            avatar: u.avatar,
+            isAdmin: !!u.isAdmin,
+            isDonor: !!u.isDonor,
+            continueWatching: u.continueWatching || [],
+            descricao: u.descricao || '',
+            socialLinks: u.socialLinks || {},
+          }))
+        );
+        if (error) console.error("[Supabase Upload] Erro nos usuarios:", error);
+      }
+
+      if ((dbCache.cineClips || []).length > 0) {
+        await persistCineClipsToSupabase(supabaseClient, dbCache, { immediate: true });
+      }
+
+      console.log("[Supabase] Upload de dados manuais com sucesso!");
+      return true;
+    } catch (error) {
+      console.error("[Supabase] Erro ao enviar dados:", error);
+      return false;
+    }
+  },
 
   getObras: () => {
     return dbCache.obras;
@@ -751,7 +611,29 @@ export const localDb = {
       dbCache.obras.push(obra);
     }
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    // Propagate to Supabase background
+    if (supabaseClient) {
+      supabaseClient.from('obras').upsert({
+        id: obra.id,
+        titulo: obra.titulo,
+        sinopse: obra.sinopse,
+        synopsis: obra.synopsis || '',
+        poster: obra.poster,
+        banner: obra.banner,
+        ano: obra.ano,
+        generos: obra.generos || [],
+        tipo: obra.tipo,
+        channelId: obra.channelId,
+        trailerUrl: obra.trailerUrl,
+        destacado: !!obra.destacado
+      }).then(({ error }: any) => {
+        if (error) console.warn("[Supabase Async] Aviso ao salvar obra:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar obra:", err?.message || err);
+      });
+    }
+
     return obra;
   },
 
@@ -760,7 +642,14 @@ export const localDb = {
     dbCache.reacts = dbCache.reacts.filter(r => r.obraId !== id);
     dbCache.comentarios = dbCache.comentarios.filter(c => c.obraId !== id);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('obras').delete().eq('id', id).then(({ error }: any) => {
+        if (error) console.warn("[Supabase Async] Aviso ao deletar obra:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar obra:", err?.message || err);
+      });
+    }
   },
 
   getReacts: () => {
@@ -787,25 +676,39 @@ export const localDb = {
       dbCache.reacts.push(react);
     }
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
-    return react;
-  },
 
-  saveReactsBatch: (reacts: ReactVideo[]) => {
-    if (reacts.length === 0) return;
-    for (const react of reacts) {
-      const idx = dbCache.reacts.findIndex((r) => r.id === react.id);
-      if (idx >= 0) dbCache.reacts[idx] = react;
-      else dbCache.reacts.push(react);
+    if (supabaseClient) {
+      supabaseClient.from('reacts').upsert({
+        id: react.id,
+        obraId: react.obraId,
+        titulo: react.titulo,
+        videoUrl: 'https://www.youtube.com/watch?v=' + react.id,
+        thumbnailUrl: react.thumbnailUrl || '',
+        duracao: react.duracao,
+        canalNome: react.canalNome,
+        visualizacoes: react.visualizacoes || 0,
+        isRecomendado: !!react.isRecomendado
+      }).then(({ error }: any) => {
+        if (error) console.warn("[Supabase Async] Aviso ao salvar react:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar react:", err?.message || err);
+      });
     }
-    saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    return react;
   },
 
   deleteReact: (id: string) => {
     dbCache.reacts = dbCache.reacts.filter(r => r.id !== id);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('reacts').delete().eq('id', id).then(({ error }: any) => {
+        if (error) console.warn("[Supabase Async] Aviso ao deletar react:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar react:", err?.message || err);
+      });
+    }
   },
 
   getComentarios: (obraId?: string) => {
@@ -818,14 +721,37 @@ export const localDb = {
   addComentario: (comentario: Comentario) => {
     dbCache.comentarios.push(comentario);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('comentarios').insert({
+        id: comentario.id,
+        obraId: comentario.obraId,
+        usuarioNome: comentario.usuarioNome,
+        usuarioEmail: comentario.usuarioEmail,
+        texto: comentario.texto,
+        nota: comentario.nota,
+        criadoEm: comentario.criadoEm
+      }).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao salvar comentario:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar comentario:", err?.message || err);
+      });
+    }
+
     return comentario;
   },
 
   deleteComentario: (id: string) => {
     dbCache.comentarios = dbCache.comentarios.filter(c => c.id !== id);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('comentarios').delete().eq('id', id).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao deletar comentario:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar comentario:", err?.message || err);
+      });
+    }
   },
 
   updateComentario: (id: string, updates: Partial<Comentario>) => {
@@ -833,7 +759,6 @@ export const localDb = {
     if (idx < 0) return null;
     dbCache.comentarios[idx] = { ...dbCache.comentarios[idx], ...updates };
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
     return dbCache.comentarios[idx];
   },
 
@@ -863,7 +788,29 @@ export const localDb = {
       favoritado = true;
     }
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      if (favoritado) {
+        supabaseClient.from('favoritos').insert({
+          usuarioEmail: email,
+          obraId: obraId
+        }).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao salvar favorito:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao salvar favorito:", err?.message || err);
+        });
+      } else {
+        supabaseClient.from('favoritos').delete()
+          .eq('usuarioEmail', email)
+          .eq('obraId', obraId)
+          .then(({ error }: any) => {
+            if (error) console.error("[Supabase Async] Erro ao deletar favorito:", error);
+          }).catch((err: any) => {
+            console.warn("[Supabase Async Network Error] Erro ao deletar favorito:", err?.message || err);
+          });
+      }
+    }
+
     return favoritado;
   },
 
@@ -891,7 +838,45 @@ export const localDb = {
       });
     }
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      if (seguindo) {
+        supabaseClient.from('canais_seguidos').insert({
+          usuarioEmail: email,
+          canalNome: canalNome
+        }).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao seguir canal:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao seguir canal:", err?.message || err);
+        });
+        
+        // Also sync notification
+        const lastNotif = dbCache.notificacoes[dbCache.notificacoes.length - 1];
+        supabaseClient.from('notificacoes').insert({
+          id: lastNotif.id,
+          titulo: lastNotif.titulo,
+          mensagem: lastNotif.mensagem,
+          lida: false,
+          criadoEm: lastNotif.criadoEm,
+          canalNome: lastNotif.canalNome,
+          usuarioEmail: lastNotif.usuarioEmail
+        }).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao postar notificacao de canal seguido:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao postar notificacao:", err?.message || err);
+        });
+      } else {
+        supabaseClient.from('canais_seguidos').delete()
+          .eq('usuarioEmail', email)
+          .eq('canalNome', canalNome)
+          .then(({ error }: any) => {
+            if (error) console.error("[Supabase Async] Erro ao deixar de seguir canal:", error);
+          }).catch((err: any) => {
+            console.warn("[Supabase Async Network Error] Erro ao deixar de seguir canal:", err?.message || err);
+          });
+      }
+    }
+
     return seguindo;
   },
 
@@ -922,7 +907,21 @@ export const localDb = {
     };
     dbCache.listas.push(novaLista);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('listas').insert({
+        id: novaLista.id,
+        nome: novaLista.nome,
+        descricao: novaLista.descricao,
+        usuarioEmail: novaLista.usuarioEmail,
+        obraIds: novaLista.obraIds || []
+      }).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao salvar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar lista:", err?.message || err);
+      });
+    }
+
     return novaLista;
   },
 
@@ -931,15 +930,36 @@ export const localDb = {
     if (idx >= 0) {
       dbCache.listas[idx] = lista;
       saveDb(dbCache);
-      scheduleSupabaseBackgroundSync();
     }
+
+    if (supabaseClient) {
+      supabaseClient.from('listas').upsert({
+        id: lista.id,
+        nome: lista.nome,
+        descricao: lista.descricao,
+        usuarioEmail: lista.usuarioEmail,
+        obraIds: lista.obraIds || []
+      }).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao atualizar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao atualizar lista:", err?.message || err);
+      });
+    }
+
     return lista;
   },
 
   deleteLista: (id: string) => {
     dbCache.listas = dbCache.listas.filter(l => l.id !== id);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('listas').delete().eq('id', id).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao deletar lista:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao deletar lista:", err?.message || err);
+      });
+    }
   },
 
   getNotificacoes: (email?: string) => {
@@ -964,7 +984,14 @@ export const localDb = {
     if (idx >= 0) {
       dbCache.notificacoes[idx].lida = true;
       saveDb(dbCache);
-      scheduleSupabaseBackgroundSync();
+    }
+
+    if (supabaseClient) {
+      supabaseClient.from('notificacoes').update({ lida: true }).eq('id', id).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao marcar notificacao como lida:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao marcar notificacao:", err?.message || err);
+      });
     }
   },
 
@@ -980,7 +1007,22 @@ export const localDb = {
       dbCache.notificacoes = [];
     }
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      if (email) {
+        supabaseClient.from('notificacoes').delete().eq('usuarioEmail', email).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao limpar notificacoes do usuario:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao limpar notificacoes:", err?.message || err);
+        });
+      } else {
+        supabaseClient.from('notificacoes').delete().neq('id', 'dummy').then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao limpar notificacoes:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao limpar notificacoes:", err?.message || err);
+        });
+      }
+    }
   },
   
   addNotificacao: (notificacao: Omit<Notificacao, 'id' | 'lida' | 'criadoEm'>) => {
@@ -992,7 +1034,23 @@ export const localDb = {
     };
     dbCache.notificacoes.unshift(nova);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
+    if (supabaseClient) {
+      supabaseClient.from('notificacoes').insert({
+        id: nova.id,
+        titulo: nova.titulo,
+        mensagem: nova.mensagem,
+        lida: false,
+        criadoEm: nova.criadoEm,
+        canalNome: nova.canalNome,
+        usuarioEmail: nova.usuarioEmail
+      }).then(({ error }: any) => {
+        if (error) console.error("[Supabase Async] Erro ao salvar nova notificacao:", error);
+      }).catch((err: any) => {
+        console.warn("[Supabase Async Network Error] Erro ao salvar nova notificacao:", err?.message || err);
+      });
+    }
+
     return nova;
   },
 
@@ -1009,7 +1067,14 @@ export const localDb = {
     dbCache.notificacoes = (dbCache.notificacoes || []).filter(n => n.id !== id);
     if (dbCache.notificacoes.length !== before) {
       saveDb(dbCache);
-      scheduleSupabaseBackgroundSync();
+
+      if (supabaseClient) {
+        supabaseClient.from('notificacoes').delete().eq('id', id).then(({ error }: any) => {
+          if (error) console.error("[Supabase Async] Erro ao deletar notificacao:", error);
+        }).catch((err: any) => {
+          console.warn("[Supabase Async Network Error] Erro ao deletar notificacao:", err?.message || err);
+        });
+      }
       return true;
     }
     return false;
@@ -1026,19 +1091,37 @@ export const localDb = {
 
   addUsuario: async (usuario: Omit<UserAccount, 'id' | 'createdAt'>, forcedId?: string) => {
     if (!dbCache.usuarios) dbCache.usuarios = [];
-    const hashedPassword = usuario.password
-      ? await hashPasswordIfNeeded(usuario.password)
-      : usuario.password;
     const novo: UserAccount = {
       ...usuario,
-      password: hashedPassword,
       id: forcedId || Math.random().toString(36).substring(2),
       createdAt: new Date().toISOString()
     };
 
+    if (supabaseClient) {
+      const { error } = await supabaseClient.from('usuarios').insert({
+        email: novo.email,
+        id: novo.id,
+        username: novo.username,
+        password: novo.password,
+        createdAt: novo.createdAt,
+        avatar: novo.avatar,
+        isAdmin: !!novo.isAdmin,
+        isDonor: !!novo.isDonor,
+        continueWatching: novo.continueWatching || []
+      });
+      if (error) {
+        console.error("[Supabase Async] Erro ao salvar novo usuario:", error);
+        let msg = error.message || "Erro ao salvar no banco Supabase.";
+        if (error.code === '42501' || msg.includes('row-level security')) {
+          msg = "Erro de RLS (Row Level Security) no Supabase. Por favor, desative o RLS ou configure as políticas para a tabela 'usuarios' no editor SQL do Supabase Dashboard utilizando o script disponível no Painel de Admin.";
+        }
+        throw new Error(msg);
+      }
+    }
+
     dbCache.usuarios.push(novo);
     saveDb(dbCache);
-    scheduleSupabaseBackgroundSync();
+
     return novo;
   },
 
@@ -1091,10 +1174,6 @@ export const localDb = {
   },
 
   updateUsuario: async (email: string, updates: Partial<UserAccount>) => {
-    const nextUpdates = { ...updates };
-    if (nextUpdates.password) {
-      nextUpdates.password = await hashPasswordIfNeeded(nextUpdates.password);
-    }
     if (!dbCache.usuarios) dbCache.usuarios = [];
     const idx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
     let current: UserAccount | null = null;
@@ -1102,7 +1181,7 @@ export const localDb = {
     if (idx >= 0) {
       dbCache.usuarios[idx] = {
         ...dbCache.usuarios[idx],
-        ...nextUpdates
+        ...updates
       };
       current = dbCache.usuarios[idx];
       saveDb(dbCache);
@@ -1111,10 +1190,10 @@ export const localDb = {
       if (dbUser) {
         const cacheIdx = dbCache.usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
         if (cacheIdx >= 0) {
-          dbCache.usuarios[cacheIdx] = { ...dbCache.usuarios[cacheIdx], ...nextUpdates };
+          dbCache.usuarios[cacheIdx] = { ...dbCache.usuarios[cacheIdx], ...updates };
           current = dbCache.usuarios[cacheIdx];
         } else {
-          current = { ...dbUser, ...nextUpdates };
+          current = { ...dbUser, ...updates };
           dbCache.usuarios.push(current);
         }
         saveDb(dbCache);
@@ -1123,7 +1202,27 @@ export const localDb = {
 
     if (!current) return null;
 
-    scheduleSupabaseBackgroundSync();
+    if (supabaseClient) {
+      const { error } = await supabaseClient.from('usuarios').update({
+        username: current.username,
+        password: current.password,
+        avatar: current.avatar,
+        isAdmin: !!current.isAdmin,
+        isDonor: !!current.isDonor,
+        role: current.role,
+        isBanned: !!current.isBanned,
+        isSuspended: !!current.isSuspended,
+        suspendedUntil: current.suspendedUntil || null,
+        bannedAt: current.bannedAt || null,
+        continueWatching: current.continueWatching || [],
+        descricao: current.descricao || "",
+        socialLinks: current.socialLinks || {}
+      }).eq('email', email);
+      if (error) {
+        console.error("[Supabase Async] Erro ao atualizar usuario:", error);
+      }
+    }
+
     return current;
   },
 
@@ -1175,7 +1274,7 @@ export const localDb = {
       id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       createdAt: new Date().toISOString(),
     };
-    dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 5000);
+    dbCache.adminConfig.auditLogs = [entry, ...(dbCache.adminConfig.auditLogs || [])].slice(0, 500);
     saveDb(dbCache);
     return entry;
   },
@@ -1581,159 +1680,7 @@ export const localDb = {
     return changed;
   },
 
-  saveAuthSession: (session: AuthSession): AuthSession => {
-    if (!dbCache.authSessions) dbCache.authSessions = [];
-    dbCache.authSessions = dbCache.authSessions.filter((s) => s.id !== session.id);
-    dbCache.authSessions.unshift(session);
-    saveDb(dbCache, true);
-    return session;
-  },
-
-  getAuthSessionByTokenHash: (tokenHash: string): AuthSession | null =>
-    (dbCache.authSessions || []).find((s) => s.tokenHash === tokenHash && !s.revokedAt) || null,
-
-  getAuthSessionById: (id: string): AuthSession | null =>
-    (dbCache.authSessions || []).find((s) => s.id === id) || null,
-
-  getAuthSessionsForUser: (email: string): AuthSession[] =>
-    (dbCache.authSessions || []).filter(
-      (s) => s.userEmail === email.toLowerCase() && !s.revokedAt
-    ),
-
-  touchAuthSession: (id: string): void => {
-    const session = (dbCache.authSessions || []).find((s) => s.id === id);
-    if (!session) return;
-    session.lastActivityAt = new Date().toISOString();
-    saveDb(dbCache);
-  },
-
-  revokeAuthSession: (id: string): void => {
-    const session = (dbCache.authSessions || []).find((s) => s.id === id);
-    if (!session) return;
-    session.revokedAt = new Date().toISOString();
-    saveDb(dbCache, true);
-  },
-
-  revokeAuthSessionsForUser: (email: string, exceptSessionId?: string): number => {
-    let count = 0;
-    for (const session of dbCache.authSessions || []) {
-      if (session.userEmail !== email.toLowerCase() || session.revokedAt) continue;
-      if (exceptSessionId && session.id === exceptSessionId) continue;
-      session.revokedAt = new Date().toISOString();
-      count++;
-    }
-    if (count > 0) saveDb(dbCache, true);
-    return count;
-  },
-
-  cleanupAuthSessions: (): number => {
-    const now = Date.now();
-    let count = 0;
-    dbCache.authSessions = (dbCache.authSessions || []).filter((s) => {
-      const expired = new Date(s.expiresAt).getTime() <= now || !!s.revokedAt;
-      if (expired) count++;
-      return !expired;
-    });
-    if (count > 0) saveDb(dbCache);
-    return count;
-  },
-
-  appendLoginAttempt: (attempt: LoginAttempt): void => {
-    if (!dbCache.loginAttempts) dbCache.loginAttempts = [];
-    dbCache.loginAttempts.unshift(attempt);
-    dbCache.loginAttempts = dbCache.loginAttempts.slice(0, 5000);
-    saveDb(dbCache);
-  },
-
-  countRecentLoginFailures: (ip: string, windowMs: number): number => {
-    const since = Date.now() - windowMs;
-    return (dbCache.loginAttempts || []).filter(
-      (a) => a.ip === ip && !a.success && new Date(a.createdAt).getTime() >= since
-    ).length;
-  },
-
-  saveCaptchaChallenge: (challenge: CaptchaChallenge): void => {
-    if (!dbCache.captchaChallenges) dbCache.captchaChallenges = [];
-    dbCache.captchaChallenges.unshift(challenge);
-    dbCache.captchaChallenges = dbCache.captchaChallenges.slice(0, 200);
-    saveDb(dbCache);
-  },
-
-  consumeCaptchaChallenge: (id: string, answer: string): boolean => {
-    const challenge = (dbCache.captchaChallenges || []).find((c) => c.id === id && !c.used);
-    if (!challenge) return false;
-    if (new Date(challenge.expiresAt).getTime() < Date.now()) return false;
-    const answerHash = hashToken(`${id}:${String(answer).trim()}`);
-    if (answerHash !== challenge.answerHash) return false;
-    challenge.used = true;
-    saveDb(dbCache);
-    return true;
-  },
-
-  appendSecurityAlert: (alert: SecurityAlert): void => {
-    if (!dbCache.securityAlerts) dbCache.securityAlerts = [];
-    dbCache.securityAlerts.unshift(alert);
-    dbCache.securityAlerts = dbCache.securityAlerts.slice(0, 1000);
-    saveDb(dbCache, true);
-  },
-
-  getSecurityAlerts: (): SecurityAlert[] => dbCache.securityAlerts || [],
-
-  claimIdempotencyKey: (scope: string, key: string, resultRef?: string): boolean => {
-    if (!dbCache.idempotencyKeys) dbCache.idempotencyKeys = [];
-    const composite = `${scope}:${key}`;
-    if (dbCache.idempotencyKeys.some((r) => r.key === composite)) return false;
-    dbCache.idempotencyKeys.unshift({
-      key: composite,
-      scope,
-      resultRef,
-      createdAt: new Date().toISOString(),
-    });
-    dbCache.idempotencyKeys = dbCache.idempotencyKeys.slice(0, 10000);
-    saveDb(dbCache, true);
-    return true;
-  },
-
-  hasIdempotencyKey: (scope: string, key: string): boolean =>
-    (dbCache.idempotencyKeys || []).some((r) => r.key === `${scope}:${key}`),
-
-  appendFinancialAuditLog: (entry: Omit<FinancialAuditEntry, 'id' | 'createdAt'>): FinancialAuditEntry => {
-    if (!dbCache.financialAuditLog) dbCache.financialAuditLog = [];
-    const row: FinancialAuditEntry = {
-      ...entry,
-      id: `fin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      createdAt: new Date().toISOString(),
-    };
-    dbCache.financialAuditLog.unshift(row);
-    saveDb(dbCache, true);
-    return row;
-  },
-
-  getFinancialAuditLog: (): FinancialAuditEntry[] => dbCache.financialAuditLog || [],
-
-  saveBackupRecord: (record: import('../types/admin.ts').BackupRecord & { fileName?: string }): void => {
-    if (!dbCache.adminConfig) dbCache.adminConfig = createDefaultAdminConfig();
-    dbCache.adminConfig.backups = [record, ...(dbCache.adminConfig.backups || [])].slice(0, 50);
-    saveDb(dbCache, true);
-  },
-
-  getBackupRecords: () => dbCache.adminConfig?.backups || [],
-
   exportDbSnapshot: (): DbSchema => {
     return JSON.parse(JSON.stringify(dbCache));
-  },
-
-  exportDbSnapshotRedacted: (): DbSchema => {
-    const snapshot = JSON.parse(JSON.stringify(dbCache)) as DbSchema;
-    snapshot.usuarios = (snapshot.usuarios || []).map((u) => ({
-      ...u,
-      password: u.password ? '[REDACTED]' : u.password,
-      twoFactorSecretEnc: u.twoFactorSecretEnc ? '[REDACTED]' : undefined,
-    }));
-    snapshot.authSessions = (snapshot.authSessions || []).map((s) => ({
-      ...s,
-      tokenHash: '[REDACTED]',
-    }));
-    return snapshot;
   },
 };

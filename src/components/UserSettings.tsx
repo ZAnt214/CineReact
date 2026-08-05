@@ -7,7 +7,6 @@ import DonorBadge from './profile/DonorBadge.tsx';
 import CreatorClipAccessPanel from './creator/CreatorClipAccessPanel.tsx';
 import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import type { ProfileLoadout } from '../types/gamification.ts';
-import { apiFetch } from '../utils/apiClient.ts';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -77,12 +76,13 @@ function ActionButton({
 }
 
 async function patchUser(
+  email: string,
   payload: Record<string, unknown>
 ): Promise<{ success: boolean; user?: UserState; error?: string }> {
-  const res = await apiFetch('/api/usuario/update', {
+  const res = await fetch('/api/usuario/update', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ email, ...payload }),
   });
   const data = await res.json();
   if (!res.ok || !data.success) {
@@ -109,7 +109,6 @@ function UserSettings({
     twitch: user.socialLinks?.twitch || '',
   });
   const [newPassword, setNewPassword] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [blurEffectsEnabled, setBlurEffectsEnabled] = useState(() => getBlurEffectsEnabled());
 
@@ -177,7 +176,7 @@ function UserSettings({
     setAvatarLoading(true);
     setAvatarMsg(null);
     try {
-      const result = await patchUser({ avatar: avatarDraft });
+      const result = await patchUser(user.email, { avatar: avatarDraft });
       if (result.success && result.user) {
         onUpdateUser(result.user);
         setAvatarMsg({ type: 'success', text: 'Foto atualizada.' });
@@ -195,10 +194,6 @@ function UserSettings({
     if (!user.isLoggedIn) return;
     setPasswordMsg(null);
 
-    if (!currentPassword) {
-      setPasswordMsg({ type: 'error', text: 'Informe a senha atual.' });
-      return;
-    }
     if (!newPassword) {
       setPasswordMsg({ type: 'error', text: 'Informe a nova senha.' });
       return;
@@ -214,10 +209,9 @@ function UserSettings({
 
     setPasswordLoading(true);
     try {
-      const result = await patchUser({ currentPassword, password: newPassword });
+      const result = await patchUser(user.email, { password: newPassword });
       if (result.success) {
         setNewPassword('');
-        setCurrentPassword('');
         setConfirmPassword('');
         setPasswordMsg({ type: 'success', text: 'Senha alterada com sucesso.' });
       } else {
@@ -228,14 +222,14 @@ function UserSettings({
     } finally {
       setPasswordLoading(false);
     }
-  }, [confirmPassword, currentPassword, newPassword, user.isLoggedIn]);
+  }, [confirmPassword, newPassword, user.email, user.isLoggedIn]);
 
   const saveSocialLinks = useCallback(async () => {
     if (!user.isLoggedIn || !isVerifiedCreator || !socialDirty) return;
     setSocialLoading(true);
     setSocialMsg(null);
     try {
-      const result = await patchUser({ socialLinks });
+      const result = await patchUser(user.email, { socialLinks });
       if (result.success && result.user) {
         onUpdateUser(result.user);
         setSocialMsg({ type: 'success', text: 'Links atualizados.' });
@@ -342,21 +336,6 @@ function UserSettings({
                 Altere sua senha de acesso. Não compartilhe com ninguém.
               </p>
               <div className="space-y-3 max-w-md">
-                <div>
-                  <FieldLabel htmlFor="current-password">Senha atual</FieldLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                    <input
-                      id="current-password"
-                      type="password"
-                      autoComplete="current-password"
-                      placeholder="Sua senha atual"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className={`${inputClass} pl-10`}
-                    />
-                  </div>
-                </div>
                 <div>
                   <FieldLabel htmlFor="new-password">Nova senha</FieldLabel>
                   <div className="relative">

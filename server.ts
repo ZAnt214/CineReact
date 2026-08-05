@@ -1,5 +1,7 @@
 import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
+import cors from "cors";
+import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
 import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
 import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
@@ -29,35 +31,14 @@ import {
   findBlockedWord,
 } from "./src/utils/platformEnforcement.ts";
 import { autoLiftExpiredSuspensions, processScheduledPublications } from "./src/utils/adminJobs.ts";
-import { installSecurity, setSessionCookie } from "./src/security/installSecurity.ts";
-import {
-  registerSecurityRoutes,
-  handleRegister,
-  handleLogin,
-  handlePasswordUpdate,
-} from "./src/security/authHandlers.ts";
-import { createSession } from "./src/security/sessions.ts";
 
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
-// Railway edge routes to containers over IPv6; 0.0.0.0 is IPv4-only.
-const BIND_HOST = process.env.BIND_HOST || (process.env.RAILWAY_ENVIRONMENT ? '::' : '0.0.0.0');
+const PORT = 3000;
 
-function respondHealth(_req: ExpressRequest, res: ExpressResponse) {
-  res.json({ status: 'ok', time: new Date().toISOString() });
-}
-
-app.get('/api/health', respondHealth);
-app.head('/api/health', (_req, res) => {
-  res.status(200).end();
-});
-
-const security = installSecurity(app);
-const requireAdmin = security.requireAdmin;
-
-app.use(express.json({ limit: "2mb" }));
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
 
 const cineClipsUploadDir = getClipsStorageDir();
 fs.mkdirSync(cineClipsUploadDir, { recursive: true });
@@ -424,19 +405,20 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     if (validReacts.length > 0) {
       const existingReacts = localDb.getReacts();
       const existingMap = new Map(existingReacts.map(r => [r.id, r]));
-      const mergedReacts = validReacts.map((valid) => {
+
+      for (const valid of validReacts) {
         const existing = existingMap.get(valid.id);
         if (existing) {
-          return {
+          localDb.saveReact({
             ...valid,
             isRecomendado: existing.isRecomendado || valid.isRecomendado,
-            likes: Math.max(existing.likes || 0, valid.likes || 0),
-          };
+            likes: Math.max(existing.likes || 0, valid.likes || 0)
+          });
+        } else {
+          localDb.saveReact(valid);
         }
-        return valid;
-      });
+      }
 
-      localDb.saveReactsBatch(mergedReacts);
       console.log(`[YouTube API] Sincronização concluída: ${validReacts.length} vídeos salvos para o canal ${channelId}.`);
     }
 
@@ -599,17 +581,6 @@ async function fetchRealChannelAvatar(channelId: string, pageUrl?: string): Prom
 }
 
 async function syncChannelAvatars() {
-  const skipOnRailway =
-    process.env.RAILWAY_ENVIRONMENT &&
-    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
-    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
-  if (skipOnRailway) {
-    console.log(
-      '[Avatar Sync] Adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar).'
-    );
-    return;
-  }
-
   console.log("[Avatar Sync] Iniciando sincronização de fotos de perfil dos canais...");
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
@@ -641,41 +612,54 @@ async function prefillDefaultReacts() {
     return;
   }
 
-  const skipOnRailway =
-    process.env.RAILWAY_ENVIRONMENT &&
-    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
-    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
-  if (skipOnRailway) {
-    console.log(
-      "[YouTube API] Pré-carregamento adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar)."
-    );
-    return;
-  }
-
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
-  if (canais.length === 0) return;
 
-  localDb.pauseSupabaseBackgroundSync();
-  try {
-    for (const canal of canais) {
-      if (!canal.channelId) continue;
+  for (const canal of canais) {
+    if (canal.channelId) {
       console.log(`[YouTube API] Sincronizando catálogo completo para o canal ${canal.titulo}...`);
-      await syncChannelVideos(canal.channelId, canal.id);
+      syncChannelVideos(canal.channelId, canal.id).catch(err => {
+        console.error(`[YouTube API] Erro ao pré-carregar canal ${canal.titulo}:`, err);
+      });
     }
-  } catch (err) {
-    console.warn('Aviso ao executar pré-carregamento inicial:', (err as Error)?.message || err);
-  } finally {
-    localDb.resumeSupabaseBackgroundSync();
-    localDb.flushSupabaseBackgroundSync().catch((err) => {
-      console.warn('[Supabase] Falha ao enviar sync pós-prefill:', (err as Error)?.message || err);
-    });
   }
 }
 
 // ==========================================
-// SECURITY — sessões, RBAC e auditoria via installSecurity()
+// ADMIN AUTH HELPERS
 // ==========================================
+
+function getAdminEmailFromRequest(req: ExpressRequest): string | undefined {
+  const header = req.headers["x-admin-email"];
+  if (typeof header === "string" && header.trim()) return header.trim();
+  const query = req.query.adminEmail;
+  if (typeof query === "string" && query.trim()) return query.trim();
+  const body = req.body?.adminEmail;
+  if (typeof body === "string" && body.trim()) return body.trim();
+  return undefined;
+}
+
+function verifyAdminEmailSync(email: string | undefined): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  if (clean === "mateusvini.t10@gmail.com") return true;
+  const user = localDb.findUsuarioByEmailSync(clean);
+  return !!user?.isAdmin;
+}
+
+function sanitizeUsuario(u: UserAccount) {
+  const { password, ...rest } = u;
+  return rest;
+}
+
+async function requireAdmin(req: ExpressRequest, res: ExpressResponse): Promise<string | null> {
+  const email = getAdminEmailFromRequest(req);
+  if (!verifyAdminEmailSync(email)) {
+    res.status(403).json({ error: "Acesso negado. Privilégios de administrador necessários." });
+    return null;
+  }
+  return email!;
+}
 
 async function discoverReactsFromYouTube(query: string, obraId: string, limit = 8): Promise<number> {
   const apiKey = process.env.YOUTUBE_API_KEY;
@@ -783,6 +767,11 @@ Formato:
 // ==========================================
 // API ROUTES
 // ==========================================
+
+// Health Check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", time: new Date().toISOString() });
+});
 
 // Config Check
 app.get("/api/config", (req, res) => {
@@ -2446,11 +2435,204 @@ app.post("/api/solicitacoes-canal", (req, res) => {
   }
 });
 
-// Cadastro de novos usuários (auth local com bcrypt — Supabase é só backup de dados)
-app.post("/api/cadastro", (req, res) => handleRegister(req, res));
+// Cadastro de novos usuários
+app.post("/api/cadastro", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+    }
 
-// Login de usuários (auth local com bcrypt, 2FA, CAPTCHA e rate limit)
-app.post("/api/login", (req, res) => handleLogin(req, res, security));
+    const existing = await localDb.findUsuarioByEmail(email);
+    if (existing) {
+      return res.status(400).json({ error: "Este e-mail já está cadastrado." });
+    }
+
+    const isSupabase = localDb.isSupabaseActive();
+    let novoUsuario;
+    let requiresVerification = false;
+
+    if (isSupabase) {
+      const supabase = localDb.getSupabaseClient();
+      // SignUp using Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username
+          }
+        }
+      });
+
+      if (authError) {
+        console.error("Erro ao registrar no Supabase Auth:", authError);
+        let errorMsg = `Erro no Supabase Auth: ${authError.message}`;
+        if (authError.message.toLowerCase().includes("rate limit") || authError.message.toLowerCase().includes("limiar")) {
+          errorMsg = "Limite de envio de e-mails excedido no Supabase (limite padrão de 3 e-mails por hora). Para facilitar os testes e liberar acesso instantâneo sem precisar confirmar e-mail, acesse o painel do Supabase -> Authentication -> Providers -> Email e DESATIVE a opção 'Confirm email'.";
+        }
+        return res.status(400).json({ error: errorMsg });
+      }
+
+      const userId = authData.user?.id || Math.random().toString(36).substring(2);
+
+      // Check if registration requires email verification
+      if (!authData.session && authData.user && !authData.user.confirmed_at) {
+        requiresVerification = true;
+      }
+
+      // Now create profile in public table
+      novoUsuario = await localDb.addUsuario({
+        username,
+        email,
+        password,
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
+        isDonor: false
+      }, userId);
+    } else {
+      novoUsuario = await localDb.addUsuario({
+        username,
+        email,
+        password,
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
+        isDonor: false
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      requiresVerification,
+      email: novoUsuario.email,
+      user: requiresVerification ? null : serializeUserState(novoUsuario)
+    });
+  } catch (error: any) {
+    console.error("Erro no cadastro de usuário:", error);
+    res.status(500).json({ error: error.message || "Erro interno no servidor ao realizar cadastro." });
+  }
+});
+
+// Login de usuários
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Master admin credentials check for mateusvini.t10@gmail.com
+    if (cleanEmail === "mateusvini.t10@gmail.com" && (password === "admin" || password === "Zantnoar12")) {
+      let dbAdmin = await localDb.findUsuarioByEmail(cleanEmail);
+      if (!dbAdmin) {
+        dbAdmin = await localDb.addUsuario({
+          username: "Mateus Vinícius",
+          email: "mateusvini.t10@gmail.com",
+          password: password,
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+          isAdmin: true,
+          isDonor: false
+        });
+      } else {
+        if (!dbAdmin.isAdmin || dbAdmin.password !== password) {
+          await localDb.updateUsuario(cleanEmail, { isAdmin: true, password });
+        }
+      }
+      return res.json({
+        success: true,
+        user: serializeUserState(dbAdmin, { isAdmin: true }),
+      });
+    }
+
+    const isSupabase = localDb.isSupabaseActive();
+
+    if (isSupabase) {
+      const supabase = localDb.getSupabaseClient();
+      // Login using Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password
+      });
+
+      if (authError) {
+        console.error("Erro ao autenticar no Supabase Auth:", authError);
+        let errorMsg = 'E-mail ou senha incorretos. Verifique e tente novamente.';
+        if (authError.message.toLowerCase().includes("confirm")) {
+          return res.status(401).json({
+            error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
+            requiresVerification: true,
+            email: cleanEmail
+          });
+        }
+        return res.status(401).json({ error: errorMsg });
+      }
+
+      // Fetch user profile from public table
+      let user = await localDb.findUsuarioByEmail(cleanEmail);
+      if (!user) {
+        // Fallback user profile creation if they exist in auth but not public table
+        user = await localDb.addUsuario({
+          username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
+          email: cleanEmail,
+          password: password,
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
+          isAdmin: cleanEmail === "mateusvini.t10@gmail.com",
+          isDonor: false
+        }, authData.user?.id);
+      }
+
+      const restriction = getAccountRestriction(user);
+      if (restriction.blocked) {
+        return res.status(403).json({
+          error: restriction.message,
+          accountBlocked: true,
+          code: restriction.code,
+        });
+      }
+
+      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
+
+      return res.json({
+        success: true,
+        user: serializeUserState(user, {
+          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
+        }),
+      });
+    } else {
+      const user = await localDb.findUsuarioByEmail(cleanEmail);
+      if (!user) {
+        return res.status(401).json({ error: "E-mail não cadastrado." });
+      }
+
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Senha incorreta." });
+      }
+
+      const restriction = getAccountRestriction(user);
+      if (restriction.blocked) {
+        return res.status(403).json({
+          error: restriction.message,
+          accountBlocked: true,
+          code: restriction.code,
+        });
+      }
+
+      await localDb.updateUsuario(cleanEmail, { lastActiveAt: new Date().toISOString() });
+
+      res.json({
+        success: true,
+        user: serializeUserState(user, {
+          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
+        }),
+      });
+    }
+  } catch (error) {
+    console.error("Erro no login de usuário:", error);
+    res.status(500).json({ error: "Erro interno no servidor ao realizar login." });
+  }
+});
 
 // Verificar código de e-mail OTP do Supabase
 app.post("/api/verificar-codigo", async (req, res) => {
@@ -2490,9 +2672,6 @@ app.post("/api/verificar-codigo", async (req, res) => {
         isDonor: false
       }, authData.user?.id);
     }
-
-    const { token: sessionToken } = createSession(user!.id, user!.email, req);
-    setSessionCookie(res, sessionToken);
 
     res.json({
       success: true,
@@ -2682,32 +2861,44 @@ app.get("/api/canais/:canalId/perfil-oficial", (req, res) => {
 // Atualizar perfil do usuário (Avatar, Descricao & Senha)
 app.post("/api/usuario/update", async (req, res) => {
   try {
-    const authEmail = security.getAuthEmail(req);
-    if (!authEmail) {
-      return res.status(401).json({ error: "Autenticação necessária." });
+    const { email, avatar, descricao, password, socialLinks } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "E-mail é obrigatório para identificação." });
     }
 
-    const { socialLinks } = req.body || {};
+    const existingUser = await localDb.findUsuarioByEmail(email);
+    if (!existingUser) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    const updates: Partial<UserAccount> = {};
+    if (avatar !== undefined) updates.avatar = avatar;
+    if (descricao !== undefined) updates.descricao = descricao;
+    if (password) updates.password = password;
+
     if (socialLinks !== undefined) {
-      const gamification = localDb.getGamificationProfile(authEmail);
+      const gamification = localDb.getGamificationProfile(email);
       migrateProfile(gamification);
       const canEditSocialLinks =
         isVerifiedCreatorLoadout(gamification.loadout) ||
         hasReward(gamification, VERIFIED_PROFILE_BADGE_ID);
-      if (!canEditSocialLinks) {
-        return res.status(403).json({ error: "Links sociais disponíveis apenas para criadores verificados." });
-      }
-      const existingUser = await localDb.findUsuarioByEmail(authEmail);
-      if (!existingUser) return res.status(404).json({ error: "Usuário não encontrado." });
-      await localDb.updateUsuario(authEmail, {
-        socialLinks: {
+      if (canEditSocialLinks) {
+        updates.socialLinks = {
           ...sanitizeSocialLinks(existingUser.socialLinks),
           ...sanitizeSocialLinks(socialLinks),
-        },
-      });
+        };
+      }
     }
 
-    await handlePasswordUpdate(req, res, security);
+    const user = await localDb.updateUsuario(email, updates);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({
+      success: true,
+      user: serializeUserState(user),
+    });
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
     res.status(500).json({ error: "Erro interno ao atualizar perfil." });
@@ -2907,11 +3098,10 @@ app.get("/api/search", (req, res) => {
 // GAMIFICATION
 // ==========================================
 registerGamificationRoutes(app);
-registerSecurityRoutes(app, security);
 registerDonationRoutes(app, requireAdmin);
 registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel);
 registerFinanceRoutes(app, requireAdmin);
-registerSubscriptionRoutes(app, requireAdmin, security);
+registerSubscriptionRoutes(app, requireAdmin);
 registerCreatorClipRoutes(app);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin);
@@ -2938,30 +3128,15 @@ app.get("/api/user/account-status", (req, res) => {
 // VITE MIDDLEWARE & STATIC ASSET SERVING
 // ==========================================
 
-async function ensureBootstrapAdmin() {
-  const email = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase().trim();
-  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
-  if (!email || !password) return;
-  const existing = await localDb.findUsuarioByEmail(email);
-  if (existing) return;
-  const { hashPassword } = await import("./src/security/password.ts");
-  await localDb.addUsuario({
-    username: "Administrador",
-    email,
-    password: await hashPassword(password),
-    isAdmin: true,
-    role: "admin",
-    isDonor: false,
-  });
-  console.log("[Security] Conta administrativa inicial criada via variáveis de ambiente.");
-}
-
-async function installFrontendMiddleware(): Promise<void> {
-  const distPath = path.join(process.cwd(), 'dist');
-  const distIndex = path.join(distPath, 'index.html');
-  const hasBuiltFrontend = fs.existsSync(distIndex);
-
-  const installStaticFrontend = () => {
+async function startServer() {
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath, {
       setHeaders(res, filePath) {
         if (filePath.endsWith('index.html')) {
@@ -2973,95 +3148,43 @@ async function installFrontendMiddleware(): Promise<void> {
         }
       },
     }));
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/uploads/')) {
-        return next();
-      }
-      if (req.path.includes('.')) {
-        return res.status(404).send('Not found');
-      }
+    app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.sendFile(distIndex);
+      res.sendFile(path.join(distPath, 'index.html'));
     });
-  };
-
-  if (hasBuiltFrontend || process.env.NODE_ENV === 'production') {
-    if (!hasBuiltFrontend) {
-      console.error('[BOOT] dist/index.html ausente — frontend estático indisponível');
-    } else {
-      console.log('[BOOT] Servindo frontend estático de', distPath);
-    }
-    installStaticFrontend();
-    return;
   }
-
-  try {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-    console.log('[BOOT] Vite middleware ativo (modo desenvolvimento)');
-  } catch (err: any) {
-    console.warn('[BOOT] Vite indisponível, usando dist/ se existir:', err?.message || err);
-    if (hasBuiltFrontend) {
-      installStaticFrontend();
-      return;
-    }
-    throw err;
-  }
-}
-
-async function startServer() {
-  await installFrontendMiddleware();
 
   ensureDemoCreatorProfile();
 
-  const server = app.listen(PORT, BIND_HOST, () => {
-    console.log(`[BOOT] Cine React em http://${BIND_HOST}:${PORT} (cwd=${process.cwd()})`);
-    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
-  });
-  server.on('error', (err) => {
-    console.error('[BOOT] Falha ao abrir porta:', err);
-    process.exit(1);
-  });
+  try {
+    await localDb.ensureCineClipsRestored();
+    if (localDb.isSupabaseActive()) {
+      console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
+      const success = await localDb.syncFromSupabase();
+      ensureDemoCreatorProfile();
+      if (success) {
+        console.log("[Supabase] Sincronização inicial na inicialização concluída!");
+      } else {
+        console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
+      }
+    }
+  } catch (err: any) {
+    console.warn("[Supabase] Erro ou timeout ao sincronizar dados na inicialização:", err?.message || err);
+  }
 
-  ensureBootstrapAdmin().catch((err) => {
-    console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
+    console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
   });
 
   syncChannelAvatars().catch(err => {
-    console.warn('Aviso ao sincronizar avatares dos canais:', err?.message || err);
+    console.warn("Aviso ao sincronizar avatares dos canais:", err?.message || err);
   });
   prefillDefaultReacts().catch(err => {
-    console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
-  });
-
-  setImmediate(() => {
-    void (async () => {
-      try {
-        await localDb.ensureCineClipsRestored();
-        if (localDb.isSupabaseActive()) {
-          console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
-          const success = await localDb.syncFromSupabase();
-          ensureDemoCreatorProfile();
-          if (success) {
-            console.log('[Supabase] Sincronização inicial na inicialização concluída!');
-          } else {
-            console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
-          }
-        }
-      } catch (err: any) {
-        console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
-      }
-    })();
+    console.warn("Aviso ao executar pré-carregamento inicial:", err?.message || err);
   });
 }
 
-startServer().catch((err) => {
-  console.error("Falha fatal ao iniciar o servidor:", err);
-  process.exit(1);
-});
+startServer();

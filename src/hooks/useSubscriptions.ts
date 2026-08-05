@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SubscriberEntitlements, SubscriptionCheckout } from '../types/finance.ts';
-import { apiFetch } from '../utils/apiClient.ts';
 
 export function useSubscriptions(email?: string, isLoggedIn?: boolean) {
   const [data, setData] = useState<SubscriberEntitlements | null>(null);
@@ -16,7 +15,7 @@ export function useSubscriptions(email?: string, isLoggedIn?: boolean) {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch('/api/subscriptions/me');
+      const res = await fetch(`/api/subscriptions/me?email=${encodeURIComponent(email)}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || 'Falha ao carregar assinaturas');
@@ -53,10 +52,10 @@ export function useSubscriptions(email?: string, isLoggedIn?: boolean) {
       setSubmitting(true);
       setError(null);
       try {
-        const res = await apiFetch('/api/subscriptions/checkout', {
+        const res = await fetch('/api/subscriptions/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan, creatorEmail }),
+          body: JSON.stringify({ email, plan, creatorEmail }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error || 'Não foi possível iniciar checkout');
@@ -80,10 +79,10 @@ export function useSubscriptions(email?: string, isLoggedIn?: boolean) {
       setSubmitting(true);
       setError(null);
       try {
-        const res = await apiFetch(`/api/subscriptions/checkouts/${checkoutId}/confirm-paid`, {
+        const res = await fetch(`/api/subscriptions/checkouts/${checkoutId}/confirm-paid`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ email }),
         });
         const body = await res.json();
         if (!res.ok && !body.pending) throw new Error(body.error || 'Erro ao confirmar');
@@ -104,10 +103,10 @@ export function useSubscriptions(email?: string, isLoggedIn?: boolean) {
       if (!email || !isLoggedIn) return false;
       setSubmitting(true);
       try {
-        const res = await apiFetch(`/api/subscriptions/${subscriptionId}/cancel`, {
+        const res = await fetch(`/api/subscriptions/${subscriptionId}/cancel`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ email }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error || 'Erro ao cancelar');
