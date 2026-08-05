@@ -1,26 +1,19 @@
 import type { Request, Response } from 'express';
 import { localDb } from '../db/local_db.ts';
 import { serializeUserState } from '../utils/userState.ts';
-import { getAccountRestriction } from '../utils/platformEnforcement.ts';
-import { hashPassword, verifyPassword, hashPasswordIfNeeded, isPasswordHashed } from './password.ts';
-import { createSession, revokeSessionByToken, revokeAllUserSessions } from './sessions.ts';
-import { setSessionCookie, clearSessionCookie, readSessionToken } from './installSecurity.ts';
+import { hashPasswordIfNeeded, verifyPassword, isPasswordHashed } from './password.ts';
+import { revokeSessionByToken, revokeAllUserSessions } from './sessions.ts';
+import { clearSessionCookie, readSessionToken } from './installSecurity.ts';
 import { isValidEmail, normalizeEmail, validatePasswordStrength } from './sanitize.ts';
-import { recordLoginAttempt, isLoginLocked, detectSuspiciousNewLogin } from './monitoring.ts';
-import { createCaptchaChallenge, verifyCaptchaChallenge } from './backup.ts';
+import { createCaptchaChallenge } from './backup.ts';
 import { userRequiresTwoFactor, verifyTwoFactorToken, generateTwoFactorSecret, enableTwoFactor, disableTwoFactor } from './twoFactor.ts';
 import { toAuthUser } from './rbac.ts';
 import { hashToken } from './crypto.ts';
 import {
   confirmEmailWithTokenHash,
-  createAdminConfirmedUser,
   getAppPublicUrl,
-  getEmailConfirmRedirectUrl,
   getEmailVerificationSetupHint,
   isSupabaseEmailAuthEnabled,
-  resendVerificationEmail,
-  signUpWithEmailVerification,
-  userNeedsEmailVerification,
 } from './supabaseAuth.ts';
 import {
   handleDiscordOAuthStart,
@@ -177,183 +170,17 @@ export function registerSecurityRoutes(app: import('express').Express, security:
 }
 
 export async function handleRegister(req: Request, res: Response): Promise<void> {
-  try {
-    const { username, email, password } = req.body || {};
-    if (!username || !email || !password) {
-      res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-      return;
-    }
-    if (!isValidEmail(email)) {
-      res.status(400).json({ error: 'E-mail inválido.' });
-      return;
-    }
-    const passErr = validatePasswordStrength(String(password));
-    if (passErr) {
-      res.status(400).json({ error: passErr });
-      return;
-    }
-
-    const cleanEmail = normalizeEmail(email);
-    const existing = await localDb.findUsuarioByEmail(cleanEmail);
-    if (existing) {
-      res.status(400).json({ error: 'Este e-mail já está cadastrado.' });
-      return;
-    }
-
-    const hashed = await hashPassword(String(password));
-    const bootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase() === cleanEmail;
-    const trimmedUsername = String(username).trim().slice(0, 80);
-    const supabaseEnabled = isSupabaseEmailAuthEnabled();
-
-    let supabaseAuthId: string | undefined;
-
-    if (supabaseEnabled) {
-      const supResult = bootstrapAdmin
-        ? await createAdminConfirmedUser(cleanEmail, String(password), trimmedUsername)
-        : await signUpWithEmailVerification(cleanEmail, String(password), trimmedUsername);
-
-      if (supResult.ok === false) {
-        res.status(400).json({
-          error: supResult.error,
-          supabaseErrorCode: supResult.code || null,
-        });
-        return;
-      }
-
-      supabaseAuthId = supResult.userId;
-    } else if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        '[Auth] SUPABASE_URL + SUPABASE_ANON_KEY ausentes — cadastro local sem Supabase Auth.'
-      );
-    }
-
-    const novoUsuario = await localDb.addUsuario({
-      username: trimmedUsername,
-      email: cleanEmail,
-      password: hashed,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120',
-      isAdmin: bootstrapAdmin,
-      role: bootstrapAdmin ? 'admin' : 'user',
-      isDonor: false,
-      emailVerified: true,
-      supabaseAuthId,
-    });
-
-    const { session, token } = createSession(novoUsuario.id, novoUsuario.email, req);
-    setSessionCookie(res, token);
-
-    res.status(201).json({
-      success: true,
-      requiresVerification: false,
-      email: novoUsuario.email,
-      user: serializeUserState(novoUsuario),
-      sessionId: session.id,
-    });
-  } catch (error: any) {
-    console.error('[Auth] Erro no cadastro:', error);
-    res.status(500).json({ error: 'Erro interno no servidor ao realizar cadastro.' });
-  }
+  res.status(403).json({
+    error: 'Cadastro disponível apenas via Discord. Use "Continuar com Discord" para criar sua conta.',
+    discordOnly: true,
+  });
 }
 
-export async function handleLogin(req: Request, res: Response, security: SecurityContext): Promise<void> {
-  try {
-    const { email, password, captchaId, captchaAnswer, twoFactorToken } = req.body || {};
-    if (!email || !password) {
-      res.status(400).json({ error: 'E-mail e senha são obrigatórios.' });
-      return;
-    }
-
-    if (isLoginLocked(req)) {
-      res.status(429).json({
-        error: 'Muitas tentativas falhas. Tente novamente em alguns minutos.',
-        locked: true,
-      });
-      return;
-    }
-
-    const cleanEmail = normalizeEmail(email);
-
-    const recentFailures = localDb.countRecentLoginFailures(
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip || 'unknown',
-      15 * 60 * 1000
-    );
-    if (recentFailures >= 5) {
-      if (!captchaId || !captchaAnswer || !verifyCaptchaChallenge(String(captchaId), String(captchaAnswer))) {
-        res.status(400).json({
-          error: 'Confirme o desafio de segurança.',
-          requiresCaptcha: true,
-        });
-        return;
-      }
-    }
-
-    const user = await localDb.findUsuarioByEmail(cleanEmail);
-    if (!user) {
-      recordLoginAttempt(req, cleanEmail, false, 'user_not_found');
-      res.status(401).json({ error: 'E-mail ou senha incorretos.' });
-      return;
-    }
-
-    const valid = await verifyPassword(String(password), user.password);
-    if (!valid) {
-      const meta = recordLoginAttempt(req, cleanEmail, false, 'invalid_password');
-      res.status(401).json({
-        error: 'E-mail ou senha incorretos.',
-        requiresCaptcha: meta.requiresCaptcha,
-      });
-      return;
-    }
-
-    if (!user.password || !isPasswordHashed(user.password)) {
-      await localDb.updateUsuario(cleanEmail, { password: await hashPassword(String(password)) });
-    }
-
-    const restriction = getAccountRestriction(user);
-    if (restriction.blocked) {
-      res.status(403).json({
-        error: restriction.message,
-        accountBlocked: true,
-        code: restriction.code,
-      });
-      return;
-    }
-
-    if (userRequiresTwoFactor(user)) {
-      if (!twoFactorToken || !verifyTwoFactorToken(user.twoFactorSecretEnc, String(twoFactorToken))) {
-        res.status(401).json({
-          error: 'Informe o código do autenticador.',
-          requires2FA: true,
-        });
-        return;
-      }
-    }
-
-    recordLoginAttempt(req, cleanEmail, true);
-    detectSuspiciousNewLogin(req, cleanEmail, user.lastUserAgent);
-    await localDb.updateUsuario(cleanEmail, {
-      lastActiveAt: new Date().toISOString(),
-      lastUserAgent: String(req.headers['user-agent'] || '').slice(0, 500),
-    } as any);
-
-    const { token } = createSession(user.id, user.email, req);
-    setSessionCookie(res, token);
-
-    const authUser = toAuthUser(user);
-    security.audit(req, {
-      actorEmail: authUser.email,
-      action: 'login',
-      targetType: 'user',
-      targetId: authUser.email,
-    });
-
-    res.json({
-      success: true,
-      user: serializeUserState(user, { isAdmin: authUser.isAdmin }),
-    });
-  } catch (error) {
-    console.error('[Auth] Erro no login:', error);
-    res.status(500).json({ error: 'Erro interno no servidor ao realizar login.' });
-  }
+export async function handleLogin(req: Request, res: Response, _security: SecurityContext): Promise<void> {
+  res.status(403).json({
+    error: 'Login disponível apenas via Discord. Use "Continuar com Discord" para entrar.',
+    discordOnly: true,
+  });
 }
 
 export async function handlePasswordUpdate(
@@ -450,46 +277,8 @@ export async function handleConfirmEmail(req: Request, res: Response): Promise<v
 }
 
 export async function handleResendVerification(req: Request, res: Response): Promise<void> {
-  try {
-    const email = normalizeEmail(String(req.body?.email || ''));
-    if (!email || !isValidEmail(email)) {
-      res.status(400).json({ error: 'Informe um e-mail válido.' });
-      return;
-    }
-
-    if (!isSupabaseEmailAuthEnabled()) {
-      res.status(503).json({
-        error: 'Verificação por e-mail não está configurada. Defina SUPABASE_URL e SUPABASE_ANON_KEY.',
-      });
-      return;
-    }
-
-    const user = await localDb.findUsuarioByEmail(email);
-    if (!user) {
-      res.status(404).json({ error: 'Não encontramos uma conta com este e-mail.' });
-      return;
-    }
-
-    if (!userNeedsEmailVerification(user)) {
-      res.json({
-        success: true,
-        message: 'Este e-mail já está confirmado. Você pode entrar na sua conta.',
-      });
-      return;
-    }
-
-    const sent = await resendVerificationEmail(email);
-    if (!sent.ok) {
-      res.status(400).json({ error: sent.error || 'Não foi possível reenviar o e-mail.' });
-      return;
-    }
-
-    res.json({
-      success: true,
-      message: 'E-mail de confirmação reenviado. Verifique sua caixa de entrada e spam.',
-    });
-  } catch (error) {
-    console.error('[Auth] Erro ao reenviar verificação:', error);
-    res.status(500).json({ error: 'Erro interno ao reenviar e-mail de confirmação.' });
-  }
+  res.status(403).json({
+    error: 'Login disponível apenas via Discord.',
+    discordOnly: true,
+  });
 }
