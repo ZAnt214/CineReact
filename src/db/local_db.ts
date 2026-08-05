@@ -567,7 +567,6 @@ async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boo
           email: u.email,
           id: u.id,
           username: u.username,
-          password: u.password,
           createdAt: u.createdAt,
           avatar: u.avatar,
           isAdmin: !!u.isAdmin,
@@ -918,7 +917,6 @@ export const localDb = {
       const u = (dbCache.usuarios || []).find(user => user.email.toLowerCase() === email.toLowerCase());
       return {
         username: u ? u.username : email.split('@')[0],
-        email: email,
         avatar: u ? u.avatar : undefined,
         isDonor: u ? u.isDonor : false
       };

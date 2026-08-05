@@ -21,6 +21,8 @@ import {
 } from './rewardsEngine.ts';
 import { ensureDonorRewardsSynced } from './donorRewards.ts';
 import type { GamificationEventType, LeaderboardType, ProfileLoadout } from '../types/gamification.ts';
+import type { SecurityContext } from '../security/types.ts';
+import { requireSessionEmail } from '../security/sessionBinding.ts';
 
 export function handleGamificationEvent(
   email: string,
@@ -102,11 +104,11 @@ export function purchaseCosmetic(email: string, itemId: string) {
   return { ...result, profile };
 }
 
-export function registerGamificationRoutes(app: import('express').Express) {
+export function registerGamificationRoutes(app: import('express').Express, security: SecurityContext) {
   app.get('/api/gamification/me', (req, res) => {
     try {
-      const email = req.query.email as string;
-      if (!email) return res.status(400).json({ error: 'Email requerido.' });
+      const email = requireSessionEmail(req, res, security, req.query.email as string);
+      if (!email) return;
       res.json(getGamificationMe(email));
     } catch (error) {
       console.error('Erro gamification/me:', error);
@@ -117,9 +119,11 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/event', (req, res) => {
     try {
       const { email, eventType, meta } = req.body;
-      if (!email || !eventType) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const reward = handleGamificationEvent(email, eventType, meta || {});
-      const me = getGamificationMe(email);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!eventType) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const reward = handleGamificationEvent(sessionEmail, eventType, meta || {});
+      const me = getGamificationMe(sessionEmail);
       res.json({ reward, ...me });
     } catch (error) {
       console.error('Erro gamification/event:', error);
@@ -154,11 +158,13 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/purchase', (req, res) => {
     try {
       const { email, itemId, cosmeticId } = req.body;
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
       const id = itemId || cosmeticId;
-      if (!email || !id) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const result = purchaseCosmetic(email, id);
+      if (!id) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const result = purchaseCosmetic(sessionEmail, id);
       if (!result.success) return res.status(400).json(result);
-      res.json({ ...result, ...getGamificationMe(email) });
+      res.json({ ...result, ...getGamificationMe(sessionEmail) });
     } catch (error) {
       console.error('Erro purchase:', error);
       res.status(500).json({ error: 'Erro na compra.' });
@@ -168,11 +174,13 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/equip', (req, res) => {
     try {
       const { email, itemId } = req.body;
-      if (!email || !itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const profile = localDb.getGamificationProfile(email);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(sessionEmail);
       const result = equipReward(profile, itemId);
       if (result.success) localDb.saveGamificationProfile(profile);
-      res.json({ ...result, ...getGamificationMe(email) });
+      res.json({ ...result, ...getGamificationMe(sessionEmail) });
     } catch (error) {
       res.status(500).json({ error: 'Erro ao equipar item.' });
     }
@@ -181,11 +189,13 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/unequip', (req, res) => {
     try {
       const { email, itemId } = req.body;
-      if (!email || !itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const profile = localDb.getGamificationProfile(email);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!itemId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(sessionEmail);
       const result = unequipReward(profile, itemId);
       if (result.success) localDb.saveGamificationProfile(profile);
-      res.json({ ...result, ...getGamificationMe(email) });
+      res.json({ ...result, ...getGamificationMe(sessionEmail) });
     } catch (error) {
       res.status(500).json({ error: 'Erro ao desequipar item.' });
     }
@@ -194,12 +204,14 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/loadout', (req, res) => {
     try {
       const { email, loadout } = req.body as { email: string; loadout: ProfileLoadout };
-      if (!email || !loadout) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const profile = localDb.getGamificationProfile(email);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!loadout) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(sessionEmail);
       const result = saveLoadout(profile, loadout);
       if (!result.success) return res.status(400).json(result);
       localDb.saveGamificationProfile(profile);
-      res.json({ ...result, ...getGamificationMe(email) });
+      res.json({ ...result, ...getGamificationMe(sessionEmail) });
     } catch (error) {
       res.status(500).json({ error: 'Erro ao salvar personalização.' });
     }
@@ -208,12 +220,14 @@ export function registerGamificationRoutes(app: import('express').Express) {
   app.post('/api/gamification/redeem', (req, res) => {
     try {
       const { email, code } = req.body;
-      if (!email || !code) return res.status(400).json({ error: 'Parâmetros inválidos.' });
-      const profile = localDb.getGamificationProfile(email);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!code) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      const profile = localDb.getGamificationProfile(sessionEmail);
       const result = redeemPromoCode(profile, code);
       if (!result.success) return res.status(400).json(result);
       localDb.saveGamificationProfile(profile);
-      res.json({ ...result, ...getGamificationMe(email) });
+      res.json({ ...result, ...getGamificationMe(sessionEmail) });
     } catch (error) {
       res.status(500).json({ error: 'Erro ao resgatar código.' });
     }

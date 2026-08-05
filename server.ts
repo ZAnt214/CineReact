@@ -20,7 +20,7 @@ import { listVideoCreators } from "./src/gamification/platformCreators.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
-import { serializeUserState } from "./src/utils/userState.ts";
+import { serializeUserState, sanitizeUsuario } from "./src/utils/userState.ts";
 import { sanitizeSocialLinks } from "./src/utils/socialLinks.ts";
 import {
   getAccountRestriction,
@@ -38,6 +38,7 @@ import {
   handlePasswordUpdate,
 } from "./src/security/authHandlers.ts";
 import { createSession } from "./src/security/sessions.ts";
+import { requireSessionEmail } from "./src/security/sessionBinding.ts";
 
 dotenv.config();
 
@@ -2236,11 +2237,13 @@ app.get("/api/comentarios", (req, res) => {
 app.post("/api/comentarios", (req, res) => {
   try {
     const { obraId, usuarioNome, usuarioEmail, texto } = req.body;
-    if (!obraId || !usuarioNome || !usuarioEmail || !texto) {
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    if (!obraId || !usuarioNome || !texto) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
     }
 
-    if (!assertActiveAccount(usuarioEmail, res)) return;
+    if (!assertActiveAccount(sessionEmail, res)) return;
 
     const blockedWords = localDb.getAdminConfig().blockedWords || [];
     const blocked = findBlockedWord(texto, blockedWords);
@@ -2252,13 +2255,13 @@ app.post("/api/comentarios", (req, res) => {
       id: Math.random().toString(36).substring(2),
       obraId,
       usuarioNome,
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       texto,
       likes: 0,
       criadoEm: new Date().toISOString(),
       moderationStatus: 'approved',
     });
-    const gamificationReward = handleGamificationEvent(usuarioEmail, 'comment');
+    const gamificationReward = handleGamificationEvent(sessionEmail, 'comment');
     res.status(201).json({
       ...enrichCommentAuthorProfile(novo),
       gamificationReward,
@@ -2286,7 +2289,7 @@ app.delete("/api/comentarios/:id", async (req, res) => {
       return res.status(404).json({ error: "Comentário não encontrado." });
     }
 
-    const requesterEmail = (req.query.email as string) || req.body?.email;
+    const requesterEmail = security.getAuthEmail(req) || (req.query.email as string) || req.body?.email;
     const isAuthor = requesterEmail && comentario.usuarioEmail.toLowerCase() === requesterEmail.toLowerCase();
 
     if (!isAdmin && !isAuthor) {
@@ -2303,8 +2306,8 @@ app.delete("/api/comentarios/:id", async (req, res) => {
 // Favoritos routes
 app.get("/api/favoritos", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getFavoritos(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar favoritos." });
@@ -2314,10 +2317,12 @@ app.get("/api/favoritos", (req, res) => {
 app.post("/api/favoritos/toggle", (req, res) => {
   try {
     const { email, obraId } = req.body;
-    if (!email || !obraId) return res.status(400).json({ error: "Email e ObraId requeridos." });
-    if (!assertActiveAccount(email, res)) return;
-    const favoritado = localDb.toggleFavorito(email, obraId);
-    const gamificationReward = favoritado ? handleGamificationEvent(email, 'favorite') : null;
+    const sessionEmail = requireSessionEmail(req, res, security, email);
+    if (!sessionEmail) return;
+    if (!obraId) return res.status(400).json({ error: "ObraId requerido." });
+    if (!assertActiveAccount(sessionEmail, res)) return;
+    const favoritado = localDb.toggleFavorito(sessionEmail, obraId);
+    const gamificationReward = favoritado ? handleGamificationEvent(sessionEmail, 'favorite') : null;
     res.json({ favoritado, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao alterar favorito." });
@@ -2327,8 +2332,8 @@ app.post("/api/favoritos/toggle", (req, res) => {
 // Canais de seguir routes
 app.get("/api/canais/seguidos", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getCanaisSeguidos(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar canais seguidos." });
@@ -2348,10 +2353,12 @@ app.get("/api/canais/:canalNome/seguidores", (req, res) => {
 app.post("/api/canais/seguir", (req, res) => {
   try {
     const { email, canalNome } = req.body;
-    if (!email || !canalNome) return res.status(400).json({ error: "Email e canalNome requeridos." });
-    const seguindo = localDb.toggleSeguirCanal(email, canalNome);
+    const sessionEmail = requireSessionEmail(req, res, security, email);
+    if (!sessionEmail) return;
+    if (!canalNome) return res.status(400).json({ error: "canalNome requerido." });
+    const seguindo = localDb.toggleSeguirCanal(sessionEmail, canalNome);
     const gamificationReward = seguindo
-      ? handleGamificationEvent(email, 'follow_creator', {
+      ? handleGamificationEvent(sessionEmail, 'follow_creator', {
           creatorName: canalNome,
           creatorId: resolveCreatorId(canalNome) || undefined,
         })
@@ -2365,8 +2372,8 @@ app.post("/api/canais/seguir", (req, res) => {
 // Listas Personalizadas
 app.get("/api/listas", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getListas(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar listas." });
@@ -2376,14 +2383,16 @@ app.get("/api/listas", (req, res) => {
 app.post("/api/listas", (req, res) => {
   try {
     const { nome, descricao, usuarioEmail, obraIds } = req.body;
-    if (!nome || !usuarioEmail) return res.status(400).json({ error: "Nome e Email requeridos." });
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    if (!nome) return res.status(400).json({ error: "Nome requerido." });
     const nova = localDb.createLista({
       nome,
       descricao: descricao || "",
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       obraIds: Array.isArray(obraIds) ? obraIds : []
     });
-    const gamificationReward = handleGamificationEvent(usuarioEmail, 'list_create');
+    const gamificationReward = handleGamificationEvent(sessionEmail, 'list_create');
     res.status(201).json({ ...nova, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao criar lista." });
@@ -2393,11 +2402,17 @@ app.post("/api/listas", (req, res) => {
 app.put("/api/listas/:id", (req, res) => {
   try {
     const { nome, descricao, usuarioEmail, obraIds } = req.body;
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    const existing = localDb.getListas(sessionEmail).find((l) => l.id === req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: "Lista não encontrada." });
+    }
     const atualizada = localDb.updateLista({
       id: req.params.id,
       nome,
       descricao,
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       obraIds
     });
     res.json(atualizada);
@@ -2408,6 +2423,12 @@ app.put("/api/listas/:id", (req, res) => {
 
 app.delete("/api/listas/:id", (req, res) => {
   try {
+    const sessionEmail = requireAuthenticatedEmail(req, res);
+    if (!sessionEmail) return;
+    const existing = localDb.getListas(sessionEmail).find((l) => l.id === req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: "Lista não encontrada." });
+    }
     localDb.deleteLista(req.params.id);
     res.json({ message: "Lista removida com sucesso." });
   } catch (error: any) {
@@ -2418,7 +2439,8 @@ app.delete("/api/listas/:id", (req, res) => {
 // Notificações
 app.get("/api/notificacoes", (req, res) => {
   try {
-    const email = req.query.email as string;
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getNotificacoes(email));
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar notificações." });
@@ -2427,6 +2449,12 @@ app.get("/api/notificacoes", (req, res) => {
 
 app.post("/api/notificacoes/:id/ler", (req, res) => {
   try {
+    const sessionEmail = requireAuthenticatedEmail(req, res);
+    if (!sessionEmail) return;
+    const notif = localDb.getNotificacoes(sessionEmail).find((n) => n.id === req.params.id);
+    if (!notif) {
+      return res.status(404).json({ error: "Notificação não encontrada." });
+    }
     localDb.marcarNotificacaoComoLida(req.params.id);
     res.json({ success: true });
   } catch (error) {
@@ -2436,7 +2464,8 @@ app.post("/api/notificacoes/:id/ler", (req, res) => {
 
 app.delete("/api/notificacoes", (req, res) => {
   try {
-    const email = req.query.email as string;
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     localDb.limparNotificacoes(email);
     res.json({ success: true });
   } catch (error) {
@@ -2830,22 +2859,23 @@ app.get("/api/search", (req, res) => {
 // ==========================================
 // GAMIFICATION
 // ==========================================
-registerGamificationRoutes(app);
+registerGamificationRoutes(app, security);
 registerSecurityRoutes(app, security);
-registerDonationRoutes(app, requireAdmin);
-registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel);
+registerDonationRoutes(app, requireAdmin, security);
+registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel, security);
 registerFinanceRoutes(app, requireAdmin);
 registerSubscriptionRoutes(app, requireAdmin, security);
-registerCreatorClipRoutes(app);
+registerCreatorClipRoutes(app, security);
 registerAdminPanelRoutes(app, requireAdmin);
-registerCineClipsRoutes(app, requireAdmin);
+registerCineClipsRoutes(app, requireAdmin, security);
 
 app.get("/api/user/account-status", (req, res) => {
-  const email = String(req.query.email || "").trim().toLowerCase();
-  if (!email) return res.status(400).json({ error: "E-mail obrigatório." });
+  const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);
+  if (!sessionEmail) return;
   autoLiftExpiredSuspensions();
-  const user = localDb.findUsuarioByEmailSync(email);
+  const user = localDb.findUsuarioByEmailSync(sessionEmail);
   const restriction = getAccountRestriction(user);
+  const isStaff = !!(user?.isAdmin || user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'curator');
   res.json({
     ok: !restriction.blocked,
     code: restriction.code,
@@ -2853,7 +2883,7 @@ app.get("/api/user/account-status", (req, res) => {
     isBanned: !!user?.isBanned,
     isSuspended: !!user?.isSuspended,
     suspendedUntil: user?.suspendedUntil,
-    isAdmin: !!user?.isAdmin,
+    isAdmin: isStaff,
     role: user?.role || (user?.isAdmin ? "admin" : "user"),
   });
 });

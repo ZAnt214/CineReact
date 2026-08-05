@@ -7,6 +7,8 @@ import {
 import { grantCreatorVerificationBenefits } from '../gamification/creatorVerificationRewards.ts';
 import { isVerifiedCreatorLoadout } from '../gamification/verifiedCreator.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
+import type { SecurityContext } from '../security/types.ts';
+import { requireSessionEmail } from '../security/sessionBinding.ts';
 
 type RequireAdminFn = (req: Request, res: Response) => Promise<string | null>;
 
@@ -46,21 +48,21 @@ function expireStaleRequests() {
 export function registerCreatorVerificationRoutes(
   app: Express,
   requireAdmin: RequireAdminFn,
-  resolveYouTubeChannel: ResolveYouTubeChannelFn
+  resolveYouTubeChannel: ResolveYouTubeChannelFn,
+  security: SecurityContext
 ) {
   app.post('/api/creator-verification/request', async (req, res) => {
     try {
       expireStaleRequests();
 
       const { email, youtubeChannelUrl } = req.body || {};
-      if (!email) {
-        return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
       if (!youtubeChannelUrl?.trim()) {
         return res.status(400).json({ error: 'Informe o link ou @ do seu canal no YouTube.' });
       }
 
-      const user = localDb.findUsuarioByEmailSync(String(email));
+      const user = localDb.findUsuarioByEmailSync(sessionEmail);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado. Faça login com sua conta.' });
       }
@@ -119,12 +121,10 @@ export function registerCreatorVerificationRoutes(
     try {
       expireStaleRequests();
 
-      const email = String(req.query.email || '');
-      if (!email) {
-        return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);
+      if (!sessionEmail) return;
 
-      const user = localDb.findUsuarioByEmailSync(email);
+      const user = localDb.findUsuarioByEmailSync(sessionEmail);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado.' });
       }
@@ -148,13 +148,12 @@ export function registerCreatorVerificationRoutes(
 
       const { id } = req.params;
       const { email } = req.body || {};
-      if (!email) {
-        return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
 
       const request = localDb
         .getCreatorVerificationRequests()
-        .find((r) => r.id === id && r.usuarioEmail.toLowerCase() === String(email).toLowerCase());
+        .find((r) => r.id === id && r.usuarioEmail.toLowerCase() === sessionEmail);
 
       if (!request) {
         return res.status(404).json({ error: 'Solicitação não encontrada.' });
