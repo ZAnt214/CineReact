@@ -27,6 +27,8 @@ import {
 } from './downloader.ts';
 import { exportClipWithBranding } from './exportVideo.ts';
 import { maskClipForViewer, canUserViewClip } from '../finance/clipAccess.ts';
+import type { SecurityContext } from '../security/types.ts';
+import { requireSessionEmail, sessionEmailOrUndefined } from '../security/sessionBinding.ts';
 
 function enrichCineClipComment(comment: CineClipComment) {
   return enrichCommentAuthorProfile(comment);
@@ -417,10 +419,14 @@ async function sendBrandedClipDownload(clip: CineClip, res: Response) {
   res.sendFile(filePath);
 }
 
-export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin) {
+export function registerCineClipsRoutes(
+  app: Express,
+  requireAdmin: RequireAdmin,
+  security: SecurityContext
+) {
   app.get('/api/cineclips/feed', (req, res) => {
     try {
-      const email = String(req.query.email || '').trim().toLowerCase() || undefined;
+      const email = sessionEmailOrUndefined(req, security);
       const cursor = parseInt(String(req.query.cursor || '0'), 10) || 0;
       const limit = Math.min(parseInt(String(req.query.limit || '10'), 10) || 10, 30);
 
@@ -477,7 +483,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       if (!clip || clip.status !== 'published') {
         return res.status(404).json({ error: 'Clip não encontrado.' });
       }
-      const email = String(req.query.email || '').trim().toLowerCase();
+      const email = sessionEmailOrUndefined(req, security);
       const resolved = withResolvedMediaUrls(clip);
       res.json({
         clip: maskClipForViewer(resolved, email || undefined),
@@ -514,16 +520,17 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/watch', (req, res) => {
     try {
       const { email, watchSeconds = 0, completed = false } = req.body || {};
-      if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
 
       const clip = localDb.getCineClipById(req.params.id);
       if (!clip) return res.status(404).json({ error: 'Clip não encontrado.' });
-      if (!canUserViewClip(String(email), clip)) {
+      if (!canUserViewClip(sessionEmail, clip)) {
         return res.status(403).json({ error: 'Conteúdo exclusivo para assinantes.', code: 'SUBSCRIPTION_REQUIRED' });
       }
 
       localDb.recordClipWatch({
-        usuarioEmail: email,
+        usuarioEmail: sessionEmail,
         clipId: req.params.id,
         watchSeconds,
         completed: !!completed,
@@ -532,12 +539,12 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
 
       let gamificationReward = null;
       if (completed) {
-        gamificationReward = handleGamificationEvent(email, 'clip_watch_complete', {
+        gamificationReward = handleGamificationEvent(sessionEmail, 'clip_watch_complete', {
           clipId: req.params.id,
           watchSeconds,
         });
       } else if (watchSeconds >= 5) {
-        gamificationReward = handleGamificationEvent(email, 'clip_watch', {
+        gamificationReward = handleGamificationEvent(sessionEmail, 'clip_watch', {
           clipId: req.params.id,
           watchSeconds,
         });
@@ -552,11 +559,12 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/like', (req, res) => {
     try {
       const { email, action = 'like' } = req.body || {};
-      if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
-      const result = localDb.likeCineClip(req.params.id, email, action);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      const result = localDb.likeCineClip(req.params.id, sessionEmail, action);
       let gamificationReward = null;
       if (action === 'like') {
-        gamificationReward = handleGamificationEvent(email, 'clip_like', { clipId: req.params.id });
+        gamificationReward = handleGamificationEvent(sessionEmail, 'clip_like', { clipId: req.params.id });
       }
       res.json({ ...result, gamificationReward });
     } catch (err: any) {
@@ -567,11 +575,12 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/favorite', (req, res) => {
     try {
       const { email, action = 'favorite' } = req.body || {};
-      if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
-      const result = localDb.favoriteCineClip(req.params.id, email, action);
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      const result = localDb.favoriteCineClip(req.params.id, sessionEmail, action);
       let gamificationReward = null;
       if (action === 'favorite') {
-        gamificationReward = handleGamificationEvent(email, 'clip_favorite', { clipId: req.params.id });
+        gamificationReward = handleGamificationEvent(sessionEmail, 'clip_favorite', { clipId: req.params.id });
       }
       res.json({ ...result, gamificationReward });
     } catch (err: any) {
@@ -582,11 +591,10 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/share', (req, res) => {
     try {
       const { email } = req.body || {};
-      const shares = localDb.shareCineClip(req.params.id, email);
-      let gamificationReward = null;
-      if (email) {
-        gamificationReward = handleGamificationEvent(email, 'clip_share', { clipId: req.params.id });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      const shares = localDb.shareCineClip(req.params.id, sessionEmail);
+      const gamificationReward = handleGamificationEvent(sessionEmail, 'clip_share', { clipId: req.params.id });
       res.json({ shares, gamificationReward });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -605,14 +613,16 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/comments', (req, res) => {
     try {
       const { email, nome, texto } = req.body || {};
-      if (!email || !texto?.trim()) {
-        return res.status(400).json({ error: 'E-mail e texto são obrigatórios.' });
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!texto?.trim()) {
+        return res.status(400).json({ error: 'Texto é obrigatório.' });
       }
 
       const comment: CineClipComment = {
         id: `cc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         clipId: req.params.id,
-        usuarioEmail: email,
+        usuarioEmail: sessionEmail,
         usuarioNome: nome || 'Usuário',
         texto: texto.trim().slice(0, 500),
         likes: 0,
@@ -621,7 +631,7 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
       };
 
       localDb.addCineClipComment(comment);
-      const gamificationReward = handleGamificationEvent(email, 'clip_comment', { clipId: req.params.id });
+      const gamificationReward = handleGamificationEvent(sessionEmail, 'clip_comment', { clipId: req.params.id });
 
       res.json({ comment: enrichCineClipComment(comment), gamificationReward });
     } catch (err: any) {
@@ -632,12 +642,14 @@ export function registerCineClipsRoutes(app: Express, requireAdmin: RequireAdmin
   app.post('/api/cineclips/:id/report', (req, res) => {
     try {
       const { email, nome, reason, details } = req.body || {};
-      if (!email || !reason) return res.status(400).json({ error: 'Dados incompletos.' });
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
+      if (!reason) return res.status(400).json({ error: 'Dados incompletos.' });
 
       const report = localDb.reportCineClip({
         id: `report-${Date.now()}`,
         clipId: req.params.id,
-        usuarioEmail: email,
+        usuarioEmail: sessionEmail,
         usuarioNome: nome || 'Usuário',
         reason,
         details: details?.slice(0, 500),

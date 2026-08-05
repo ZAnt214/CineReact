@@ -7,7 +7,16 @@ import { getClientIp } from './audit.ts';
 export function validateMercadoPagoWebhook(req: Request, paymentId: string): boolean {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
   if (!secret) {
-    // Fallback: exige token de API para validação via fetch no serviço
+    if (process.env.NODE_ENV === 'production') {
+      raiseSecurityAlert({
+        type: 'webhook_invalid',
+        severity: 'critical',
+        message: 'Webhook Mercado Pago sem MERCADOPAGO_WEBHOOK_SECRET em produção',
+        ip: getClientIp(req),
+        metadata: JSON.stringify({ paymentId }),
+      });
+      return false;
+    }
     return !!process.env.MERCADOPAGO_ACCESS_TOKEN;
   }
 

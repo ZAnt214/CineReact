@@ -5,6 +5,13 @@ import { getAccountRestriction } from './platformEnforcement.ts';
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120';
 
+/** Remove credenciais e segredos antes de expor registros de usuário em APIs admin. */
+export function sanitizeUsuario(user: UserAccount | null | undefined): Omit<UserAccount, 'password' | 'twoFactorSecretEnc'> | null {
+  if (!user) return null;
+  const { password: _pw, twoFactorSecretEnc: _tfa, ...safe } = user;
+  return safe;
+}
+
 export function serializeUserState(user: UserAccount, overrides: Partial<UserState> = {}): UserState {
   const restriction = getAccountRestriction(user);
   return {

@@ -2,19 +2,21 @@ import type { Express, Request, Response } from 'express';
 import { localDb } from '../db/local_db.ts';
 import { isVerifiedCreatorEmail } from './subscriptionService.ts';
 import type { ClipAccessLevel } from '../types/finance.ts';
+import type { SecurityContext } from '../security/types.ts';
+import { requireSessionEmail } from '../security/sessionBinding.ts';
 
-export function registerCreatorClipRoutes(app: Express) {
+export function registerCreatorClipRoutes(app: Express, security: SecurityContext) {
   app.get('/api/creator/clips', (req, res) => {
     try {
-      const email = String(req.query.email || '').toLowerCase().trim();
-      if (!email) return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      if (!isVerifiedCreatorEmail(email)) {
+      const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);
+      if (!sessionEmail) return;
+      if (!isVerifiedCreatorEmail(sessionEmail)) {
         return res.status(403).json({ error: 'Apenas criadores verificados podem gerenciar conteúdo.' });
       }
 
       const clips = localDb
         .getCineClips()
-        .filter((c) => c.criadorEmail?.toLowerCase() === email)
+        .filter((c) => c.criadorEmail?.toLowerCase() === sessionEmail)
         .sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime());
 
       res.json({ clips });
@@ -25,15 +27,15 @@ export function registerCreatorClipRoutes(app: Express) {
 
   app.patch('/api/creator/clips/:id/access', (req, res) => {
     try {
-      const email = String(req.body?.email || '').toLowerCase().trim();
-      if (!email) return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      if (!isVerifiedCreatorEmail(email)) {
+      const sessionEmail = requireSessionEmail(req, res, security, req.body?.email);
+      if (!sessionEmail) return;
+      if (!isVerifiedCreatorEmail(sessionEmail)) {
         return res.status(403).json({ error: 'Apenas criadores verificados.' });
       }
 
       const clip = localDb.getCineClipById(req.params.id);
       if (!clip) return res.status(404).json({ error: 'Vídeo não encontrado.' });
-      if (clip.criadorEmail?.toLowerCase() !== email) {
+      if (clip.criadorEmail?.toLowerCase() !== sessionEmail) {
         return res.status(403).json({ error: 'Este vídeo não pertence à sua conta.' });
       }
 

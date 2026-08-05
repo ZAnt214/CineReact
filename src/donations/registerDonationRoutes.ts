@@ -9,6 +9,8 @@ import {
   recordDonationPayment,
 } from '../gamification/donorRewards.ts';
 import { serializeUserState } from '../utils/userState.ts';
+import type { SecurityContext } from '../security/types.ts';
+import { requireSessionEmail } from '../security/sessionBinding.ts';
 
 type RequireAdminFn = (req: Request, res: Response) => Promise<string | null>;
 
@@ -16,15 +18,18 @@ function uid(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function registerDonationRoutes(app: Express, requireAdmin: RequireAdminFn) {
+export function registerDonationRoutes(
+  app: Express,
+  requireAdmin: RequireAdminFn,
+  security: SecurityContext
+) {
   app.post('/api/donations/request', (req, res) => {
     try {
       const { email, nome } = req.body || {};
-      if (!email) {
-        return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, email);
+      if (!sessionEmail) return;
 
-      const user = localDb.findUsuarioByEmailSync(String(email));
+      const user = localDb.findUsuarioByEmailSync(sessionEmail);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado. Faça login com sua conta.' });
       }
@@ -68,17 +73,15 @@ export function registerDonationRoutes(app: Express, requireAdmin: RequireAdminF
 
   app.get('/api/donations/me', (req, res) => {
     try {
-      const email = String(req.query.email || '');
-      if (!email) {
-        return res.status(400).json({ error: 'E-mail é obrigatório.' });
-      }
+      const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);
+      if (!sessionEmail) return;
 
-      const user = localDb.findUsuarioByEmailSync(email);
+      const user = localDb.findUsuarioByEmailSync(sessionEmail);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado.' });
       }
 
-      const request = localDb.getLatestDonationRequestForUser(email);
+      const request = localDb.getLatestDonationRequestForUser(sessionEmail);
       res.json({
         isDonor: !!user.isDonor,
         request,
