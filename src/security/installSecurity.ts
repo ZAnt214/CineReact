@@ -80,6 +80,17 @@ export function installSecurity(app: Express): SecurityContext {
             /* ignore malformed origin */
           }
         }
+        if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PUBLIC_DOMAIN) {
+          try {
+            const host = new URL(origin).hostname;
+            if (host.endsWith('.up.railway.app') || host.endsWith('.railway.app')) {
+              callback(null, true);
+              return;
+            }
+          } catch {
+            /* ignore malformed origin */
+          }
+        }
         callback(new Error('CORS bloqueado'));
       },
       credentials: true,

@@ -42,7 +42,7 @@ async function prepareDataDir() {
 console.log('[BOOT] Ambiente:', {
   cwd: process.cwd(),
   port: process.env.PORT,
-  bindHost: process.env.BIND_HOST || (process.env.RAILWAY_ENVIRONMENT ? '::' : '0.0.0.0'),
+  bindHost: process.env.BIND_HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV,
   railway: process.env.RAILWAY_ENVIRONMENT,
   dataDir: process.env.CINE_REACT_DATA_DIR,
@@ -50,8 +50,7 @@ console.log('[BOOT] Ambiente:', {
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('[BOOT] uncaughtException:', err);
-  process.exit(1);
+  console.error('[BOOT] uncaughtException (processo continua):', err);
 });
 
 process.on('unhandledRejection', (err) => {
