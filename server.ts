@@ -42,9 +42,16 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+// Railway edge routes to containers over IPv6; 0.0.0.0 is IPv4-only.
+const BIND_HOST = process.env.BIND_HOST || (process.env.RAILWAY_ENVIRONMENT ? '::' : '0.0.0.0');
 
-app.get('/api/health', (_req, res) => {
+function respondHealth(_req: ExpressRequest, res: ExpressResponse) {
   res.json({ status: 'ok', time: new Date().toISOString() });
+}
+
+app.get('/api/health', respondHealth);
+app.head('/api/health', (_req, res) => {
+  res.status(200).end();
 });
 
 const security = installSecurity(app);
@@ -3013,9 +3020,13 @@ async function startServer() {
 
   ensureDemoCreatorProfile();
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[BOOT] Cine React em http://0.0.0.0:${PORT} (cwd=${process.cwd()})`);
+  const server = app.listen(PORT, BIND_HOST, () => {
+    console.log(`[BOOT] Cine React em http://${BIND_HOST}:${PORT} (cwd=${process.cwd()})`);
     console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+  });
+  server.on('error', (err) => {
+    console.error('[BOOT] Falha ao abrir porta:', err);
+    process.exit(1);
   });
 
   ensureBootstrapAdmin().catch((err) => {
