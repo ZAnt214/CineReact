@@ -20,29 +20,74 @@ export function isCustomAuthEmailConfigured(): boolean {
   return !!getResendApiKey() && !!getAuthEmailFrom();
 }
 
-function buildVerificationEmailHtml(actionLink: string): string {
+function buildVerificationEmailHtml(actionLink: string, appUrl: string): string {
+  const year = new Date().getFullYear();
   return `
-    <div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-      <h1 style="color: #111; font-size: 22px;">Confirme seu e-mail</h1>
-      <p style="color: #444; line-height: 1.5;">
-        Clique no botão abaixo para ativar sua conta no CineReact.
-      </p>
-      <p style="margin: 28px 0;">
-        <a href="${actionLink}" style="background: #eab308; color: #111; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">
-          Confirmar e-mail
-        </a>
-      </p>
-      <p style="color: #666; font-size: 13px; line-height: 1.5;">
-        Se o botão não funcionar, copie e cole este link no navegador:<br />
-        <a href="${actionLink}">${actionLink}</a>
-      </p>
-    </div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirme seu e-mail — CineReact</title>
+</head>
+<body style="margin:0;padding:0;background:#050508;font-family:Inter,Segoe UI,system-ui,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#050508;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#0a0a0c;border:1px solid rgba(201,169,98,0.22);border-radius:20px;">
+          <tr>
+            <td style="padding:32px 32px 20px;text-align:center;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.28em;text-transform:uppercase;color:#c9a962;margin-bottom:10px;">CineReact</div>
+              <h1 style="margin:0;font-size:24px;line-height:1.25;font-weight:800;color:#ffffff;">Confirme seu e-mail</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 8px;">
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#a1a1aa;">
+                Falta só um passo para ativar sua conta. Clique no botão abaixo para confirmar seu e-mail e começar a explorar reacts no CineReact.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 12px;text-align:center;">
+              <a href="${actionLink}" style="display:inline-block;background:linear-gradient(90deg,#9a7b3c 0%,#e8d5b5 100%);color:#111111;font-size:15px;font-weight:800;text-decoration:none;padding:14px 32px;border-radius:999px;">
+                Confirmar e-mail
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 32px 28px;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#71717a;">
+                Se o botão não funcionar, copie e cole este link no navegador:
+              </p>
+              <p style="margin:8px 0 0;font-size:12px;line-height:1.5;">
+                <a href="${actionLink}" style="color:#c9a962;word-break:break-all;">${actionLink}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px 28px;border-top:1px solid rgba(255,255,255,0.06);">
+              <p style="margin:0;font-size:11px;line-height:1.5;color:#52525b;text-align:center;">
+                Você recebeu este e-mail porque criou uma conta em
+                <a href="${appUrl}" style="color:#c9a962;text-decoration:none;">CineReact</a>.
+                <br />Se não foi você, ignore esta mensagem.
+                <br />© ${year} CineReact
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `.trim();
 }
 
 export async function sendVerificationEmailViaResend(
   to: string,
-  actionLink: string
+  actionLink: string,
+  appUrl: string
 ): Promise<ResendResult> {
   const apiKey = getResendApiKey();
   const from = getAuthEmailFrom();
@@ -65,7 +110,7 @@ export async function sendVerificationEmailViaResend(
         from,
         to: [to],
         subject: 'Confirme seu e-mail — CineReact',
-        html: buildVerificationEmailHtml(actionLink),
+        html: buildVerificationEmailHtml(actionLink, appUrl),
       }),
     });
 
@@ -126,17 +171,18 @@ export async function generateSignupConfirmationLink(
   return { ok: true, actionLink };
 }
 
-export async function sendVerificationEmailWithGenerateLinkFallback(
+export async function sendBrandedVerificationEmail(
   admin: SupabaseClient,
   email: string,
   redirectTo: string,
+  appUrl: string,
   password?: string
 ): Promise<ResendResult> {
   if (!isCustomAuthEmailConfigured()) {
     return {
       ok: false,
       error:
-        'SMTP do Supabase falhou e envio alternativo não está configurado (RESEND_API_KEY + AUTH_EMAIL_FROM).',
+        'E-mail personalizado não configurado. Defina RESEND_API_KEY e AUTH_EMAIL_FROM no Railway.',
     };
   }
 
@@ -145,5 +191,15 @@ export async function sendVerificationEmailWithGenerateLinkFallback(
     return { ok: false, error: link.error };
   }
 
-  return sendVerificationEmailViaResend(email, link.actionLink);
+  return sendVerificationEmailViaResend(email, link.actionLink, appUrl);
+}
+
+/** @deprecated Use sendBrandedVerificationEmail */
+export async function sendVerificationEmailWithGenerateLinkFallback(
+  admin: SupabaseClient,
+  email: string,
+  redirectTo: string,
+  password?: string
+): Promise<ResendResult> {
+  return sendBrandedVerificationEmail(admin, email, redirectTo, redirectTo.replace(/\/api\/auth\/confirm-email$/, ''), password);
 }

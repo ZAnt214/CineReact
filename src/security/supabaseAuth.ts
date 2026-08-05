@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient, type AuthError } from '@supabase/sup
 import type { UserAccount } from '../types.ts';
 import {
   isCustomAuthEmailConfigured,
-  sendVerificationEmailWithGenerateLinkFallback,
+  sendBrandedVerificationEmail,
 } from './authEmailDelivery.ts';
 
 let anonAuthClient: SupabaseClient | null = null;
@@ -344,6 +344,19 @@ async function deliverVerificationEmail(
   password?: string,
   adminClient?: SupabaseClient | null
 ): Promise<{ ok: boolean; error?: string }> {
+  const redirectTo = getEmailConfirmRedirectUrl();
+  const appUrl = resolvePublicAppUrl();
+  const admin = adminClient ?? getSupabaseAdminAuthClient();
+
+  if (isCustomAuthEmailConfigured() && admin) {
+    const branded = await sendBrandedVerificationEmail(admin, email, redirectTo, appUrl, password);
+    if (branded.ok) {
+      console.info('[Auth] E-mail de confirmação CineReact enviado via Resend.');
+      return { ok: true };
+    }
+    console.warn('[Auth] Envio CineReact via Resend falhou, tentando Supabase:', 'error' in branded ? branded.error : '');
+  }
+
   const client = getSupabaseAnonAuthClient();
   if (!client) {
     return { ok: false, error: 'Verificação por e-mail não configurada.' };
@@ -352,7 +365,7 @@ async function deliverVerificationEmail(
   const { error } = await client.auth.resend({
     type: 'signup',
     email,
-    options: { emailRedirectTo: getEmailConfirmRedirectUrl() },
+    options: { emailRedirectTo: redirectTo },
   });
 
   if (!error) {
@@ -365,17 +378,11 @@ async function deliverVerificationEmail(
     status: error.status,
   });
 
-  const admin = adminClient ?? getSupabaseAdminAuthClient();
   if (!admin) {
     return { ok: false, error: formatSupabaseAuthError(error) };
   }
 
-  const fallback = await sendVerificationEmailWithGenerateLinkFallback(
-    admin,
-    email,
-    getEmailConfirmRedirectUrl(),
-    password
-  );
+  const fallback = await sendBrandedVerificationEmail(admin, email, redirectTo, appUrl, password);
   if (fallback.ok) {
     console.info('[Auth] E-mail de confirmação enviado via Resend (fallback após falha do Supabase SMTP).');
     return { ok: true };
