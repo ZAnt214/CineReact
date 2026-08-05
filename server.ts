@@ -42,8 +42,8 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-// Railway edge routes to containers over IPv6; 0.0.0.0 is IPv4-only.
-const BIND_HOST = process.env.BIND_HOST || (process.env.RAILWAY_ENVIRONMENT ? '::' : '0.0.0.0');
+// 0.0.0.0 funcionou em produção (#186). Use BIND_HOST=:: só se necessário.
+const BIND_HOST = process.env.BIND_HOST || '0.0.0.0';
 
 function respondHealth(_req: ExpressRequest, res: ExpressResponse) {
   res.json({ status: 'ok', time: new Date().toISOString() });
