@@ -18,11 +18,15 @@ import {
   getEmailConfirmRedirectUrl,
   getEmailVerificationSetupHint,
   isSupabaseEmailAuthEnabled,
-  isSupabaseEmailConfirmed,
   resendVerificationEmail,
   signUpWithEmailVerification,
   userNeedsEmailVerification,
 } from './supabaseAuth.ts';
+import {
+  handleDiscordOAuthStart,
+  handleOAuthCallback,
+  getOAuthSetupHint,
+} from './oauthHandlers.ts';
 import type { SecurityContext } from './types.ts';
 
 export function registerSecurityRoutes(app: import('express').Express, security: SecurityContext) {
@@ -158,6 +162,18 @@ export function registerSecurityRoutes(app: import('express').Express, security:
   app.get('/api/auth/verification-setup', (_req, res) => {
     res.json(getEmailVerificationSetupHint());
   });
+
+  app.get('/api/auth/oauth/discord', (req, res) => {
+    void handleDiscordOAuthStart(req, res);
+  });
+
+  app.get('/api/auth/oauth/callback', (req, res) => {
+    void handleOAuthCallback(req, res);
+  });
+
+  app.get('/api/auth/oauth/setup', (_req, res) => {
+    res.json(getOAuthSetupHint());
+  });
 }
 
 export async function handleRegister(req: Request, res: Response): Promise<void> {
@@ -190,8 +206,6 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
     const supabaseEnabled = isSupabaseEmailAuthEnabled();
 
     let supabaseAuthId: string | undefined;
-    let emailVerified = true;
-    let emailSendFailed = false;
 
     if (supabaseEnabled) {
       const supResult = bootstrapAdmin
@@ -201,18 +215,15 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       if (supResult.ok === false) {
         res.status(400).json({
           error: supResult.error,
-          setupRedirectUrl: getEmailConfirmRedirectUrl(),
           supabaseErrorCode: supResult.code || null,
         });
         return;
       }
 
       supabaseAuthId = supResult.userId;
-      emailVerified = supResult.alreadyConfirmed;
-      emailSendFailed = !!supResult.emailSendFailed;
     } else if (process.env.NODE_ENV === 'production') {
       console.warn(
-        '[Auth] SUPABASE_URL + SUPABASE_ANON_KEY ausentes — cadastro sem verificação de e-mail.'
+        '[Auth] SUPABASE_URL + SUPABASE_ANON_KEY ausentes — cadastro local sem Supabase Auth.'
       );
     }
 
@@ -224,23 +235,9 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       isAdmin: bootstrapAdmin,
       role: bootstrapAdmin ? 'admin' : 'user',
       isDonor: false,
-      emailVerified,
+      emailVerified: true,
       supabaseAuthId,
     });
-
-    if (supabaseEnabled && !emailVerified) {
-      res.status(201).json({
-        success: true,
-        requiresVerification: true,
-        emailSendFailed,
-        message: emailSendFailed
-          ? 'Conta criada, mas o Supabase não enviou o e-mail. Verifique Authentication → Providers → Email (Confirm email) no Supabase e use "Reenviar e-mail de confirmação".'
-          : 'Enviamos um e-mail de confirmação (Supabase). Verifique sua caixa de entrada e spam antes de entrar.',
-        email: novoUsuario.email,
-        setupRedirectUrl: emailSendFailed ? getEmailConfirmRedirectUrl() : undefined,
-      });
-      return;
-    }
 
     const { session, token } = createSession(novoUsuario.id, novoUsuario.email, req);
     setSessionCookie(res, token);
@@ -319,24 +316,6 @@ export async function handleLogin(req: Request, res: Response, security: Securit
         code: restriction.code,
       });
       return;
-    }
-
-    if (userNeedsEmailVerification(user)) {
-      let verified = user.emailVerified === true;
-      if (!verified && user.supabaseAuthId) {
-        verified = await isSupabaseEmailConfirmed(user.supabaseAuthId);
-        if (verified) {
-          await localDb.updateUsuario(cleanEmail, { emailVerified: true });
-        }
-      }
-      if (!verified) {
-        res.status(403).json({
-          error: 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada ou spam.',
-          requiresVerification: true,
-          email: cleanEmail,
-        });
-        return;
-      }
     }
 
     if (userRequiresTwoFactor(user)) {

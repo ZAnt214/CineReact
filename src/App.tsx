@@ -156,13 +156,35 @@ export default function App() {
     if (!authState) return;
 
     const notices: Record<string, string> = {
+      'oauth-success': 'Login com Discord realizado com sucesso!',
+      'oauth-error': 'Não foi possível entrar com Discord. Tente novamente ou use e-mail e senha.',
+      'oauth-missing': 'Login com Discord cancelado ou link inválido.',
+      'oauth-blocked': 'Sua conta está restrita. Entre em contato com o suporte.',
       'verify-success': 'E-mail confirmado com sucesso! Agora você pode entrar na sua conta.',
-      'verify-error': 'Não foi possível confirmar o e-mail. O link pode ter expirado — peça um novo envio ao entrar.',
+      'verify-error': 'Não foi possível confirmar o e-mail. O link pode ter expirado.',
       'verify-missing': 'Link de confirmação inválido ou incompleto.',
-      'verify-unavailable': 'Verificação por e-mail temporariamente indisponível. Tente mais tarde.',
+      'verify-unavailable': 'Verificação temporariamente indisponível.',
     };
 
-    if (notices[authState]) {
+    if (authState === 'oauth-success') {
+      apiFetch('/api/auth/me')
+        .then(async (res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.success && data.user) {
+            setUser(data.user);
+            setShowAuthModal(false);
+          } else {
+            setAuthNotice(notices['oauth-success']);
+            setAuthInitialMode('login');
+            setShowAuthModal(true);
+          }
+        })
+        .catch(() => {
+          setAuthNotice(notices['oauth-success']);
+          setAuthInitialMode('login');
+          setShowAuthModal(true);
+        });
+    } else if (notices[authState]) {
       setAuthNotice(notices[authState]);
       setAuthInitialMode('login');
       setShowAuthModal(true);
