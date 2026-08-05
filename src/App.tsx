@@ -234,7 +234,7 @@ export default function App() {
     let cancelled = false;
     const verifyAccount = async () => {
       try {
-        const res = await fetch(`/api/user/account-status?email=${encodeURIComponent(user.email)}`);
+        const res = await apiFetch(`/api/user/account-status?email=${encodeURIComponent(user.email)}`);
         const data = await res.json();
         if (cancelled) return;
         if (!data.ok) {
@@ -398,9 +398,8 @@ export default function App() {
   const handleToggleSeguir = async (canalNome: string) => {
     if (!user.isLoggedIn) return;
     try {
-      const res = await fetch('/api/canais/seguir', {
+      const res = await apiFetch('/api/canais/seguir', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, canalNome })
       });
       if (res.ok) {
@@ -503,9 +502,8 @@ export default function App() {
     });
 
     if (user.email) {
-      fetch('/api/usuario/continue-watching', {
+      apiFetch('/api/usuario/continue-watching', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: user.email,
           reactId,

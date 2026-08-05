@@ -7,6 +7,7 @@ import type {
   ProfileLoadout,
 } from '../types/gamification.ts';
 import type { GamificationEventType } from '../types/gamification.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 interface UseGamificationOptions {
   email?: string;
@@ -23,7 +24,7 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     if (!email || !enabled) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/gamification/me?email=${encodeURIComponent(email)}`);
+      const res = await apiFetch(`/api/gamification/me?email=${encodeURIComponent(email)}`);
       if (res.ok) setData(await res.json());
     } catch (e) {
       console.error('Erro ao carregar gamificação:', e);
@@ -40,9 +41,8 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     async (eventType: GamificationEventType, meta: Record<string, unknown> = {}) => {
       if (!email) return null;
       try {
-        const res = await fetch('/api/gamification/event', {
+        const res = await apiFetch('/api/gamification/event', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, eventType, meta }),
         });
         if (res.ok) {
@@ -85,9 +85,8 @@ export function useGamification({ email, enabled = true }: UseGamificationOption
     async (endpoint: string, body: Record<string, unknown>) => {
       if (!email) return false;
       try {
-        const res = await fetch(endpoint, {
+        const res = await apiFetch(endpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, ...body }),
         });
         if (res.ok) {

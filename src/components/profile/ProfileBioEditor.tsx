@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { apiFetch } from '../../utils/apiClient.ts';
 
 const MAX_BIO = 180;
 
@@ -40,9 +41,8 @@ function ProfileBioEditor({ bio, email, onSaved, className = '' }: ProfileBioEdi
     setSaving(true);
     setError('');
     try {
-      const res = await fetch('/api/usuario/update', {
+      const res = await apiFetch('/api/usuario/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, descricao: trimmed }),
       });
       const data = await res.json();

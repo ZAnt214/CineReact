@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DonationRequest } from '../types/donations.ts';
 import { DONATION_MP_LINK } from '../types/donations.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 interface DonationStatus {
   isDonor: boolean;
@@ -21,7 +22,7 @@ export function useDonationStatus(email?: string, isLoggedIn?: boolean) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/donations/me?email=${encodeURIComponent(email)}`);
+      const res = await apiFetch(`/api/donations/me?email=${encodeURIComponent(email)}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || 'Falha ao carregar status');
@@ -59,9 +60,8 @@ export function useDonationStatus(email?: string, isLoggedIn?: boolean) {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch('/api/donations/request', {
+      const res = await apiFetch('/api/donations/request', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
       const body = await res.json();

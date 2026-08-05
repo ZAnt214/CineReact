@@ -3,6 +3,7 @@ import { Bookmark, Heart, FolderHeart, Plus, Trash2, Edit2, Play, AlertCircle, Y
 import { Obra, ListaPersonalizada, UserState } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
+import { apiFetch } from '../utils/apiClient.ts';
 
 interface MyListProps {
   user: UserState;
@@ -38,21 +39,21 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
       }
 
       // Fetch favorites
-      const favsRes = await fetch(`/api/favoritos?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      const favsRes = await apiFetch(`/api/favoritos?email=${encodeURIComponent(user.email)}`).catch(() => null);
       if (favsRes && favsRes.ok) {
         const favIds: string[] = await favsRes.json().catch(() => []);
         setFavoritos(obras.filter(o => favIds.includes(o.id)));
       }
 
       // Fetch lists
-      const listsRes = await fetch(`/api/listas?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      const listsRes = await apiFetch(`/api/listas?email=${encodeURIComponent(user.email)}`).catch(() => null);
       if (listsRes && listsRes.ok) {
         const data = await listsRes.json().catch(() => []);
         setListas(data);
       }
 
       // Fetch followed channels
-      const chanRes = await fetch(`/api/canais/seguidos?email=${encodeURIComponent(user.email)}`).catch(() => null);
+      const chanRes = await apiFetch(`/api/canais/seguidos?email=${encodeURIComponent(user.email)}`).catch(() => null);
       if (chanRes && chanRes.ok) {
         const data = await chanRes.json().catch(() => []);
         setCanaisSeguidos(data);
@@ -75,9 +76,8 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
 
     setSubmittingList(true);
     try {
-      const res = await fetch('/api/listas', {
+      const res = await apiFetch('/api/listas', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nome: newListName,
           descricao: newListDesc,
@@ -101,7 +101,7 @@ export default function MyList({ user, onSelectObra }: MyListProps) {
   const handleDeleteList = async (id: string) => {
     if (!confirm('Deseja realmente excluir esta lista personalizada?')) return;
     try {
-      const res = await fetch(`/api/listas/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/listas/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchUserData();
       }

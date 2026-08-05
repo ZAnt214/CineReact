@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CineClip } from '../types/cineclips.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 interface FeedState {
   clips: CineClip[];
@@ -32,7 +33,7 @@ export function useCineClipsFeed(email?: string) {
       if (cursor) params.set('cursor', cursor);
       params.set('limit', '6');
 
-      const res = await fetch(`/api/cineclips/feed?${params}`, {
+      const res = await apiFetch(`/api/cineclips/feed?${params}`, {
         headers: { Accept: 'application/json' },
       });
       if (!res.ok) throw new Error('Falha ao carregar feed');
@@ -95,9 +96,8 @@ export async function clipAction(
   if (action === 'favorite') body.action = 'favorite';
   if (action === 'unfavorite') body.action = 'unfavorite';
 
-  const res = await fetch(endpoints[action], {
+  const res = await apiFetch(endpoints[action], {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error('Ação falhou');
@@ -112,9 +112,8 @@ export async function fetchHashtagClips(tag: string) {
 }
 
 export async function postClipComment(clipId: string, email: string, nome: string, texto: string) {
-  const res = await fetch(`/api/cineclips/${clipId}/comments`, {
+  const res = await apiFetch(`/api/cineclips/${clipId}/comments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, nome, texto }),
   });
   if (!res.ok) throw new Error('Falha ao comentar');
@@ -132,7 +131,7 @@ export async function downloadClipVideo(clipId: string, options?: { adminEmail?:
     ? `/api/admin/cineclips/${clipId}/download`
     : `/api/cineclips/${clipId}/download`;
 
-  const res = await fetch(endpoint, {
+  const res = await apiFetch(endpoint, {
     headers: options?.adminEmail ? { 'x-admin-email': options.adminEmail } : undefined,
   });
 
@@ -163,9 +162,8 @@ export async function reportClip(
   reason: string,
   details?: string
 ) {
-  const res = await fetch(`/api/cineclips/${clipId}/report`, {
+  const res = await apiFetch(`/api/cineclips/${clipId}/report`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, nome, reason, details }),
   });
   if (!res.ok) throw new Error('Falha ao denunciar');
