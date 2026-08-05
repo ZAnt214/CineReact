@@ -115,6 +115,7 @@
 
 .cine-brand--center .cine-brand-tagline {
   text-align: center;
+  padding-left: 0;
 }
 
 .cine-brand--xs { font-size: 1.35rem; }

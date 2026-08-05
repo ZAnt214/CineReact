@@ -201,12 +201,12 @@ export default function AuthModal({
                 </p>
               </div>
 
-              <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center max-w-lg md:max-w-none mx-auto">
-                <div className="md:hidden mb-8">
-                  <CineReactLogo size="lg" align="center" animated />
+              <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center max-w-lg md:max-w-none mx-auto w-full">
+                <div className="flex justify-center w-full mb-6 md:mb-8">
+                  <CineReactLogo size="lg" align="center" animated showTagline />
                 </div>
 
-                <div className="text-center md:text-left mb-6">
+                <div className="text-center mb-6">
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold tracking-wider uppercase mb-3">
                     Acesso gratuito
                   </div>

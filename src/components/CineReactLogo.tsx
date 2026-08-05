@@ -70,7 +70,7 @@ export default function CineReactLogo({
   showTagline = true,
 }: CineReactLogoProps) {
   const sizeClass = sizeStyles[size];
-  const wrapperClass = `select-none inline-block ${align === 'center' ? 'mx-auto block w-fit' : ''} ${className}`;
+  const wrapperClass = `select-none ${align === 'center' ? 'mx-auto block w-fit' : 'inline-block'} ${className}`;
 
   const mark = (
     <BrandMark
