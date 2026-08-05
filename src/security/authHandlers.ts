@@ -201,6 +201,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
         res.status(400).json({
           error: supResult.error,
           setupRedirectUrl: getEmailConfirmRedirectUrl(),
+          supabaseErrorCode: supResult.code || null,
         });
         return;
       }
