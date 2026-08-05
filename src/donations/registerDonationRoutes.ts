@@ -38,7 +38,7 @@ export function registerDonationRoutes(
         return res.status(400).json({ error: 'Você já é Apoiador VIP.' });
       }
 
-      const pending = localDb.getPendingDonationRequestForUser(email);
+      const pending = localDb.getPendingDonationRequestForUser(sessionEmail);
       if (pending) {
         return res.json({ request: pending, alreadyPending: true });
       }
