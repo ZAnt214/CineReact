@@ -195,41 +195,7 @@ export async function signUpWithEmailVerification(
   password: string,
   username: string
 ): Promise<SupabaseSignUpResult> {
-  if (isEmailVerificationBypassed()) {
-    return createAdminConfirmedUser(email, password, username);
-  }
-
-  const admin = getSupabaseAdminAuthClient();
-  if (admin) {
-    const adminResult = await signUpViaAdmin(admin, email, password, username);
-    if (adminResult.ok) {
-      return adminResult;
-    }
-    if (adminResult.ok === false && adminResult.code === 'user_exists') {
-      return adminResult;
-    }
-
-    if (adminResult.ok === false) {
-      console.warn('[Auth] Cadastro admin sem envio de e-mail — tentando signUp via anon key.', adminResult.code);
-      const anonResult = await signUpViaAnon(email, password, username);
-      if (anonResult.ok) {
-        return anonResult;
-      }
-      if (anonResult.ok === false && anonResult.code === 'user_exists') {
-        return anonResult;
-      }
-
-      if (anonResult.ok === false) {
-        return anonResult.error !== adminResult.error ? anonResult : adminResult;
-      }
-
-      return anonResult;
-    }
-
-    return adminResult;
-  }
-
-  return signUpViaAnon(email, password, username);
+  return createAdminConfirmedUser(email, password, username);
 }
 
 async function signUpViaAdmin(
@@ -411,14 +377,8 @@ export async function isSupabaseEmailConfirmed(supabaseAuthId: string): Promise<
   return !!data.user.email_confirmed_at;
 }
 
-export function userNeedsEmailVerification(user: UserAccount): boolean {
-  if (isEmailVerificationBypassed()) return false;
-  if (!isSupabaseEmailAuthEnabled()) return false;
-  if (user.emailVerified === true) return false;
-  if (user.emailVerified === false) return true;
-  // Contas legadas sem Supabase Auth continuam entrando sem verificação.
-  if (!user.supabaseAuthId) return false;
-  return true;
+export function userNeedsEmailVerification(_user: UserAccount): boolean {
+  return false;
 }
 
 export async function deleteSupabaseUser(userId: string): Promise<void> {
