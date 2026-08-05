@@ -22,6 +22,7 @@ import {
   webhookLimiter,
 } from './rateLimit.ts';
 import { startAutoBackupScheduler } from './backup.ts';
+import { CINE_REACT_CSP_DIRECTIVES } from './contentSecurityPolicy.ts';
 import type { StaffRole } from '../types/admin.ts';
 
 function readSessionToken(req: Request): string | null {
@@ -38,7 +39,10 @@ export function installSecurity(app: Express): SecurityContext {
   app.set('trust proxy', 1);
   app.use(
     helmet({
-      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production'
+          ? { directives: CINE_REACT_CSP_DIRECTIVES }
+          : false,
       crossOriginEmbedderPolicy: false,
       frameguard: { action: 'deny' },
       hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
