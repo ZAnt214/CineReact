@@ -8,7 +8,7 @@ export function isSupabaseEmailAuthEnabled(): boolean {
   return !!(process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_ANON_KEY?.trim());
 }
 
-/** Plano free do Supabase: sem SMTP/templates custom. Cadastro entra direto sem e-mail. */
+/** Opcional: cadastro sem e-mail (não usar com modelo padrão Supabase). */
 export function isEmailVerificationBypassed(): boolean {
   const raw = process.env.AUTH_SKIP_EMAIL_VERIFICATION?.trim().toLowerCase();
   return raw === '1' || raw === 'true' || raw === 'yes';
@@ -435,8 +435,15 @@ export function getAppPublicUrl(): string {
   return resolvePublicAppUrl();
 }
 
+export function getEmailVerificationMode(): 'bypass' | 'supabase_default' | 'disabled' {
+  if (!isSupabaseEmailAuthEnabled()) return 'disabled';
+  if (isEmailVerificationBypassed()) return 'bypass';
+  return 'supabase_default';
+}
+
 export function getEmailVerificationSetupHint(): {
   supabaseEmailAuthEnabled: boolean;
+  emailVerificationMode: 'bypass' | 'supabase_default' | 'disabled';
   emailVerificationBypassed: boolean;
   publicAppUrl: string;
   confirmRedirectUrl: string;
@@ -457,6 +464,7 @@ export function getEmailVerificationSetupHint(): {
 
   return {
     supabaseEmailAuthEnabled: isSupabaseEmailAuthEnabled(),
+    emailVerificationMode: getEmailVerificationMode(),
     emailVerificationBypassed: isEmailVerificationBypassed(),
     publicAppUrl: resolvePublicAppUrl(),
     confirmRedirectUrl: getEmailConfirmRedirectUrl(),

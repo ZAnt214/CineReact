@@ -234,8 +234,8 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
         requiresVerification: true,
         emailSendFailed,
         message: emailSendFailed
-          ? 'Conta criada, mas não enviamos o e-mail de confirmação. No Supabase: Authentication → Emails, configure SMTP e personalize o template "Confirm signup". Depois use "Reenviar e-mail de confirmação".'
-          : 'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada (e spam) para ativar sua conta antes de entrar.',
+          ? 'Conta criada, mas o Supabase não enviou o e-mail. Verifique Authentication → Providers → Email (Confirm email) no Supabase e use "Reenviar e-mail de confirmação".'
+          : 'Enviamos um e-mail de confirmação (Supabase). Verifique sua caixa de entrada e spam antes de entrar.',
         email: novoUsuario.email,
         setupRedirectUrl: emailSendFailed ? getEmailConfirmRedirectUrl() : undefined,
       });
