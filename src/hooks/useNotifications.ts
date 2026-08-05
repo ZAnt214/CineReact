@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Notificacao } from '../types.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -23,7 +24,7 @@ export function useNotifications({ email, isOpen = false }: UseNotificationsOpti
     const requestId = ++requestIdRef.current;
 
     try {
-      const res = await fetch(buildUrl()).catch(() => null);
+      const res = await apiFetch(buildUrl()).catch(() => null);
       if (!res?.ok || requestId !== requestIdRef.current) return;
 
       const data = (await res.json().catch(() => [])) as Notificacao[];
@@ -70,7 +71,7 @@ export function useNotifications({ email, isOpen = false }: UseNotificationsOpti
     );
 
     try {
-      await fetch(`/api/notificacoes/${id}/ler`, { method: 'POST' });
+      await apiFetch(`/api/notificacoes/${id}/ler`, { method: 'POST' });
     } catch (error) {
       console.error(error);
       fetchNotifications();
@@ -85,7 +86,7 @@ export function useNotifications({ email, isOpen = false }: UseNotificationsOpti
 
     try {
       await Promise.all(
-        unreadIds.map((id) => fetch(`/api/notificacoes/${id}/ler`, { method: 'POST' }))
+        unreadIds.map((id) => apiFetch(`/api/notificacoes/${id}/ler`, { method: 'POST' }))
       );
     } catch (error) {
       console.error(error);
@@ -98,7 +99,7 @@ export function useNotifications({ email, isOpen = false }: UseNotificationsOpti
     setNotifications([]);
 
     try {
-      await fetch(buildUrl(), { method: 'DELETE' });
+      await apiFetch(buildUrl(), { method: 'DELETE' });
     } catch (error) {
       console.error(error);
       setNotifications(previous);

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Film, Globe, Loader2, Lock, Unlock } from 'lucide-react';
-import type { CineClip } from '../types/cineclips.ts';
-import type { ClipAccessLevel } from '../types/finance.ts';
+import type { CineClip } from '../../types/cineclips.ts';
+import type { ClipAccessLevel } from '../../types/finance.ts';
+import { apiFetch } from '../../utils/apiClient.ts';
 
 interface CreatorClipAccessPanelProps {
   email: string;
@@ -22,7 +23,7 @@ export default function CreatorClipAccessPanel({ email }: CreatorClipAccessPanel
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/creator/clips?email=${encodeURIComponent(email)}`);
+      const res = await apiFetch(`/api/creator/clips?email=${encodeURIComponent(email)}`);
       const data = await res.json();
       if (res.ok) setClips(data.clips || []);
     } finally {
@@ -43,9 +44,8 @@ export default function CreatorClipAccessPanel({ email }: CreatorClipAccessPanel
     setSaving(clipId);
     setMessage('');
     try {
-      const res = await fetch(`/api/creator/clips/${clipId}/access`, {
+      const res = await apiFetch(`/api/creator/clips/${clipId}/access`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, accessLevel, participatesInGlobal, exclusiveDays }),
       });
       const data = await res.json();

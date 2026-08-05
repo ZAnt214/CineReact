@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 interface CreatorVerificationStatus {
   isVerifiedCreator: boolean;
@@ -21,7 +22,7 @@ export function useCreatorVerificationStatus(email?: string, isLoggedIn?: boolea
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/creator-verification/me?email=${encodeURIComponent(email)}`);
+      const res = await apiFetch(`/api/creator-verification/me?email=${encodeURIComponent(email)}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || 'Falha ao carregar status');
@@ -60,9 +61,8 @@ export function useCreatorVerificationStatus(email?: string, isLoggedIn?: boolea
       setSubmitting(true);
       setError(null);
       try {
-        const res = await fetch('/api/creator-verification/request', {
+        const res = await apiFetch('/api/creator-verification/request', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, youtubeChannelUrl }),
         });
         const body = await res.json();
@@ -86,9 +86,8 @@ export function useCreatorVerificationStatus(email?: string, isLoggedIn?: boolea
       setChecking(true);
       setError(null);
       try {
-        const res = await fetch(`/api/creator-verification/${requestId}/check-description`, {
+        const res = await apiFetch(`/api/creator-verification/${requestId}/check-description`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
         const body = await res.json();

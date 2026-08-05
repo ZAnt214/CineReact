@@ -5,6 +5,7 @@ import ProfileAvatar from './profile/ProfileAvatar.tsx';
 import ProfileNameRow from './profile/ProfileNameRow.tsx';
 import { resolveAuthorProfileProps } from '../utils/authorProfileDisplay.ts';
 import type { ProfileLoadout } from '../types/gamification.ts';
+import { apiFetch } from '../utils/apiClient.ts';
 
 const INITIAL_VISIBLE = 8;
 
@@ -194,9 +195,8 @@ export default function CommentSection({
     setComentarioSucesso(false);
 
     try {
-      const res = await fetch('/api/comentarios', {
+      const res = await apiFetch('/api/comentarios', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           obraId,
           usuarioNome: user.nome,
@@ -223,7 +223,7 @@ export default function CommentSection({
   const handleDeleteComentario = useCallback(
     async (id: string) => {
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/comentarios/${id}?email=${encodeURIComponent(user.email)}`,
           { method: 'DELETE' }
         );
