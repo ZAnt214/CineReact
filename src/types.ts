@@ -127,8 +127,5 @@ export interface UserAccount {
   isBanned?: boolean;
   bannedAt?: string;
   lastActiveAt?: string;
-  lastUserAgent?: string;
-  twoFactorEnabled?: boolean;
-  twoFactorSecretEnc?: string;
 }
 

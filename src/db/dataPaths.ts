@@ -28,30 +28,13 @@ export function getDataDir(): string {
   return process.cwd();
 }
 
-export function isValidJsonFile(filePath: string): boolean {
-  try {
-    if (!fs.existsSync(filePath)) return false;
-    const data = fs.readFileSync(filePath, 'utf-8');
-    JSON.parse(data);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** Copia dados legados para o diretório persistente (Railway), ignorando JSON inválido. */
+/** Copia dados legados de /tmp para o diretório persistente (Railway). */
 export function migrateLegacyFile(targetPath: string, legacyPaths: string[]): void {
   try {
-    if (fs.existsSync(targetPath) && isValidJsonFile(targetPath)) return;
-
-    if (fs.existsSync(targetPath) && !isValidJsonFile(targetPath)) {
-      const quarantinePath = `${targetPath}.corrupt.${Date.now()}`;
-      fs.renameSync(targetPath, quarantinePath);
-      console.warn(`[data] JSON inválido em ${targetPath}; movido para ${quarantinePath}`);
-    }
+    if (fs.existsSync(targetPath)) return;
 
     for (const legacy of legacyPaths) {
-      if (legacy === targetPath || !isValidJsonFile(legacy)) continue;
+      if (legacy === targetPath || !fs.existsSync(legacy)) continue;
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
       fs.copyFileSync(legacy, targetPath);
       console.log(`[data] Migrado ${legacy} → ${targetPath}`);
