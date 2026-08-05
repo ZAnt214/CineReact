@@ -42,6 +42,7 @@ async function prepareDataDir() {
 console.log('[BOOT] Ambiente:', {
   cwd: process.cwd(),
   port: process.env.PORT,
+  bindHost: process.env.BIND_HOST || (process.env.RAILWAY_ENVIRONMENT ? '::' : '0.0.0.0'),
   nodeEnv: process.env.NODE_ENV,
   railway: process.env.RAILWAY_ENVIRONMENT,
   dataDir: process.env.CINE_REACT_DATA_DIR,
