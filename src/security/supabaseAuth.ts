@@ -26,12 +26,38 @@ export function getSupabaseAdminAuthClient(): SupabaseClient | null {
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) return null;
+
+  const anonKey = process.env.SUPABASE_ANON_KEY?.trim();
+  if (anonKey && key === anonKey) {
+    console.error(
+      '[Auth] SUPABASE_SERVICE_ROLE_KEY é igual à ANON_KEY. ' +
+        'Copie a chave service_role (secret) em Project Settings → API.'
+    );
+    return null;
+  }
+
   if (!adminAuthClient) {
     adminAuthClient = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }
   return adminAuthClient;
+}
+
+function isInvalidServiceRoleError(error: AuthError): boolean {
+  const status = error.status || 0;
+  const code = (error.code || '').toLowerCase();
+  const message = (error.message || '').toLowerCase();
+  return (
+    status === 401 ||
+    status === 403 ||
+    code === 'bad_jwt' ||
+    code === 'invalid_jwt' ||
+    message.includes('invalid api key') ||
+    message.includes('jwt') ||
+    message.includes('not authorized') ||
+    message.includes('invalid claim')
+  );
 }
 
 const PLACEHOLDER_APP_URL_MARKERS = ['my_app_url', 'your-domain', 'example.com', 'changeme'];
@@ -105,6 +131,12 @@ export function formatSupabaseAuthError(error: AuthError | null | undefined): st
   if (message && message !== '{}') return message;
 
   const code = error.code || '';
+  const status = error.status || 0;
+
+  if (isInvalidServiceRoleError(error)) {
+    return 'SUPABASE_SERVICE_ROLE_KEY inválida. No Supabase → Project Settings → API, copie a chave service_role (secret), não a anon.';
+  }
+
   if (code === 'validation_failed') {
     return `URL de confirmação não permitida no Supabase. Adicione em Redirect URLs: ${getEmailConfirmRedirectUrl()}`;
   }
@@ -116,7 +148,11 @@ export function formatSupabaseAuthError(error: AuthError | null | undefined): st
   }
 
   if (code) {
-    return `Erro no cadastro (${code}). Verifique Authentication → Email e Redirect URLs no Supabase.`;
+    return `Erro no cadastro (${code}, HTTP ${status}). Verifique Authentication → Email e Redirect URLs no Supabase.`;
+  }
+
+  if (status) {
+    return `Erro no Supabase Auth (HTTP ${status}). Verifique as chaves API e Redirect URLs.`;
   }
 
   return 'Não foi possível criar a conta no Supabase. Verifique Authentication → Email, Confirm email e Redirect URLs.';
@@ -151,7 +187,18 @@ export async function signUpWithEmailVerification(
 ): Promise<SupabaseSignUpResult> {
   const admin = getSupabaseAdminAuthClient();
   if (admin) {
-    return signUpViaAdmin(admin, email, password, username);
+    const adminResult = await signUpViaAdmin(admin, email, password, username);
+    if (adminResult.ok || adminResult.code === 'user_exists') {
+      return adminResult;
+    }
+
+    console.warn('[Auth] admin.createUser falhou — tentando signUp via anon key.', adminResult.code);
+    const anonResult = await signUpViaAnon(email, password, username);
+    if (anonResult.ok || anonResult.code === 'user_exists') {
+      return anonResult;
+    }
+
+    return anonResult.error && anonResult.error !== adminResult.error ? anonResult : adminResult;
   }
 
   return signUpViaAnon(email, password, username);
@@ -350,6 +397,8 @@ export function getEmailVerificationSetupHint(): {
   publicAppUrl: string;
   confirmRedirectUrl: string;
   appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost';
+  serviceRoleKeyConfigured: boolean;
+  serviceRoleKeyMatchesAnon: boolean;
 } {
   const configured = process.env.APP_URL?.trim();
   let appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost' = 'localhost';
@@ -367,5 +416,9 @@ export function getEmailVerificationSetupHint(): {
     publicAppUrl: resolvePublicAppUrl(),
     confirmRedirectUrl: getEmailConfirmRedirectUrl(),
     appUrlSource,
+    serviceRoleKeyConfigured: !!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
+    serviceRoleKeyMatchesAnon:
+      !!process.env.SUPABASE_ANON_KEY?.trim() &&
+      process.env.SUPABASE_ANON_KEY?.trim() === process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
   };
 }
