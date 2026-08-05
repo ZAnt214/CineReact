@@ -197,6 +197,9 @@ export async function handleOAuthCallback(req: Request, res: Response): Promise<
       return;
     }
 
+    const email = resolveOAuthEmail(data.session.user);
+    const isNewUser = !(await localDb.findUsuarioByEmail(email));
+
     const account = await findOrCreateOAuthUser(data.session.user);
     const restriction = getAccountRestriction(account);
     if (restriction.blocked) {
@@ -210,7 +213,7 @@ export async function handleOAuthCallback(req: Request, res: Response): Promise<
     clearOAuthCookies(req, res);
     recordLoginAttempt(req, account.email, true, 'oauth_discord');
 
-    res.redirect(`${appUrl}?auth=oauth-success`);
+    res.redirect(`${appUrl}?auth=oauth-success${isNewUser ? '&new=1' : ''}`);
   } catch (error) {
     console.error('[Auth] Erro no callback OAuth:', error);
     clearOAuthCookies(req, res);
@@ -220,10 +223,12 @@ export async function handleOAuthCallback(req: Request, res: Response): Promise<
 
 export function getOAuthSetupHint(): {
   discordOAuthEnabled: boolean;
+  discordOnlyLogin: boolean;
   oauthCallbackUrl: string;
 } {
   return {
     discordOAuthEnabled: isDiscordOAuthEnabled(),
+    discordOnlyLogin: true,
     oauthCallbackUrl: getOAuthCallbackUrl(),
   };
 }
