@@ -8,6 +8,12 @@ export function isSupabaseEmailAuthEnabled(): boolean {
   return !!(process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_ANON_KEY?.trim());
 }
 
+/** Plano free do Supabase: sem SMTP/templates custom. Cadastro entra direto sem e-mail. */
+export function isEmailVerificationBypassed(): boolean {
+  const raw = process.env.AUTH_SKIP_EMAIL_VERIFICATION?.trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
 function getSupabaseUrl(): string {
   return process.env.SUPABASE_URL!.trim();
 }
@@ -189,6 +195,10 @@ export async function signUpWithEmailVerification(
   password: string,
   username: string
 ): Promise<SupabaseSignUpResult> {
+  if (isEmailVerificationBypassed()) {
+    return createAdminConfirmedUser(email, password, username);
+  }
+
   const admin = getSupabaseAdminAuthClient();
   if (admin) {
     const adminResult = await signUpViaAdmin(admin, email, password, username);
@@ -402,6 +412,7 @@ export async function isSupabaseEmailConfirmed(supabaseAuthId: string): Promise<
 }
 
 export function userNeedsEmailVerification(user: UserAccount): boolean {
+  if (isEmailVerificationBypassed()) return false;
   if (!isSupabaseEmailAuthEnabled()) return false;
   if (user.emailVerified === true) return false;
   if (user.emailVerified === false) return true;
@@ -426,6 +437,7 @@ export function getAppPublicUrl(): string {
 
 export function getEmailVerificationSetupHint(): {
   supabaseEmailAuthEnabled: boolean;
+  emailVerificationBypassed: boolean;
   publicAppUrl: string;
   confirmRedirectUrl: string;
   appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost';
@@ -445,6 +457,7 @@ export function getEmailVerificationSetupHint(): {
 
   return {
     supabaseEmailAuthEnabled: isSupabaseEmailAuthEnabled(),
+    emailVerificationBypassed: isEmailVerificationBypassed(),
     publicAppUrl: resolvePublicAppUrl(),
     confirmRedirectUrl: getEmailConfirmRedirectUrl(),
     appUrlSource,
