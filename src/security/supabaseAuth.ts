@@ -1,5 +1,9 @@
 import { createClient, type SupabaseClient, type AuthError } from '@supabase/supabase-js';
 import type { UserAccount } from '../types.ts';
+import {
+  isCustomAuthEmailConfigured,
+  sendVerificationEmailWithGenerateLinkFallback,
+} from './authEmailDelivery.ts';
 
 let anonAuthClient: SupabaseClient | null = null;
 let adminAuthClient: SupabaseClient | null = null;
@@ -151,6 +155,10 @@ export function formatSupabaseAuthError(error: AuthError | null | undefined): st
     return `Erro no cadastro (${code}, HTTP ${status}). Verifique Authentication → Email e Redirect URLs no Supabase.`;
   }
 
+  if (status >= 500) {
+    return 'Supabase não conseguiu enviar o e-mail (erro ' + status + '). No painel Supabase: Authentication → Emails → configure SMTP customizado (ou verifique limite de e-mails e os Auth Logs).';
+  }
+
   if (status) {
     return `Erro no Supabase Auth (HTTP ${status}). Verifique as chaves API e Redirect URLs.`;
   }
@@ -177,7 +185,7 @@ function isEmptyIdentitiesSignup(data: { user?: { identities?: unknown[] } | nul
 }
 
 export type SupabaseSignUpResult =
-  | { ok: true; userId: string; alreadyConfirmed: boolean }
+  | { ok: true; userId: string; alreadyConfirmed: boolean; emailSendFailed?: boolean }
   | { ok: false; error: string; code?: string };
 
 export async function signUpWithEmailVerification(
@@ -188,17 +196,31 @@ export async function signUpWithEmailVerification(
   const admin = getSupabaseAdminAuthClient();
   if (admin) {
     const adminResult = await signUpViaAdmin(admin, email, password, username);
-    if (adminResult.ok || adminResult.code === 'user_exists') {
+    if (adminResult.ok) {
+      return adminResult;
+    }
+    if (adminResult.ok === false && adminResult.code === 'user_exists') {
       return adminResult;
     }
 
-    console.warn('[Auth] admin.createUser falhou — tentando signUp via anon key.', adminResult.code);
-    const anonResult = await signUpViaAnon(email, password, username);
-    if (anonResult.ok || anonResult.code === 'user_exists') {
+    if (adminResult.ok === false) {
+      console.warn('[Auth] Cadastro admin sem envio de e-mail — tentando signUp via anon key.', adminResult.code);
+      const anonResult = await signUpViaAnon(email, password, username);
+      if (anonResult.ok) {
+        return anonResult;
+      }
+      if (anonResult.ok === false && anonResult.code === 'user_exists') {
+        return anonResult;
+      }
+
+      if (anonResult.ok === false) {
+        return anonResult.error !== adminResult.error ? anonResult : adminResult;
+      }
+
       return anonResult;
     }
 
-    return anonResult.error && anonResult.error !== adminResult.error ? anonResult : adminResult;
+    return adminResult;
   }
 
   return signUpViaAnon(email, password, username);
@@ -234,15 +256,14 @@ async function signUpViaAdmin(
     return { ok: false, error: 'Resposta inválida do Supabase ao criar conta.' };
   }
 
-  const sent = await resendVerificationEmail(email);
+  const sent = await deliverVerificationEmail(email, password, admin);
   if (!sent.ok) {
-    console.error('[Auth] Falha ao enviar e-mail de confirmação:', sent.error);
-    await deleteSupabaseUser(userId);
+    console.error('[Auth] Falha ao enviar e-mail de confirmação (usuário Auth mantido):', sent.error);
     return {
-      ok: false,
-      error:
-        sent.error ||
-        'Conta criada no Supabase, mas o e-mail de confirmação não foi enviado. Verifique SMTP e Redirect URLs.',
+      ok: true,
+      userId,
+      alreadyConfirmed: false,
+      emailSendFailed: true,
     };
   }
 
@@ -318,7 +339,11 @@ export async function createAdminConfirmedUser(
   return { ok: true, userId: data.user.id, alreadyConfirmed: true };
 }
 
-export async function resendVerificationEmail(email: string): Promise<{ ok: boolean; error?: string }> {
+async function deliverVerificationEmail(
+  email: string,
+  password?: string,
+  adminClient?: SupabaseClient | null
+): Promise<{ ok: boolean; error?: string }> {
   const client = getSupabaseAnonAuthClient();
   if (!client) {
     return { ok: false, error: 'Verificação por e-mail não configurada.' };
@@ -330,11 +355,41 @@ export async function resendVerificationEmail(email: string): Promise<{ ok: bool
     options: { emailRedirectTo: getEmailConfirmRedirectUrl() },
   });
 
-  if (error) {
-    console.error('[Auth] Supabase resend falhou:', error.message, error.code);
+  if (!error) {
+    return { ok: true };
+  }
+
+  console.error('[Auth] Supabase resend falhou:', {
+    message: error.message,
+    code: error.code,
+    status: error.status,
+  });
+
+  const admin = adminClient ?? getSupabaseAdminAuthClient();
+  if (!admin) {
     return { ok: false, error: formatSupabaseAuthError(error) };
   }
-  return { ok: true };
+
+  const fallback = await sendVerificationEmailWithGenerateLinkFallback(
+    admin,
+    email,
+    getEmailConfirmRedirectUrl(),
+    password
+  );
+  if (fallback.ok) {
+    console.info('[Auth] E-mail de confirmação enviado via Resend (fallback após falha do Supabase SMTP).');
+    return { ok: true };
+  }
+
+  const fallbackError = 'error' in fallback ? fallback.error : 'Falha no envio alternativo de e-mail.';
+  return {
+    ok: false,
+    error: isCustomAuthEmailConfigured() ? fallbackError : formatSupabaseAuthError(error),
+  };
+}
+
+export async function resendVerificationEmail(email: string): Promise<{ ok: boolean; error?: string }> {
+  return deliverVerificationEmail(email);
 }
 
 export async function confirmEmailWithTokenHash(
@@ -399,6 +454,7 @@ export function getEmailVerificationSetupHint(): {
   appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost';
   serviceRoleKeyConfigured: boolean;
   serviceRoleKeyMatchesAnon: boolean;
+  customEmailFallbackConfigured: boolean;
 } {
   const configured = process.env.APP_URL?.trim();
   let appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost' = 'localhost';
@@ -420,5 +476,6 @@ export function getEmailVerificationSetupHint(): {
     serviceRoleKeyMatchesAnon:
       !!process.env.SUPABASE_ANON_KEY?.trim() &&
       process.env.SUPABASE_ANON_KEY?.trim() === process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
+    customEmailFallbackConfigured: isCustomAuthEmailConfigured(),
   };
 }
