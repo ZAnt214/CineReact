@@ -61,6 +61,7 @@ export interface AdminAuditLog {
   targetId?: string;
   details?: string;
   ip?: string;
+  userAgent?: string;
   createdAt: string;
 }
 
