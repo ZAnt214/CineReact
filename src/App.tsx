@@ -159,6 +159,7 @@ export default function App() {
       'oauth-success': 'Login com Discord realizado com sucesso!',
       'oauth-error': 'Não foi possível entrar com Discord. Tente novamente.',
       'oauth-missing': 'Login com Discord cancelado ou link inválido.',
+      'oauth-terms': 'Aceite os Termos de Uso e a Política de Privacidade antes de continuar com Discord.',
       'oauth-blocked': 'Sua conta está restrita. Entre em contato com o suporte.',
     };
 

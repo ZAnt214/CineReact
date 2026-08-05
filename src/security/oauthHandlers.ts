@@ -12,6 +12,7 @@ import { resolvePublicAppUrl, isSupabaseEmailAuthEnabled } from './supabaseAuth.
 import type { UserAccount } from '../types.ts';
 
 const OAUTH_COOKIE_PREFIX = 'sb_oauth_';
+const OAUTH_TERMS_COOKIE = 'cinereact_oauth_terms';
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120';
 
@@ -105,16 +106,80 @@ function resolveOAuthAvatar(user: User): string {
   return typeof avatar === 'string' && avatar.trim() ? avatar.trim() : DEFAULT_AVATAR;
 }
 
-async function findOrCreateOAuthUser(supabaseUser: User): Promise<UserAccount> {
+type DiscordProfileSnapshot = {
+  oauthProvider: 'discord';
+  discordId?: string;
+  discordUsername?: string;
+  providerEmail?: string;
+};
+
+function extractDiscordProfile(user: User): DiscordProfileSnapshot {
+  const discordIdentity = user.identities?.find((identity) => identity.provider === 'discord');
+  const identityData = discordIdentity?.identity_data || {};
+  const meta = user.user_metadata || {};
+
+  const discordId =
+    (typeof discordIdentity?.id === 'string' && discordIdentity.id) ||
+    (typeof meta.provider_id === 'string' && meta.provider_id) ||
+    undefined;
+
+  const discordUsername =
+    (typeof identityData.username === 'string' && identityData.username.trim()) ||
+    (typeof identityData.full_name === 'string' && identityData.full_name.trim()) ||
+    (typeof meta.preferred_username === 'string' && meta.preferred_username.trim()) ||
+    (typeof meta.username === 'string' && meta.username.trim()) ||
+    undefined;
+
+  const providerEmail =
+    (typeof user.email === 'string' && user.email.includes('@') && !user.email.includes('@oauth.cinereact.local')
+      ? normalizeEmail(user.email)
+      : undefined) ||
+    (typeof identityData.email === 'string' && identityData.email.trim()
+      ? normalizeEmail(identityData.email)
+      : undefined) ||
+    (typeof meta.email === 'string' && meta.email.trim() ? normalizeEmail(meta.email) : undefined);
+
+  return {
+    oauthProvider: 'discord',
+    discordId,
+    discordUsername,
+    providerEmail,
+  };
+}
+
+async function findOrCreateOAuthUser(
+  supabaseUser: User,
+  termsAcceptedAt: string
+): Promise<UserAccount> {
   const email = resolveOAuthEmail(supabaseUser);
   const username = resolveOAuthUsername(supabaseUser, email);
   const avatar = resolveOAuthAvatar(supabaseUser);
+  const discordProfile = extractDiscordProfile(supabaseUser);
+
+  const profilePatch = {
+    supabaseAuthId: supabaseUser.id,
+    emailVerified: true,
+    avatar,
+    username,
+    oauthProvider: discordProfile.oauthProvider,
+    discordId: discordProfile.discordId,
+    discordUsername: discordProfile.discordUsername,
+    providerEmail: discordProfile.providerEmail,
+    termsAcceptedAt,
+  };
+
+  console.info('[Auth] Discord login:', {
+    accountEmail: email,
+    providerEmail: discordProfile.providerEmail || null,
+    discordId: discordProfile.discordId || null,
+    discordUsername: discordProfile.discordUsername || null,
+    supabaseAuthId: supabaseUser.id,
+  });
 
   const existing = await localDb.findUsuarioByEmail(email);
   if (existing) {
     await localDb.updateUsuario(email, {
-      supabaseAuthId: supabaseUser.id,
-      emailVerified: true,
+      ...profilePatch,
       avatar: existing.avatar || avatar,
       username: existing.username || username,
     });
@@ -127,15 +192,20 @@ async function findOrCreateOAuthUser(supabaseUser: User): Promise<UserAccount> {
     username,
     email,
     password: randomPassword,
-    avatar,
-    emailVerified: true,
-    supabaseAuthId: supabaseUser.id,
+    ...profilePatch,
   });
 }
 
 export async function handleDiscordOAuthStart(req: Request, res: Response): Promise<void> {
+  const appUrl = resolvePublicAppUrl();
+
   if (!isDiscordOAuthEnabled()) {
     res.status(503).json({ error: 'Login com Discord não configurado (SUPABASE_URL + SUPABASE_ANON_KEY).' });
+    return;
+  }
+
+  if (req.cookies[OAUTH_TERMS_COOKIE] !== '1') {
+    res.redirect(`${appUrl}?auth=oauth-terms`);
     return;
   }
 
@@ -197,10 +267,17 @@ export async function handleOAuthCallback(req: Request, res: Response): Promise<
       return;
     }
 
+    if (req.cookies[OAUTH_TERMS_COOKIE] !== '1') {
+      clearOAuthCookies(req, res);
+      res.redirect(`${appUrl}?auth=oauth-terms`);
+      return;
+    }
+
+    const termsAcceptedAt = new Date().toISOString();
     const email = resolveOAuthEmail(data.session.user);
     const isNewUser = !(await localDb.findUsuarioByEmail(email));
 
-    const account = await findOrCreateOAuthUser(data.session.user);
+    const account = await findOrCreateOAuthUser(data.session.user, termsAcceptedAt);
     const restriction = getAccountRestriction(account);
     if (restriction.blocked) {
       clearOAuthCookies(req, res);
@@ -211,6 +288,7 @@ export async function handleOAuthCallback(req: Request, res: Response): Promise<
     const { session, token } = createSession(account.id, account.email, req);
     setSessionCookie(res, token);
     clearOAuthCookies(req, res);
+    res.clearCookie(OAUTH_TERMS_COOKIE, { path: '/' });
     recordLoginAttempt(req, account.email, true, 'oauth_discord');
 
     res.redirect(`${appUrl}?auth=oauth-success${isNewUser ? '&new=1' : ''}`);
