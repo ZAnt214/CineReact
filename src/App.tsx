@@ -135,6 +135,7 @@ export default function App() {
   });
 
   const [subscriptionCreatorEmail, setSubscriptionCreatorEmail] = useState<string | undefined>();
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
 
   const isUserAuthenticated = Boolean(user.isLoggedIn && user.email?.trim());
   const { settings: platformSettings, loading: platformSettingsLoading } = usePlatformSettings();
@@ -147,6 +148,31 @@ export default function App() {
       meta.setAttribute('content', platformSettings.seoDescription);
     }
   }, [platformSettings]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const authState = params.get('auth');
+    if (!authState) return;
+
+    const notices: Record<string, string> = {
+      'verify-success': 'E-mail confirmado com sucesso! Agora você pode entrar na sua conta.',
+      'verify-error': 'Não foi possível confirmar o e-mail. O link pode ter expirado — peça um novo envio ao entrar.',
+      'verify-missing': 'Link de confirmação inválido ou incompleto.',
+      'verify-unavailable': 'Verificação por e-mail temporariamente indisponível. Tente mais tarde.',
+    };
+
+    if (notices[authState]) {
+      setAuthNotice(notices[authState]);
+      setAuthInitialMode('login');
+      setShowAuthModal(true);
+    }
+
+    params.delete('auth');
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', nextUrl);
+  }, []);
 
   const setUser = (newUser: UserState) => {
     setUserState(newUser);
@@ -1758,8 +1784,10 @@ export default function App() {
     <AuthModal
       isOpen={showAuthModal}
       initialMode={authInitialMode}
+      initialInfoMessage={authNotice}
       onClose={() => {
         setShowAuthModal(false);
+        setAuthNotice(null);
         pendingPlayRef.current = null;
       }}
       onSuccess={(loggedUser, isNewUser) => {

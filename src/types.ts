@@ -130,5 +130,9 @@ export interface UserAccount {
   lastUserAgent?: string;
   twoFactorEnabled?: boolean;
   twoFactorSecretEnc?: string;
+  /** E-mail confirmado via Supabase Auth */
+  emailVerified?: boolean;
+  /** ID do usuário em auth.users (Supabase) */
+  supabaseAuthId?: string;
 }
 

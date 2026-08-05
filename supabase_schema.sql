@@ -97,7 +97,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
   avatar TEXT,
   "isAdmin" BOOLEAN DEFAULT false,
   "isDonor" BOOLEAN DEFAULT false,
-  "continueWatching" JSONB DEFAULT '[]'::jsonb
+  "continueWatching" JSONB DEFAULT '[]'::jsonb,
+  "emailVerified" BOOLEAN DEFAULT true,
+  "supabaseAuthId" TEXT
 );
 
 -- 9. Backup dos CineClips (sobrevive a deploys no Railway)
