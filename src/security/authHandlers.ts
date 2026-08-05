@@ -191,13 +191,14 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 
     let supabaseAuthId: string | undefined;
     let emailVerified = true;
+    let emailSendFailed = false;
 
     if (supabaseEnabled) {
       const supResult = bootstrapAdmin
         ? await createAdminConfirmedUser(cleanEmail, String(password), trimmedUsername)
         : await signUpWithEmailVerification(cleanEmail, String(password), trimmedUsername);
 
-      if (!supResult.ok) {
+      if (supResult.ok === false) {
         res.status(400).json({
           error: supResult.error,
           setupRedirectUrl: getEmailConfirmRedirectUrl(),
@@ -208,6 +209,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 
       supabaseAuthId = supResult.userId;
       emailVerified = supResult.alreadyConfirmed;
+      emailSendFailed = !!supResult.emailSendFailed;
     } else if (process.env.NODE_ENV === 'production') {
       console.warn(
         '[Auth] SUPABASE_URL + SUPABASE_ANON_KEY ausentes — cadastro sem verificação de e-mail.'
@@ -230,9 +232,12 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       res.status(201).json({
         success: true,
         requiresVerification: true,
-        message:
-          'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada (e spam) para ativar sua conta antes de entrar.',
+        emailSendFailed,
+        message: emailSendFailed
+          ? 'Conta criada, mas não enviamos o e-mail de confirmação. Configure SMTP no Supabase (Authentication → Emails) ou defina RESEND_API_KEY + AUTH_EMAIL_FROM no Railway, depois use "Reenviar e-mail de confirmação".'
+          : 'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada (e spam) para ativar sua conta antes de entrar.',
         email: novoUsuario.email,
+        setupRedirectUrl: emailSendFailed ? getEmailConfirmRedirectUrl() : undefined,
       });
       return;
     }
