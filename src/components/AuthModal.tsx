@@ -66,8 +66,8 @@ function formatAuthError(raw?: unknown): string {
     return 'E-mail ou senha incorretos. Verifique e tente novamente.';
   }
 
-  if (lower.includes('redirect') || lower.includes('validation_failed')) {
-    return 'Configuração do Supabase incompleta. Adicione a URL de confirmação em Authentication → URL Configuration → Redirect URLs.';
+  if (lower.includes('redirect') || lower.includes('validation_failed') || lower.includes('redirect urls')) {
+    return text;
   }
 
   return text;
@@ -281,7 +281,11 @@ export default function AuthModal({
           setInfoMsg(data.error || data.message || 'Verifique seu e-mail para confirmar o cadastro antes de entrar.');
           setMode('login');
         } else {
-          setErrorMsg(formatAuthError(data.error));
+          const extra =
+            data.setupRedirectUrl && typeof data.error === 'string' && data.error.includes('Redirect')
+              ? `\n\nAdicione no Supabase: ${data.setupRedirectUrl}`
+              : '';
+          setErrorMsg(formatAuthError(data.error) + extra);
         }
       }
     } catch {
