@@ -1,9 +1,5 @@
 import { createClient, type SupabaseClient, type AuthError } from '@supabase/supabase-js';
 import type { UserAccount } from '../types.ts';
-import {
-  isCustomAuthEmailConfigured,
-  sendBrandedVerificationEmail,
-} from './authEmailDelivery.ts';
 
 let anonAuthClient: SupabaseClient | null = null;
 let adminAuthClient: SupabaseClient | null = null;
@@ -341,22 +337,10 @@ export async function createAdminConfirmedUser(
 
 async function deliverVerificationEmail(
   email: string,
-  password?: string,
-  adminClient?: SupabaseClient | null
+  _password?: string,
+  _adminClient?: SupabaseClient | null
 ): Promise<{ ok: boolean; error?: string }> {
   const redirectTo = getEmailConfirmRedirectUrl();
-  const appUrl = resolvePublicAppUrl();
-  const admin = adminClient ?? getSupabaseAdminAuthClient();
-
-  if (isCustomAuthEmailConfigured() && admin) {
-    const branded = await sendBrandedVerificationEmail(admin, email, redirectTo, appUrl, password);
-    if (branded.ok) {
-      console.info('[Auth] E-mail de confirmação CineReact enviado via Resend.');
-      return { ok: true };
-    }
-    console.warn('[Auth] Envio CineReact via Resend falhou, tentando Supabase:', 'error' in branded ? branded.error : '');
-  }
-
   const client = getSupabaseAnonAuthClient();
   if (!client) {
     return { ok: false, error: 'Verificação por e-mail não configurada.' };
@@ -378,21 +362,7 @@ async function deliverVerificationEmail(
     status: error.status,
   });
 
-  if (!admin) {
-    return { ok: false, error: formatSupabaseAuthError(error) };
-  }
-
-  const fallback = await sendBrandedVerificationEmail(admin, email, redirectTo, appUrl, password);
-  if (fallback.ok) {
-    console.info('[Auth] E-mail de confirmação enviado via Resend (fallback após falha do Supabase SMTP).');
-    return { ok: true };
-  }
-
-  const fallbackError = 'error' in fallback ? fallback.error : 'Falha no envio alternativo de e-mail.';
-  return {
-    ok: false,
-    error: isCustomAuthEmailConfigured() ? fallbackError : formatSupabaseAuthError(error),
-  };
+  return { ok: false, error: formatSupabaseAuthError(error) };
 }
 
 export async function resendVerificationEmail(email: string): Promise<{ ok: boolean; error?: string }> {
@@ -461,7 +431,6 @@ export function getEmailVerificationSetupHint(): {
   appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost';
   serviceRoleKeyConfigured: boolean;
   serviceRoleKeyMatchesAnon: boolean;
-  customEmailFallbackConfigured: boolean;
 } {
   const configured = process.env.APP_URL?.trim();
   let appUrlSource: 'APP_URL' | 'RAILWAY_PUBLIC_DOMAIN' | 'RAILWAY_STATIC_URL' | 'localhost' = 'localhost';
@@ -483,6 +452,5 @@ export function getEmailVerificationSetupHint(): {
     serviceRoleKeyMatchesAnon:
       !!process.env.SUPABASE_ANON_KEY?.trim() &&
       process.env.SUPABASE_ANON_KEY?.trim() === process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
-    customEmailFallbackConfigured: isCustomAuthEmailConfigured(),
   };
 }
