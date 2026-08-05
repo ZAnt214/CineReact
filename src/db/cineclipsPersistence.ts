@@ -18,6 +18,30 @@ type DbSlice = Parameters<typeof buildCineClipsPayload>[0];
 
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 let restorePromise: Promise<boolean> | null = null;
+let cineclipsSupabaseDisabled = false;
+let lastCineclipsIssueLogAt = 0;
+
+function isMissingCineclipsTableError(error: unknown): boolean {
+  const msg = String((error as { message?: string })?.message || error || '');
+  return msg.includes('cineclips_payload') || msg.includes('schema cache');
+}
+
+function logCineclipsSupabaseIssue(kind: 'missing_table' | 'other', detail?: string): void {
+  const now = Date.now();
+  if (cineclipsSupabaseDisabled && now - lastCineclipsIssueLogAt < 5 * 60 * 1000) return;
+  lastCineclipsIssueLogAt = now;
+
+  if (kind === 'missing_table') {
+    cineclipsSupabaseDisabled = true;
+    console.warn(
+      '[CineClips] Tabela cineclips_payload ausente no Supabase. ' +
+        'Execute supabase_cineclips_migration.sql no SQL Editor e configure SUPABASE_SERVICE_ROLE_KEY no Railway.'
+    );
+    return;
+  }
+
+  console.warn('[CineClips] Falha ao salvar no Supabase:', detail || 'erro desconhecido');
+}
 
 export function getPersistenceDiagnostics() {
   const dataDir = getDataDir();
@@ -36,6 +60,8 @@ export function getPersistenceDiagnostics() {
 export async function fetchCineClipsPayloadFromSupabase(
   client: SupabaseClient
 ): Promise<CineClipsPayload | null> {
+  if (cineclipsSupabaseDisabled) return null;
+
   try {
     const { data, error } = await client
       .from('cineclips_payload')
@@ -44,8 +70,8 @@ export async function fetchCineClipsPayloadFromSupabase(
       .maybeSingle();
 
     if (error) {
-      if (String(error.message || '').includes('cineclips_payload')) {
-        console.warn('[CineClips] Tabela cineclips_payload ausente no Supabase. Execute o SQL atualizado em supabase_schema.sql');
+      if (isMissingCineclipsTableError(error)) {
+        logCineclipsSupabaseIssue('missing_table');
       } else {
         console.warn('[CineClips] Falha ao buscar payload no Supabase:', error.message || error);
       }
@@ -67,6 +93,8 @@ export async function persistCineClipsToSupabase(
   db: DbSlice,
   options?: { immediate?: boolean }
 ): Promise<void> {
+  if (cineclipsSupabaseDisabled) return;
+
   const run = async () => {
     let localPayload = buildCineClipsPayload(db);
     const remote = await fetchCineClipsPayloadFromSupabase(client);
@@ -88,7 +116,11 @@ export async function persistCineClipsToSupabase(
     });
 
     if (error) {
-      console.warn('[CineClips] Falha ao salvar no Supabase:', error.message || error);
+      if (isMissingCineclipsTableError(error)) {
+        logCineclipsSupabaseIssue('missing_table');
+      } else {
+        logCineclipsSupabaseIssue('other', String(error.message || error));
+      }
     } else {
       console.log(`[CineClips] Persistidos ${payload.cineClips.length} clips no Supabase`);
     }
