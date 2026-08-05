@@ -11,6 +11,16 @@ import { createCaptchaChallenge, verifyCaptchaChallenge } from './backup.ts';
 import { userRequiresTwoFactor, verifyTwoFactorToken, generateTwoFactorSecret, enableTwoFactor, disableTwoFactor } from './twoFactor.ts';
 import { toAuthUser } from './rbac.ts';
 import { hashToken } from './crypto.ts';
+import {
+  confirmEmailWithTokenHash,
+  createAdminConfirmedUser,
+  getAppPublicUrl,
+  isSupabaseEmailAuthEnabled,
+  isSupabaseEmailConfirmed,
+  resendVerificationEmail,
+  signUpWithEmailVerification,
+  userNeedsEmailVerification,
+} from './supabaseAuth.ts';
 import type { SecurityContext } from './types.ts';
 
 export function registerSecurityRoutes(app: import('express').Express, security: SecurityContext) {
@@ -134,6 +144,14 @@ export function registerSecurityRoutes(app: import('express').Express, security:
     if (!(await security.requireAdmin(req, res))) return;
     res.json({ entries: localDb.getFinancialAuditLog().slice(0, 500) });
   });
+
+  app.get('/api/auth/confirm-email', async (req, res) => {
+    await handleConfirmEmail(req, res);
+  });
+
+  app.post('/api/auth/resend-verification', async (req, res) => {
+    await handleResendVerification(req, res);
+  });
 }
 
 export async function handleRegister(req: Request, res: Response): Promise<void> {
@@ -162,16 +180,52 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 
     const hashed = await hashPassword(String(password));
     const bootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase() === cleanEmail;
+    const trimmedUsername = String(username).trim().slice(0, 80);
+    const supabaseEnabled = isSupabaseEmailAuthEnabled();
+
+    let supabaseAuthId: string | undefined;
+    let emailVerified = true;
+
+    if (supabaseEnabled) {
+      const supResult = bootstrapAdmin
+        ? await createAdminConfirmedUser(cleanEmail, String(password), trimmedUsername)
+        : await signUpWithEmailVerification(cleanEmail, String(password), trimmedUsername);
+
+      if (!supResult.ok) {
+        res.status(400).json({ error: supResult.error });
+        return;
+      }
+
+      supabaseAuthId = supResult.userId;
+      emailVerified = supResult.alreadyConfirmed;
+    } else if (process.env.NODE_ENV === 'production') {
+      console.warn(
+        '[Auth] SUPABASE_URL + SUPABASE_ANON_KEY ausentes — cadastro sem verificação de e-mail.'
+      );
+    }
 
     const novoUsuario = await localDb.addUsuario({
-      username: String(username).trim().slice(0, 80),
+      username: trimmedUsername,
       email: cleanEmail,
       password: hashed,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120',
       isAdmin: bootstrapAdmin,
       role: bootstrapAdmin ? 'admin' : 'user',
       isDonor: false,
+      emailVerified,
+      supabaseAuthId,
     });
+
+    if (supabaseEnabled && !emailVerified) {
+      res.status(201).json({
+        success: true,
+        requiresVerification: true,
+        message:
+          'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada (e spam) para ativar sua conta antes de entrar.',
+        email: novoUsuario.email,
+      });
+      return;
+    }
 
     const { session, token } = createSession(novoUsuario.id, novoUsuario.email, req);
     setSessionCookie(res, token);
@@ -250,6 +304,24 @@ export async function handleLogin(req: Request, res: Response, security: Securit
         code: restriction.code,
       });
       return;
+    }
+
+    if (userNeedsEmailVerification(user)) {
+      let verified = user.emailVerified === true;
+      if (!verified && user.supabaseAuthId) {
+        verified = await isSupabaseEmailConfirmed(user.supabaseAuthId);
+        if (verified) {
+          await localDb.updateUsuario(cleanEmail, { emailVerified: true });
+        }
+      }
+      if (!verified) {
+        res.status(403).json({
+          error: 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada ou spam.',
+          requiresVerification: true,
+          email: cleanEmail,
+        });
+        return;
+      }
     }
 
     if (userRequiresTwoFactor(user)) {
@@ -350,4 +422,80 @@ export function resolveAuthenticatedEmail(req: Request, security: SecurityContex
   if (!sessionEmail) return null;
   if (bodyEmail && normalizeEmail(bodyEmail) !== sessionEmail) return null;
   return sessionEmail;
+}
+
+export async function handleConfirmEmail(req: Request, res: Response): Promise<void> {
+  const token_hash = String(req.query.token_hash || req.query.token || '').trim();
+  const type = String(req.query.type || 'signup').trim();
+  const appUrl = getAppPublicUrl();
+
+  if (!token_hash) {
+    res.redirect(`${appUrl}?auth=verify-missing`);
+    return;
+  }
+
+  if (!isSupabaseEmailAuthEnabled()) {
+    res.redirect(`${appUrl}?auth=verify-unavailable`);
+    return;
+  }
+
+  const result = await confirmEmailWithTokenHash(token_hash, type);
+  if (!result.ok || !result.email) {
+    console.warn('[Auth] Falha ao confirmar e-mail:', result.error);
+    res.redirect(`${appUrl}?auth=verify-error`);
+    return;
+  }
+
+  const cleanEmail = normalizeEmail(result.email);
+  const user = await localDb.findUsuarioByEmail(cleanEmail);
+  if (user) {
+    await localDb.updateUsuario(cleanEmail, { emailVerified: true });
+  }
+
+  res.redirect(`${appUrl}?auth=verify-success`);
+}
+
+export async function handleResendVerification(req: Request, res: Response): Promise<void> {
+  try {
+    const email = normalizeEmail(String(req.body?.email || ''));
+    if (!email || !isValidEmail(email)) {
+      res.status(400).json({ error: 'Informe um e-mail válido.' });
+      return;
+    }
+
+    if (!isSupabaseEmailAuthEnabled()) {
+      res.status(503).json({
+        error: 'Verificação por e-mail não está configurada. Defina SUPABASE_URL e SUPABASE_ANON_KEY.',
+      });
+      return;
+    }
+
+    const user = await localDb.findUsuarioByEmail(email);
+    if (!user) {
+      res.status(404).json({ error: 'Não encontramos uma conta com este e-mail.' });
+      return;
+    }
+
+    if (!userNeedsEmailVerification(user)) {
+      res.json({
+        success: true,
+        message: 'Este e-mail já está confirmado. Você pode entrar na sua conta.',
+      });
+      return;
+    }
+
+    const sent = await resendVerificationEmail(email);
+    if (!sent.ok) {
+      res.status(400).json({ error: sent.error || 'Não foi possível reenviar o e-mail.' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: 'E-mail de confirmação reenviado. Verifique sua caixa de entrada e spam.',
+    });
+  } catch (error) {
+    console.error('[Auth] Erro ao reenviar verificação:', error);
+    res.status(500).json({ error: 'Erro interno ao reenviar e-mail de confirmação.' });
+  }
 }

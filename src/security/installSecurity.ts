@@ -170,6 +170,8 @@ export function installSecurity(app: Express): SecurityContext {
   app.use('/api/cadastro', registerLimiter);
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/register', registerLimiter);
+  app.use('/api/auth/resend-verification', registerLimiter);
+  app.use('/api/reenviar-codigo', registerLimiter);
   app.use('/api/webhooks', webhookLimiter);
 
   return {

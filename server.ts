@@ -34,6 +34,7 @@ import {
   registerSecurityRoutes,
   handleRegister,
   handleLogin,
+  handleResendVerification,
   handlePasswordUpdate,
 } from "./src/security/authHandlers.ts";
 import { createSession } from "./src/security/sessions.ts";
@@ -2471,16 +2472,13 @@ app.post("/api/cadastro", (req, res) => handleRegister(req, res));
 // Login de usuários (auth local com bcrypt, 2FA, CAPTCHA e rate limit)
 app.post("/api/login", (req, res) => handleLogin(req, res, security));
 
-// Verificação OTP legada (Supabase Auth) — auth local via /api/login
-app.post("/api/verificar-codigo", (_req, res) => {
-  res.status(410).json({
-    error: "Verificação por e-mail desativada. Use /api/cadastro e /api/login.",
-  });
-});
+// Verificação de e-mail via Supabase Auth
+app.post("/api/reenviar-codigo", (req, res) => handleResendVerification(req, res));
 
-app.post("/api/reenviar-codigo", (_req, res) => {
-  res.status(410).json({
-    error: "Verificação por e-mail desativada. Use /api/cadastro e /api/login.",
+app.post("/api/verificar-codigo", (_req, res) => {
+  res.status(400).json({
+    error: 'Use o link enviado por e-mail para confirmar sua conta. Se expirou, peça um novo envio.',
+    requiresVerification: true,
   });
 });
 

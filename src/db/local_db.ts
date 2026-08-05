@@ -62,6 +62,8 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   if (local.suspendedUntil) merged.suspendedUntil = local.suspendedUntil;
   if (local.bannedAt) merged.bannedAt = local.bannedAt;
   if (local.lastActiveAt) merged.lastActiveAt = local.lastActiveAt;
+  if (local.emailVerified !== undefined) merged.emailVerified = local.emailVerified;
+  if (local.supabaseAuthId) merged.supabaseAuthId = local.supabaseAuthId;
 
   return merged;
 }
@@ -568,6 +570,8 @@ async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boo
           continueWatching: u.continueWatching || [],
           descricao: u.descricao || '',
           socialLinks: u.socialLinks || {},
+          emailVerified: u.emailVerified ?? true,
+          supabaseAuthId: u.supabaseAuthId || null,
         }))
       );
     }

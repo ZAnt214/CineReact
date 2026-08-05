@@ -27,6 +27,7 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess: (user: UserState, isNewUser?: boolean) => void;
   initialMode?: 'login' | 'register';
+  initialInfoMessage?: string | null;
 }
 
 const REMEMBERED_EMAIL_KEY = 'cine_react_remembered_email';
@@ -74,7 +75,8 @@ export default function AuthModal({
   isOpen,
   onClose,
   onSuccess,
-  initialMode = 'login'
+  initialMode = 'login',
+  initialInfoMessage = null,
 }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [username, setUsername] = useState('');
@@ -88,6 +90,8 @@ export default function AuthModal({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const firstInputRef = useRef<HTMLInputElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -109,7 +113,10 @@ export default function AuthModal({
 
     setMode(initialMode);
     setErrorMsg('');
-    setInfoMsg('');
+    setInfoMsg(initialInfoMessage || '');
+    setPendingVerification(
+      !!initialInfoMessage && !/confirmado com sucesso/i.test(initialInfoMessage)
+    );
     setShowForgotPassword(false);
 
     const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY);
@@ -120,7 +127,7 @@ export default function AuthModal({
 
     const timer = window.setTimeout(() => firstInputRef.current?.focus(), 120);
     return () => window.clearTimeout(timer);
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, initialInfoMessage]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -248,6 +255,7 @@ export default function AuthModal({
 
       if (res.ok) {
         if (data.requiresVerification) {
+          setPendingVerification(true);
           setInfoMsg(data.message || 'Enviamos um e-mail de confirmação. Verifique sua caixa de entrada para ativar sua conta.');
           setMode('login');
         } else if (data.success && data.user) {
@@ -260,6 +268,7 @@ export default function AuthModal({
         }
       } else {
         if (data.requiresVerification) {
+          setPendingVerification(true);
           setInfoMsg(data.error || data.message || 'Verifique seu e-mail para confirmar o cadastro antes de entrar.');
           setMode('login');
         } else {
@@ -273,10 +282,38 @@ export default function AuthModal({
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      setErrorMsg('Informe o e-mail usado no cadastro.');
+      return;
+    }
+    setResendLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await apiFetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPendingVerification(true);
+        setInfoMsg(data.message || 'E-mail de confirmação reenviado.');
+      } else {
+        setErrorMsg(formatAuthError(data.error));
+      }
+    } catch {
+      setErrorMsg('Erro de conexão ao reenviar o e-mail.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const switchMode = (next: 'login' | 'register') => {
     setMode(next);
     setErrorMsg('');
     setInfoMsg('');
+    setPendingVerification(false);
     setShowForgotPassword(false);
     setConfirmPassword('');
   };
@@ -431,7 +468,19 @@ export default function AuthModal({
                       className="bg-cine-surface/40 border border-cine-accent/30 text-cine-cream p-3 rounded-xl text-xs font-medium mb-4 flex items-start gap-2"
                     >
                       <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                      <span>{infoMsg}</span>
+                      <div className="space-y-2">
+                        <span>{infoMsg}</span>
+                        {pendingVerification && (
+                          <button
+                            type="button"
+                            onClick={handleResendVerification}
+                            disabled={resendLoading || !email.trim()}
+                            className="text-cine-accent-light hover:text-cine-cream font-bold underline underline-offset-2 disabled:opacity-50 cursor-pointer"
+                          >
+                            {resendLoading ? 'Reenviando…' : 'Reenviar e-mail de confirmação'}
+                          </button>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
