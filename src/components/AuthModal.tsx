@@ -32,12 +32,17 @@ interface AuthModalProps {
 
 const REMEMBERED_EMAIL_KEY = 'cine_react_remembered_email';
 
-function formatAuthError(raw?: string): string {
-  if (!raw?.trim()) {
-    return 'Não foi possível entrar. Verifique seus dados e tente novamente.';
+function formatAuthError(raw?: unknown): string {
+  if (raw == null) {
+    return 'Não foi possível completar. Verifique seus dados e tente novamente.';
   }
 
-  const lower = raw.toLowerCase();
+  const text = typeof raw === 'string' ? raw.trim() : String(raw).trim();
+  if (!text || text === '{}' || text === '[object Object]') {
+    return 'Não foi possível criar a conta. Verifique os dados, tente outro e-mail ou confira a configuração do Supabase.';
+  }
+
+  const lower = text.toLowerCase();
 
   if (
     lower.includes('credenciais inválidas') ||
@@ -61,7 +66,11 @@ function formatAuthError(raw?: string): string {
     return 'E-mail ou senha incorretos. Verifique e tente novamente.';
   }
 
-  return raw;
+  if (lower.includes('redirect') || lower.includes('validation_failed')) {
+    return 'Configuração do Supabase incompleta. Adicione a URL de confirmação em Authentication → URL Configuration → Redirect URLs.';
+  }
+
+  return text;
 }
 
 const benefits = [
