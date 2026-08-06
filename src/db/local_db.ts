@@ -439,6 +439,75 @@ const supabaseFetchWithTimeout = async (input: any, init?: any) => {
   }
 };
 
+function normalizeRemoteReact(row: Record<string, unknown>): ReactVideo {
+  return {
+    id: String(row.id),
+    obraId: String(row.obraId),
+    titulo: String(row.titulo || ''),
+    canalNome: String(row.canalNome || ''),
+    publicadoEm: String(row.publicadoEm || new Date().toISOString()),
+    duracao: String(row.duracao || ''),
+    visualizacoes: Number(row.visualizacoes || 0),
+    thumbnailUrl: String(row.thumbnailUrl || row.thumbnail || ''),
+    canalId: row.canalId ? String(row.canalId) : undefined,
+    isRecomendado: Boolean(row.isRecomendado),
+    likes: row.likes != null ? Number(row.likes) : undefined,
+  };
+}
+
+function mergeObrasFromRemote(local: Obra[], remote: Obra[]): Obra[] {
+  const map = new Map<string, Obra>();
+  for (const obra of remote) map.set(obra.id, obra);
+  for (const obra of local) {
+    const remoteObra = map.get(obra.id);
+    if (!remoteObra) {
+      map.set(obra.id, obra);
+      continue;
+    }
+    map.set(obra.id, {
+      ...remoteObra,
+      ...obra,
+      channelId: obra.channelId || remoteObra.channelId,
+      banner: obra.banner || remoteObra.banner,
+      poster: obra.poster || remoteObra.poster,
+      sinopse: obra.sinopse || remoteObra.sinopse,
+    });
+  }
+  return Array.from(map.values());
+}
+
+function mergeReactsFromRemote(local: ReactVideo[], remote: unknown[]): ReactVideo[] {
+  const map = new Map<string, ReactVideo>();
+  for (const row of remote) {
+    const react = normalizeRemoteReact(row as Record<string, unknown>);
+    map.set(react.id, react);
+  }
+  for (const react of local) {
+    const existing = map.get(react.id);
+    map.set(react.id, existing ? { ...existing, ...react } : react);
+  }
+  return Array.from(map.values());
+}
+
+async function deleteObraFromSupabase(obraId: string): Promise<void> {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from('reacts').delete().eq('obraId', obraId);
+    await supabaseClient.from('obras').delete().eq('id', obraId);
+  } catch (err) {
+    console.warn('[Supabase] Falha ao remover obra do cloud:', (err as Error)?.message || err);
+  }
+}
+
+async function deleteReactFromSupabase(reactId: string): Promise<void> {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from('reacts').delete().eq('id', reactId);
+  } catch (err) {
+    console.warn('[Supabase] Falha ao remover react do cloud:', (err as Error)?.message || err);
+  }
+}
+
 async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boolean> {
   if (!supabaseClient) return false;
   try {
@@ -491,6 +560,8 @@ async function uploadCacheToSupabase(options?: { quiet?: boolean }): Promise<boo
           canalNome: r.canalNome,
           visualizacoes: r.visualizacoes || 0,
           isRecomendado: !!r.isRecomendado,
+          publicadoEm: r.publicadoEm || null,
+          canalId: r.canalId || null,
         }))
       );
     }
@@ -712,12 +783,9 @@ export const localDb = {
         return true;
       }
 
-      // Otherwise, Supabase is the single source of truth - override local memory cache!
-      dbCache.obras = obras || [];
-      dbCache.reacts = (reacts || []).map((r: any) => ({
-        ...r,
-        thumbnailUrl: r.thumbnailUrl || r.thumbnail
-      }));
+      // Mescla remoto + local para não perder importações recentes antes do push ao Supabase.
+      dbCache.obras = mergeObrasFromRemote(dbCache.obras || [], obras || []);
+      dbCache.reacts = mergeReactsFromRemote(dbCache.reacts || [], reacts || []);
       dbCache.comentarios = comentarios || [];
       dbCache.favoritos = favoritos || [];
       dbCache.canaisSeguidos = canaisSeguidos || [];
@@ -774,6 +842,7 @@ export const localDb = {
     dbCache.comentarios = dbCache.comentarios.filter(c => c.obraId !== id);
     saveDb(dbCache);
     scheduleSupabaseBackgroundSync();
+    void deleteObraFromSupabase(id);
   },
 
   getReacts: () => {
@@ -819,6 +888,7 @@ export const localDb = {
     dbCache.reacts = dbCache.reacts.filter(r => r.id !== id);
     saveDb(dbCache);
     scheduleSupabaseBackgroundSync();
+    void deleteReactFromSupabase(id);
   },
 
   getComentarios: (obraId?: string) => {

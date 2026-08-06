@@ -1,6 +1,7 @@
 import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
 import { localDb } from "./src/db/local_db.ts";
+import type { Obra, ReactVideo } from "./src/types.ts";
 import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
 import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
 import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
@@ -39,6 +40,7 @@ import {
 } from "./src/security/authHandlers.ts";
 import { createSession } from "./src/security/sessions.ts";
 import { requireSessionEmail } from "./src/security/sessionBinding.ts";
+import { channelRequestLimiter } from "./src/security/rateLimit.ts";
 
 dotenv.config();
 
@@ -469,6 +471,21 @@ async function syncChannelVideos(channelId: string, obraId: string) {
   }
 }
 
+function allowMockChannelImport(): boolean {
+  return process.env.ALLOW_MOCK_CHANNEL_IMPORT === '1' || process.env.ALLOW_MOCK_CHANNEL_IMPORT === 'true';
+}
+
+/** Importa vídeos do YouTube após salvar metadados do canal no catálogo. */
+async function syncVideosForChannelObra(obra: Obra): Promise<number> {
+  if (obra.channelId?.startsWith('UC')) {
+    await syncChannelVideos(obra.channelId, obra.id);
+  } else {
+    const cleanTitle = obra.titulo.replace(/^Canal\s+/i, '').trim();
+    await discoverReactsFromYouTube(cleanTitle, obra.id, 12);
+  }
+  return localDb.getReacts().filter((r) => r.obraId === obra.id).length;
+}
+
 async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5): Promise<ReactVideo[]> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") {
@@ -877,6 +894,7 @@ app.post("/api/supabase/migrate", async (req, res) => {
 
 
 app.post("/api/sync/:obraId", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   try {
     const obraId = req.params.obraId;
     const obra = localDb.getObras().find(o => o.id === obraId);
@@ -885,7 +903,13 @@ app.post("/api/sync/:obraId", async (req, res) => {
     }
     
     await syncChannelVideos(obra.channelId, obra.id);
-    res.json({ status: "ok", message: `Sincronização concluída para ${obra.titulo}.` });
+    await localDb.flushSupabaseBackgroundSync();
+    const reactCount = localDb.getReacts().filter((r) => r.obraId === obra.id).length;
+    res.json({
+      status: "ok",
+      message: `Sincronização concluída para ${obra.titulo}.`,
+      reactCount,
+    });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao sincronizar canal." });
   }
@@ -1464,14 +1488,23 @@ app.post('/api/catalogo/canal', async (req, res) => {
 
     const saved = localDb.saveObra(existing ? { ...existing, ...obraData, id: existing.id } : obraData);
 
+    let reactCount = localDb.getReacts().filter((r) => r.obraId === saved.id).length;
+    try {
+      reactCount = await syncVideosForChannelObra(saved);
+      await localDb.flushSupabaseBackgroundSync();
+    } catch (syncErr) {
+      console.warn('[Catálogo] Canal salvo, mas falha ao sincronizar vídeos:', (syncErr as Error)?.message || syncErr);
+    }
+
     res.json({
       success: true,
       obra: saved,
       mode: resolved.source,
+      reactCount,
       savedToSupabase: localDb.isSupabaseActive(),
       message: existing
-        ? `Canal "${saved.titulo}" atualizado no catálogo.`
-        : `Canal "${saved.titulo}" adicionado ao catálogo.`,
+        ? `Canal "${saved.titulo}" atualizado (${reactCount} vídeos no catálogo).`
+        : `Canal "${saved.titulo}" adicionado (${reactCount} vídeos importados).`,
     });
   } catch (error: any) {
     console.error('[Catálogo] Erro ao salvar canal:', error);
@@ -1615,6 +1648,9 @@ app.post("/api/canais/importar", async (req, res) => {
         console.log(`[Importar Canal] ${reactsAdded} reacts encontrados via busca para ${titulo}`);
       }
 
+      await localDb.flushSupabaseBackgroundSync();
+      const reactCount = localDb.getReacts().filter((r) => r.obraId === canalSlug).length;
+
       localDb.addNotificacao({
         titulo: `Novo Canal Importado: ${titulo}`,
         mensagem: `O canal ${titulo} foi importado com dados reais do YouTube (${resolved.source}).`,
@@ -1625,12 +1661,13 @@ app.post("/api/canais/importar", async (req, res) => {
       return res.status(200).json({
         success: true,
         obra: novaObra,
+        reactCount,
         mode: resolved.source === 'api' ? 'real' : resolved.source,
       });
     }
 
-    // Fallback para simulação do Gemini se houver chave do Gemini configurada
-    if (ai) {
+    // Fallback simulado apenas se explicitamente habilitado (evita vídeos fake em produção).
+    if (ai && allowMockChannelImport()) {
       try {
         console.log(`[Importar Canal] Simulando canal com Gemini para "${url}"...`);
         const cleanQuery = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
@@ -1746,47 +1783,53 @@ app.post("/api/canais/importar", async (req, res) => {
       }
     }
 
-    // 3. Fallback estático se nada mais funcionar
-    console.log(`[Importar Canal] Usando fallback estático de segurança...`);
-    const cleanUrl = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
-    const title = cleanUrl.charAt(0).toUpperCase() + cleanUrl.slice(1);
-    const canalSlug = `canal-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    if (allowMockChannelImport()) {
+      console.log(`[Importar Canal] Usando fallback estático de segurança...`);
+      const cleanUrl = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
+      const title = cleanUrl.charAt(0).toUpperCase() + cleanUrl.slice(1);
+      const canalSlug = `canal-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-    const novaObra = localDb.saveObra({
-      id: canalSlug,
-      titulo: `Canal ${title}`,
-      tipo: 'canal',
-      sinopse: `Canal de reacts repleto de entretenimento e comentários inteligentes sobre filmes, séries e animes.`,
-      ano: 2023,
-      generos: ["React", "Entretenimento"],
-      banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
-      poster: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300",
-      trailerUrl: "https://www.youtube.com",
-      channelId: `static_${Math.random().toString(36).substring(2, 10)}`
-    });
-
-    for (let i = 1; i <= 5; i++) {
-      localDb.saveReact({
-        id: `mock_static_${canalSlug}_${i}`,
-        titulo: `REACT ${i} - REAGINDO AOS MELHORES MOMENTOS DO FILME DO ANO!`,
-        canalNome: title,
-        canalId: novaObra.channelId || '',
-        publicadoEm: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        duracao: `${10 + i}:${15 + i * 5}`,
-        visualizacoes: 50000 * i,
-        thumbnailUrl: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=400",
-        obraId: canalSlug
+      const novaObra = localDb.saveObra({
+        id: canalSlug,
+        titulo: `Canal ${title}`,
+        tipo: 'canal',
+        sinopse: `Canal de reacts repleto de entretenimento e comentários inteligentes sobre filmes, séries e animes.`,
+        ano: 2023,
+        generos: ["React", "Entretenimento"],
+        banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
+        poster: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300",
+        trailerUrl: "https://www.youtube.com",
+        channelId: `static_${Math.random().toString(36).substring(2, 10)}`
       });
+
+      for (let i = 1; i <= 5; i++) {
+        localDb.saveReact({
+          id: `mock_static_${canalSlug}_${i}`,
+          titulo: `REACT ${i} - REAGINDO AOS MELHORES MOMENTOS DO FILME DO ANO!`,
+          canalNome: title,
+          canalId: novaObra.channelId || '',
+          publicadoEm: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          duracao: `${10 + i}:${15 + i * 5}`,
+          visualizacoes: 50000 * i,
+          thumbnailUrl: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=400",
+          obraId: canalSlug
+        });
+      }
+
+      localDb.addNotificacao({
+        titulo: `Novo Canal Cadastrado (Mock): ${title}`,
+        mensagem: `O canal ${title} foi criado com dados mockados de segurança.`,
+        canalNome: title,
+        usuarioEmail: req.body.email
+      });
+
+      return res.status(200).json({ success: true, obra: novaObra, mode: 'static' });
     }
 
-    localDb.addNotificacao({
-      titulo: `Novo Canal Cadastrado (Mock): ${title}`,
-      mensagem: `O canal ${title} foi criado com dados mockados de segurança.`,
-      canalNome: title,
-      usuarioEmail: req.body.email
+    return res.status(404).json({
+      error:
+        'Não foi possível importar este canal. Verifique o link do YouTube e configure YOUTUBE_API_KEY no servidor.',
     });
-
-    return res.status(200).json({ success: true, obra: novaObra, mode: 'static' });
 
   } catch (error: any) {
     console.error("Erro interno ao importar canal:", error);
@@ -2474,18 +2517,21 @@ app.delete("/api/notificacoes", (req, res) => {
 });
 
 // Solicitações de adição de canais por criadores de conteúdo
-app.post("/api/solicitacoes-canal", (req, res) => {
+app.post("/api/solicitacoes-canal", channelRequestLimiter, (req, res) => {
   try {
     const { canalNome, canalUrl, emailContato } = req.body;
     if (!canalNome || !canalUrl || !emailContato) {
       return res.status(400).json({ error: "Todos os campos (canalNome, canalUrl, emailContato) são obrigatórios." });
     }
+
+    const sessionEmail = security.getAuthEmail(req);
     
     // Cria uma notificação que o admin poderá ver
     localDb.addNotificacao({
       titulo: `Solicitação: Novo Canal por Criador`,
       mensagem: `O criador de conteúdo solicitou a inclusão do canal "${canalNome}" (${canalUrl}). E-mail de contato: ${emailContato}`,
-      canalNome: canalNome
+      canalNome: canalNome,
+      usuarioEmail: sessionEmail || undefined,
     });
 
     res.status(201).json({ success: true, message: "Solicitação enviada com sucesso! Analisaremos o canal em breve." });
@@ -3006,29 +3052,28 @@ async function startServer() {
   syncChannelAvatars().catch(err => {
     console.warn('Aviso ao sincronizar avatares dos canais:', err?.message || err);
   });
-  prefillDefaultReacts().catch(err => {
-    console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
-  });
 
-  setImmediate(() => {
-    void (async () => {
-      try {
-        await localDb.ensureCineClipsRestored();
-        if (localDb.isSupabaseActive()) {
-          console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
-          const success = await localDb.syncFromSupabase();
-          ensureDemoCreatorProfile();
-          if (success) {
-            console.log('[Supabase] Sincronização inicial na inicialização concluída!');
-          } else {
-            console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
-          }
+  void (async () => {
+    try {
+      await localDb.ensureCineClipsRestored();
+      if (localDb.isSupabaseActive()) {
+        console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
+        const success = await localDb.syncFromSupabase();
+        ensureDemoCreatorProfile();
+        if (success) {
+          console.log('[Supabase] Sincronização inicial na inicialização concluída!');
+        } else {
+          console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
         }
-      } catch (err: any) {
-        console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
       }
-    })();
-  });
+    } catch (err: any) {
+      console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
+    }
+
+    prefillDefaultReacts().catch(err => {
+      console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
+    });
+  })();
 }
 
 startServer().catch((err) => {
