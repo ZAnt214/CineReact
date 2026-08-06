@@ -58,3 +58,13 @@ export const webhookLimiter = rateLimit({
   keyGenerator: (req) => getClientIp(req),
   handler: limitHandler,
 });
+
+/** Solicitações públicas de inclusão de canal — evita spam na fila do admin. */
+export const channelRequestLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => getClientIp(req),
+  handler: limitHandler,
+});
