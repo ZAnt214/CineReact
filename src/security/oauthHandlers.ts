@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import { localDb } from '../db/local_db.ts';
 import { getAccountRestriction } from '../utils/platformEnforcement.ts';
+import { isMasterAdminEmail } from '../utils/platformEnforcement.ts';
 import { hashPassword } from './password.ts';
 import { createSession } from './sessions.ts';
 import { setSessionCookie } from './installSecurity.ts';
@@ -156,7 +157,7 @@ async function findOrCreateOAuthUser(
   const avatar = resolveOAuthAvatar(supabaseUser);
   const discordProfile = extractDiscordProfile(supabaseUser);
 
-  const profilePatch = {
+  const profilePatch: Partial<UserAccount> = {
     supabaseAuthId: supabaseUser.id,
     emailVerified: true,
     avatar,
@@ -167,6 +168,11 @@ async function findOrCreateOAuthUser(
     providerEmail: discordProfile.providerEmail,
     termsAcceptedAt,
   };
+
+  if (isMasterAdminEmail(email) || isMasterAdminEmail(discordProfile.providerEmail)) {
+    profilePatch.isAdmin = true;
+    profilePatch.role = 'admin';
+  }
 
   console.info('[Auth] Discord login:', {
     accountEmail: email,

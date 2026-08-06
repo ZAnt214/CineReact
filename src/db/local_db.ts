@@ -36,6 +36,7 @@ import { hashToken } from '../security/crypto.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
+import { isMasterAdminUser } from '../utils/platformEnforcement.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
 import { getDataDir, isValidJsonFile, migrateLegacyFile } from './dataPaths.ts';
 import {
@@ -69,6 +70,11 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   if (local.discordUsername) merged.discordUsername = local.discordUsername;
   if (local.providerEmail) merged.providerEmail = local.providerEmail;
   if (local.termsAcceptedAt) merged.termsAcceptedAt = local.termsAcceptedAt;
+  if (local.isAdmin) merged.isAdmin = true;
+  if (isMasterAdminUser(local) || isMasterAdminUser(merged)) {
+    merged.isAdmin = true;
+    merged.role = 'admin';
+  }
 
   return merged;
 }

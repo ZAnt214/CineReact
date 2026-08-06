@@ -5,7 +5,7 @@ import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { localDb } from '../db/local_db.ts';
 import type { UserAccount } from '../types.ts';
 import type { AuthUser } from './types.ts';
-import { MASTER_EMAIL } from '../utils/platformEnforcement.ts';
+import { isMasterAdminUser } from '../utils/platformEnforcement.ts';
 
 const ROLE_RANK: Record<StaffRole, number> = {
   user: 0,
@@ -15,7 +15,7 @@ const ROLE_RANK: Record<StaffRole, number> = {
 };
 
 export function resolveStaffRole(user: UserAccount): StaffRole {
-  if (user.isAdmin || user.email.toLowerCase() === MASTER_EMAIL) return 'admin';
+  if (user.isAdmin || isMasterAdminUser(user)) return 'admin';
   if (user.role === 'moderator' || user.role === 'curator' || user.role === 'admin') {
     return user.role;
   }

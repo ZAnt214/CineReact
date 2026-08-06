@@ -22,6 +22,7 @@ import { CINECLIPS_CATEGORIES } from '../../types/cineclips.ts';
 import { AdminPanelCard, AdminBadge, AdminStatCard } from '../components/AdminUi.tsx';
 import { useAdminToast } from '../components/AdminToast.tsx';
 import { downloadClipVideo } from '../../hooks/useCineClips.ts';
+import { adminFetch as adminApiFetch } from '../../utils/adminApi.ts';
 import { detectClipPlatform, platformLabel } from '../../cineclips/platform.ts';
 
 interface CineClipsAdminPageProps {
@@ -66,14 +67,7 @@ export default function CineClipsAdminPage({ email }: CineClipsAdminPageProps) {
   const detectedPlatform = importUrl.trim() ? detectClipPlatform(importUrl) : 'unknown';
 
   const adminFetch = useCallback(async (path: string, options?: RequestInit) => {
-    const res = await fetch(path, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-email': email,
-        ...(options?.headers || {}),
-      },
-    });
+    const res = await adminApiFetch(email, path, options);
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
       const err = new Error(body.error || 'Erro na requisição') as Error & { alternatives?: string[] };

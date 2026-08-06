@@ -10,12 +10,22 @@ export interface AccountRestriction {
 
 export const MASTER_EMAIL = 'mateusvini.t10@gmail.com';
 
+export function isMasterAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return email.toLowerCase().trim() === MASTER_EMAIL.toLowerCase();
+}
+
+export function isMasterAdminUser(user: UserAccount | null | undefined): boolean {
+  if (!user) return false;
+  return isMasterAdminEmail(user.email) || isMasterAdminEmail(user.providerEmail);
+}
+
 export function getAccountRestriction(user: UserAccount | null | undefined): AccountRestriction {
   if (!user) {
     return { blocked: false, code: null, message: '' };
   }
 
-  if (user.email.toLowerCase() === MASTER_EMAIL) {
+  if (isMasterAdminUser(user)) {
     return { blocked: false, code: null, message: '' };
   }
 

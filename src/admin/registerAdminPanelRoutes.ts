@@ -8,7 +8,7 @@ import { ACHIEVEMENTS } from '../data/gamification.ts';
 import { REWARDS_CATALOG } from '../data/rewardsCatalog.ts';
 import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
-import { MASTER_EMAIL } from '../utils/platformEnforcement.ts';
+import { isMasterAdminEmail, isMasterAdminUser } from '../utils/platformEnforcement.ts';
 
 type ExpressRequest = Request;
 type ExpressResponse = Response;
@@ -21,10 +21,10 @@ function uid(prefix: string) {
 
 function getStaffRole(email: string): StaffRole {
   const normalized = email.toLowerCase().trim();
-  if (normalized === MASTER_EMAIL) return 'admin';
+  if (isMasterAdminEmail(normalized)) return 'admin';
   const user = localDb.findUsuarioByEmailSync(normalized);
   if (!user) return 'user';
-  if (user.isAdmin || user.role === 'admin') return 'admin';
+  if (isMasterAdminUser(user) || user.isAdmin || user.role === 'admin') return 'admin';
   if (user.role === 'moderator') return 'moderator';
   if (user.role === 'curator') return 'curator';
   return 'user';
