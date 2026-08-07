@@ -17,6 +17,11 @@ import { AdminConfig, createDefaultAdminConfig, AdminAuditLog } from '../types/a
 import type { DonationRequest } from '../types/donations.ts';
 import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
 import type {
+  MinutagemAnalysisRequest,
+  MinutagemMarker,
+  MinutagemMarkerSubmission,
+} from '../types/minutagem.ts';
+import type {
   CreatorPayout,
   FinanceTransaction,
   MonthlyCloseRecord,
@@ -37,6 +42,7 @@ import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
+import { MINUTAGEM_SEED_MARKERS } from '../data/minutagemSeed.ts';
 import { getDataDir, isValidJsonFile, migrateLegacyFile } from './dataPaths.ts';
 import {
   persistCineClipsToSupabase,
@@ -73,6 +79,27 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   return merged;
 }
 
+function seedMinutagemIfEmpty(parsed: DbSchema) {
+  if (!parsed.minutagemMarkers) parsed.minutagemMarkers = [];
+  if (parsed.minutagemMarkers.length > 0) return;
+
+  const obras = parsed.obras || [];
+  const now = new Date().toISOString();
+  for (const seed of MINUTAGEM_SEED_MARKERS) {
+    const obraExists = obras.some((o) => o.id === seed.obraId);
+    if (!obraExists) continue;
+    parsed.minutagemMarkers.push({
+      ...seed,
+      id: `mm-${seed.obraId}-${seed.minutos}-${Math.random().toString(36).slice(2, 6)}`,
+      createdAt: now,
+    });
+  }
+  if (parsed.minutagemMarkers.length > 0) {
+    saveDb(parsed);
+    console.log(`[Minutagem] ${parsed.minutagemMarkers.length} marcadores iniciais carregados.`);
+  }
+}
+
 const DB_PATH = path.join(getDataDir(), 'db_cine_react.json');
 
 migrateLegacyFile(DB_PATH, [
@@ -106,6 +133,9 @@ interface DbSchema {
   cineClipWatchHistory: CineClipWatchEvent[];
   donationRequests: DonationRequest[];
   creatorVerificationRequests: CreatorVerificationRequest[];
+  minutagemMarkers: MinutagemMarker[];
+  minutagemMarkerSubmissions: MinutagemMarkerSubmission[];
+  minutagemAnalysisRequests: MinutagemAnalysisRequest[];
   financeTransactions: FinanceTransaction[];
   platformSubscriptions: PlatformSubscription[];
   creatorPayouts: CreatorPayout[];
@@ -218,6 +248,21 @@ function initDb(): DbSchema {
         saveDb(parsed);
       }
 
+      if (!parsed.minutagemMarkers) {
+        parsed.minutagemMarkers = [];
+        saveDb(parsed);
+      }
+      if (!parsed.minutagemMarkerSubmissions) {
+        parsed.minutagemMarkerSubmissions = [];
+        saveDb(parsed);
+      }
+      if (!parsed.minutagemAnalysisRequests) {
+        parsed.minutagemAnalysisRequests = [];
+        saveDb(parsed);
+      }
+
+      seedMinutagemIfEmpty(parsed);
+
       if (!parsed.financeTransactions) parsed.financeTransactions = [];
       if (!parsed.platformSubscriptions) parsed.platformSubscriptions = [];
       if (!parsed.creatorPayouts) parsed.creatorPayouts = [];
@@ -279,6 +324,9 @@ function initDb(): DbSchema {
     cineClipWatchHistory: [],
     donationRequests: [],
     creatorVerificationRequests: [],
+    minutagemMarkers: [],
+    minutagemMarkerSubmissions: [],
+    minutagemAnalysisRequests: [],
     financeTransactions: [],
     platformSubscriptions: [],
     creatorPayouts: [],
@@ -292,6 +340,7 @@ function initDb(): DbSchema {
     financialAuditLog: [],
   };
 
+  seedMinutagemIfEmpty(initialDb);
   saveDb(initialDb);
   return initialDb;
 }
@@ -322,6 +371,9 @@ try {
     cineClipWatchHistory: [],
     donationRequests: [],
     creatorVerificationRequests: [],
+    minutagemMarkers: [],
+    minutagemMarkerSubmissions: [],
+    minutagemAnalysisRequests: [],
     financeTransactions: [],
     platformSubscriptions: [],
     creatorPayouts: [],
@@ -1792,6 +1844,168 @@ export const localDb = {
   },
 
   getFinancialAuditLog: (): FinancialAuditEntry[] => dbCache.financialAuditLog || [],
+
+  getMinutagemMarkers: (obraId?: string): MinutagemMarker[] => {
+    const list = dbCache.minutagemMarkers || [];
+    if (!obraId) return [...list];
+    return list.filter((m) => m.obraId === obraId);
+  },
+
+  getMinutagemMarkerById: (id: string): MinutagemMarker | null => {
+    return (dbCache.minutagemMarkers || []).find((m) => m.id === id) || null;
+  },
+
+  createMinutagemMarker: (
+    data: Omit<MinutagemMarker, 'id' | 'createdAt'>
+  ): MinutagemMarker => {
+    if (!dbCache.minutagemMarkers) dbCache.minutagemMarkers = [];
+    const marker: MinutagemMarker = {
+      ...data,
+      id: `mm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    };
+    dbCache.minutagemMarkers.push(marker);
+    saveDb(dbCache, true);
+    return marker;
+  },
+
+  deleteMinutagemMarker: (id: string): boolean => {
+    if (!dbCache.minutagemMarkers) return false;
+    const idx = dbCache.minutagemMarkers.findIndex((m) => m.id === id);
+    if (idx < 0) return false;
+    dbCache.minutagemMarkers.splice(idx, 1);
+    saveDb(dbCache, true);
+    return true;
+  },
+
+  createMinutagemMarkerSubmission: (
+    data: Omit<MinutagemMarkerSubmission, 'id' | 'requestedAt' | 'status'>
+  ): MinutagemMarkerSubmission => {
+    if (!dbCache.minutagemMarkerSubmissions) dbCache.minutagemMarkerSubmissions = [];
+    const submission: MinutagemMarkerSubmission = {
+      ...data,
+      id: `mms-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+    };
+    dbCache.minutagemMarkerSubmissions.unshift(submission);
+    saveDb(dbCache, true);
+    return submission;
+  },
+
+  getMinutagemMarkerSubmissions: (
+    status?: MinutagemMarkerSubmission['status']
+  ): MinutagemMarkerSubmission[] => {
+    const list = dbCache.minutagemMarkerSubmissions || [];
+    if (!status) return [...list];
+    return list.filter((s) => s.status === status);
+  },
+
+  getPendingMinutagemSubmissionForUser: (email: string): MinutagemMarkerSubmission | null => {
+    const key = email.toLowerCase();
+    return (
+      (dbCache.minutagemMarkerSubmissions || []).find(
+        (s) => s.usuarioEmail.toLowerCase() === key && s.status === 'pending'
+      ) || null
+    );
+  },
+
+  updateMinutagemMarkerSubmission: (
+    id: string,
+    updates: Partial<
+      Pick<
+        MinutagemMarkerSubmission,
+        'status' | 'reviewedAt' | 'reviewedBy' | 'adminNote'
+      >
+    >
+  ): MinutagemMarkerSubmission | null => {
+    if (!dbCache.minutagemMarkerSubmissions) return null;
+    const idx = dbCache.minutagemMarkerSubmissions.findIndex((s) => s.id === id);
+    if (idx < 0) return null;
+    dbCache.minutagemMarkerSubmissions[idx] = {
+      ...dbCache.minutagemMarkerSubmissions[idx],
+      ...updates,
+    };
+    saveDb(dbCache, true);
+    return dbCache.minutagemMarkerSubmissions[idx];
+  },
+
+  createMinutagemAnalysisRequest: (
+    data: Omit<MinutagemAnalysisRequest, 'id' | 'requestedAt' | 'status'>
+  ): MinutagemAnalysisRequest => {
+    if (!dbCache.minutagemAnalysisRequests) dbCache.minutagemAnalysisRequests = [];
+    const request: MinutagemAnalysisRequest = {
+      ...data,
+      id: `mma-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+    };
+    dbCache.minutagemAnalysisRequests.unshift(request);
+    saveDb(dbCache, true);
+    return request;
+  },
+
+  getMinutagemAnalysisRequests: (
+    status?: MinutagemAnalysisRequest['status']
+  ): MinutagemAnalysisRequest[] => {
+    const list = dbCache.minutagemAnalysisRequests || [];
+    if (!status) return [...list];
+    return list.filter((r) => r.status === status);
+  },
+
+  getPendingMinutagemAnalysisForUser: (email: string): MinutagemAnalysisRequest | null => {
+    const key = email.toLowerCase();
+    return (
+      (dbCache.minutagemAnalysisRequests || []).find(
+        (r) =>
+          r.usuarioEmail.toLowerCase() === key &&
+          (r.status === 'pending' || r.status === 'in_progress')
+      ) || null
+    );
+  },
+
+  updateMinutagemAnalysisRequest: (
+    id: string,
+    updates: Partial<
+      Pick<
+        MinutagemAnalysisRequest,
+        'status' | 'reviewedAt' | 'reviewedBy' | 'adminNote' | 'obraId'
+      >
+    >
+  ): MinutagemAnalysisRequest | null => {
+    if (!dbCache.minutagemAnalysisRequests) return null;
+    const idx = dbCache.minutagemAnalysisRequests.findIndex((r) => r.id === id);
+    if (idx < 0) return null;
+    dbCache.minutagemAnalysisRequests[idx] = {
+      ...dbCache.minutagemAnalysisRequests[idx],
+      ...updates,
+    };
+    saveDb(dbCache, true);
+    return dbCache.minutagemAnalysisRequests[idx];
+  },
+
+  getMinutagemCatalogSummary: (): Array<{
+    obraId: string;
+    obraTitulo: string;
+    tipo: string;
+    markerCount: number;
+  }> => {
+    const obras = dbCache.obras || [];
+    const markers = dbCache.minutagemMarkers || [];
+    const eligible = obras.filter((o) => ['filme', 'serie', 'anime'].includes(o.tipo));
+    const counts: Record<string, number> = {};
+    markers.forEach((m) => {
+      counts[m.obraId] = (counts[m.obraId] || 0) + 1;
+    });
+    return eligible
+      .map((o) => ({
+        obraId: o.id,
+        obraTitulo: o.titulo,
+        tipo: o.tipo,
+        markerCount: counts[o.id] || 0,
+      }))
+      .sort((a, b) => b.markerCount - a.markerCount || a.obraTitulo.localeCompare(b.obraTitulo));
+  },
 
   saveBackupRecord: (record: import('../types/admin.ts').BackupRecord & { fileName?: string }): void => {
     if (!dbCache.adminConfig) dbCache.adminConfig = createDefaultAdminConfig();

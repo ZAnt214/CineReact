@@ -17,6 +17,7 @@ import {
   LogOut,
   Pin,
   Zap,
+  Clock,
   Wallet,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -36,7 +37,8 @@ export type AdminSection =
   | 'financeiro'
   | 'configuracoes'
   | 'sistema'
-  | 'cineclips';
+  | 'cineclips'
+  | 'minutagem';
 
 const NAV: { id: AdminSection; label: string; icon: React.ElementType; group: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Geral' },
@@ -44,6 +46,7 @@ const NAV: { id: AdminSection; label: string; icon: React.ElementType; group: st
   { id: 'catalogo', label: 'Catálogo', icon: Link2, group: 'Conteúdo' },
   { id: 'conteudo', label: 'Obras & Vídeos', icon: LayoutGrid, group: 'Conteúdo' },
   { id: 'cineclips', label: 'CineClips', icon: Zap, group: 'Conteúdo' },
+  { id: 'minutagem', label: 'Minutagem', icon: Clock, group: 'Conteúdo' },
   { id: 'criadores', label: 'Criadores', icon: Inbox, group: 'Conteúdo' },
   { id: 'moderacao', label: 'Moderação', icon: Shield, group: 'Comunidade' },
   { id: 'usuarios', label: 'Usuários', icon: Users, group: 'Comunidade' },

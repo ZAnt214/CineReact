@@ -15,6 +15,7 @@ import {
   SecurityAdminPage,
 } from './pages/AdminPages.tsx';
 import CineClipsAdminPage from './pages/CineClipsAdminPage.tsx';
+import MinutagemAdminPage from './pages/MinutagemAdminPage.tsx';
 import FinanceAdminPage from './pages/FinanceAdminPage.tsx';
 
 interface AdminShellProps {
@@ -39,6 +40,8 @@ export function AdminShell({ user, onClose, onSelectObra }: AdminShellProps) {
         return <AdminPanel user={user} onSelectObra={onSelectObra} forcedTab="conteudo" embedded />;
       case 'cineclips':
         return <CineClipsAdminPage email={email} />;
+      case 'minutagem':
+        return <MinutagemAdminPage email={email} />;
       case 'criadores':
         return <AdminPanel user={user} onSelectObra={onSelectObra} forcedTab="criadores" embedded />;
       case 'moderacao':

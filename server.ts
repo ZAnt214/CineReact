@@ -11,6 +11,7 @@ import { registerFinanceRoutes } from "./src/finance/registerFinanceRoutes.ts";
 import { registerSubscriptionRoutes } from "./src/finance/registerSubscriptionRoutes.ts";
 import { registerCreatorClipRoutes } from "./src/finance/registerCreatorClipRoutes.ts";
 import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
+import { registerMinutagemRoutes } from "./src/minutagem/registerMinutagemRoutes.ts";
 import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
 import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
 import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
@@ -2914,6 +2915,7 @@ registerSubscriptionRoutes(app, requireAdmin, security);
 registerCreatorClipRoutes(app, security);
 registerAdminPanelRoutes(app, requireAdmin);
 registerCineClipsRoutes(app, requireAdmin, security);
+registerMinutagemRoutes(app, requireAdmin, security);
 
 app.get("/api/user/account-status", (req, res) => {
   const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);

@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { Play, Clock, ArrowLeft } from 'lucide-react';
+import { Play, Clock, ArrowLeft, Shield, Loader2 } from 'lucide-react';
 import { Obra, ReactVideo } from '../types.ts';
 import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
+import { useMinutagemMarkers } from '../hooks/useMinutagem.ts';
+import { formatMinutagem, contentTypeLabel, contentTypeBadgeClass } from '../minutagem/utils.ts';
 
 interface ObraPageProps {
   obra: Obra;
   reacts: ReactVideo[];
   onPlayVideo: (reactId: string, obraId: string) => void;
   onBack: () => void;
+  onOpenMinutagem?: () => void;
 }
 
-export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPageProps) {
+export default function ObraPage({ obra, reacts, onPlayVideo, onBack, onOpenMinutagem }: ObraPageProps) {
   const [filter, setFilter] = useState<'relevantes' | 'recentes' | 'antigos'>('relevantes');
+  const showMinutagem = ['filme', 'serie', 'anime'].includes(obra.tipo);
+  const { markers, loading: markersLoading } = useMinutagemMarkers(showMinutagem ? obra.id : undefined);
 
   const filteredReacts = [...reacts].sort((a, b) => {
     if (filter === 'relevantes') {
@@ -65,6 +70,60 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack }: ObraPage
           </div>
         </div>
       </div>
+
+      {showMinutagem && (
+        <div className="mb-10 rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-cyan-400" />
+              <h2 className="font-bold text-white">Minutagem para streamers</h2>
+            </div>
+            {onOpenMinutagem && (
+              <button
+                type="button"
+                onClick={onOpenMinutagem}
+                className="text-xs font-bold text-cyan-400 hover:underline"
+              >
+                Abrir ferramenta
+              </button>
+            )}
+          </div>
+          {markersLoading ? (
+            <div className="flex items-center gap-2 text-zinc-500 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Carregando avisos...
+            </div>
+          ) : markers.length === 0 ? (
+            <p className="text-sm text-zinc-500">
+              Ainda sem minutagem catalogada.{' '}
+              {onOpenMinutagem && (
+                <button type="button" onClick={onOpenMinutagem} className="text-cyan-400 font-bold hover:underline">
+                  Pedir análise ou contribuir
+                </button>
+              )}
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {markers.slice(0, 5).map((m) => (
+                <li key={m.id} className="flex items-center gap-3 text-sm">
+                  <span className="font-mono text-cyan-300 font-bold shrink-0">
+                    {formatMinutagem(m.minutos, m.segundos)}
+                  </span>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${contentTypeBadgeClass(m.tipoConteudo)}`}>
+                    {contentTypeLabel(m.tipoConteudo)}
+                  </span>
+                  <span className="text-zinc-300 truncate">{m.label}</span>
+                </li>
+              ))}
+              {markers.length > 5 && onOpenMinutagem && (
+                <button type="button" onClick={onOpenMinutagem} className="text-xs text-zinc-500 hover:text-white">
+                  + {markers.length - 5} mais...
+                </button>
+              )}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* FILTERS */}
       <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-neutral-800 pb-4">
