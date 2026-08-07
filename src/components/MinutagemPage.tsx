@@ -177,16 +177,6 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
     [filteredCatalog]
   );
 
-  const groupedWithMarkers = useMemo(() => {
-    const groups: Record<string, MinutagemCatalogEntry[]> = {};
-    for (const entry of catalogWithMarkers) {
-      const key = entry.tipo || 'outro';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(entry);
-    }
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  }, [catalogWithMarkers]);
-
   const openObra = (obraId: string) => {
     setSelectedObraId(obraId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -429,23 +419,14 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                         Nenhum título com minutagem encontrado.
                       </div>
                     ) : (
-                      <div className="space-y-10">
-                        {groupedWithMarkers.map(([tipo, entries]) => (
-                          <section key={tipo} className="catalog-row space-y-3.5">
-                            <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-white uppercase tracking-wider font-sans leading-none">
-                              {tipoLabel(tipo)}
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                              {entries.map((entry, index) => (
-                                <ObraCatalogCard
-                                  key={entry.obraId}
-                                  entry={entry}
-                                  index={index}
-                                  onClick={() => openObra(entry.obraId)}
-                                />
-                              ))}
-                            </div>
-                          </section>
+                      <div className="grid grid-cols-3 gap-3 sm:gap-5 md:gap-6">
+                        {catalogWithMarkers.map((entry, index) => (
+                          <ObraCatalogCard
+                            key={entry.obraId}
+                            entry={entry}
+                            index={index}
+                            onClick={() => openObra(entry.obraId)}
+                          />
                         ))}
                       </div>
                     )}
@@ -468,7 +449,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                           />
                         </button>
                         {showPendingCatalog && (
-                          <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-t border-cine-border/25 pt-4">
+                          <div className="px-4 pb-4 grid grid-cols-3 gap-3 sm:gap-4 border-t border-cine-border/25 pt-4">
                             {catalogWithoutMarkers.map((c) => (
                               <button
                                 key={c.obraId}
