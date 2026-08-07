@@ -86,11 +86,19 @@ function marcacaoBadgeLabel(count: number): string {
 
 function TipoHeraldicBanner({ tipo }: { tipo: string }) {
   const variant = tipo === 'filme' || tipo === 'serie' || tipo === 'anime' ? tipo : 'serie';
+  const label = tipoLabel(tipo);
   return (
-    <span className={`minutagem-heraldic-banner minutagem-heraldic-banner--${variant}`}>
-      <span className="minutagem-heraldic-banner__pole" aria-hidden />
+    <span
+      className={`minutagem-heraldic-banner minutagem-heraldic-banner--${variant}`}
+      aria-label={label}
+    >
+      <span className="minutagem-heraldic-banner__mast" aria-hidden>
+        <span className="minutagem-heraldic-banner__finial" />
+        <span className="minutagem-heraldic-banner__pole" />
+      </span>
       <span className="minutagem-heraldic-banner__cloth">
-        <span className="minutagem-heraldic-banner__label">{tipoLabel(tipo)}</span>
+        <span className="minutagem-heraldic-banner__shine" aria-hidden />
+        <span className="minutagem-heraldic-banner__label">{label}</span>
       </span>
     </span>
   );
