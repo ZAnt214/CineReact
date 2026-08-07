@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   ChevronDown,
-  ChevronRight,
   Clock,
   Film,
   Loader2,
@@ -11,7 +10,6 @@ import {
   Plus,
   Search,
   Send,
-  Shield,
   CheckCircle2,
   Tv,
 } from 'lucide-react';
@@ -85,50 +83,57 @@ function MinutagemMarkerCard({ marker }: { marker: MinutagemMarker }) {
 function ObraCatalogCard({
   entry,
   onClick,
+  index = 0,
 }: {
   entry: MinutagemCatalogEntry;
   onClick: () => void;
+  index?: number;
 }) {
   const Icon = entry.tipo === 'filme' ? Film : Tv;
+
   return (
-    <button
+    <motion.button
       type="button"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut', delay: Math.min(index * 0.04, 0.24) }}
       onClick={onClick}
-      className="group text-left rounded-2xl border border-neutral-800 bg-neutral-950/60 overflow-hidden transition-all hover:border-cyan-500/35 hover:bg-cyan-500/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40"
+      className="catalog-card-standard catalog-card rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full md:select-none text-left w-full"
     >
-      <div className="relative aspect-[2/3] bg-neutral-900 overflow-hidden">
+      <div className="relative aspect-3/4 w-full overflow-hidden shrink-0 catalog-card-thumb catalog-card-standard-thumb bg-neutral-950">
         {entry.poster ? (
           <OptimizedImage
             src={entry.poster}
             alt={entry.obraTitulo}
             lite
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading={index < 6 ? 'eager' : 'lazy'}
+            className="w-full h-full object-cover md:group-hover/card:scale-[1.03] md:transition-transform md:duration-300"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-cyan-400/60">
+          <div className="absolute inset-0 flex items-center justify-center text-cine-accent-light/50">
             <Icon className="w-10 h-10" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
+
         {entry.markerCount > 0 && (
-          <span className="absolute top-2 right-2 text-[10px] font-black uppercase px-2 py-1 rounded-full bg-cyan-500/90 text-black shadow-lg">
+          <span className="absolute top-2.5 right-2.5 z-20 catalog-card-duration shadow-md text-[10px] font-bold uppercase tracking-wide">
             {entry.markerCount} aviso{entry.markerCount !== 1 ? 's' : ''}
           </span>
         )}
-        <div className="absolute bottom-0 left-0 right-0 p-3">
-          <p className="font-bold text-white text-sm leading-snug line-clamp-2 drop-shadow-md">
-            {entry.obraTitulo}
-          </p>
-          <p className="text-[10px] text-zinc-300 mt-0.5 capitalize">{tipoLabel(entry.tipo)}</p>
-        </div>
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-t border-neutral-800/60">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 group-hover:text-cyan-400/80 transition-colors">
-          Ver minutagem
+
+      <div className="p-3.5 sm:p-4 flex flex-col gap-2 catalog-card-standard-body">
+        <span className="text-[9px] uppercase font-mono bg-neutral-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400 self-start">
+          {tipoLabel(entry.tipo)}
         </span>
-        <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 group-hover:text-cyan-400 transition-colors" />
+        <h3 className="text-sm sm:text-base font-bold text-white line-clamp-2 leading-snug min-h-[2.5rem] md:group-hover/card:text-cine-accent-light transition-colors">
+          {entry.obraTitulo}
+        </h3>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 pt-1 border-t border-cine-border/25">
+          Ver minutagem
+        </p>
       </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -241,42 +246,44 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#07090f]">
-      <div className="cine-container pt-20 pb-28">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <section className="text-center space-y-4">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-neutral-900/80 text-cyan-100 text-[11px] font-bold uppercase tracking-wider">
-              <Shield className="w-3.5 h-3.5 text-cyan-300" />
-              Ferramenta para streamers
-            </span>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-              Minutagem de conteúdo sensível
-            </h1>
-            <p className="text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-              Toque no filme ou série para abrir a minutagem completa. Ideal para reagir ao vivo com
-              segurança.
-            </p>
-          </section>
+    <div className="w-full flex-1">
+      <div className="cine-container pt-24 pb-20 space-y-8">
+        <header className="relative pt-2 pb-2 md:pb-4">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
+            Ferramenta para streamers
+          </p>
+          <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
+            Minutagem de{' '}
+            <span className="text-cine-accent-light">conteúdo sensível</span>
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-2xl">
+            Toque no filme ou série para abrir a minutagem completa. Ideal para reagir ao vivo com segurança.
+          </p>
+          <div
+            className="mt-4 h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent"
+            aria-hidden
+          />
+        </header>
 
-          <div className="flex flex-wrap gap-2 justify-center">
-            {(['browse', 'submit', 'request'] as PanelMode[]).map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => {
-                  setPanel(id);
-                  if (id !== 'browse') setSelectedObraId(null);
-                }}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border ${
-                  panel === id
-                    ? 'bg-cine-accent-light text-black border-cine-accent-light'
-                    : 'bg-neutral-900/60 text-zinc-400 border-neutral-800 hover:border-cyan-500/30 hover:text-white'
-                }`}
-              >
-                {id === 'browse' ? 'Consultar' : id === 'submit' ? 'Contribuir' : 'Pedir análise'}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {(['browse', 'submit', 'request'] as PanelMode[]).map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => {
+                setPanel(id);
+                if (id !== 'browse') setSelectedObraId(null);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 border ${
+                panel === id
+                  ? 'bg-cine-accent text-white shadow-md shadow-cine-accent/20 border-cine-accent'
+                  : 'bg-neutral-900/60 text-zinc-300 border-neutral-800 hover:bg-neutral-800 hover:border-cine-accent/30'
+              }`}
+            >
+              {id === 'browse' ? 'Consultar' : id === 'submit' ? 'Contribuir' : 'Pedir análise'}
+            </button>
+          ))}
+        </div>
 
           {panel === 'browse' && (
             <div className="space-y-6">
@@ -287,8 +294,8 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-5"
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="space-y-6"
                   >
                     <button
                       type="button"
@@ -299,7 +306,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                       Voltar ao catálogo
                     </button>
 
-                    <div className="relative rounded-2xl border border-cyan-500/20 overflow-hidden">
+                    <div className="catalog-card-standard catalog-card rounded-2xl overflow-hidden relative">
                       {(selectedEntry?.banner || selectedEntry?.poster) && (
                         <div className="absolute inset-0">
                           <OptimizedImage
@@ -308,10 +315,10 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                             lite
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#07090f] via-[#07090f]/85 to-black/50" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/85 to-black/50" />
                         </div>
                       )}
-                      <div className="relative p-5 md:p-6 bg-gradient-to-b from-cyan-500/8 to-neutral-950/80">
+                      <div className="relative p-5 md:p-6">
                         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                           {selectedEntry?.poster && (
                             <div className="hidden sm:block w-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg aspect-[2/3]">
@@ -397,8 +404,8 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-6"
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="space-y-8"
                   >
                     <div className="relative">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -407,7 +414,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Buscar filme, série ou anime..."
-                        className="w-full pl-11 pr-4 py-3 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder:text-zinc-600 focus:border-cyan-500/40 focus:outline-none"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl bg-neutral-900/60 border border-neutral-800/80 text-white placeholder:text-zinc-600 focus:border-cine-accent/40 focus:outline-none transition-colors duration-300"
                       />
                     </div>
 
@@ -421,17 +428,18 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                         Nenhum título com minutagem encontrado.
                       </div>
                     ) : (
-                      <div className="space-y-8">
+                      <div className="space-y-10">
                         {groupedWithMarkers.map(([tipo, entries]) => (
-                          <section key={tipo} className="space-y-3">
-                            <h2 className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 px-1">
+                          <section key={tipo} className="catalog-row space-y-3.5">
+                            <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-white uppercase tracking-wider font-sans leading-none">
                               {tipoLabel(tipo)}
                             </h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                              {entries.map((entry) => (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              {entries.map((entry, index) => (
                                 <ObraCatalogCard
                                   key={entry.obraId}
                                   entry={entry}
+                                  index={index}
                                   onClick={() => openObra(entry.obraId)}
                                 />
                               ))}
@@ -442,7 +450,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                     )}
 
                     {catalogWithoutMarkers.length > 0 && (
-                      <section className="rounded-2xl border border-neutral-800/80 bg-neutral-950/30 overflow-hidden">
+                      <section className="catalog-card-standard rounded-2xl overflow-hidden">
                         <button
                           type="button"
                           onClick={() => setShowPendingCatalog((v) => !v)}
@@ -459,7 +467,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                           />
                         </button>
                         {showPendingCatalog && (
-                          <div className="px-4 pb-4 grid sm:grid-cols-2 gap-2 border-t border-neutral-800/60 pt-3">
+                          <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-t border-cine-border/25 pt-4">
                             {catalogWithoutMarkers.map((c) => (
                               <button
                                 key={c.obraId}
@@ -487,7 +495,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
           )}
 
           {panel === 'submit' && (
-            <div className="max-w-xl mx-auto rounded-2xl border border-neutral-800 bg-neutral-950/70 p-6 space-y-5">
+            <div className="max-w-xl mx-auto catalog-card-standard rounded-2xl p-6 space-y-5">
               <div className="flex items-center gap-2 text-amber-200/90">
                 <Plus className="w-5 h-5" />
                 <h2 className="font-bold">Cadastrar minutagem (fã)</h2>
@@ -607,7 +615,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
           )}
 
           {panel === 'request' && (
-            <div className="max-w-xl mx-auto rounded-2xl border border-neutral-800 bg-neutral-950/70 p-6 space-y-5">
+            <div className="max-w-xl mx-auto catalog-card-standard rounded-2xl p-6 space-y-5">
               <div className="flex items-center gap-2 text-cyan-200">
                 <Search className="w-5 h-5" />
                 <h2 className="font-bold">Pedir análise completa</h2>
@@ -693,7 +701,6 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
               )}
             </div>
           )}
-        </div>
       </div>
     </div>
   );
