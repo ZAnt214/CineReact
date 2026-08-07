@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
   Clock,
   Film,
   Loader2,
@@ -10,8 +13,11 @@ import {
   Send,
   Shield,
   CheckCircle2,
+  Tv,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { UserState } from '../types.ts';
+import type { MinutagemMarker } from '../types/minutagem.ts';
 import {
   MINUTAGEM_CONTENT_LABELS,
   type MinutagemContentType,
@@ -20,6 +26,7 @@ import {
   useMinutagemCatalog,
   useMinutagemMarkers,
   useMinutagemMe,
+  type MinutagemCatalogEntry,
 } from '../hooks/useMinutagem.ts';
 import {
   contentTypeBadgeClass,
@@ -36,11 +43,92 @@ interface MinutagemPageProps {
 
 type PanelMode = 'browse' | 'submit' | 'request';
 
+const TIPO_LABELS: Record<string, string> = {
+  filme: 'Filmes',
+  serie: 'Séries',
+  anime: 'Animes',
+};
+
+function tipoLabel(tipo: string) {
+  return TIPO_LABELS[tipo] || tipo;
+}
+
+function MinutagemMarkerCard({ marker }: { marker: MinutagemMarker }) {
+  return (
+    <article className="rounded-xl border border-neutral-800/80 bg-black/35 p-4 space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-mono text-sm font-bold text-cyan-300 tabular-nums">
+          {formatMinutagemRange(marker.minutos, marker.segundos, marker.fimMinutos, marker.fimSegundos)}
+        </span>
+        {marker.duracaoSegundos && (
+          <span className="text-[10px] font-bold uppercase tracking-wide text-zinc-500 px-2 py-0.5 rounded-full border border-neutral-800">
+            {formatDuracaoSegundos(marker.duracaoSegundos)}
+          </span>
+        )}
+        {marker.episodioLabel && (
+          <span className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 px-2 py-0.5 rounded-full border border-neutral-700/80">
+            {marker.episodioLabel}
+          </span>
+        )}
+      </div>
+      <span
+        className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${contentTypeBadgeClass(marker.tipoConteudo)}`}
+      >
+        {contentTypeLabel(marker.tipoConteudo)}
+      </span>
+      <p className="text-sm text-zinc-200 leading-relaxed">{marker.label}</p>
+    </article>
+  );
+}
+
+function ObraCatalogCard({
+  entry,
+  onClick,
+}: {
+  entry: MinutagemCatalogEntry;
+  onClick: () => void;
+}) {
+  const Icon = entry.tipo === 'filme' ? Film : Tv;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group text-left rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 transition-all hover:border-cyan-500/35 hover:bg-cyan-500/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 min-w-0">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-cyan-400 group-hover:border-cyan-500/30">
+            <Icon className="w-4 h-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-bold text-white leading-snug line-clamp-2 group-hover:text-cyan-100 transition-colors">
+              {entry.obraTitulo}
+            </p>
+            <p className="text-xs text-zinc-500 mt-1 capitalize">{tipoLabel(entry.tipo)}</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 mt-1 group-hover:text-cyan-400 transition-colors" />
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-2 pt-3 border-t border-neutral-800/60">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+          {entry.markerCount > 0 ? 'Ver minutagem' : 'Sem avisos'}
+        </span>
+        {entry.markerCount > 0 && (
+          <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/25">
+            {entry.markerCount} aviso{entry.markerCount !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+    </button>
+  );
+}
+
 export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: MinutagemPageProps) {
   const { catalog, loading: catalogLoading } = useMinutagemCatalog();
   const [search, setSearch] = useState('');
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [panel, setPanel] = useState<PanelMode>('browse');
+  const [showPendingCatalog, setShowPendingCatalog] = useState(false);
 
   const selectedEntry = catalog.find((c) => c.obraId === selectedObraId);
   const { markers, loading: markersLoading } = useMinutagemMarkers(selectedObraId || undefined);
@@ -66,8 +154,31 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
     );
   }, [catalog, search]);
 
-  const catalogWithMarkers = filteredCatalog.filter((c) => c.markerCount > 0);
-  const catalogWithoutMarkers = filteredCatalog.filter((c) => c.markerCount === 0);
+  const catalogWithMarkers = useMemo(
+    () => filteredCatalog.filter((c) => c.markerCount > 0),
+    [filteredCatalog]
+  );
+  const catalogWithoutMarkers = useMemo(
+    () => filteredCatalog.filter((c) => c.markerCount === 0),
+    [filteredCatalog]
+  );
+
+  const groupedWithMarkers = useMemo(() => {
+    const groups: Record<string, MinutagemCatalogEntry[]> = {};
+    for (const entry of catalogWithMarkers) {
+      const key = entry.tipo || 'outro';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(entry);
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [catalogWithMarkers]);
+
+  const openObra = (obraId: string) => {
+    setSelectedObraId(obraId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closeObra = () => setSelectedObraId(null);
 
   const handleSubmitMarker = async () => {
     if (!user.isLoggedIn) {
@@ -123,7 +234,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
   return (
     <div className="min-h-screen w-full bg-[#07090f]">
       <div className="cine-container pt-20 pb-28">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           <section className="text-center space-y-4">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-neutral-900/80 text-cyan-100 text-[11px] font-bold uppercase tracking-wider">
               <Shield className="w-3.5 h-3.5 text-cyan-300" />
@@ -133,9 +244,8 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
               Minutagem de conteúdo sensível
             </h1>
             <p className="text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-              Consulte em que minuto exato de um filme ou série aparece nudez ou cenas de sexo — ideal
-              para reagir com segurança ao vivo. Fãs podem contribuir; tudo passa por análise antes de
-              publicar.
+              Toque no filme ou série para abrir a minutagem completa. Ideal para reagir ao vivo com
+              segurança.
             </p>
           </section>
 
@@ -144,7 +254,10 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
               <button
                 key={id}
                 type="button"
-                onClick={() => setPanel(id)}
+                onClick={() => {
+                  setPanel(id);
+                  if (id !== 'browse') setSelectedObraId(null);
+                }}
                 className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border ${
                   panel === id
                     ? 'bg-cine-accent-light text-black border-cine-accent-light'
@@ -158,155 +271,184 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
 
           {panel === 'browse' && (
             <div className="space-y-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar filme, série ou anime..."
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder:text-zinc-600 focus:border-cyan-500/40 focus:outline-none"
-                />
-              </div>
+              <AnimatePresence mode="wait">
+                {selectedObraId ? (
+                  <motion.div
+                    key={`detail-${selectedObraId}`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-5"
+                  >
+                    <button
+                      type="button"
+                      onClick={closeObra}
+                      className="flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Voltar ao catálogo
+                    </button>
 
-              {catalogLoading ? (
-                <div className="flex justify-center py-16 text-zinc-500 gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Carregando catálogo...
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                      <Film className="w-4 h-4 text-cyan-400" />
-                      Com minutagem catalogada
-                    </h2>
-                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                      {catalogWithMarkers.length === 0 && (
-                        <p className="text-sm text-zinc-500 py-4">Nenhum título com minutagem ainda.</p>
-                      )}
-                      {catalogWithMarkers.map((entry) => (
-                        <button
-                          key={entry.obraId}
-                          type="button"
-                          onClick={() => setSelectedObraId(entry.obraId)}
-                          className={`w-full text-left p-3 rounded-xl border transition-all ${
-                            selectedObraId === entry.obraId
-                              ? 'border-cyan-500/40 bg-cyan-500/10'
-                              : 'border-neutral-800 bg-neutral-950/50 hover:border-neutral-700'
-                          }`}
-                        >
-                          <div className="flex justify-between gap-2">
-                            <span className="font-semibold text-white truncate">{entry.obraTitulo}</span>
-                            <span className="text-[10px] font-bold uppercase text-cyan-300 shrink-0">
-                              {entry.markerCount} avisos
-                            </span>
-                          </div>
-                          <span className="text-xs text-zinc-500">{entry.tipo}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-5 min-h-[280px]">
-                    {!selectedObraId ? (
-                      <div className="flex flex-col items-center justify-center h-full text-center py-12 text-zinc-500">
-                        <Clock className="w-10 h-10 mb-3 opacity-40" />
-                        <p className="text-sm">Selecione um título para ver os momentos catalogados.</p>
-                      </div>
-                    ) : markersLoading ? (
-                      <div className="flex justify-center py-12 text-zinc-500 gap-2">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      </div>
-                    ) : markers.length === 0 ? (
-                      <div className="text-center py-12 text-zinc-500">
-                        <p className="text-sm">Sem marcadores para {selectedEntry?.obraTitulo}.</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSubmitObraId(selectedObraId);
-                            setPanel('request');
-                          }}
-                          className="mt-4 text-cyan-400 text-sm font-bold hover:underline"
-                        >
-                          Pedir análise deste título
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h3 className="text-lg font-black text-white">{selectedEntry?.obraTitulo}</h3>
-                            <p className="text-xs text-zinc-500">{markers.length} momento(s) catalogado(s)</p>
-                          </div>
+                    <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-cyan-500/8 to-neutral-950/80 p-5 md:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/80 mb-1">
+                            {tipoLabel(selectedEntry?.tipo || '')}
+                          </p>
+                          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                            {selectedEntry?.obraTitulo}
+                          </h2>
+                          <p className="text-sm text-zinc-500 mt-2">
+                            {markersLoading
+                              ? 'Carregando...'
+                              : `${markers.length} momento(s) catalogado(s)`}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 shrink-0">
                           {onSelectObra && (
                             <button
                               type="button"
                               onClick={() => onSelectObra(selectedObraId)}
-                              className="text-xs font-bold text-cyan-400 hover:underline shrink-0"
+                              className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
                             >
                               Ver reacts
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSubmitObraId(selectedObraId);
+                              setPanel('submit');
+                            }}
+                            className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
+                          >
+                            Contribuir
+                          </button>
                         </div>
-                        <ul className="space-y-2">
-                          {markers.map((m) => (
-                            <li
-                              key={m.id}
-                              className="flex items-start gap-3 p-3 rounded-xl bg-black/40 border border-neutral-800/80"
-                            >
-                              <span className="font-mono text-sm font-bold text-cyan-300 shrink-0 tabular-nums">
-                                {formatMinutagemRange(m.minutos, m.segundos, m.fimMinutos, m.fimSegundos)}
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <span
-                                  className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded border mb-1 ${contentTypeBadgeClass(m.tipoConteudo)}`}
-                                >
-                                  {contentTypeLabel(m.tipoConteudo)}
-                                </span>
-                                <p className="text-sm text-zinc-200">{m.label}</p>
-                                <div className="flex flex-wrap gap-2 mt-0.5">
-                                  {m.episodioLabel && (
-                                    <p className="text-xs text-zinc-500">{m.episodioLabel}</p>
-                                  )}
-                                  {m.duracaoSegundos && (
-                                    <p className="text-xs text-zinc-600">
-                                      {formatDuracaoSegundos(m.duracaoSegundos)}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
+                      </div>
+                    </div>
+
+                    {markersLoading ? (
+                      <div className="flex justify-center py-16 text-zinc-500 gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Carregando minutagem...
+                      </div>
+                    ) : markers.length === 0 ? (
+                      <div className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-8 text-center space-y-4">
+                        <Clock className="w-10 h-10 mx-auto text-zinc-600" />
+                        <p className="text-sm text-zinc-400">Ainda não há minutagem para este título.</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRequestTitulo(selectedEntry?.obraTitulo || '');
+                            setPanel('request');
+                          }}
+                          className="text-sm font-bold text-cyan-400 hover:underline"
+                        >
+                          Pedir análise completa
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {markers.map((m) => (
+                          <MinutagemMarkerCard key={m.id} marker={m} />
+                        ))}
                       </div>
                     )}
-                  </div>
-                </div>
-              )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="catalog"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-6"
+                  >
+                    <div className="relative">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar filme, série ou anime..."
+                        className="w-full pl-11 pr-4 py-3 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder:text-zinc-600 focus:border-cyan-500/40 focus:outline-none"
+                      />
+                    </div>
 
-              {catalogWithoutMarkers.length > 0 && (
-                <div className="rounded-xl border border-neutral-800/60 bg-neutral-950/30 p-4">
-                  <p className="text-xs text-zinc-500 mb-2 uppercase font-bold tracking-wider">
-                    Sem minutagem ainda ({catalogWithoutMarkers.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {catalogWithoutMarkers.slice(0, 12).map((c) => (
-                      <button
-                        key={c.obraId}
-                        type="button"
-                        onClick={() => {
-                          setRequestTitulo(c.obraTitulo);
-                          setPanel('request');
-                        }}
-                        className="text-xs px-3 py-1 rounded-full border border-neutral-800 text-zinc-400 hover:border-cyan-500/30 hover:text-white"
-                      >
-                        {c.obraTitulo}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    {catalogLoading ? (
+                      <div className="flex justify-center py-16 text-zinc-500 gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Carregando catálogo...
+                      </div>
+                    ) : catalogWithMarkers.length === 0 ? (
+                      <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-10 text-center text-zinc-500 text-sm">
+                        Nenhum título com minutagem encontrado.
+                      </div>
+                    ) : (
+                      <div className="space-y-8">
+                        {groupedWithMarkers.map(([tipo, entries]) => (
+                          <section key={tipo} className="space-y-3">
+                            <h2 className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 px-1">
+                              {tipoLabel(tipo)}
+                            </h2>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              {entries.map((entry) => (
+                                <ObraCatalogCard
+                                  key={entry.obraId}
+                                  entry={entry}
+                                  onClick={() => openObra(entry.obraId)}
+                                />
+                              ))}
+                            </div>
+                          </section>
+                        ))}
+                      </div>
+                    )}
+
+                    {catalogWithoutMarkers.length > 0 && (
+                      <section className="rounded-2xl border border-neutral-800/80 bg-neutral-950/30 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setShowPendingCatalog((v) => !v)}
+                          className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-white/[0.02] transition-colors"
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-zinc-300">Sem minutagem catalogada</p>
+                            <p className="text-xs text-zinc-500 mt-0.5">
+                              {catalogWithoutMarkers.length} título(s) — peça análise ao admin
+                            </p>
+                          </div>
+                          <ChevronDown
+                            className={`w-5 h-5 text-zinc-500 shrink-0 transition-transform ${showPendingCatalog ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                        {showPendingCatalog && (
+                          <div className="px-4 pb-4 grid sm:grid-cols-2 gap-2 border-t border-neutral-800/60 pt-3">
+                            {catalogWithoutMarkers.map((c) => (
+                              <button
+                                key={c.obraId}
+                                type="button"
+                                onClick={() => {
+                                  setRequestTitulo(c.obraTitulo);
+                                  setPanel('request');
+                                }}
+                                className="text-left px-3 py-2.5 rounded-xl border border-neutral-800/80 bg-black/20 text-sm text-zinc-400 hover:border-cyan-500/30 hover:text-white transition-colors"
+                              >
+                                <span className="line-clamp-2">{c.obraTitulo}</span>
+                                <span className="text-[10px] uppercase text-zinc-600 mt-1 block">
+                                  Solicitar análise
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
