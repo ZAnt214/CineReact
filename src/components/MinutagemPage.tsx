@@ -243,15 +243,14 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
       <div className="cine-container pt-24 pb-20 space-y-8">
         <header className="relative pt-2 pb-2 md:pb-4">
           <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
-            Reage ao vivo sem sustinho
+            Minutagem
           </p>
           <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
-            O minuto certo{' '}
-            <span className="text-cine-accent-light">antes da cena</span>
+            Cenas sensíveis{' '}
+            <span className="text-cine-accent-light">por minuto</span>
           </h1>
-          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-2xl">
-            Catálogo da comunidade: onde pausar, pular ou cortar. Toque no poster e abre a minutagem
-            completa do filme ou série.
+          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg">
+            Filmes e séries com os minutos já catalogados. Abra o título para ver a lista completa.
           </p>
           <div
             className="mt-4 h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent"
