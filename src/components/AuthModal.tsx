@@ -1,566 +1,384 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { apiFetch } from '../utils/apiClient.ts';
 import {
-  AlertCircle,
-  ArrowRight,
-  Bookmark,
-  Check,
-  Eye,
-  EyeOff,
-  History,
-  Info,
-  Lock,
-  LogIn,
-  Mail,
-  ShieldCheck,
-  User,
-  UserPlus,
-  Users,
   X,
+  Film,
+  Bookmark,
+  Heart,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  Lock,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { UserState } from '../types.ts';
+import { motion, AnimatePresence } from 'motion/react';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: UserState, isNewUser?: boolean) => void;
+  onSuccess?: (user: unknown, isNewUser?: boolean) => void;
   initialMode?: 'login' | 'register';
+  initialInfoMessage?: string | null;
 }
 
-type AuthMode = 'login' | 'register' | 'verify_otp';
+const DISCORD_SECURITY_MESSAGE =
+  'Utilizamos exclusivamente o login com Discord para oferecer um acesso mais seguro e simplificado. Dessa forma, reduzimos riscos relacionados à autenticação e garantimos uma experiência mais prática e confiável para todos os usuários.';
 
-const inputClassName =
-  'h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900/70 pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 hover:border-zinc-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/10';
+const OAUTH_TERMS_COOKIE = 'cinereact_oauth_terms';
 
-const accountBenefits = [
-  {
-    icon: Bookmark,
-    title: 'Salve seus favoritos',
-    description: 'Mantenha obras e reacts importantes sempre por perto.',
-  },
-  {
-    icon: History,
-    title: 'Continue de onde parou',
-    description: 'Acompanhe seu progresso entre diferentes sessões.',
-  },
-  {
-    icon: Users,
-    title: 'Acompanhe criadores',
-    description: 'Siga canais e encontre novos conteúdos com facilidade.',
-  },
+const benefits = [
+  { icon: Film, text: 'Assista a todos os reacts do catálogo' },
+  { icon: Bookmark, text: 'Salve favoritos e crie listas personalizadas' },
+  { icon: Heart, text: 'Envie Energia da Plateia aos criadores' },
+  { icon: ShieldCheck, text: 'Sincronize seu progresso em qualquer dispositivo' },
 ];
+
+function setOAuthTermsCookie(): void {
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${OAUTH_TERMS_COOKIE}=1; path=/; max-age=900; SameSite=Lax${secure}`;
+}
 
 export default function AuthModal({
   isOpen,
   onClose,
-  onSuccess,
-  initialMode = 'login',
+  initialInfoMessage = null,
 }: AuthModalProps) {
-  const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [verificationEmail, setVerificationEmail] = useState('');
-  const [resending, setResending] = useState(false);
+  const [discordOAuthEnabled, setDiscordOAuthEnabled] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
+
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const body = document.body;
-    const html = document.documentElement;
-    const scrollPosition = window.scrollY;
-    const previousBodyStyles = {
-      overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-    };
-    const previousHtmlOverflow = html.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
+    setErrorMsg('');
+    setInfoMsg(initialInfoMessage || '');
+    setAcceptedTerms(false);
+    setLegalModal(null);
 
-    body.style.overflow = 'hidden';
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollPosition}px`;
-    body.style.width = '100%';
-    html.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      body.style.overflow = previousBodyStyles.overflow;
-      body.style.position = previousBodyStyles.position;
-      body.style.top = previousBodyStyles.top;
-      body.style.width = previousBodyStyles.width;
-      html.style.overflow = previousHtmlOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-      window.scrollTo(0, scrollPosition);
-    };
-  }, [isOpen, onClose]);
+    apiFetch('/api/auth/oauth/setup')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setDiscordOAuthEnabled(!!data?.discordOAuthEnabled))
+      .catch(() => setDiscordOAuthEnabled(false));
+  }, [isOpen, initialInfoMessage]);
 
   useEffect(() => {
-    if (isOpen) {
-      setMode(initialMode);
-      setErrorMsg('');
-      setInfoMsg('');
-    }
-  }, [isOpen, initialMode]);
+    if (!isOpen) return;
 
-  const clearMessages = () => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (legalModal) setLegalModal(null);
+        else onClose();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose, legalModal]);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return;
+
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+
+    const preventBackgroundTouchMove = (event: TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (modalContentRef.current?.contains(target)) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventBackgroundTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', preventBackgroundTouchMove);
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
+  const handleDiscordLogin = () => {
+    if (!acceptedTerms) {
+      setErrorMsg('Para continuar, aceite os Termos de Uso e a Política de Privacidade.');
+      return;
+    }
     setErrorMsg('');
-    setInfoMsg('');
+    setOAuthTermsCookie();
+    window.location.href = '/api/auth/oauth/discord';
   };
 
-  const changeMode = (nextMode: 'login' | 'register') => {
-    setMode(nextMode);
-    setShowPassword(false);
-    clearMessages();
-  };
+  if (typeof document === 'undefined') return null;
 
-  const resetFields = () => {
-    setUsername('');
-    setEmail('');
-    setPassword('');
-    setShowPassword(false);
-  };
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-    clearMessages();
-
-    try {
-      const endpoint = mode === 'register' ? '/api/cadastro' : '/api/login';
-      const bodyPayload = mode === 'register'
-        ? { username, email, password }
-        : { email, password };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyPayload),
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.requiresVerification) {
-          setVerificationEmail(data.email || email);
-          setMode('verify_otp');
-          setInfoMsg('Enviamos um código de confirmação para o seu e-mail.');
-        } else if (data.success && data.user) {
-          onSuccess(data.user, mode === 'register');
-          onClose();
-          resetFields();
-        } else {
-          setErrorMsg('Ocorreu um erro ao processar. Tente novamente.');
-        }
-      } else if (data.requiresVerification) {
-        setVerificationEmail(data.email || email);
-        setMode('verify_otp');
-        setInfoMsg(data.error || 'Insira o código de confirmação enviado para seu e-mail.');
-      } else {
-        setErrorMsg(data.error || 'Falha na autenticação.');
-      }
-    } catch {
-      setErrorMsg('Erro de conexão com o servidor. Verifique sua internet.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (event: FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-    clearMessages();
-
-    try {
-      const response = await fetch('/api/verificar-codigo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: verificationEmail, token: verificationCode }),
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success && data.user) {
-        onSuccess(data.user, true);
-        onClose();
-        resetFields();
-        setVerificationCode('');
-        setVerificationEmail('');
-        setMode('login');
-      } else {
-        setErrorMsg(data.error || 'Código inválido ou expirado. Confira e tente novamente.');
-      }
-    } catch {
-      setErrorMsg('Erro de conexão com o servidor. Verifique sua internet.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setResending(true);
-    clearMessages();
-
-    try {
-      const response = await fetch('/api/reenviar-codigo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: verificationEmail }),
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setInfoMsg(data.message || 'Um novo código de confirmação foi enviado.');
-      } else {
-        setErrorMsg(data.error || 'Erro ao reenviar o código.');
-      }
-    } catch {
-      setErrorMsg('Erro de conexão com o servidor.');
-    } finally {
-      setResending(false);
-    }
-  };
-
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center overscroll-none p-3 sm:p-6">
-          <motion.button
-            type="button"
-            aria-label="Fechar autenticação"
+        <motion.div
+          className="fixed inset-0 z-[230] overscroll-none"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-modal-title"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 h-full w-full bg-black/85"
+            className="absolute inset-0 bg-black"
           />
 
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="auth-title"
-            initial={{ opacity: 0, scale: 0.97, y: 18 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 18 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative z-10 flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/[0.09] bg-[#0b0b0d] shadow-[0_30px_100px_rgba(0,0,0,0.75)] md:grid md:grid-cols-[0.9fr_1.1fr]"
+            ref={modalContentRef}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="relative h-[100dvh] w-full overflow-y-auto overscroll-y-contain touch-pan-y bg-neutral-950 text-zinc-300"
           >
-            <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent" aria-hidden="true" />
-
             <button
-              type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/90 text-zinc-500 transition-colors hover:border-zinc-700 hover:text-white sm:top-5 sm:right-5"
+              className="absolute top-4 right-4 z-10 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-neutral-900 transition-colors cursor-pointer"
               aria-label="Fechar"
-              title="Fechar"
             >
-              <X className="h-4 w-4" aria-hidden="true" />
+              <X className="w-5 h-5" />
             </button>
 
-            <aside className="relative hidden overflow-hidden border-r border-white/[0.07] bg-zinc-950 p-8 md:flex md:flex-col md:justify-between">
-              <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-amber-400/[0.08] blur-3xl" aria-hidden="true" />
+            <div className="grid grid-cols-1 md:grid-cols-5 min-h-full">
+              <div className="hidden md:flex md:col-span-2 flex-col justify-between p-8 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black border-r border-neutral-800/80 relative overflow-hidden">
+                <div className="absolute -top-20 -right-20 w-48 h-48 bg-cine-accent/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 space-y-8">
+                  <CineReactLogo size="xl" animated heading />
+                  <div>
+                    <h3 className="text-lg font-black text-white leading-snug">
+                      Sua conta no maior portal de reacts do Brasil
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
+                      Grátis para sempre. Entre com Discord.
+                    </p>
+                  </div>
+                  <ul className="space-y-3">
+                    {benefits.map(({ icon: Icon, text }) => (
+                      <li key={text} className="flex items-start gap-2.5 text-xs text-zinc-400">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-cine-accent/10 border border-cine-accent/20">
+                          <Icon className="w-3.5 h-3.5 text-cine-accent-light" />
+                        </span>
+                        {text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="relative z-10 text-[10px] text-zinc-600 leading-relaxed">
+                  Login seguro via Discord. Coletamos e-mail e perfil público do Discord para criar sua conta.
+                </p>
+              </div>
 
-              <div className="relative">
-                <div className="flex items-center font-['Fredoka',sans-serif] text-2xl font-black">
-                  <span className="text-white">Cine</span>
-                  <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
-                    React
+              <div className="md:col-span-3 p-6 sm:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-h-[100dvh] md:min-h-full flex flex-col justify-center max-w-lg md:max-w-none mx-auto w-full">
+                <div className="flex justify-center w-full mb-6 md:mb-8">
+                  <CineReactLogo size="lg" align="center" animated showTagline />
+                </div>
+
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-cine-accent/10 border border-cine-accent/20 text-cine-accent-light text-[10px] font-bold tracking-wider uppercase mb-3">
+                    Acesso gratuito
+                  </div>
+                  <h2 id="auth-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    Entrar no CineReact
+                  </h2>
+                  <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
+                    Use sua conta Discord para assistir reacts, salvar favoritos e apoiar criadores.
+                  </p>
+                </div>
+
+                <div className="mb-5 p-4 rounded-xl bg-neutral-900/70 border border-neutral-800 text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                  {DISCORD_SECURITY_MESSAGE}
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {errorMsg && (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="bg-neutral-900/95 border border-cine-accent/30 text-zinc-100 p-3.5 rounded-xl text-sm mb-4 flex items-start gap-2.5"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-cine-accent-light" />
+                      <span>{errorMsg}</span>
+                    </motion.div>
+                  )}
+                  {infoMsg && !errorMsg && (
+                    <motion.div
+                      key="info"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="bg-cine-surface/40 border border-cine-accent/30 text-cine-cream p-3 rounded-xl text-xs font-medium mb-4 flex items-start gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{infoMsg}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <label className="flex items-start gap-3 mb-5 cursor-pointer select-none group">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => {
+                      setAcceptedTerms(e.target.checked);
+                      if (e.target.checked) setErrorMsg('');
+                    }}
+                    className="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-neutral-900 text-cine-accent focus:ring-cine-accent/40 cursor-pointer"
+                  />
+                  <span className="text-xs text-zinc-400 leading-relaxed">
+                    Li e aceito os{' '}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setLegalModal('terms');
+                      }}
+                      className="text-cine-accent-light hover:text-cine-cream font-bold underline underline-offset-2 cursor-pointer"
+                    >
+                      Termos de Uso
+                    </button>
+                    {' '}e a{' '}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setLegalModal('privacy');
+                      }}
+                      className="text-cine-accent-light hover:text-cine-cream font-bold underline underline-offset-2 cursor-pointer"
+                    >
+                      Política de Privacidade
+                    </button>
+                    . Autorizo o uso do e-mail e dados públicos do Discord para criar e manter minha conta.
                   </span>
-                  <span className="ml-0.5 text-amber-400">!</span>
-                </div>
+                </label>
 
-                <p className="mt-8 text-[10px] font-black uppercase tracking-[0.18em] text-amber-400">
-                  Sua experiência, do seu jeito
-                </p>
-                <h2 className="mt-3 text-3xl font-black leading-tight text-white">
-                  Entre para organizar tudo o que você ama assistir.
-                </h2>
-                <p className="mt-4 text-sm leading-6 text-zinc-500">
-                  Uma conta gratuita conecta suas preferências em toda a experiência CineReact.
-                </p>
-
-                <div className="mt-8 space-y-5">
-                  {accountBenefits.map(({ icon: Icon, title, description }) => (
-                    <div key={title} className="flex gap-3.5">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/15 bg-amber-400/[0.07]">
-                        <Icon className="h-4 w-4 text-amber-400" aria-hidden="true" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-zinc-200">{title}</p>
-                        <p className="mt-0.5 text-xs leading-5 text-zinc-600">{description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative mt-10 flex items-center gap-2 text-[11px] text-zinc-600">
-                <ShieldCheck className="h-4 w-4 text-amber-400" aria-hidden="true" />
-                Seus dados são usados para oferecer os recursos da conta.
-              </div>
-            </aside>
-
-            <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
-              <div className="mb-6 flex items-center font-['Fredoka',sans-serif] text-xl font-black md:hidden">
-                <span className="text-white">Cine</span>
-                <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
-                  React
-                </span>
-                <span className="ml-0.5 text-amber-400">!</span>
-              </div>
-
-              {mode !== 'verify_otp' && (
-                <div className="mb-7 grid grid-cols-2 rounded-xl border border-zinc-800 bg-zinc-950 p-1">
+                {discordOAuthEnabled ? (
                   <button
                     type="button"
-                    onClick={() => changeMode('login')}
-                    className={`h-10 rounded-lg text-xs font-black transition-colors ${
-                      mode === 'login'
-                        ? 'bg-zinc-800 text-white shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
+                    onClick={handleDiscordLogin}
+                    disabled={!acceptedTerms}
+                    className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl text-base font-bold bg-[#5865F2] hover:bg-[#4752c4] disabled:opacity-45 disabled:cursor-not-allowed text-white transition-colors shadow-lg shadow-[#5865F2]/25 cursor-pointer"
                   >
-                    Entrar
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z" />
+                    </svg>
+                    Continuar com Discord
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => changeMode('register')}
-                    className={`h-10 rounded-lg text-xs font-black transition-colors ${
-                      mode === 'register'
-                        ? 'bg-amber-400 text-black shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    Criar conta
-                  </button>
-                </div>
-              )}
-
-              <div className="pr-10">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-400">
-                  {mode === 'verify_otp' ? 'Verificação de segurança' : 'Conta CineReact'}
-                </p>
-                <h2 id="auth-title" className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                  {mode === 'login'
-                    ? 'Bem-vindo de volta.'
-                    : mode === 'register'
-                      ? 'Crie sua conta gratuita.'
-                      : 'Confirme seu e-mail.'}
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-zinc-500">
-                  {mode === 'login'
-                    ? 'Entre para acessar seus favoritos, canais e histórico.'
-                    : mode === 'register'
-                      ? 'Leva apenas alguns instantes para começar.'
-                      : `Digite o código enviado para ${verificationEmail}.`}
-                </p>
-              </div>
-
-              <AnimatePresence mode="popLayout">
-                {errorMsg && (
-                  <motion.div
-                    key="auth-error"
-                    role="alert"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-500/25 bg-red-500/[0.07] p-3 text-xs leading-5 text-red-300"
-                  >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                    {errorMsg}
-                  </motion.div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-neutral-900/80 border border-neutral-800 text-sm text-zinc-400 text-center">
+                    Login com Discord temporariamente indisponível. Tente novamente em instantes.
+                  </div>
                 )}
 
-                {infoMsg && (
-                  <motion.div
-                    key="auth-info"
-                    role="status"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-400/20 bg-amber-400/[0.07] p-3 text-xs leading-5 text-amber-300"
-                  >
-                    <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                    {infoMsg}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {mode === 'verify_otp' ? (
-                <form onSubmit={handleVerifyOtp} className="mt-7">
-                  <label htmlFor="verification-code" className="text-xs font-bold text-zinc-300">
-                    Código de verificação
-                  </label>
-                  <div className="relative mt-2">
-                    <Lock className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-                    <input
-                      id="verification-code"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      required
-                      maxLength={8}
-                      placeholder="000000"
-                      value={verificationCode}
-                      onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, ''))}
-                      className={`${inputClassName} pr-11 text-center font-mono text-lg tracking-[0.35em]`}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-black text-black transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black" />
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4" aria-hidden="true" />
-                        Confirmar e entrar
-                      </>
-                    )}
-                  </button>
-
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5 text-xs">
-                    <button
-                      type="button"
-                      onClick={handleResendOtp}
-                      disabled={resending}
-                      className="font-bold text-amber-400 transition-colors hover:text-amber-300 disabled:opacity-50"
-                    >
-                      {resending ? 'Reenviando...' : 'Reenviar código'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => changeMode('login')}
-                      className="text-zinc-500 transition-colors hover:text-zinc-300"
-                    >
-                      Voltar ao login
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleSubmit} className="mt-7 space-y-4">
-                  {mode === 'register' && (
-                    <div>
-                      <label htmlFor="auth-username" className="text-xs font-bold text-zinc-300">
-                        Nome de usuário
-                      </label>
-                      <div className="relative mt-2">
-                        <User className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-                        <input
-                          id="auth-username"
-                          type="text"
-                          autoComplete="username"
-                          required
-                          placeholder="Como você quer ser chamado?"
-                          value={username}
-                          onChange={(event) => setUsername(event.target.value)}
-                          className={inputClassName}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label htmlFor="auth-email" className="text-xs font-bold text-zinc-300">
-                      E-mail
-                    </label>
-                    <div className="relative mt-2">
-                      <Mail className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-                      <input
-                        id="auth-email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        placeholder="voce@exemplo.com"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        className={inputClassName}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="auth-password" className="text-xs font-bold text-zinc-300">
-                      Senha
-                    </label>
-                    <div className="relative mt-2">
-                      <Lock className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-                      <input
-                        id="auth-password"
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                        required
-                        placeholder={mode === 'login' ? 'Digite sua senha' : 'Crie uma senha'}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        className={`${inputClassName} pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(current => !current)}
-                        className="absolute top-1/2 right-3 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
-                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {mode === 'register' && (
-                    <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.05] bg-zinc-950/60 p-3 text-[11px] leading-5 text-zinc-600">
-                      <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                      Ao criar sua conta, você concorda com os Termos de Uso e a Política de Privacidade do CineReact.
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-black text-black transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black" />
-                    ) : mode === 'login' ? (
-                      <>
-                        <LogIn className="h-4 w-4" aria-hidden="true" />
-                        Entrar no CineReact
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-4 w-4" aria-hidden="true" />
-                        Criar minha conta
-                      </>
-                    )}
-                    {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />}
-                  </button>
-                </form>
-              )}
-
-              {mode !== 'verify_otp' && (
-                <p className="mt-6 border-t border-white/[0.06] pt-5 text-center text-xs text-zinc-500">
-                  {mode === 'login' ? 'Ainda não tem uma conta?' : 'Já possui uma conta?'}
-                  <button
-                    type="button"
-                    onClick={() => changeMode(mode === 'login' ? 'register' : 'login')}
-                    className="ml-1.5 font-bold text-amber-400 transition-colors hover:text-amber-300"
-                  >
-                    {mode === 'login' ? 'Cadastre-se grátis' : 'Entre agora'}
-                  </button>
+                <p className="text-[11px] text-zinc-600 text-center mt-4 leading-relaxed">
+                  Primeira vez? Ao autorizar no Discord, coletamos e-mail, nome e avatar públicos para sua conta CineReact.
                 </p>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full mt-6 py-2.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                >
+                  Continuar navegando sem conta
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {legalModal && (
+                <motion.div
+                  className="fixed inset-0 z-[240] flex items-center justify-center p-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div
+                    className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                    onClick={() => setLegalModal(null)}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                    className="relative w-full max-w-lg bg-cine-surface border border-cine-border rounded-2xl p-6 max-h-[80vh] overflow-y-auto shadow-2xl"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setLegalModal(null)}
+                      className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-800/60 cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                    {legalModal === 'privacy' ? (
+                      <div className="space-y-3 pr-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Lock className="w-5 h-5 text-cine-accent-light" />
+                          <h3 className="text-lg font-bold text-white">Política de Privacidade</h3>
+                        </div>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          No login com Discord, recebemos e-mail, nome de usuário e avatar públicos conforme autorizado por você no Discord.
+                          Usamos esses dados para criar sua conta, personalizar seu perfil e manter sua sessão segura.
+                        </p>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          Não vendemos seus dados. Você pode solicitar alterações ou suporte pelo e-mail de atendimento do CineReact.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 pr-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-5 h-5 text-cine-accent-light" />
+                          <h3 className="text-lg font-bold text-white">Termos de Uso</h3>
+                        </div>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          O CineReact é uma plataforma agregadora de conteúdo público. Ao usar o serviço, você concorda em não utilizar a conta para atividades ilegais ou abusivas.
+                        </p>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          O acesso é gratuito e vinculado à sua conta Discord. Você é responsável pela segurança da sua conta no Discord.
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
               )}
-            </section>
+            </AnimatePresence>
           </motion.div>
-        </div>
+        </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

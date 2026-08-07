@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["nodejs_22", "bun"]
+aptPkgs = ["ffmpeg", "tar", "xz-utils", "librsvg2-bin", "python3", "build-essential"]
+
+[phases.install]
+cmds = ["bun install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["bun run build"]
+
+[start]
+cmd = "CINE_REACT_DATA_DIR=/data CINECLIPS_UPLOAD_DIR=/data/cineclips-uploads node scripts/railway-boot.mjs"

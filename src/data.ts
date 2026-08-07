@@ -182,6 +182,20 @@ export const OBRAS_INICIAIS: Obra[] = [
     destacado: false,
     channelId: 'UCdfAq743YxDtyj1O5GrtO9w'
   },
+  {
+    id: 'canal-fanit-lin',
+    titulo: 'Canal Fanit & Lin',
+    tipo: 'canal',
+    ano: 2026,
+    generos: ['React', 'Entretenimento', 'YouTube'],
+    synopsis: 'Categoria exclusiva para os reacts do canal Fanit & Lin. Mãe e filha reagindo juntas a animes, filmes, séries e memes.',
+    sinopse: 'Mãe e filha reagindo juntas a animes, filmes, séries, memes e tudo que está bombando. ❤️',
+    banner: 'https://yt3.googleusercontent.com/mCPaxTHW0Pp25C_zkXMx2yLsSPp1_TtYbs8RzF5GWkpXtdrWQyEb06PssSjbzhWczDefI62hUg',
+    poster: 'https://yt3.ggpht.com/s3qZHtMkwkOXuq47sBfvPWdgu3992-v-rN1eArHamGIGetARp-xTPAwCqgikrNNPeZ4k3sAu1g=s800-c-k-c0x00ffffff-no-rj',
+    trailerUrl: 'https://www.youtube.com/channel/UCt4h_T-QCTfgXnuTq7tLKSg',
+    destacado: true,
+    channelId: 'UCt4h_T-QCTfgXnuTq7tLKSg'
+  },
 ];
 
 export const VIDEOS_INICIAIS: ReactVideo[] = [];

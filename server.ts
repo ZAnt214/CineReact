@@ -1,19 +1,125 @@
-import express from "express";
+import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import path from "path";
-import cors from "cors";
-import { createServer as createViteServer } from "vite";
 import { localDb } from "./src/db/local_db.ts";
+import type { Obra, ReactVideo } from "./src/types.ts";
+import { registerGamificationRoutes, handleGamificationEvent, enrichCommentAuthorProfile } from "./src/gamification/serverHelpers.ts";
+import { grantDonorVipBenefits } from "./src/gamification/donorRewards.ts";
+import { registerAdminPanelRoutes } from "./src/admin/registerAdminPanelRoutes.ts";
+import { registerDonationRoutes } from "./src/donations/registerDonationRoutes.ts";
+import { registerCreatorVerificationRoutes } from "./src/creatorVerification/registerCreatorVerificationRoutes.ts";
+import { registerFinanceRoutes } from "./src/finance/registerFinanceRoutes.ts";
+import { registerSubscriptionRoutes } from "./src/finance/registerSubscriptionRoutes.ts";
+import { registerCreatorClipRoutes } from "./src/finance/registerCreatorClipRoutes.ts";
+import { registerCineClipsRoutes } from "./src/cineclips/serverRoutes.ts";
+import { registerMinutagemRoutes } from "./src/minutagem/registerMinutagemRoutes.ts";
+import { getClipsStorageDir } from "./src/cineclips/downloader.ts";
+import { findOfficialCreatorEmailForChannel, getPublicUserProfile } from "./src/gamification/publicUserProfile.ts";
+import { isVerifiedCreatorLoadout } from "./src/gamification/verifiedCreator.ts";
+import { migrateProfile, hasReward, resolveCreatorId } from "./src/gamification/rewardsEngine.ts";
+import { VERIFIED_PROFILE_BADGE_ID } from "./src/data/rewardsCatalog.ts";
+import { ensureDemoCreatorProfile } from "./src/gamification/demoCreator.ts";
+import { listVideoCreators } from "./src/gamification/platformCreators.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as dotenv from "dotenv";
-import { ReactVideo, UserAccount } from "./src/types.ts";
+import * as fs from "fs";
+import { serializeUserState, sanitizeUsuario } from "./src/utils/userState.ts";
+import { sanitizeSocialLinks } from "./src/utils/socialLinks.ts";
+import {
+  getAccountRestriction,
+  isCommentPubliclyVisible,
+  isReactPubliclyVisible,
+  findBlockedWord,
+} from "./src/utils/platformEnforcement.ts";
+import { autoLiftExpiredSuspensions, processScheduledPublications } from "./src/utils/adminJobs.ts";
+import { installSecurity, setSessionCookie } from "./src/security/installSecurity.ts";
+import {
+  registerSecurityRoutes,
+  handleRegister,
+  handleLogin,
+  handleResendVerification,
+  handlePasswordUpdate,
+} from "./src/security/authHandlers.ts";
+import { createSession } from "./src/security/sessions.ts";
+import { requireSessionEmail } from "./src/security/sessionBinding.ts";
+import { channelRequestLimiter } from "./src/security/rateLimit.ts";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+// 0.0.0.0 funcionou em produção (#186). Use BIND_HOST=:: só se necessário.
+const BIND_HOST = process.env.BIND_HOST || '0.0.0.0';
 
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+function respondHealth(_req: ExpressRequest, res: ExpressResponse) {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+}
+
+app.get('/api/health', respondHealth);
+app.head('/api/health', (_req, res) => {
+  res.status(200).end();
+});
+
+const security = installSecurity(app);
+const requireAdmin = security.requireAdmin;
+
+app.use(express.json({ limit: "2mb" }));
+
+const cineClipsUploadDir = getClipsStorageDir();
+fs.mkdirSync(cineClipsUploadDir, { recursive: true });
+app.use("/uploads/cineclips", express.static(cineClipsUploadDir, {
+  maxAge: process.env.NODE_ENV === "production" ? "7d" : 0,
+  setHeaders(res) {
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=604800");
+  },
+}));
+
+app.use((_req, _res, next) => {
+  processScheduledPublications();
+  autoLiftExpiredSuspensions();
+  next();
+});
+
+function getUserRestrictionResponse(email?: string) {
+  if (!email) return null;
+  const user = localDb.findUsuarioByEmailSync(email.trim().toLowerCase());
+  const restriction = getAccountRestriction(user);
+  if (!restriction.blocked) return null;
+  return restriction;
+}
+
+function assertActiveAccount(email: string | undefined, res: ExpressResponse): boolean {
+  const restriction = getUserRestrictionResponse(email);
+  if (!restriction) return true;
+  res.status(403).json({
+    error: restriction.message,
+    accountBlocked: true,
+    code: restriction.code,
+  });
+  return false;
+}
+
+function isRequestAdmin(req: ExpressRequest): boolean {
+  const email = security.getAuthEmail(req);
+  if (!email) return false;
+  const user = localDb.findUsuarioByEmailSync(email);
+  return !!(user?.isAdmin || user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'curator');
+}
+
+function isBootstrapSuperAdmin(email: string): boolean {
+  const bootstrap = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  return !!bootstrap && email.toLowerCase() === bootstrap;
+}
+
+function requireAuthenticatedEmail(req: ExpressRequest, res: ExpressResponse): string | null {
+  const email = security.getAuthEmail(req);
+  if (!email) {
+    res.status(401).json({ error: 'Autenticação necessária.' });
+    return null;
+  }
+  return email;
+}
+
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Initialize Gemini Client safely
@@ -72,9 +178,9 @@ function isShortOrInvalidVideo(video: any): boolean {
   const snippet = video.snippet || {};
   const contentDetails = video.contentDetails || {};
 
-  // 1. Duration check: YouTube Shorts/Reels are <= 120s (2 minutes)
+  // 1. Duration check: YouTube Shorts/Reels are <= 60s (1 minute)
   const durationSec = getDurationSeconds(contentDetails.duration || '');
-  if (durationSec > 0 && durationSec <= 120) {
+  if (durationSec > 0 && durationSec <= 60) {
     return true;
   }
 
@@ -137,6 +243,31 @@ function isShortOrInvalidReact(r: any): boolean {
   return false;
 }
 
+async function safeFetch(url: string, options: any = {}, retries = 1): Promise<Response | null> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err: any) {
+      if (i === retries) {
+        console.warn(`[safeFetch] Conexão indisponível para ${url.substring(0, 60)}...`);
+        return null;
+      }
+      await new Promise(r => setTimeout(r, 300 * (i + 1)));
+    }
+  }
+  return null;
+}
+
+function getYoutubeApiKey(): string | null {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (!key || key === "MY_YOUTUBE_API_KEY") return null;
+  return key;
+}
+
 async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean; videoData?: any }> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") {
@@ -146,10 +277,10 @@ async function validateYouTubeVideo(videoId: string): Promise<{ isValid: boolean
 
   try {
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoId}&key=${apiKey}`;
-    const res = await fetch(videosUrl);
-    if (!res.ok) {
-      console.error(`[YouTube API] Erro ao validar vídeo ${videoId}: status ${res.status}`);
-      return { isValid: false };
+    const res = await safeFetch(videosUrl);
+    if (!res || !res.ok) {
+      console.warn(`[YouTube API] Aviso ao validar vídeo ${videoId}: ${res?.status || 'Network Error / Timeout'}. Permitindo inclusão com fallback.`);
+      return { isValid: true };
     }
     const data: any = await res.json();
     if (!data.items || data.items.length === 0) {
@@ -182,32 +313,87 @@ async function syncChannelVideos(channelId: string, obraId: string) {
   }
 
   try {
-    console.log(`[YouTube API] Buscando vídeos recentes do canal ${channelId} para "${obraId}"`);
+    console.log(`[YouTube API] Buscando todos os vídeos do canal ${channelId} para "${obraId}"`);
     let nextPageToken = '';
-    const allVideoIds = [];
+    const allVideoIds: string[] = [];
     let pagesFetched = 0;
     
-    // Instead of using search, use the uploads playlist (UU + channelId without UC)
-    // This costs 1 quota unit instead of 100
-    const uploadsPlaylistId = 'UU' + channelId.substring(2);
-    
-    // Fetch recent video IDs from the channel's upload playlist (limit to 3 pages/150 videos)
-    do {
-      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
-      const searchRes = await fetch(playlistUrl);
-      if (!searchRes.ok) {
-        const errText = await searchRes.text();
-        console.error(`[YouTube API] Erro ao pesquisar no canal ${channelId}: ${searchRes.status} - ${errText}`);
-        break;
+    let realChannelId = channelId;
+    let uploadsPlaylistId = '';
+
+    // If channelId starts with UC, convert directly to UU
+    if (channelId.startsWith('UC')) {
+      realChannelId = channelId;
+      uploadsPlaylistId = 'UU' + channelId.substring(2);
+    } else {
+      // Resolve handle or username to channel ID and uploads playlist
+      try {
+        let resolveUrl = '';
+        if (channelId.startsWith('@')) {
+          resolveUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,id&forHandle=${encodeURIComponent(channelId)}&key=${apiKey}`;
+        } else {
+          resolveUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,id&forUsername=${encodeURIComponent(channelId)}&key=${apiKey}`;
+        }
+        const chRes = await safeFetch(resolveUrl);
+        if (chRes && chRes.ok) {
+          const chData: any = await chRes.json();
+          if (chData.items?.[0]) {
+            realChannelId = chData.items[0].id || channelId;
+            uploadsPlaylistId = chData.items[0].contentDetails?.relatedPlaylists?.uploads || (realChannelId.startsWith('UC') ? 'UU' + realChannelId.substring(2) : '');
+          }
+        }
+      } catch (e) {
+        console.warn(`[YouTube API] Erro ao resolver ID para handle/username ${channelId}:`, e);
       }
-      
-      const searchData: any = await searchRes.json();
-      const ids = searchData.items?.map((item: any) => item.contentDetails?.videoId).filter(Boolean) || [];
-      allVideoIds.push(...ids);
-      
-      nextPageToken = searchData.nextPageToken;
-      pagesFetched++;
-    } while (nextPageToken && pagesFetched < 3);
+    }
+
+    if (!uploadsPlaylistId && realChannelId.startsWith('UC')) {
+      uploadsPlaylistId = 'UU' + realChannelId.substring(2);
+    }
+
+    if (uploadsPlaylistId) {
+      do {
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+        const searchRes = await safeFetch(playlistUrl);
+        if (!searchRes || !searchRes.ok) {
+          const errText = searchRes ? await searchRes.text() : 'Network Error';
+          console.warn(`[YouTube API] Playlist de uploads do canal ${realChannelId} (playlist ${uploadsPlaylistId}) retornou status ${searchRes?.status}: ${errText}`);
+          break;
+        }
+        
+        const searchData: any = await searchRes.json();
+        const ids = searchData.items?.map((item: any) => item.contentDetails?.videoId).filter(Boolean) || [];
+        allVideoIds.push(...ids);
+        
+        nextPageToken = searchData.nextPageToken;
+        pagesFetched++;
+      } while (nextPageToken && pagesFetched < 20);
+    }
+
+    // Fallback: if uploads playlist didn't return any videos, use YouTube Search endpoint by channelId or title
+    if (allVideoIds.length === 0) {
+      console.log(`[YouTube API] Usando busca direta para canal ${realChannelId}...`);
+      let searchPageToken = '';
+      let searchPages = 0;
+      do {
+        let searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=50&type=video&order=date&key=${apiKey}${searchPageToken ? `&pageToken=${searchPageToken}` : ''}`;
+        if (realChannelId.startsWith('UC')) {
+          searchUrl += `&channelId=${realChannelId}`;
+        } else {
+          const obraObj = localDb.getObras().find(o => o.id === obraId);
+          const cleanName = obraObj ? obraObj.titulo.replace(/^Canal\s+/i, '') : channelId;
+          searchUrl += `&q=${encodeURIComponent(cleanName + ' react')}`;
+        }
+
+        const searchRes = await safeFetch(searchUrl);
+        if (!searchRes || !searchRes.ok) break;
+        const searchData: any = await searchRes.json();
+        const ids = searchData.items?.map((item: any) => item.id?.videoId).filter(Boolean) || [];
+        allVideoIds.push(...ids);
+        searchPageToken = searchData.nextPageToken;
+        searchPages++;
+      } while (searchPageToken && searchPages < 10);
+    }
     
     const uniqueIds = Array.from(new Set(allVideoIds));
     console.log(`[YouTube API] Encontrados ${uniqueIds.length} vídeos no canal ${channelId}. Buscando detalhes...`);
@@ -217,9 +403,9 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     for (let i = 0; i < uniqueIds.length; i += 50) {
       const batchIds = uniqueIds.slice(i, i + 50);
       const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${batchIds.join(',')}&key=${apiKey}`;
-      const videosRes = await fetch(videosUrl);
-      if (!videosRes.ok) {
-        console.error(`[YouTube API] Erro ao obter detalhes do lote: ${videosRes.status}`);
+      const videosRes = await safeFetch(videosUrl);
+      if (!videosRes || !videosRes.ok) {
+        console.warn(`[YouTube API] Erro ao obter detalhes do lote: ${videosRes?.status || 'Network Error'}`);
         continue;
       }
       
@@ -261,24 +447,44 @@ async function syncChannelVideos(channelId: string, obraId: string) {
     // Sort from newest to oldest
     validReacts.sort((a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime());
     
-    // Remove existing reacts for this obra and save the new ones
+    // Merge into database preserving custom parameters (isRecomendado, likes, etc.)
     if (validReacts.length > 0) {
-      
-      // manual replace using the exported methods
-      const oldReacts = localDb.getReacts().filter(r => r.obraId === obraId);
-      for (const old of oldReacts) {
-        localDb.deleteReact(old.id);
-      }
-      for (const valid of validReacts) {
-        localDb.saveReact(valid);
-      }
+      const existingReacts = localDb.getReacts();
+      const existingMap = new Map(existingReacts.map(r => [r.id, r]));
+      const mergedReacts = validReacts.map((valid) => {
+        const existing = existingMap.get(valid.id);
+        if (existing) {
+          return {
+            ...valid,
+            isRecomendado: existing.isRecomendado || valid.isRecomendado,
+            likes: Math.max(existing.likes || 0, valid.likes || 0),
+          };
+        }
+        return valid;
+      });
 
-      console.log(`[YouTube API] Salvos ${validReacts.length} vídeos do canal ${channelId} no banco.`);
+      localDb.saveReactsBatch(mergedReacts);
+      console.log(`[YouTube API] Sincronização concluída: ${validReacts.length} vídeos salvos para o canal ${channelId}.`);
     }
 
   } catch (err) {
     console.error(`[YouTube API] Erro ao sincronizar canal ${channelId}:`, err);
   }
+}
+
+function allowMockChannelImport(): boolean {
+  return process.env.ALLOW_MOCK_CHANNEL_IMPORT === '1' || process.env.ALLOW_MOCK_CHANNEL_IMPORT === 'true';
+}
+
+/** Importa vídeos do YouTube após salvar metadados do canal no catálogo. */
+async function syncVideosForChannelObra(obra: Obra): Promise<number> {
+  if (obra.channelId?.startsWith('UC')) {
+    await syncChannelVideos(obra.channelId, obra.id);
+  } else {
+    const cleanTitle = obra.titulo.replace(/^Canal\s+/i, '').trim();
+    await discoverReactsFromYouTube(cleanTitle, obra.id, 12);
+  }
+  return localDb.getReacts().filter((r) => r.obraId === obra.id).length;
 }
 
 async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5): Promise<ReactVideo[]> {
@@ -292,10 +498,10 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
     console.log(`[YouTube API] Buscando reacts reais do YouTube para "${obraId}" com query "${query}"`);
     // Buscamos o triplo de resultados para filtrar e escolher os válidos/disponíveis
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${maxResults * 3}&q=${encodeURIComponent(query)}&type=video&key=${apiKey}`;
-    const searchRes = await fetch(searchUrl);
-    if (!searchRes.ok) {
-      const errText = await searchRes.text();
-      console.error(`[YouTube API] Erro ao pesquisar no YouTube: ${searchRes.status} - ${errText}`);
+    const searchRes = await safeFetch(searchUrl);
+    if (!searchRes || !searchRes.ok) {
+      const errText = searchRes ? await searchRes.text() : 'Network Error';
+      console.warn(`[YouTube API] Erro ao pesquisar no YouTube: ${searchRes?.status} - ${errText}`);
       return [];
     }
 
@@ -309,9 +515,9 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
 
     // Validação estrita via endpoint de vídeos
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoIds.join(',')}&key=${apiKey}`;
-    const videosRes = await fetch(videosUrl);
-    if (!videosRes.ok) {
-      console.error(`[YouTube API] Erro ao obter detalhes dos vídeos: ${videosRes.status}`);
+    const videosRes = await safeFetch(videosUrl);
+    if (!videosRes || !videosRes.ok) {
+      console.warn(`[YouTube API] Erro ao obter detalhes dos vídeos: ${videosRes?.status || 'Network Error'}`);
       return [];
     }
 
@@ -384,13 +590,13 @@ async function searchAndSaveReacts(obraId: string, query: string, maxResults = 5
   }
 }
 
-async function fetchRealChannelAvatar(channelId: string): Promise<string | null> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (apiKey && apiKey !== "MY_YOUTUBE_API_KEY") {
+async function fetchRealChannelAvatar(channelId: string, pageUrl?: string): Promise<string | null> {
+  const apiKey = getYoutubeApiKey();
+  if (apiKey && channelId.startsWith('UC')) {
     try {
       const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
-      const res = await fetch(url);
-      if (res.ok) {
+      const res = await safeFetch(url);
+      if (res && res.ok) {
         const data: any = await res.json();
         const avatar = data.items?.[0]?.snippet?.thumbnails?.high?.url ||
                        data.items?.[0]?.snippet?.thumbnails?.medium?.url ||
@@ -402,32 +608,50 @@ async function fetchRealChannelAvatar(channelId: string): Promise<string | null>
     }
   }
 
-  // Fallback: scrape channel page
-  try {
-    const channelUrl = `https://www.youtube.com/channel/${channelId}`;
-    const res = await fetch(channelUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-      }
-    });
-    if (res.ok) {
-      const html = await res.text();
-      const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i) || 
-                           html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
-      if (ogImageMatch && ogImageMatch[1]) {
-        const url = ogImageMatch[1];
-        if (url && !url.includes('youtube_logo') && !url.includes('yt_logo')) {
-          return url;
+  const scrapeTargets = [
+    pageUrl,
+    channelId.startsWith('UC') ? `https://www.youtube.com/channel/${channelId}` : null,
+    channelId.startsWith('@') ? `https://www.youtube.com/${channelId}` : null,
+  ].filter(Boolean) as string[];
+
+  for (const target of scrapeTargets) {
+    try {
+      const res = await safeFetch(target, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        }
+      });
+      if (res && res.ok) {
+        const html = await res.text();
+        const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i) ||
+                             html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
+        if (ogImageMatch?.[1]) {
+          const imageUrl = ogImageMatch[1];
+          if (imageUrl && !imageUrl.includes('youtube_logo') && !imageUrl.includes('yt_logo')) {
+            return imageUrl;
+          }
         }
       }
+    } catch (e) {
+      console.error(`[Avatar Sync] Erro de rede scraping para ${target}:`, e);
     }
-  } catch (e) {
-    console.error(`[Avatar Sync] Erro de rede scraping para canal ${channelId}:`, e);
   }
   return null;
 }
 
 async function syncChannelAvatars() {
+  const skipOnRailway =
+    process.env.RAILWAY_ENVIRONMENT &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
+  if (skipOnRailway) {
+    console.log(
+      '[Avatar Sync] Adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar).'
+    );
+    return;
+  }
+
   console.log("[Avatar Sync] Iniciando sincronização de fotos de perfil dos canais...");
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
@@ -459,30 +683,148 @@ async function prefillDefaultReacts() {
     return;
   }
 
-  const currentReacts = localDb.getReacts();
-  
+  const skipOnRailway =
+    process.env.RAILWAY_ENVIRONMENT &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== '1' &&
+    process.env.ENABLE_STARTUP_YOUTUBE_SYNC !== 'true';
+  if (skipOnRailway) {
+    console.log(
+      "[YouTube API] Pré-carregamento adiado no Railway (ENABLE_STARTUP_YOUTUBE_SYNC=1 para forçar)."
+    );
+    return;
+  }
+
   const existingObras = localDb.getObras();
   const canais = existingObras.filter(o => o.tipo === 'canal');
+  if (canais.length === 0) return;
 
-  for (const canal of canais) {
-    const canalReacts = currentReacts.filter(r => r.obraId === canal.id);
-    if (canalReacts.length === 0 && canal.channelId) {
-      console.log(`[YouTube API] Buscando reacts para canal exclusivo ${canal.titulo}...`);
-      syncChannelVideos(canal.channelId, canal.id).catch(err => {
-        console.error(`[YouTube API] Erro ao pré-carregar canal ${canal.titulo}:`, err);
-      });
+  localDb.pauseSupabaseBackgroundSync();
+  try {
+    for (const canal of canais) {
+      if (!canal.channelId) continue;
+      console.log(`[YouTube API] Sincronizando catálogo completo para o canal ${canal.titulo}...`);
+      await syncChannelVideos(canal.channelId, canal.id);
     }
+  } catch (err) {
+    console.warn('Aviso ao executar pré-carregamento inicial:', (err as Error)?.message || err);
+  } finally {
+    localDb.resumeSupabaseBackgroundSync();
+    localDb.flushSupabaseBackgroundSync().catch((err) => {
+      console.warn('[Supabase] Falha ao enviar sync pós-prefill:', (err as Error)?.message || err);
+    });
   }
+}
+
+// ==========================================
+// SECURITY — sessões, RBAC e auditoria via installSecurity()
+// ==========================================
+
+async function discoverReactsFromYouTube(query: string, obraId: string, limit = 8): Promise<number> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey || apiKey === "MY_YOUTUBE_API_KEY") return 0;
+
+  try {
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(query + " react")}&maxResults=${limit}&key=${apiKey}`;
+    const searchRes = await safeFetch(searchUrl);
+    if (!searchRes?.ok) return 0;
+
+    const searchData: any = await searchRes.json();
+    const videoIds = (searchData.items || [])
+      .map((item: any) => item.id?.videoId)
+      .filter(Boolean) as string[];
+
+    if (videoIds.length === 0) return 0;
+
+    const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=${videoIds.join(",")}&key=${apiKey}`;
+    const videosRes = await safeFetch(videosUrl);
+    if (!videosRes?.ok) return 0;
+
+    const videosData: any = await videosRes.json();
+    let added = 0;
+
+    for (const video of videosData.items || []) {
+      const isPublic = video.status?.privacyStatus === "public";
+      const isEmbeddable = video.status?.embeddable === true;
+      const isProcessed = video.status?.uploadStatus === "processed";
+      if (!isPublic || !isEmbeddable || !isProcessed || isShortOrInvalidVideo(video)) continue;
+
+      const snippet = video.snippet || {};
+      const statistics = video.statistics || {};
+      const contentDetails = video.contentDetails || {};
+
+      localDb.saveReact({
+        id: video.id,
+        titulo: snippet.title || "React",
+        canalNome: snippet.channelTitle || "YouTube",
+        canalId: snippet.channelId || "",
+        publicadoEm: snippet.publishedAt ? snippet.publishedAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        duracao: parseISO8601Duration(contentDetails.duration || ""),
+        visualizacoes: Number(statistics.viewCount) || 0,
+        thumbnailUrl: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`,
+        obraId,
+      });
+      added++;
+    }
+
+    return added;
+  } catch (err) {
+    console.error("[Discover] Erro ao buscar reacts no YouTube:", err);
+    return 0;
+  }
+}
+
+async function discoverObraWithGemini(query: string) {
+  if (!ai) return null;
+
+  const prompt = `Gere dados realistas em JSON para a obra de entretenimento: "${query}".
+Retorne APENAS JSON válido, sem markdown.
+Formato:
+{
+  "id": "slug-em-minusculo",
+  "titulo": "Título Oficial",
+  "tipo": "filme|serie|anime|jogo",
+  "sinopse": "Sinopse envolvente em português do Brasil",
+  "ano": 2020,
+  "generos": ["Gênero1", "Gênero2"],
+  "banner": "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+  "poster": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+  "trailerUrl": "https://www.youtube.com/watch?v=VyHV0BRZKoI"
+}`;
+
+  const geminiRes = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: { responseMimeType: "application/json" },
+  });
+
+  const text = geminiRes.text?.trim();
+  if (!text) return null;
+
+  let cleanText = text;
+  if (cleanText.startsWith("```")) {
+    cleanText = cleanText.replace(/^```json\s*/, "").replace(/```$/, "").trim();
+  }
+
+  const data = JSON.parse(cleanText);
+  const slug = (data.id || query).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  return localDb.saveObra({
+    id: slug,
+    titulo: data.titulo || query,
+    tipo: ["filme", "serie", "anime", "jogo", "canal"].includes(data.tipo) ? data.tipo : "filme",
+    sinopse: data.sinopse || `Obra ${query} catalogada no CineReact.`,
+    ano: Number(data.ano) || new Date().getFullYear(),
+    generos: Array.isArray(data.generos) ? data.generos : ["Entretenimento"],
+    banner: data.banner || "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+    poster: data.poster || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+    trailerUrl: data.trailerUrl || "https://www.youtube.com/watch?v=VyHV0BRZKoI",
+    destacado: false,
+  });
 }
 
 // ==========================================
 // API ROUTES
 // ==========================================
-
-// Health Check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
-});
 
 // Config Check
 app.get("/api/config", (req, res) => {
@@ -518,6 +860,7 @@ app.get("/api/supabase/status", async (req, res) => {
 // Force Sync from Supabase to Memory Cache
 app.post("/api/supabase/sync", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     if (!localDb.isSupabaseActive()) {
       return res.status(400).json({ error: "Supabase não está configurado." });
     }
@@ -535,6 +878,7 @@ app.post("/api/supabase/sync", async (req, res) => {
 // Force Upload from Memory Cache to Supabase
 app.post("/api/supabase/migrate", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     if (!localDb.isSupabaseActive()) {
       return res.status(400).json({ error: "Supabase não está configurado." });
     }
@@ -551,6 +895,7 @@ app.post("/api/supabase/migrate", async (req, res) => {
 
 
 app.post("/api/sync/:obraId", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   try {
     const obraId = req.params.obraId;
     const obra = localDb.getObras().find(o => o.id === obraId);
@@ -559,7 +904,13 @@ app.post("/api/sync/:obraId", async (req, res) => {
     }
     
     await syncChannelVideos(obra.channelId, obra.id);
-    res.json({ status: "ok", message: `Sincronização concluída para ${obra.titulo}.` });
+    await localDb.flushSupabaseBackgroundSync();
+    const reactCount = localDb.getReacts().filter((r) => r.obraId === obra.id).length;
+    res.json({
+      status: "ok",
+      message: `Sincronização concluída para ${obra.titulo}.`,
+      reactCount,
+    });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao sincronizar canal." });
   }
@@ -599,8 +950,8 @@ app.get("/api/obras/:id", async (req, res) => {
         try {
           console.log(`[YouTube Banner Sync] Buscando banner e avatar real para ${obra.titulo} (${obra.channelId})...`);
           const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${obra.channelId}&key=${apiKey}`;
-          const detailRes = await fetch(detailUrl);
-          if (detailRes.ok) {
+          const detailRes = await safeFetch(detailUrl);
+          if (detailRes && detailRes.ok) {
             const detailData: any = await detailRes.json();
             const item = detailData.items?.[0];
             if (item) {
@@ -656,132 +1007,668 @@ app.get("/api/obras/:id", async (req, res) => {
   }
 });
 
+interface ResolvedYouTubeChannel {
+  channelId: string;
+  titulo: string;
+  sinopse: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  source: 'api' | 'scrape' | 'oembed';
+}
+
+const YOUTUBE_BROWSER_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+};
+
+function extractVideoIdFromUrl(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.+&v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+async function resolveChannelViaOEmbed(videoUrl: string): Promise<{ authorUrl: string; authorName: string; thumbnailUrl?: string } | null> {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
+    const res = await safeFetch(oembedUrl);
+    if (!res?.ok) return null;
+    const data: any = await res.json();
+    if (!data?.author_url || !data?.author_name) return null;
+    return {
+      authorUrl: data.author_url,
+      authorName: data.author_name,
+      thumbnailUrl: data.thumbnail_url,
+    };
+  } catch (err) {
+    console.warn('[YouTube oEmbed] Falha ao resolver vídeo:', err);
+    return null;
+  }
+}
+
+async function scrapeYouTubeChannelPage(pageUrl: string): Promise<ResolvedYouTubeChannel | null> {
+  try {
+    const normalizedUrl = pageUrl.startsWith('http')
+      ? pageUrl.split('?')[0]
+      : `https://www.youtube.com/@${pageUrl.replace(/^@/, '')}`;
+
+    const res = await safeFetch(normalizedUrl, { headers: YOUTUBE_BROWSER_HEADERS });
+    if (!res?.ok) {
+      console.warn(`[YouTube Scrape] HTTP ${res?.status || 'erro'} para ${normalizedUrl}`);
+      return null;
+    }
+
+    const html = await res.text();
+    const channelId =
+      html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/)?.[1] ||
+      html.match(/"externalId":"(UC[a-zA-Z0-9_-]{22})"/)?.[1] ||
+      html.match(/youtube\.com\/channel\/(UC[a-zA-Z0-9_-]{22})/)?.[1] ||
+      null;
+
+    const ogTitle =
+      html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:title"/i)?.[1];
+    const titulo = decodeHtmlEntities(ogTitle || '').replace(/\s*-\s*YouTube\s*$/i, '').trim();
+
+    const ogImage =
+      html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i)?.[1];
+    const avatarUrl = ogImage && !ogImage.includes('youtube_logo') && !ogImage.includes('yt_logo')
+      ? decodeHtmlEntities(ogImage)
+      : null;
+
+    const bannerMatch =
+      html.match(/"bannerExternalUrl":"(https:\\\/\\\/[^"]+)"/)?.[1] ||
+      html.match(/"bannerExternalUrl":"(https:\/\/[^"]+)"/)?.[1];
+    const bannerUrl = bannerMatch ? decodeHtmlEntities(bannerMatch.replace(/\\\//g, '/')) : null;
+
+    const ogDesc =
+      html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"/i)?.[1] ||
+      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:description"/i)?.[1];
+    const sinopse = decodeHtmlEntities(ogDesc || '').trim();
+
+    if (!channelId && !titulo) return null;
+
+    return {
+      channelId: channelId || '',
+      titulo: titulo || 'Canal do YouTube',
+      sinopse: sinopse || 'Canal de reacts no YouTube.',
+      avatarUrl,
+      bannerUrl,
+      source: 'scrape',
+    };
+  } catch (err) {
+    console.error('[YouTube Scrape] Erro ao extrair metadados:', err);
+    return null;
+  }
+}
+
+async function fetchChannelViaYouTubeApi(
+  idObj: { type: 'id' | 'handle' | 'username' | 'search'; value: string },
+  apiKey: string
+): Promise<ResolvedYouTubeChannel | null> {
+  try {
+    let apiUrl = '';
+    if (idObj.type === 'id') {
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${idObj.value}&key=${apiKey}`;
+    } else if (idObj.type === 'handle') {
+      const handle = idObj.value.startsWith('@') ? idObj.value : `@${idObj.value}`;
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(handle)}&key=${apiKey}`;
+    } else if (idObj.type === 'username') {
+      apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forUsername=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
+    } else {
+      apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(idObj.value)}&key=${apiKey}&maxResults=1`;
+    }
+
+    let channelRes = await safeFetch(apiUrl);
+    if (!channelRes?.ok && idObj.type === 'handle') {
+      const handleWithoutAt = idObj.value.replace(/^@/, '');
+      const retryUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(handleWithoutAt)}&key=${apiKey}`;
+      channelRes = await safeFetch(retryUrl);
+    }
+
+    if (!channelRes?.ok) {
+      const errText = channelRes ? await channelRes.text().catch(() => '') : 'network error';
+      console.warn(`[YouTube API] Falha ao buscar canal (${idObj.type}):`, errText.slice(0, 200));
+      return null;
+    }
+
+    const channelData: any = await channelRes.json();
+    let item = null;
+
+    if (idObj.type === 'search' && channelData.items?.[0]) {
+      const foundChannelId = channelData.items[0].id?.channelId || channelData.items[0].snippet?.channelId;
+      if (foundChannelId) {
+        return fetchChannelViaYouTubeApi({ type: 'id', value: foundChannelId }, apiKey);
+      }
+    } else if (channelData.items?.[0]) {
+      item = channelData.items[0];
+    }
+
+    if (!item) return null;
+
+    const snippet = item.snippet || {};
+    const branding = item.brandingSettings || {};
+
+    return {
+      channelId: item.id,
+      titulo: snippet.title || 'Canal do YouTube',
+      sinopse: snippet.description || 'Canal de reacts no YouTube.',
+      avatarUrl: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || null,
+      bannerUrl: branding.image?.bannerExternalUrl || null,
+      source: 'api',
+    };
+  } catch (err) {
+    console.error('[YouTube API] Erro ao buscar canal:', err);
+    return null;
+  }
+}
+
+function buildChannelPageUrl(
+  input: string,
+  idObj: { type: 'id' | 'handle' | 'username' | 'search'; value: string }
+): string {
+  const trimmed = input.trim();
+  if (trimmed.startsWith('http')) return trimmed.split('?')[0];
+
+  if (idObj.type === 'handle') {
+    const handle = idObj.value.startsWith('@') ? idObj.value : `@${idObj.value}`;
+    return `https://www.youtube.com/${handle}`;
+  }
+  if (idObj.type === 'id') return `https://www.youtube.com/channel/${idObj.value}`;
+  if (idObj.type === 'username') return `https://www.youtube.com/user/${idObj.value}`;
+  if (idObj.type === 'search' && trimmed.includes('youtube.com/c/')) {
+    return trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/c/${idObj.value}`;
+  }
+  return `https://www.youtube.com/@${trimmed.replace(/^@/, '')}`;
+}
+
+async function resolveYouTubeChannel(inputUrl: string): Promise<ResolvedYouTubeChannel | null> {
+  const trimmed = inputUrl.trim();
+  const apiKey = getYoutubeApiKey();
+
+  const videoId = extractVideoIdFromUrl(trimmed);
+  if (videoId) {
+    const videoUrl = trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/watch?v=${videoId}`;
+    const oembed = await resolveChannelViaOEmbed(videoUrl);
+    if (oembed) {
+      const fromAuthorPage = await scrapeYouTubeChannelPage(oembed.authorUrl);
+      if (fromAuthorPage) {
+        return {
+          ...fromAuthorPage,
+          titulo: fromAuthorPage.titulo !== 'Canal do YouTube' ? fromAuthorPage.titulo : oembed.authorName,
+          avatarUrl: fromAuthorPage.avatarUrl || oembed.thumbnailUrl || null,
+          source: fromAuthorPage.source,
+        };
+      }
+
+      const authorIdObj = extractYouTubeIdentifier(oembed.authorUrl);
+      if (apiKey) {
+        const fromApi = await fetchChannelViaYouTubeApi(authorIdObj, apiKey);
+        if (fromApi) {
+          return { ...fromApi, titulo: fromApi.titulo || oembed.authorName };
+        }
+      }
+
+      const authorChannelId = authorIdObj.type === 'id'
+        ? authorIdObj.value
+        : (oembed.authorUrl.match(/channel\/(UC[a-zA-Z0-9_-]{22})/)?.[1] || '');
+
+      return {
+        channelId: authorChannelId,
+        titulo: oembed.authorName,
+        sinopse: 'Canal de reacts no YouTube.',
+        avatarUrl: oembed.thumbnailUrl || null,
+        bannerUrl: null,
+        source: 'oembed',
+      };
+    }
+  }
+
+  const idObj = extractYouTubeIdentifier(trimmed);
+
+  if (apiKey) {
+    const fromApi = await fetchChannelViaYouTubeApi(idObj, apiKey);
+    if (fromApi) return fromApi;
+  }
+
+  const pageUrl = buildChannelPageUrl(trimmed, idObj);
+  const scraped = await scrapeYouTubeChannelPage(pageUrl);
+  if (!scraped) return null;
+
+  if (apiKey && scraped.channelId.startsWith('UC')) {
+    const enriched = await fetchChannelViaYouTubeApi({ type: 'id', value: scraped.channelId }, apiKey);
+    if (enriched) {
+      return {
+        ...enriched,
+        titulo: enriched.titulo || scraped.titulo,
+        sinopse: enriched.sinopse || scraped.sinopse,
+        avatarUrl: enriched.avatarUrl || scraped.avatarUrl,
+        bannerUrl: enriched.bannerUrl || scraped.bannerUrl,
+      };
+    }
+  }
+
+  return scraped;
+}
+
 function extractYouTubeIdentifier(url: string): { type: 'id' | 'handle' | 'username' | 'search'; value: string } {
-  const cleanedUrl = url.trim();
-  
-  // E.g. https://www.youtube.com/channel/UC5f7MdfgNf6Z-jXb1Gqy8vA
+  const cleanedUrl = url.trim().split('?')[0].replace(/\/+$/, '');
+
   const channelIdMatch = cleanedUrl.match(/(?:youtube\.com\/channel\/|youtube\.com\/channels\/)(UC[a-zA-Z0-9_-]{22})/);
   if (channelIdMatch) {
     return { type: 'id', value: channelIdMatch[1] };
   }
-  
-  // E.g. https://www.youtube.com/@casimiro or @casimiro
-  const handleMatch = cleanedUrl.match(/(?:youtube\.com\/@|@)([a-zA-Z0-9_.-]+)/);
+
+  const handleMatch = cleanedUrl.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/@([a-zA-Z0-9_.-]+)/i);
   if (handleMatch) {
     return { type: 'handle', value: '@' + handleMatch[1] };
   }
 
-  // E.g. https://www.youtube.com/user/casimiro
-  const userMatch = cleanedUrl.match(/youtube\.com\/user\/([a-zA-Z0-9_.-]+)/);
+  if (cleanedUrl.startsWith('@')) {
+    return { type: 'handle', value: cleanedUrl };
+  }
+
+  const userMatch = cleanedUrl.match(/youtube\.com\/user\/([a-zA-Z0-9_.-]+)/i);
   if (userMatch) {
     return { type: 'username', value: userMatch[1] };
   }
 
-  // E.g. https://www.youtube.com/c/SomeChannelName
-  const customMatch = cleanedUrl.match(/youtube\.com\/c\/([a-zA-Z0-9_.-]+)/);
+  const customMatch = cleanedUrl.match(/youtube\.com\/c\/([a-zA-Z0-9_.-]+)/i);
   if (customMatch) {
     return { type: 'search', value: customMatch[1] };
   }
 
-  // Fallback to searching if it's just a general name or anything else
-  return { type: 'search', value: cleanedUrl };
+  return { type: 'search', value: cleanedUrl.replace(/^@/, '').trim() };
 }
 
+function buildCanalSlugFromTitle(titulo: string): string {
+  const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
+  return `canal-${cleanName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+}
+
+interface ResolvedVideoMetadata {
+  videoId: string;
+  titulo: string;
+  canalNome: string;
+  authorUrl: string;
+  thumbnailUrl: string;
+  source: 'oembed' | 'scrape';
+}
+
+async function resolveVideoViaOEmbed(videoUrl: string): Promise<ResolvedVideoMetadata | null> {
+  const videoId = extractVideoIdFromUrl(videoUrl.trim());
+  if (!videoId) return null;
+
+  const normalizedUrl = videoUrl.trim().startsWith('http')
+    ? videoUrl.trim()
+    : `https://www.youtube.com/watch?v=${videoId}`;
+
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(normalizedUrl)}&format=json`;
+    const res = await safeFetch(oembedUrl);
+    if (!res?.ok) return null;
+    const data: any = await res.json();
+    if (!data?.title) return null;
+
+    return {
+      videoId,
+      titulo: data.title,
+      canalNome: data.author_name || 'Canal do YouTube',
+      authorUrl: data.author_url || '',
+      thumbnailUrl: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      source: 'oembed',
+    };
+  } catch (err) {
+    console.warn('[Catálogo] Falha ao resolver vídeo via oEmbed:', err);
+    return null;
+  }
+}
+
+function obraFromResolvedChannel(
+  resolved: ResolvedYouTubeChannel,
+  inputUrl: string,
+  existingId?: string
+) {
+  const titulo = resolved.titulo.startsWith('Canal') ? resolved.titulo : `Canal ${resolved.titulo}`;
+  const canalSlug = existingId || buildCanalSlugFromTitle(titulo);
+  const defaultBanner = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200';
+  const defaultPoster = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300';
+  const idObj = extractYouTubeIdentifier(inputUrl);
+
+  return {
+    id: canalSlug,
+    titulo,
+    tipo: 'canal' as const,
+    sinopse: resolved.sinopse || 'Canal de reacts no YouTube.',
+    ano: new Date().getFullYear(),
+    generos: ['React', 'Entretenimento', 'YouTube'],
+    banner: resolved.bannerUrl || resolved.avatarUrl || defaultBanner,
+    poster: resolved.avatarUrl || defaultPoster,
+    trailerUrl: resolved.channelId.startsWith('UC')
+      ? `https://www.youtube.com/channel/${resolved.channelId}`
+      : buildChannelPageUrl(inputUrl, idObj),
+    channelId: resolved.channelId.startsWith('UC') ? resolved.channelId : undefined,
+  };
+}
+
+async function resolveCanalObraForVideo(
+  canalNome: string,
+  authorUrl: string
+) {
+  const existingObras = localDb.getObras();
+  const cleanName = canalNome.trim().toLowerCase();
+
+  let matchingObra = existingObras.find(o =>
+    o.tipo === 'canal' && (
+      o.titulo.toLowerCase().includes(cleanName) ||
+      cleanName.includes(o.titulo.replace(/^canal\s+/i, '').toLowerCase())
+    )
+  );
+
+  if (matchingObra) return matchingObra;
+
+  if (authorUrl) {
+    const resolved = await resolveYouTubeChannel(authorUrl);
+    if (resolved?.titulo) {
+      const slug = buildCanalSlugFromTitle(resolved.titulo);
+      matchingObra = existingObras.find(o => o.id === slug || o.channelId === resolved.channelId);
+      if (matchingObra) return matchingObra;
+
+      return obraFromResolvedChannel(resolved, authorUrl, slug);
+    }
+  }
+
+  const canalSlug = buildCanalSlugFromTitle(canalNome);
+  matchingObra = existingObras.find(o => o.id === canalSlug);
+  if (matchingObra) return matchingObra;
+
+  return {
+    id: canalSlug,
+    titulo: canalNome.startsWith('Canal') ? canalNome : `Canal ${canalNome}`,
+    tipo: 'canal' as const,
+    sinopse: `Categoria exclusiva para os reacts do canal ${canalNome}.`,
+    ano: new Date().getFullYear(),
+    generos: ['Reacts', 'YouTube'],
+    banner: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1600',
+    poster: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300',
+    trailerUrl: authorUrl || 'https://www.youtube.com',
+  };
+}
+
+async function findOrCreateCanalObraForVideo(
+  canalNome: string,
+  authorUrl: string
+) {
+  const resolved = await resolveCanalObraForVideo(canalNome, authorUrl);
+  const existing = localDb.getObras().find(o => o.id === resolved.id);
+  if (existing) return existing;
+  return localDb.saveObra(resolved as Obra);
+}
+
+// ==========================================
+// CATÁLOGO MANUAL (sem depender da API do YouTube)
+// ==========================================
+
+app.post('/api/catalogo/canal/preview', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do canal do YouTube.' });
+  }
+
+  try {
+    const resolved = await resolveYouTubeChannel(url.trim());
+    if (!resolved?.titulo) {
+      return res.status(404).json({ error: 'Não foi possível obter os dados deste canal. Verifique o link.' });
+    }
+
+    const slug = buildCanalSlugFromTitle(resolved.titulo);
+    const existing = localDb.getObras().find(o => o.id === slug || (resolved.channelId && o.channelId === resolved.channelId));
+
+    res.json({
+      preview: {
+        id: existing?.id || slug,
+        titulo: resolved.titulo.startsWith('Canal') ? resolved.titulo : `Canal ${resolved.titulo}`,
+        sinopse: resolved.sinopse,
+        poster: resolved.avatarUrl,
+        banner: resolved.bannerUrl || resolved.avatarUrl,
+        channelId: resolved.channelId || null,
+        source: resolved.source,
+        alreadyExists: !!existing,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro no preview do canal:', error);
+    res.status(500).json({ error: 'Erro ao carregar preview do canal.' });
+  }
+});
+
+app.post('/api/catalogo/canal', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do canal do YouTube.' });
+  }
+
+  try {
+    const resolved = await resolveYouTubeChannel(url.trim());
+    if (!resolved?.titulo) {
+      return res.status(404).json({ error: 'Não foi possível importar este canal. Verifique o link.' });
+    }
+
+    let avatarUrl = resolved.avatarUrl;
+    if (!avatarUrl && resolved.channelId.startsWith('UC')) {
+      avatarUrl = await fetchRealChannelAvatar(
+        resolved.channelId,
+        buildChannelPageUrl(url.trim(), extractYouTubeIdentifier(url.trim()))
+      );
+    }
+
+    const obraData = obraFromResolvedChannel(
+      { ...resolved, avatarUrl: avatarUrl || resolved.avatarUrl },
+      url.trim()
+    );
+
+    const existing = localDb.getObras().find(o =>
+      o.id === obraData.id || (obraData.channelId && o.channelId === obraData.channelId)
+    );
+
+    const saved = localDb.saveObra(existing ? { ...existing, ...obraData, id: existing.id } : obraData);
+
+    let reactCount = localDb.getReacts().filter((r) => r.obraId === saved.id).length;
+    try {
+      reactCount = await syncVideosForChannelObra(saved);
+      await localDb.flushSupabaseBackgroundSync();
+    } catch (syncErr) {
+      console.warn('[Catálogo] Canal salvo, mas falha ao sincronizar vídeos:', (syncErr as Error)?.message || syncErr);
+    }
+
+    res.json({
+      success: true,
+      obra: saved,
+      mode: resolved.source,
+      reactCount,
+      savedToSupabase: localDb.isSupabaseActive(),
+      message: existing
+        ? `Canal "${saved.titulo}" atualizado (${reactCount} vídeos no catálogo).`
+        : `Canal "${saved.titulo}" adicionado (${reactCount} vídeos importados).`,
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro ao salvar canal:', error);
+    res.status(500).json({ error: 'Erro ao salvar canal no catálogo.' });
+  }
+});
+
+app.post('/api/catalogo/video/preview', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do vídeo do YouTube.' });
+  }
+
+  try {
+    const meta = await resolveVideoViaOEmbed(url.trim());
+    if (!meta) {
+      return res.status(404).json({ error: 'Não foi possível obter os dados deste vídeo. Verifique o link.' });
+    }
+
+    const existing = localDb.getReacts().find(r => r.id === meta.videoId);
+    const canalObra = await resolveCanalObraForVideo(meta.canalNome, meta.authorUrl);
+
+    res.json({
+      preview: {
+        id: meta.videoId,
+        titulo: meta.titulo,
+        canalNome: meta.canalNome,
+        thumbnailUrl: meta.thumbnailUrl,
+        obraId: canalObra.id,
+        obraTitulo: canalObra.titulo,
+        source: meta.source,
+        alreadyExists: !!existing,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro no preview do vídeo:', error);
+    res.status(500).json({ error: 'Erro ao carregar preview do vídeo.' });
+  }
+});
+
+app.post('/api/catalogo/video', async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
+  const { url, obraId } = req.body;
+  if (!url?.trim()) {
+    return res.status(400).json({ error: 'Informe o link do vídeo do YouTube.' });
+  }
+
+  try {
+    const meta = await resolveVideoViaOEmbed(url.trim());
+    if (!meta) {
+      return res.status(404).json({ error: 'Não foi possível importar este vídeo. Verifique o link.' });
+    }
+
+    let targetObra = obraId
+      ? localDb.getObras().find(o => o.id === obraId)
+      : null;
+
+    if (!targetObra) {
+      targetObra = await findOrCreateCanalObraForVideo(meta.canalNome, meta.authorUrl);
+    }
+
+    const existing = localDb.getReacts().find(r => r.id === meta.videoId);
+    const reactPayload: ReactVideo = {
+      id: meta.videoId,
+      titulo: meta.titulo,
+      canalNome: meta.canalNome,
+      canalId: targetObra.channelId || '',
+      publicadoEm: new Date().toISOString().split('T')[0],
+      duracao: existing?.duracao || '--:--',
+      visualizacoes: existing?.visualizacoes || 0,
+      thumbnailUrl: meta.thumbnailUrl,
+      obraId: targetObra.id,
+      isRecomendado: existing?.isRecomendado || false,
+      likes: existing?.likes || 0,
+    };
+
+    const saved = localDb.saveReact(reactPayload);
+
+    res.json({
+      success: true,
+      react: saved,
+      obra: targetObra,
+      mode: meta.source,
+      savedToSupabase: localDb.isSupabaseActive(),
+      message: existing
+        ? `Vídeo "${saved.titulo}" atualizado no catálogo.`
+        : `Vídeo "${saved.titulo}" adicionado ao catálogo de ${targetObra.titulo}.`,
+    });
+  } catch (error: any) {
+    console.error('[Catálogo] Erro ao salvar vídeo:', error);
+    res.status(500).json({ error: 'Erro ao salvar vídeo no catálogo.' });
+  }
+});
+
 app.post("/api/canais/importar", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   const { url } = req.body;
   if (!url) {
     return res.status(400).json({ error: "O link ou identificador do canal é obrigatório." });
   }
 
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  const hasYoutubeKey = apiKey && apiKey !== "MY_YOUTUBE_API_KEY";
-
   try {
-    // 1. Tentar obter dados reais se a chave do YouTube estiver configurada
-    if (hasYoutubeKey) {
-      try {
-        const idObj = extractYouTubeIdentifier(url);
-        console.log(`[Importar Canal] Identificador extraído:`, idObj);
+    console.log(`[Importar Canal] Resolvendo metadados para: ${url}`);
+    const resolved = await resolveYouTubeChannel(url);
 
-        let apiUrl = "";
-        if (idObj.type === 'id') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${idObj.value}&key=${apiKey}`;
-        } else if (idObj.type === 'handle') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forHandle=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
-        } else if (idObj.type === 'username') {
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&forUsername=${encodeURIComponent(idObj.value)}&key=${apiKey}`;
-        } else {
-          apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(idObj.value)}&key=${apiKey}&maxResults=1`;
-        }
+    if (resolved && resolved.titulo) {
+      let avatarUrl = resolved.avatarUrl;
+      let bannerUrl = resolved.bannerUrl;
 
-        const channelRes = await fetch(apiUrl);
-        if (channelRes.ok) {
-          const channelData: any = await channelRes.json();
-          let item = null;
-
-          if (idObj.type === 'search' && channelData.items?.[0]) {
-            const foundChannelId = channelData.items[0].id?.channelId;
-            if (foundChannelId) {
-              const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${foundChannelId}&key=${apiKey}`;
-              const detailRes = await fetch(detailUrl);
-              if (detailRes.ok) {
-                const detailData: any = await detailRes.json();
-                item = detailData.items?.[0];
-              }
-            }
-          } else if (channelData.items?.[0]) {
-            item = channelData.items[0];
-          }
-
-          if (item) {
-            const channelId = item.id;
-            const snippet = item.snippet || {};
-            const branding = item.brandingSettings || {};
-
-            const titulo = snippet.title || "Canal do YouTube";
-            const sinopse = snippet.description || `Canal focado em reacts super legais de filmes, séries e jogos.`;
-            const avatarUrl = snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300";
-            const bannerUrl = branding.image?.bannerExternalUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
-
-            // Nome sem "Canal " no início para o slug
-            const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
-            const canalSlug = `canal-${cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-
-            // Criar Obra
-            const novaObra = localDb.saveObra({
-              id: canalSlug,
-              titulo: titulo.startsWith("Canal") ? titulo : `Canal ${titulo}`,
-              tipo: 'canal',
-              sinopse: sinopse,
-              ano: snippet.publishedAt ? new Date(snippet.publishedAt).getFullYear() : new Date().getFullYear(),
-              generos: ["React", "Entretenimento", "YouTube"],
-              banner: bannerUrl,
-              poster: avatarUrl,
-              trailerUrl: `https://www.youtube.com/channel/${channelId}`,
-              channelId: channelId
-            });
-
-            // Sincronizar vídeos
-            await syncChannelVideos(channelId, canalSlug);
-
-            localDb.addNotificacao({
-              titulo: `Novo Canal Importado: ${titulo}`,
-              mensagem: `O canal ${titulo} foi importado com sucesso diretamente do YouTube!`,
-              canalNome: titulo,
-              usuarioEmail: req.body.email
-            });
-
-            return res.status(200).json({ success: true, obra: novaObra, mode: 'real' });
-          }
-        }
-      } catch (ytError) {
-        console.error("Erro ao importar dados reais do YouTube:", ytError);
-        // Continue para o fallback se a API der erro
+      if (!avatarUrl && resolved.channelId.startsWith('UC')) {
+        avatarUrl = await fetchRealChannelAvatar(resolved.channelId, buildChannelPageUrl(url, extractYouTubeIdentifier(url)));
       }
+
+      const titulo = resolved.titulo;
+      const cleanName = titulo.replace(/^Canal\s+/i, '').trim();
+      const canalSlug = `canal-${cleanName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+
+      const defaultBanner = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
+      const defaultPoster = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300";
+
+      const novaObra = localDb.saveObra({
+        id: canalSlug,
+        titulo: titulo.startsWith("Canal") ? titulo : `Canal ${titulo}`,
+        tipo: 'canal',
+        sinopse: resolved.sinopse || `Canal focado em reacts no YouTube.`,
+        ano: new Date().getFullYear(),
+        generos: ["React", "Entretenimento", "YouTube"],
+        banner: bannerUrl || avatarUrl || defaultBanner,
+        poster: avatarUrl || defaultPoster,
+        trailerUrl: resolved.channelId.startsWith('UC')
+          ? `https://www.youtube.com/channel/${resolved.channelId}`
+          : buildChannelPageUrl(url, extractYouTubeIdentifier(url)),
+        channelId: resolved.channelId.startsWith('UC') ? resolved.channelId : undefined,
+      });
+
+      if (resolved.channelId.startsWith('UC')) {
+        await syncChannelVideos(resolved.channelId, canalSlug);
+      } else {
+        const reactsAdded = await discoverReactsFromYouTube(titulo, canalSlug, 12);
+        console.log(`[Importar Canal] ${reactsAdded} reacts encontrados via busca para ${titulo}`);
+      }
+
+      await localDb.flushSupabaseBackgroundSync();
+      const reactCount = localDb.getReacts().filter((r) => r.obraId === canalSlug).length;
+
+      localDb.addNotificacao({
+        titulo: `Novo Canal Importado: ${titulo}`,
+        mensagem: `O canal ${titulo} foi importado com dados reais do YouTube (${resolved.source}).`,
+        canalNome: titulo,
+        usuarioEmail: req.body.email
+      });
+
+      return res.status(200).json({
+        success: true,
+        obra: novaObra,
+        reactCount,
+        mode: resolved.source === 'api' ? 'real' : resolved.source,
+      });
     }
 
-    // 2. Fallback para simulação do Gemini se houver chave do Gemini configurada
-    if (ai) {
+    // Fallback simulado apenas se explicitamente habilitado (evita vídeos fake em produção).
+    if (ai && allowMockChannelImport()) {
       try {
         console.log(`[Importar Canal] Simulando canal com Gemini para "${url}"...`);
         const cleanQuery = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
@@ -897,47 +1784,53 @@ app.post("/api/canais/importar", async (req, res) => {
       }
     }
 
-    // 3. Fallback estático se nada mais funcionar
-    console.log(`[Importar Canal] Usando fallback estático de segurança...`);
-    const cleanUrl = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
-    const title = cleanUrl.charAt(0).toUpperCase() + cleanUrl.slice(1);
-    const canalSlug = `canal-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    if (allowMockChannelImport()) {
+      console.log(`[Importar Canal] Usando fallback estático de segurança...`);
+      const cleanUrl = url.replace(/(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|c\/|@|user\/)?/, "").replace(/@/, "").trim();
+      const title = cleanUrl.charAt(0).toUpperCase() + cleanUrl.slice(1);
+      const canalSlug = `canal-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-    const novaObra = localDb.saveObra({
-      id: canalSlug,
-      titulo: `Canal ${title}`,
-      tipo: 'canal',
-      sinopse: `Canal de reacts repleto de entretenimento e comentários inteligentes sobre filmes, séries e animes.`,
-      ano: 2023,
-      generos: ["React", "Entretenimento"],
-      banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
-      poster: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300",
-      trailerUrl: "https://www.youtube.com",
-      channelId: `static_${Math.random().toString(36).substring(2, 10)}`
-    });
-
-    for (let i = 1; i <= 5; i++) {
-      localDb.saveReact({
-        id: `mock_static_${canalSlug}_${i}`,
-        titulo: `REACT ${i} - REAGINDO AOS MELHORES MOMENTOS DO FILME DO ANO!`,
-        canalNome: title,
-        canalId: novaObra.channelId || '',
-        publicadoEm: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        duracao: `${10 + i}:${15 + i * 5}`,
-        visualizacoes: 50000 * i,
-        thumbnailUrl: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=400",
-        obraId: canalSlug
+      const novaObra = localDb.saveObra({
+        id: canalSlug,
+        titulo: `Canal ${title}`,
+        tipo: 'canal',
+        sinopse: `Canal de reacts repleto de entretenimento e comentários inteligentes sobre filmes, séries e animes.`,
+        ano: 2023,
+        generos: ["React", "Entretenimento"],
+        banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
+        poster: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300",
+        trailerUrl: "https://www.youtube.com",
+        channelId: `static_${Math.random().toString(36).substring(2, 10)}`
       });
+
+      for (let i = 1; i <= 5; i++) {
+        localDb.saveReact({
+          id: `mock_static_${canalSlug}_${i}`,
+          titulo: `REACT ${i} - REAGINDO AOS MELHORES MOMENTOS DO FILME DO ANO!`,
+          canalNome: title,
+          canalId: novaObra.channelId || '',
+          publicadoEm: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          duracao: `${10 + i}:${15 + i * 5}`,
+          visualizacoes: 50000 * i,
+          thumbnailUrl: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=400",
+          obraId: canalSlug
+        });
+      }
+
+      localDb.addNotificacao({
+        titulo: `Novo Canal Cadastrado (Mock): ${title}`,
+        mensagem: `O canal ${title} foi criado com dados mockados de segurança.`,
+        canalNome: title,
+        usuarioEmail: req.body.email
+      });
+
+      return res.status(200).json({ success: true, obra: novaObra, mode: 'static' });
     }
 
-    localDb.addNotificacao({
-      titulo: `Novo Canal Cadastrado (Mock): ${title}`,
-      mensagem: `O canal ${title} foi criado com dados mockados de segurança.`,
-      canalNome: title,
-      usuarioEmail: req.body.email
+    return res.status(404).json({
+      error:
+        'Não foi possível importar este canal. Verifique o link do YouTube e configure YOUTUBE_API_KEY no servidor.',
     });
-
-    return res.status(200).json({ success: true, obra: novaObra, mode: 'static' });
 
   } catch (error: any) {
     console.error("Erro interno ao importar canal:", error);
@@ -945,8 +1838,9 @@ app.post("/api/canais/importar", async (req, res) => {
   }
 });
 
-app.post("/api/obras", (req, res) => {
+app.post("/api/obras", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     const { id, titulo, tipo, sinopse, ano, generos, banner, poster, trailerUrl, destacado, channelId } = req.body;
     if (!id || !titulo || !tipo) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
@@ -970,8 +1864,38 @@ app.post("/api/obras", (req, res) => {
   }
 });
 
-app.delete("/api/obras/:id", (req, res) => {
+app.put("/api/obras/:id", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
+    const { id } = req.params;
+    const existing = localDb.getObras().find(o => o.id === id);
+    if (!existing) {
+      return res.status(404).json({ error: "Obra não encontrada." });
+    }
+
+    const { titulo, tipo, sinopse, ano, generos, banner, poster, trailerUrl, destacado, channelId } = req.body;
+    const updated = localDb.saveObra({
+      ...existing,
+      titulo: titulo ?? existing.titulo,
+      tipo: tipo ?? existing.tipo,
+      sinopse: sinopse ?? existing.sinopse,
+      ano: ano !== undefined ? Number(ano) : existing.ano,
+      generos: Array.isArray(generos) ? generos : (typeof generos === "string" ? generos.split(",").map((s: string) => s.trim()) : existing.generos),
+      banner: banner ?? existing.banner,
+      poster: poster ?? existing.poster,
+      trailerUrl: trailerUrl ?? existing.trailerUrl,
+      destacado: destacado !== undefined ? !!destacado : existing.destacado,
+      channelId: channelId ?? existing.channelId,
+    });
+    res.json(updated);
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao atualizar obra." });
+  }
+});
+
+app.delete("/api/obras/:id", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
     localDb.deleteObra(req.params.id);
     res.json({ message: "Obra excluída com sucesso." });
   } catch (error: any) {
@@ -982,12 +1906,25 @@ app.delete("/api/obras/:id", (req, res) => {
 // Reacts routes
 app.get("/api/reacts", (req, res) => {
   try {
-    const allReacts = localDb.getReacts().filter(r => !isShortOrInvalidReact(r));
-    // Sort from newest to oldest
+    const obraId = req.query.obraId as string | undefined;
+    const canalId = req.query.canalId as string | undefined;
+    const isAdmin = isRequestAdmin(req);
+
+    let allReacts = localDb.getReacts()
+      .filter(r => !isShortOrInvalidReact(r))
+      .filter(r => isReactPubliclyVisible(r, isAdmin));
+
+    if (obraId) {
+      allReacts = allReacts.filter(r => r.obraId === obraId);
+    } else if (canalId) {
+      allReacts = allReacts.filter(r => r.canalId === canalId);
+    }
+
     allReacts.sort((a, b) => new Date(b.publicadoEm || 0).getTime() - new Date(a.publicadoEm || 0).getTime());
-    // Limit to 500 to prevent large payloads and timeouts
-    const limitedReacts = allReacts.slice(0, 500);
-    res.json(limitedReacts);
+
+    const shouldLimit = !obraId && !canalId && !isAdmin;
+    const result = shouldLimit ? allReacts.slice(0, 500) : allReacts;
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar reacts." });
   }
@@ -1062,7 +1999,8 @@ app.delete("/api/reacts/:id", (req, res) => {
 
 app.post("/api/reacts/:id/like", (req, res) => {
   try {
-    const { action } = req.body; // 'like' | 'unlike'
+    const { action, email } = req.body; // 'like' | 'unlike'
+    if (!assertActiveAccount(email, res)) return;
     const newLikes = localDb.likeReact(req.params.id, action === 'unlike' ? 'unlike' : 'like');
     res.json({ success: true, likes: newLikes });
   } catch (error: any) {
@@ -1070,8 +2008,9 @@ app.post("/api/reacts/:id/like", (req, res) => {
   }
 });
 
-app.post("/api/reacts/:id/recomendar", (req, res) => {
+app.post("/api/reacts/:id/recomendar", async (req, res) => {
   try {
+    if (!(await requireAdmin(req, res))) return;
     const { id } = req.params;
     const { recomendado } = req.body;
     const reacts = localDb.getReacts();
@@ -1088,6 +2027,7 @@ app.post("/api/reacts/:id/recomendar", (req, res) => {
 });
 
 app.post("/api/reacts/recomendar-link", async (req, res) => {
+  if (!(await requireAdmin(req, res))) return;
   try {
     const { url } = req.body;
     if (!url || typeof url !== 'string' || !url.trim()) {
@@ -1148,8 +2088,8 @@ app.post("/api/reacts/recomendar-link", async (req, res) => {
           try {
             console.log(`[Recomendar Link] Buscando banner real para o novo canal ${canalNome} (${channelId})...`);
             const detailUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${channelId}&key=${apiKey}`;
-            const detailRes = await fetch(detailUrl);
-            if (detailRes.ok) {
+            const detailRes = await safeFetch(detailUrl);
+            if (detailRes && detailRes.ok) {
               const detailData: any = await detailRes.json();
               const item = detailData.items?.[0];
               if (item) {
@@ -1327,17 +2267,10 @@ app.post("/api/reacts/recomendar-link", async (req, res) => {
 app.get("/api/comentarios", (req, res) => {
   try {
     const obraId = req.query.obraId as string;
-    const rawComments = localDb.getComentarios(obraId);
+    const isAdmin = isRequestAdmin(req);
+    const rawComments = localDb.getComentarios(obraId).filter((c) => isCommentPubliclyVisible(c, isAdmin));
     
-    // Enrich comments with user's isDonor status and avatar URL
-    const enriched = rawComments.map(c => {
-      const userAcct = localDb.findUsuarioByEmailSync(c.usuarioEmail);
-      return {
-        ...c,
-        isDonor: userAcct?.isDonor || (c.usuarioEmail === "mateusvini.t10@gmail.com" ? true : false),
-        avatar: userAcct?.avatar || ""
-      };
-    });
+    const enriched = rawComments.map((c) => enrichCommentAuthorProfile(c));
     
     res.json(enriched);
   } catch (error: any) {
@@ -1348,19 +2281,35 @@ app.get("/api/comentarios", (req, res) => {
 app.post("/api/comentarios", (req, res) => {
   try {
     const { obraId, usuarioNome, usuarioEmail, texto } = req.body;
-    if (!obraId || !usuarioNome || !usuarioEmail || !texto) {
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    if (!obraId || !usuarioNome || !texto) {
       return res.status(400).json({ error: "Campos obrigatórios ausentes." });
     }
+
+    if (!assertActiveAccount(sessionEmail, res)) return;
+
+    const blockedWords = localDb.getAdminConfig().blockedWords || [];
+    const blocked = findBlockedWord(texto, blockedWords);
+    if (blocked) {
+      return res.status(400).json({ error: `Seu comentário contém termo bloqueado: "${blocked}"` });
+    }
+
     const novo = localDb.addComentario({
       id: Math.random().toString(36).substring(2),
       obraId,
       usuarioNome,
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       texto,
       likes: 0,
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
+      moderationStatus: 'approved',
     });
-    res.status(201).json(novo);
+    const gamificationReward = handleGamificationEvent(sessionEmail, 'comment');
+    res.status(201).json({
+      ...enrichCommentAuthorProfile(novo),
+      gamificationReward,
+    });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao adicionar comentário." });
   }
@@ -1376,8 +2325,21 @@ app.post("/api/comentarios/:id/like", (req, res) => {
   }
 });
 
-app.delete("/api/comentarios/:id", (req, res) => {
+app.delete("/api/comentarios/:id", async (req, res) => {
   try {
+    const isAdmin = isRequestAdmin(req);
+    const comentario = localDb.getComentarios().find(c => c.id === req.params.id);
+    if (!comentario) {
+      return res.status(404).json({ error: "Comentário não encontrado." });
+    }
+
+    const requesterEmail = security.getAuthEmail(req) || (req.query.email as string) || req.body?.email;
+    const isAuthor = requesterEmail && comentario.usuarioEmail.toLowerCase() === requesterEmail.toLowerCase();
+
+    if (!isAdmin && !isAuthor) {
+      return res.status(403).json({ error: "Sem permissão para remover este comentário." });
+    }
+
     localDb.deleteComentario(req.params.id);
     res.json({ message: "Comentário removido." });
   } catch (error: any) {
@@ -1388,8 +2350,8 @@ app.delete("/api/comentarios/:id", (req, res) => {
 // Favoritos routes
 app.get("/api/favoritos", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getFavoritos(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar favoritos." });
@@ -1399,9 +2361,13 @@ app.get("/api/favoritos", (req, res) => {
 app.post("/api/favoritos/toggle", (req, res) => {
   try {
     const { email, obraId } = req.body;
-    if (!email || !obraId) return res.status(400).json({ error: "Email e ObraId requeridos." });
-    const favoritado = localDb.toggleFavorito(email, obraId);
-    res.json({ favoritado });
+    const sessionEmail = requireSessionEmail(req, res, security, email);
+    if (!sessionEmail) return;
+    if (!obraId) return res.status(400).json({ error: "ObraId requerido." });
+    if (!assertActiveAccount(sessionEmail, res)) return;
+    const favoritado = localDb.toggleFavorito(sessionEmail, obraId);
+    const gamificationReward = favoritado ? handleGamificationEvent(sessionEmail, 'favorite') : null;
+    res.json({ favoritado, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao alterar favorito." });
   }
@@ -1410,8 +2376,8 @@ app.post("/api/favoritos/toggle", (req, res) => {
 // Canais de seguir routes
 app.get("/api/canais/seguidos", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getCanaisSeguidos(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar canais seguidos." });
@@ -1431,9 +2397,17 @@ app.get("/api/canais/:canalNome/seguidores", (req, res) => {
 app.post("/api/canais/seguir", (req, res) => {
   try {
     const { email, canalNome } = req.body;
-    if (!email || !canalNome) return res.status(400).json({ error: "Email e canalNome requeridos." });
-    const seguindo = localDb.toggleSeguirCanal(email, canalNome);
-    res.json({ seguindo });
+    const sessionEmail = requireSessionEmail(req, res, security, email);
+    if (!sessionEmail) return;
+    if (!canalNome) return res.status(400).json({ error: "canalNome requerido." });
+    const seguindo = localDb.toggleSeguirCanal(sessionEmail, canalNome);
+    const gamificationReward = seguindo
+      ? handleGamificationEvent(sessionEmail, 'follow_creator', {
+          creatorName: canalNome,
+          creatorId: resolveCreatorId(canalNome) || undefined,
+        })
+      : null;
+    res.json({ seguindo, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao seguir canal." });
   }
@@ -1442,8 +2416,8 @@ app.post("/api/canais/seguir", (req, res) => {
 // Listas Personalizadas
 app.get("/api/listas", (req, res) => {
   try {
-    const email = req.query.email as string;
-    if (!email) return res.status(400).json({ error: "Email requerido." });
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getListas(email));
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao buscar listas." });
@@ -1453,14 +2427,17 @@ app.get("/api/listas", (req, res) => {
 app.post("/api/listas", (req, res) => {
   try {
     const { nome, descricao, usuarioEmail, obraIds } = req.body;
-    if (!nome || !usuarioEmail) return res.status(400).json({ error: "Nome e Email requeridos." });
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    if (!nome) return res.status(400).json({ error: "Nome requerido." });
     const nova = localDb.createLista({
       nome,
       descricao: descricao || "",
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       obraIds: Array.isArray(obraIds) ? obraIds : []
     });
-    res.status(201).json(nova);
+    const gamificationReward = handleGamificationEvent(sessionEmail, 'list_create');
+    res.status(201).json({ ...nova, gamificationReward });
   } catch (error: any) {
     res.status(500).json({ error: "Erro ao criar lista." });
   }
@@ -1469,11 +2446,17 @@ app.post("/api/listas", (req, res) => {
 app.put("/api/listas/:id", (req, res) => {
   try {
     const { nome, descricao, usuarioEmail, obraIds } = req.body;
+    const sessionEmail = requireSessionEmail(req, res, security, usuarioEmail);
+    if (!sessionEmail) return;
+    const existing = localDb.getListas(sessionEmail).find((l) => l.id === req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: "Lista não encontrada." });
+    }
     const atualizada = localDb.updateLista({
       id: req.params.id,
       nome,
       descricao,
-      usuarioEmail,
+      usuarioEmail: sessionEmail,
       obraIds
     });
     res.json(atualizada);
@@ -1484,6 +2467,12 @@ app.put("/api/listas/:id", (req, res) => {
 
 app.delete("/api/listas/:id", (req, res) => {
   try {
+    const sessionEmail = requireAuthenticatedEmail(req, res);
+    if (!sessionEmail) return;
+    const existing = localDb.getListas(sessionEmail).find((l) => l.id === req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: "Lista não encontrada." });
+    }
     localDb.deleteLista(req.params.id);
     res.json({ message: "Lista removida com sucesso." });
   } catch (error: any) {
@@ -1494,7 +2483,8 @@ app.delete("/api/listas/:id", (req, res) => {
 // Notificações
 app.get("/api/notificacoes", (req, res) => {
   try {
-    const email = req.query.email as string;
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     res.json(localDb.getNotificacoes(email));
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar notificações." });
@@ -1503,6 +2493,12 @@ app.get("/api/notificacoes", (req, res) => {
 
 app.post("/api/notificacoes/:id/ler", (req, res) => {
   try {
+    const sessionEmail = requireAuthenticatedEmail(req, res);
+    if (!sessionEmail) return;
+    const notif = localDb.getNotificacoes(sessionEmail).find((n) => n.id === req.params.id);
+    if (!notif) {
+      return res.status(404).json({ error: "Notificação não encontrada." });
+    }
     localDb.marcarNotificacaoComoLida(req.params.id);
     res.json({ success: true });
   } catch (error) {
@@ -1512,7 +2508,8 @@ app.post("/api/notificacoes/:id/ler", (req, res) => {
 
 app.delete("/api/notificacoes", (req, res) => {
   try {
-    const email = req.query.email as string;
+    const email = requireSessionEmail(req, res, security, req.query.email as string);
+    if (!email) return;
     localDb.limparNotificacoes(email);
     res.json({ success: true });
   } catch (error) {
@@ -1521,18 +2518,21 @@ app.delete("/api/notificacoes", (req, res) => {
 });
 
 // Solicitações de adição de canais por criadores de conteúdo
-app.post("/api/solicitacoes-canal", (req, res) => {
+app.post("/api/solicitacoes-canal", channelRequestLimiter, (req, res) => {
   try {
     const { canalNome, canalUrl, emailContato } = req.body;
     if (!canalNome || !canalUrl || !emailContato) {
       return res.status(400).json({ error: "Todos os campos (canalNome, canalUrl, emailContato) são obrigatórios." });
     }
+
+    const sessionEmail = security.getAuthEmail(req);
     
     // Cria uma notificação que o admin poderá ver
     localDb.addNotificacao({
       titulo: `Solicitação: Novo Canal por Criador`,
       mensagem: `O criador de conteúdo solicitou a inclusão do canal "${canalNome}" (${canalUrl}). E-mail de contato: ${emailContato}`,
-      canalNome: canalNome
+      canalNome: canalNome,
+      usuarioEmail: sessionEmail || undefined,
     });
 
     res.status(201).json({ success: true, message: "Solicitação enviada com sucesso! Analisaremos o canal em breve." });
@@ -1542,352 +2542,36 @@ app.post("/api/solicitacoes-canal", (req, res) => {
   }
 });
 
-// Cadastro de novos usuários
-app.post("/api/cadastro", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
-    }
+// Cadastro de novos usuários (auth local com bcrypt — Supabase é só backup de dados)
+app.post("/api/cadastro", (req, res) => handleRegister(req, res));
 
-    const existing = await localDb.findUsuarioByEmail(email);
-    if (existing) {
-      return res.status(400).json({ error: "Este e-mail já está cadastrado." });
-    }
+// Login de usuários (auth local com bcrypt, 2FA, CAPTCHA e rate limit)
+app.post("/api/login", (req, res) => handleLogin(req, res, security));
 
-    const isSupabase = localDb.isSupabaseActive();
-    let novoUsuario;
-    let requiresVerification = false;
+// Verificação de e-mail via Supabase Auth
+app.post("/api/reenviar-codigo", (req, res) => handleResendVerification(req, res));
 
-    if (isSupabase) {
-      const supabase = localDb.getSupabaseClient();
-      // SignUp using Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username
-          }
-        }
-      });
-
-      if (authError) {
-        console.error("Erro ao registrar no Supabase Auth:", authError);
-        let errorMsg = `Erro no Supabase Auth: ${authError.message}`;
-        if (authError.message.toLowerCase().includes("rate limit") || authError.message.toLowerCase().includes("limiar")) {
-          errorMsg = "Limite de envio de e-mails excedido no Supabase (limite padrão de 3 e-mails por hora). Para facilitar os testes e liberar acesso instantâneo sem precisar confirmar e-mail, acesse o painel do Supabase -> Authentication -> Providers -> Email e DESATIVE a opção 'Confirm email'.";
-        }
-        return res.status(400).json({ error: errorMsg });
-      }
-
-      const userId = authData.user?.id || Math.random().toString(36).substring(2);
-
-      // Check if registration requires email verification
-      if (!authData.session && authData.user && !authData.user.confirmed_at) {
-        requiresVerification = true;
-      }
-
-      // Now create profile in public table
-      novoUsuario = await localDb.addUsuario({
-        username,
-        email,
-        password,
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
-        isDonor: false
-      }, userId);
-    } else {
-      novoUsuario = await localDb.addUsuario({
-        username,
-        email,
-        password,
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
-        isDonor: false
-      });
-    }
-
-    res.status(201).json({
-      success: true,
-      requiresVerification,
-      email: novoUsuario.email,
-      user: requiresVerification ? null : {
-        isLoggedIn: true,
-        nome: novoUsuario.username,
-        email: novoUsuario.email,
-        avatar: novoUsuario.avatar,
-        isAdmin: novoUsuario.isAdmin || false,
-        isDonor: novoUsuario.isDonor || false,
-        continueWatching: [],
-        descricao: ""
-      }
-    });
-  } catch (error: any) {
-    console.error("Erro no cadastro de usuário:", error);
-    res.status(500).json({ error: error.message || "Erro interno no servidor ao realizar cadastro." });
-  }
-});
-
-// Login de usuários
-app.post("/api/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    // Master admin credentials check for mateusvini.t10@gmail.com
-    if (cleanEmail === "mateusvini.t10@gmail.com" && (password === "admin" || password === "Zantnoar12")) {
-      let dbAdmin = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!dbAdmin) {
-        dbAdmin = await localDb.addUsuario({
-          username: "Mateus Vinícius",
-          email: "mateusvini.t10@gmail.com",
-          password: password,
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: true,
-          isDonor: false
-        });
-      } else {
-        if (!dbAdmin.isAdmin || dbAdmin.password !== password) {
-          await localDb.updateUsuario(cleanEmail, { isAdmin: true, password });
-        }
-      }
-      return res.json({
-        success: true,
-        user: {
-          isLoggedIn: true,
-          nome: dbAdmin.username || "Mateus Vinícius",
-          email: "mateusvini.t10@gmail.com",
-          avatar: dbAdmin.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: true,
-          isDonor: dbAdmin.isDonor || false,
-          continueWatching: dbAdmin.continueWatching || [],
-          descricao: dbAdmin.descricao || ""
-        }
-      });
-    }
-
-    const isSupabase = localDb.isSupabaseActive();
-
-    if (isSupabase) {
-      const supabase = localDb.getSupabaseClient();
-      // Login using Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password
-      });
-
-      if (authError) {
-        console.error("Erro ao autenticar no Supabase Auth:", authError);
-        let errorMsg = `Credenciais inválidas: ${authError.message}`;
-        if (authError.message.toLowerCase().includes("confirm")) {
-          return res.status(401).json({
-            error: "Seu e-mail ainda não foi verificado. Insira o código de confirmação enviado para o seu e-mail.",
-            requiresVerification: true,
-            email: cleanEmail
-          });
-        }
-        return res.status(401).json({ error: errorMsg });
-      }
-
-      // Fetch user profile from public table
-      let user = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!user) {
-        // Fallback user profile creation if they exist in auth but not public table
-        user = await localDb.addUsuario({
-          username: authData.user?.user_metadata?.username || cleanEmail.split('@')[0],
-          email: cleanEmail,
-          password: password,
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: cleanEmail === "mateusvini.t10@gmail.com",
-          isDonor: false
-        }, authData.user?.id);
-      }
-
-      return res.json({
-        success: true,
-        user: {
-          isLoggedIn: true,
-          nome: user.username,
-          email: user.email,
-          avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-          isDonor: user.isDonor || false,
-          continueWatching: user.continueWatching || [],
-          descricao: user.descricao || ""
-        }
-      });
-    } else {
-      const user = await localDb.findUsuarioByEmail(cleanEmail);
-      if (!user) {
-        return res.status(401).json({ error: "E-mail não cadastrado." });
-      }
-
-      if (user.password !== password) {
-        return res.status(401).json({ error: "Senha incorreta." });
-      }
-
-      res.json({
-        success: true,
-        user: {
-          isLoggedIn: true,
-          nome: user.username,
-          email: user.email,
-          avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-          isAdmin: user.isAdmin || user.email.toLowerCase() === "mateusvini.t10@gmail.com",
-          isDonor: user.isDonor || false,
-          continueWatching: user.continueWatching || [],
-          descricao: user.descricao || ""
-        }
-      });
-    }
-  } catch (error) {
-    console.error("Erro no login de usuário:", error);
-    res.status(500).json({ error: "Erro interno no servidor ao realizar login." });
-  }
-});
-
-// Verificar código de e-mail OTP do Supabase
-app.post("/api/verificar-codigo", async (req, res) => {
-  try {
-    const { email, token } = req.body;
-    if (!email || !token) {
-      return res.status(400).json({ error: "E-mail e código de verificação são obrigatórios." });
-    }
-
-    const isSupabase = localDb.isSupabaseActive();
-    if (!isSupabase) {
-      return res.status(400).json({ error: "O Supabase não está ativo no momento." });
-    }
-
-    const supabase = localDb.getSupabaseClient();
-    // Verify the OTP/token sent to the user's email
-    const { data: authData, error: authError } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'signup'
-    });
-
-    if (authError) {
-      console.error("Erro ao verificar OTP no Supabase:", authError);
-      return res.status(400).json({ error: `Código de confirmação inválido ou expirado: ${authError.message}` });
-    }
-
-    // Now retrieve or create their user profile in public table
-    let user = await localDb.findUsuarioByEmail(email);
-    if (!user) {
-      user = await localDb.addUsuario({
-        username: authData.user?.user_metadata?.username || email.split('@')[0],
-        email: email,
-        password: '', // Password handled by auth
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: email.toLowerCase() === "mateusvini.t10@gmail.com",
-        isDonor: false
-      }, authData.user?.id);
-    }
-
-    res.json({
-      success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
-      }
-    });
-  } catch (error: any) {
-    console.error("Erro ao verificar código OTP:", error);
-    res.status(500).json({ error: error.message || "Erro interno ao realizar verificação." });
-  }
-});
-
-// Reenviar código de verificação do Supabase
-app.post("/api/reenviar-codigo", async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório." });
-    }
-
-    const isSupabase = localDb.isSupabaseActive();
-    if (!isSupabase) {
-      return res.status(400).json({ error: "O Supabase não está ativo no momento." });
-    }
-
-    const supabase = localDb.getSupabaseClient();
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email
-    });
-
-    if (error) {
-      console.error("Erro ao reenviar OTP no Supabase:", error);
-      let errorMsg = `Erro ao reenviar código: ${error.message}`;
-      if (error.message.toLowerCase().includes("rate limit") || error.message.toLowerCase().includes("limiar")) {
-        errorMsg = "Limite de envio de e-mails excedido no Supabase (limite de 3 e-mails por hora no provedor padrão). Recomendamos desativar 'Confirm email' nas configurações do Supabase Dashboard (Authentication -> Providers -> Email) para testes sem limitações.";
-      }
-      return res.status(400).json({ error: errorMsg });
-    }
-
-    res.json({
-      success: true,
-      message: "Um novo código de confirmação foi enviado para o seu e-mail."
-    });
-  } catch (error: any) {
-    console.error("Erro ao reenviar OTP:", error);
-    res.status(500).json({ error: error.message || "Erro interno ao reenviar código." });
-  }
+app.post("/api/verificar-codigo", (_req, res) => {
+  res.status(400).json({
+    error: 'Use o link enviado por e-mail para confirmar sua conta. Se expirou, peça um novo envio.',
+    requiresVerification: true,
+  });
 });
 
 // Obter informações atualizadas do usuário
 app.get("/api/usuario/me", async (req, res) => {
   try {
-    const { email } = req.query;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório." });
-    }
+    const email = requireAuthenticatedEmail(req, res);
+    if (!email) return;
 
-    const user = await localDb.findUsuarioByEmail(email as string);
+    const user = await localDb.findUsuarioByEmail(email);
     if (!user) {
-      // Default hardcoded admin fallback
-      if ((email as string).toLowerCase() === "mateusvini.t10@gmail.com") {
-        return res.json({
-          success: true,
-          user: {
-            isLoggedIn: true,
-            nome: "Mateus Vinícius",
-            email: "mateusvini.t10@gmail.com",
-            avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-            isAdmin: true,
-            isDonor: false,
-            continueWatching: [],
-            descricao: ""
-          }
-        });
-      }
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
 
     res.json({
       success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
-      }
+      user: serializeUserState(user),
     });
   } catch (error) {
     console.error("Erro ao obter perfil do usuário:", error);
@@ -1898,8 +2582,10 @@ app.get("/api/usuario/me", async (req, res) => {
 // Atualizar progresso do "Continue Assistindo"
 app.post("/api/usuario/continue-watching", async (req, res) => {
   try {
-    const { email, reactId, obraId, progress } = req.body;
-    if (!email || !reactId || !obraId) {
+    const email = requireAuthenticatedEmail(req, res);
+    if (!email) return;
+    const { reactId, obraId, progress } = req.body;
+    if (!reactId || !obraId) {
       return res.status(400).json({ error: "Parâmetros inválidos." });
     }
 
@@ -1917,92 +2603,129 @@ app.post("/api/usuario/continue-watching", async (req, res) => {
 
     await localDb.updateUsuario(email, { continueWatching: updatedList });
 
-    res.json({ success: true, continueWatching: updatedList });
+    const react = localDb.getReacts().find((r) => r.id === reactId);
+    const obra = localDb.getObras().find((o) => o.id === obraId);
+    const creatorId = obra?.tipo === 'canal' ? obraId : resolveCreatorId(react?.canalNome || '', obraId);
+    let gamificationReward = handleGamificationEvent(email, 'watch_progress', {
+      reactId,
+      obraId,
+      progress,
+      durationMinutes: 1,
+      category: obra?.tipo,
+      franchiseId: obra?.tipo === 'canal' ? undefined : obraId,
+      creatorName: react?.canalNome,
+      creatorId: creatorId || undefined,
+    });
+    if (progress >= 95) {
+      const completeReward = handleGamificationEvent(email, 'watch_complete', {
+        reactId,
+        obraId,
+        category: obra?.tipo,
+        franchiseId: obra?.tipo === 'canal' ? undefined : obraId,
+        creatorName: react?.canalNome,
+        creatorId: creatorId || undefined,
+      });
+      gamificationReward = completeReward;
+    }
+
+    res.json({ success: true, continueWatching: updatedList, gamificationReward });
   } catch (error) {
     console.error("Erro ao salvar progresso de reprodução:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
   }
 });
 
+// Perfil público de usuário (cosméticos + redes para criadores verificados)
+app.get("/api/criadores", (_req, res) => {
+  try {
+    const creators = listVideoCreators();
+    res.json({ success: true, creators });
+  } catch (error) {
+    console.error("Erro ao listar criadores:", error);
+    res.status(500).json({ error: "Erro interno ao listar criadores." });
+  }
+});
+
+app.get("/api/usuario/public/:email", (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email || "");
+    if (!email) return res.status(400).json({ error: "E-mail é obrigatório." });
+    const profile = getPublicUserProfile(email);
+    if (!profile) return res.status(404).json({ error: "Perfil não encontrado." });
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error("Erro ao obter perfil público:", error);
+    res.status(500).json({ error: "Erro interno ao obter perfil público." });
+  }
+});
+
+// Perfil oficial do criador vinculado a um canal
+app.get("/api/canais/:canalId/perfil-oficial", (req, res) => {
+  try {
+    const canalId = decodeURIComponent(req.params.canalId || "");
+    const obra = localDb.getObras().find((o) => o.id === canalId && o.tipo === "canal");
+    if (!obra) return res.status(404).json({ error: "Canal não encontrado." });
+
+    const creatorEmail = findOfficialCreatorEmailForChannel(canalId, obra.officialCreatorEmail);
+    if (!creatorEmail) {
+      return res.json({ success: true, profile: null });
+    }
+
+    const profile = getPublicUserProfile(creatorEmail);
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error("Erro ao obter perfil oficial do canal:", error);
+    res.status(500).json({ error: "Erro interno ao obter perfil oficial do canal." });
+  }
+});
+
 // Atualizar perfil do usuário (Avatar, Descricao & Senha)
 app.post("/api/usuario/update", async (req, res) => {
   try {
-    const { email, avatar, descricao, password } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório para identificação." });
+    const authEmail = security.getAuthEmail(req);
+    if (!authEmail) {
+      return res.status(401).json({ error: "Autenticação necessária." });
     }
 
-    const updates: Partial<UserAccount> = {};
-    if (avatar !== undefined) updates.avatar = avatar;
-    if (descricao !== undefined) updates.descricao = descricao;
-    if (password) updates.password = password;
-
-    const user = await localDb.updateUsuario(email, updates);
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    res.json({
-      success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: user.isDonor || false,
-        continueWatching: user.continueWatching || [],
-        descricao: user.descricao || ""
+    const { socialLinks } = req.body || {};
+    if (socialLinks !== undefined) {
+      const gamification = localDb.getGamificationProfile(authEmail);
+      migrateProfile(gamification);
+      const canEditSocialLinks =
+        isVerifiedCreatorLoadout(gamification.loadout) ||
+        hasReward(gamification, VERIFIED_PROFILE_BADGE_ID);
+      if (!canEditSocialLinks) {
+        return res.status(403).json({ error: "Links sociais disponíveis apenas para criadores verificados." });
       }
-    });
+      const existingUser = await localDb.findUsuarioByEmail(authEmail);
+      if (!existingUser) return res.status(404).json({ error: "Usuário não encontrado." });
+      await localDb.updateUsuario(authEmail, {
+        socialLinks: {
+          ...sanitizeSocialLinks(existingUser.socialLinks),
+          ...sanitizeSocialLinks(socialLinks),
+        },
+      });
+    }
+
+    await handlePasswordUpdate(req, res, security);
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
     res.status(500).json({ error: "Erro interno ao atualizar perfil." });
   }
 });
 
-// Registrar doação e conceder tag de Doador VIP
+// Registrar doação — use POST /api/donations/request (fila de aprovação)
 app.post("/api/usuario/donate", async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "E-mail é obrigatório." });
-    }
-
-    const user = await localDb.updateUsuario(email, { isDonor: true });
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    // Criar uma notificação no sistema informando a doação de sucesso
-    localDb.addNotificacao({
-      titulo: "🎖️ Doação Confirmada!",
-      mensagem: `Olá ${user.username}, agradecemos imensamente o seu apoio financeiro! Você acaba de receber a Tag Exclusiva de Apoiador/Doador do Cine React! Seu nome agora brilha no chat.`
-    });
-
-    res.json({
-      success: true,
-      user: {
-        isLoggedIn: true,
-        nome: user.username,
-        email: user.email,
-        avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120",
-        isAdmin: user.isAdmin || false,
-        isDonor: true,
-        continueWatching: user.continueWatching || []
-      }
-    });
-  } catch (error) {
-    console.error("Erro ao processar doação:", error);
-    res.status(500).json({ error: "Erro interno ao processar doação." });
-  }
+  res.status(410).json({
+    error: "Use o fluxo de doação VIP em /doacoes. Após pagar, aguarde aprovação da equipe.",
+  });
 });
 
 // Lista todos os usuários cadastrados (apenas para exibição no painel admin)
-app.get("/api/usuarios", (req, res) => {
+app.get("/api/usuarios", async (req, res) => {
   try {
-    const list = localDb.getUsuarios();
-    // Return sanitized users
+    if (!(await requireAdmin(req, res))) return;
+    const list = localDb.getUsuarios().map(sanitizeUsuario);
     res.json(list);
   } catch (error) {
     console.error("Erro ao listar usuários:", error);
@@ -2010,8 +2733,155 @@ app.get("/api/usuarios", (req, res) => {
   }
 });
 
+// Toggle VIP (Apoiador) de usuário — apenas admin
+app.post("/api/usuarios/:email/vip", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const targetEmail = decodeURIComponent(req.params.email);
+    const { isDonor } = req.body;
+
+    if (isDonor) {
+      grantDonorVipBenefits(targetEmail, 'admin-vip');
+      const user = localDb.findUsuarioByEmailSync(targetEmail);
+      return res.json({ success: true, user: sanitizeUsuario(user) });
+    }
+
+    const updated = await localDb.updateUsuario(targetEmail, { isDonor: false });
+    if (!updated) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({ success: true, user: sanitizeUsuario(updated) });
+  } catch (error: any) {
+    console.error("Erro ao atualizar VIP:", error);
+    res.status(500).json({ error: "Erro ao atualizar status VIP." });
+  }
+});
+
+// Toggle admin de usuário — apenas super admin
+app.post("/api/usuarios/:email/admin", async (req, res) => {
+  try {
+    const adminEmail = await requireAdmin(req, res);
+    if (!adminEmail) return;
+    if (!isBootstrapSuperAdmin(adminEmail)) {
+      return res.status(403).json({ error: "Apenas o super administrador pode alterar privilégios de admin." });
+    }
+
+    const targetEmail = decodeURIComponent(req.params.email);
+    const { isAdmin } = req.body;
+    const updated = await localDb.updateUsuario(targetEmail, { isAdmin: !!isAdmin });
+    if (!updated) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json({ success: true, user: sanitizeUsuario(updated) });
+  } catch (error: any) {
+    res.status(500).json({ error: "Erro ao atualizar privilégios de admin." });
+  }
+});
+
+// Notificações administrativas (solicitações de criadores, etc.)
+app.get("/api/admin/notificacoes", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const tipo = req.query.tipo as string;
+    let list = localDb.getAllNotificacoes();
+    if (tipo === "solicitacoes") {
+      list = list.filter(n => n.titulo.toLowerCase().includes("solicitação"));
+    }
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar notificações administrativas." });
+  }
+});
+
+app.delete("/api/notificacoes/:id", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const deleted = localDb.deleteNotificacao(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Notificação não encontrada." });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao remover notificação." });
+  }
+});
+
+// Descoberta inteligente de obras com Gemini + reacts do YouTube
+app.post("/api/admin/discover", async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return;
+    const { query } = req.body;
+    if (!query?.trim()) {
+      return res.status(400).json({ error: "Informe o nome da obra para descobrir." });
+    }
+
+    const normalizedQuery = query.trim();
+    const existing = localDb.getObras().find(o =>
+      o.id === normalizedQuery.toLowerCase().replace(/[^a-z0-9]+/g, "-") ||
+      o.titulo.toLowerCase() === normalizedQuery.toLowerCase()
+    );
+
+    if (existing) {
+      const reactsAdded = await discoverReactsFromYouTube(existing.titulo, existing.id);
+      return res.json({
+        success: true,
+        mode: "existing",
+        obra: existing,
+        reactsAdded,
+        message: reactsAdded > 0
+          ? `Obra já existia. ${reactsAdded} react(s) adicionado(s) do YouTube.`
+          : "Obra já cadastrada no catálogo.",
+      });
+    }
+
+    let obra;
+    let mode = "fallback";
+
+    if (ai) {
+      try {
+        obra = await discoverObraWithGemini(normalizedQuery);
+        mode = "gemini";
+      } catch (geminiErr) {
+        console.error("[Discover] Erro no Gemini:", geminiErr);
+      }
+    }
+
+    if (!obra) {
+      const slug = normalizedQuery.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      obra = localDb.saveObra({
+        id: slug,
+        titulo: normalizedQuery,
+        tipo: "filme",
+        sinopse: `${normalizedQuery} catalogado no CineReact.`,
+        ano: new Date().getFullYear(),
+        generos: ["Entretenimento"],
+        banner: "https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=1600",
+        poster: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=600",
+        trailerUrl: "https://www.youtube.com/watch?v=VyHV0BRZKoI",
+        destacado: false,
+      });
+      mode = "manual";
+    }
+
+    const reactsAdded = await discoverReactsFromYouTube(obra.titulo, obra.id);
+
+    res.json({
+      success: true,
+      mode,
+      obra,
+      reactsAdded,
+      message: `Obra "${obra.titulo}" cadastrada com sucesso${reactsAdded > 0 ? ` e ${reactsAdded} react(s) encontrado(s) no YouTube` : ""}.`,
+    });
+  } catch (error: any) {
+    console.error("Erro na descoberta inteligente:", error);
+    res.status(500).json({ error: error.message || "Erro ao descobrir conteúdo." });
+  }
+});
+
 // ==========================================
-// INTELICENT SEARCH W// This endpoint takes a search query and uses Gemini AI to extract real info, and automatically populates real reacts from YouTube.
+// INTELICENT SEARCH — busca local no catálogo
 app.get("/api/search", (req, res) => {
   const query = req.query.q as string;
   if (!query) {
@@ -2034,52 +2904,188 @@ app.get("/api/search", (req, res) => {
 });
 
 // ==========================================
+// GAMIFICATION
+// ==========================================
+registerGamificationRoutes(app, security);
+registerSecurityRoutes(app, security);
+registerDonationRoutes(app, requireAdmin, security);
+registerCreatorVerificationRoutes(app, requireAdmin, resolveYouTubeChannel, security);
+registerFinanceRoutes(app, requireAdmin);
+registerSubscriptionRoutes(app, requireAdmin, security);
+registerCreatorClipRoutes(app, security);
+registerAdminPanelRoutes(app, requireAdmin);
+registerCineClipsRoutes(app, requireAdmin, security);
+registerMinutagemRoutes(app, requireAdmin, security);
+
+app.get("/api/user/account-status", (req, res) => {
+  const sessionEmail = requireSessionEmail(req, res, security, req.query.email as string);
+  if (!sessionEmail) return;
+  autoLiftExpiredSuspensions();
+  const user = localDb.findUsuarioByEmailSync(sessionEmail);
+  const restriction = getAccountRestriction(user);
+  const isStaff = !!(user?.isAdmin || user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'curator');
+  res.json({
+    ok: !restriction.blocked,
+    code: restriction.code,
+    message: restriction.message,
+    isBanned: !!user?.isBanned,
+    isSuspended: !!user?.isSuspended,
+    suspendedUntil: user?.suspendedUntil,
+    isAdmin: isStaff,
+    role: user?.role || (user?.isAdmin ? "admin" : "user"),
+  });
+});
+
+// ==========================================
 // VITE MIDDLEWARE & STATIC ASSET SERVING
 // ==========================================
 
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
+async function ensureBootstrapAdmin() {
+  const email = process.env.BOOTSTRAP_ADMIN_EMAIL?.toLowerCase().trim();
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  if (!email || !password) return;
+  const existing = await localDb.findUsuarioByEmail(email);
+  if (existing) return;
+  const { hashPassword } = await import("./src/security/password.ts");
+  await localDb.addUsuario({
+    username: "Administrador",
+    email,
+    password: await hashPassword(password),
+    isAdmin: true,
+    role: "admin",
+    isDonor: false,
+  });
+  console.log("[Security] Conta administrativa inicial criada via variáveis de ambiente.");
+}
+
+async function installFrontendMiddleware(): Promise<void> {
+  const distPath = path.join(process.cwd(), 'dist');
+  const distIndex = path.join(distPath, 'index.html');
+  const hasBuiltFrontend = fs.existsSync(distIndex);
+
+  const installStaticFrontend = () => {
+    app.use(express.static(distPath, {
+      setHeaders(res, filePath) {
+        if (filePath.endsWith('index.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    }));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/uploads/')) {
+        return next();
+      }
+      if (req.path.includes('.')) {
+        return res.status(404).send('Not found');
+      }
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.sendFile(distIndex);
+    });
+  };
+
+  if (hasBuiltFrontend || process.env.NODE_ENV === 'production') {
+    if (!hasBuiltFrontend) {
+      console.error('[BOOT] dist/index.html ausente — frontend estático indisponível');
+    } else {
+      console.log('[BOOT] Servindo frontend estático de', distPath);
+    }
+    installStaticFrontend();
+    return;
+  }
+
+  try {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    console.log('[BOOT] Vite middleware ativo (modo desenvolvimento)');
+  } catch (err: any) {
+    console.warn('[BOOT] Vite indisponível, usando dist/ se existir:', err?.message || err);
+    if (hasBuiltFrontend) {
+      installStaticFrontend();
+      return;
+    }
+    throw err;
+  }
+}
+
+async function startServer() {
+  await installFrontendMiddleware();
+
+  ensureDemoCreatorProfile();
+
+  const onRailway = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
+  const portsToTry = onRailway
+    ? [...new Set([PORT, 3000, 8080])]
+    : [PORT];
+
+  for (const port of portsToTry) {
+    const server = app.listen(port, BIND_HOST, () => {
+      console.log(`[BOOT] Cine React em http://${BIND_HOST}:${port} (cwd=${process.cwd()})`);
+      if (port === PORT) {
+        console.log(`[CineClips] ${localDb.getCineClips().length} clips carregados no cache`);
+      }
+    });
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (port === PORT) {
+        console.error('[BOOT] Falha ao abrir porta principal:', err);
+        process.exit(1);
+      }
+      console.warn(`[BOOT] Porta auxiliar ${port} indisponível:`, err.message);
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Cine React executando em http://0.0.0.0:${PORT}`);
-    
-    // Inicialização da sincronização com Supabase se ativo
-    if (localDb.isSupabaseActive()) {
-      console.log("[Supabase] Detectado e ativo! Sincronizando dados...");
-      localDb.syncFromSupabase()
-        .then(success => {
-          if (success) {
-            console.log("[Supabase] Sincronização inicial na inicialização concluída!");
-          } else {
-            console.warn("[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.");
-          }
-        })
-        .catch(err => {
-          console.error("[Supabase] Erro ao sincronizar dados na inicialização:", err);
-        });
+  if (onRailway) {
+    console.log(`[BOOT] Railway: escutando em ${portsToTry.join(', ')} (Target Port pode ser 3000 ou 8080)`);
+  }
+
+  ensureBootstrapAdmin().catch((err) => {
+    console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);
+  });
+
+  try {
+    const count = localDb.applyMinutagemCatalog();
+    console.log(`[Minutagem] Catálogo oficial aplicado (${count} marcadores).`);
+  } catch (err: any) {
+    console.warn('[Minutagem] Falha ao aplicar catálogo:', err?.message || err);
+  }
+
+  syncChannelAvatars().catch(err => {
+    console.warn('Aviso ao sincronizar avatares dos canais:', err?.message || err);
+  });
+
+  void (async () => {
+    try {
+      await localDb.ensureCineClipsRestored();
+      if (localDb.isSupabaseActive()) {
+        console.log('[Supabase] Detectado e ativo! Sincronizando dados...');
+        const success = await localDb.syncFromSupabase();
+        ensureDemoCreatorProfile();
+        if (success) {
+          console.log('[Supabase] Sincronização inicial na inicialização concluída!');
+        } else {
+          console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Supabase] Erro ou timeout ao sincronizar dados na inicialização:', err?.message || err);
     }
 
-    // Sincroniza fotos de perfil reais dos canais
-    syncChannelAvatars().catch(err => {
-      console.error("Erro ao sincronizar avatares dos canais:", err);
-    });
-    // Pré-carrega reacts do YouTube se necessário
     prefillDefaultReacts().catch(err => {
-      console.error("Erro ao executar pré-carregamento inicial:", err);
+      console.warn('Aviso ao executar pré-carregamento inicial:', err?.message || err);
     });
-  });
+  })();
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("Falha fatal ao iniciar o servidor:", err);
+  process.exit(1);
+});

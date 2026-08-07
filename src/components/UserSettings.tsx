@@ -1,384 +1,489 @@
-import React, { useState, useEffect } from 'react';
-import { User, Lock, Shield, Sparkles, Check, AlertCircle, Heart, Upload } from 'lucide-react';
-import { UserState } from '../types.ts';
-import { motion } from 'motion/react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Lock, Check, AlertCircle, Heart, Loader2, Camera } from 'lucide-react';
+import { UserState, CreatorSocialLinks } from '../types.ts';
+import { getBlurEffectsEnabled, setBlurEffectsEnabled as persistBlurEffects } from '../utils/visualPreferences.ts';
+import { SOCIAL_PLATFORMS } from '../utils/socialLinks.ts';
+import DonorBadge from './profile/DonorBadge.tsx';
+import CreatorClipAccessPanel from './creator/CreatorClipAccessPanel.tsx';
+import ProfileAvatar from './profile/ProfileAvatar.tsx';
+import type { ProfileLoadout } from '../types/gamification.ts';
+import { apiFetch } from '../utils/apiClient.ts';
+
+const MIN_PASSWORD_LENGTH = 8;
 
 interface UserSettingsProps {
   user: UserState;
   onUpdateUser: (newUser: UserState) => void;
   onNavigateToDonations: () => void;
+  isVerifiedCreator?: boolean;
+  userLoadout?: ProfileLoadout | null;
 }
 
-export default function UserSettings({ user, onUpdateUser, onNavigateToDonations }: UserSettingsProps) {
-  const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
-  const [descricao, setDescricao] = useState(user.descricao || '');
+function SettingsDivider() {
+  return <div className="h-px bg-gradient-to-r from-cine-accent/25 via-neutral-800/80 to-transparent" aria-hidden />;
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
+      {children}
+    </p>
+  );
+}
+
+function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="block text-[11px] uppercase tracking-[0.28em] text-zinc-500 font-semibold mb-2">
+      {children}
+    </label>
+  );
+}
+
+const inputClass =
+  'w-full bg-neutral-950/40 border border-neutral-800/70 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-colors focus:border-cine-accent/45 focus:ring-1 focus:ring-cine-accent/20';
+
+function StatusMessage({ type, children }: { type: 'error' | 'success'; children: React.ReactNode }) {
+  const Icon = type === 'error' ? AlertCircle : Check;
+  const color = type === 'error' ? 'text-red-400' : 'text-emerald-400';
+  return (
+    <p className={`text-sm ${color} flex items-center gap-2`}>
+      <Icon className="w-4 h-4 shrink-0" />
+      {children}
+    </p>
+  );
+}
+
+function ActionButton({
+  children,
+  loading,
+  disabled,
+  onClick,
+}: {
+  children: React.ReactNode;
+  loading?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled || loading}
+      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light text-neutral-950 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+    >
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : children}
+    </button>
+  );
+}
+
+async function patchUser(
+  payload: Record<string, unknown>
+): Promise<{ success: boolean; user?: UserState; error?: string }> {
+  const res = await apiFetch('/api/usuario/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    return { success: false, error: data.error || 'Não foi possível salvar.' };
+  }
+  return { success: true, user: data.user as UserState };
+}
+
+function UserSettings({
+  user,
+  onUpdateUser,
+  onNavigateToDonations,
+  isVerifiedCreator = false,
+  userLoadout,
+}: UserSettingsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarDraft, setAvatarDraft] = useState(user.avatar || '');
+  const [socialLinks, setSocialLinks] = useState<CreatorSocialLinks>({
+    instagram: user.socialLinks?.instagram || '',
+    youtube: user.socialLinks?.youtube || '',
+    x: user.socialLinks?.x || '',
+    tiktok: user.socialLinks?.tiktok || '',
+    discord: user.socialLinks?.discord || '',
+    twitch: user.socialLinks?.twitch || '',
+  });
   const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [blurEffectsEnabled, setBlurEffectsEnabled] = useState(() => getBlurEffectsEnabled());
+
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [socialMsg, setSocialMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   useEffect(() => {
-    setAvatarUrl(user.avatar || '');
-    setDescricao(user.descricao || '');
-  }, [user.avatar, user.descricao]);
-  
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [dragActive, setDragActive] = useState(false);
+    setAvatarDraft(user.avatar || '');
+    setSocialLinks({
+      instagram: user.socialLinks?.instagram || '',
+      youtube: user.socialLinks?.youtube || '',
+      x: user.socialLinks?.x || '',
+      tiktok: user.socialLinks?.tiktok || '',
+      discord: user.socialLinks?.discord || '',
+      twitch: user.socialLinks?.twitch || '',
+    });
+  }, [user.avatar, user.socialLinks]);
 
-  const processFile = (file: File) => {
-    // Limit to 2.5MB to ensure safe transmission and storage in JSON database
+  useEffect(() => {
+    const syncBlur = () => setBlurEffectsEnabled(getBlurEffectsEnabled());
+    window.addEventListener('cinereact:blur-effects-changed', syncBlur);
+    return () => window.removeEventListener('cinereact:blur-effects-changed', syncBlur);
+  }, []);
+
+  const avatarDirty = avatarDraft !== (user.avatar || '');
+  const socialDirty = useMemo(() => {
+    if (!isVerifiedCreator) return false;
+    return SOCIAL_PLATFORMS.some(({ key }) => (socialLinks[key] || '') !== (user.socialLinks?.[key] || ''));
+  }, [isVerifiedCreator, socialLinks, user.socialLinks]);
+
+  const processFile = useCallback((file: File) => {
+    setAvatarMsg(null);
     if (file.size > 2.5 * 1024 * 1024) {
-      setErrorMsg('A imagem deve ter no máximo 2.5MB.');
+      setAvatarMsg({ type: 'error', text: 'A imagem deve ter no máximo 2.5MB.' });
       return;
     }
-    
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('Por favor, selecione apenas arquivos de imagem.');
+      setAvatarMsg({ type: 'error', text: 'Selecione apenas arquivos de imagem.' });
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarUrl(reader.result as string);
-      setSuccessMsg('Imagem carregada com sucesso! Clique em "Salvar Alterações" para aplicar.');
-      setErrorMsg('');
+      setAvatarDraft(reader.result as string);
+      setAvatarMsg({ type: 'success', text: 'Foto pronta. Toque em salvar para aplicar.' });
     };
     reader.onerror = () => {
-      setErrorMsg('Erro ao ler o arquivo de imagem.');
+      setAvatarMsg({ type: 'error', text: 'Erro ao ler o arquivo.' });
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  };
+    if (file) processFile(file);
+    e.target.value = '';
+  }, [processFile]);
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+  const saveAvatar = useCallback(async () => {
+    if (!user.isLoggedIn || !avatarDirty) return;
+    setAvatarLoading(true);
+    setAvatarMsg(null);
+    try {
+      const result = await patchUser({ avatar: avatarDraft });
+      if (result.success && result.user) {
+        onUpdateUser(result.user);
+        setAvatarMsg({ type: 'success', text: 'Foto atualizada.' });
+      } else {
+        setAvatarMsg({ type: 'error', text: result.error || 'Erro ao salvar foto.' });
+      }
+    } catch {
+      setAvatarMsg({ type: 'error', text: 'Erro de conexão.' });
+    } finally {
+      setAvatarLoading(false);
     }
-  };
+  }, [avatarDirty, avatarDraft, onUpdateUser, user.email, user.isLoggedIn]);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const savePassword = useCallback(async () => {
     if (!user.isLoggedIn) return;
-    
-    setErrorMsg('');
-    setSuccessMsg('');
+    setPasswordMsg(null);
 
-    if (newPassword && newPassword !== confirmPassword) {
-      setErrorMsg('As senhas não coincidem!');
+    if (!currentPassword) {
+      setPasswordMsg({ type: 'error', text: 'Informe a senha atual.' });
+      return;
+    }
+    if (!newPassword) {
+      setPasswordMsg({ type: 'error', text: 'Informe a nova senha.' });
+      return;
+    }
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setPasswordMsg({ type: 'error', text: `Use pelo menos ${MIN_PASSWORD_LENGTH} caracteres.` });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'As senhas não coincidem.' });
       return;
     }
 
-    setLoading(true);
-
+    setPasswordLoading(true);
     try {
-      const res = await fetch('/api/usuario/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user.email,
-          avatar: avatarUrl,
-          descricao: descricao,
-          password: newPassword || undefined
-        })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        onUpdateUser(data.user);
-        setSuccessMsg('Perfil atualizado com sucesso!');
+      const result = await patchUser({ currentPassword, password: newPassword });
+      if (result.success) {
         setNewPassword('');
+        setCurrentPassword('');
         setConfirmPassword('');
+        setPasswordMsg({ type: 'success', text: 'Senha alterada com sucesso.' });
       } else {
-        setErrorMsg(data.error || 'Erro ao atualizar perfil.');
+        setPasswordMsg({ type: 'error', text: result.error || 'Erro ao alterar senha.' });
       }
-    } catch (err) {
-      setErrorMsg('Erro de conexão com o servidor.');
+    } catch {
+      setPasswordMsg({ type: 'error', text: 'Erro de conexão.' });
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
-  };
+  }, [confirmPassword, currentPassword, newPassword, user.isLoggedIn]);
+
+  const saveSocialLinks = useCallback(async () => {
+    if (!user.isLoggedIn || !isVerifiedCreator || !socialDirty) return;
+    setSocialLoading(true);
+    setSocialMsg(null);
+    try {
+      const result = await patchUser({ socialLinks });
+      if (result.success && result.user) {
+        onUpdateUser(result.user);
+        setSocialMsg({ type: 'success', text: 'Links atualizados.' });
+      } else {
+        setSocialMsg({ type: 'error', text: result.error || 'Erro ao salvar links.' });
+      }
+    } catch {
+      setSocialMsg({ type: 'error', text: 'Erro de conexão.' });
+    } finally {
+      setSocialLoading(false);
+    }
+  }, [isVerifiedCreator, onUpdateUser, socialDirty, socialLinks, user.email, user.isLoggedIn]);
 
   return (
-    <div className="pt-24 pb-20 px-4 md:px-8 max-w-4xl mx-auto min-h-screen text-zinc-300">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        {/* Header Section */}
-        <div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-wider flex items-center gap-3">
-            <Shield className="w-8 h-8 text-amber-400" />
-            Configurações de Conta
-          </h1>
-          <p className="text-zinc-500 text-xs mt-1">
-            Gerencie suas informações de acesso, envie sua foto de perfil diretamente e visualize seus benefícios VIP.
-          </p>
+    <div className="cine-container pt-24 pb-20 min-h-screen w-full text-zinc-300 max-w-2xl">
+      <header className="pt-2 pb-6 md:pb-8">
+        <SectionLabel>Sua conta</SectionLabel>
+        <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-white mt-1">
+          {user.isLoggedIn ? 'Configurações' : 'Preferências'}
+        </h1>
+        <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
+          {user.isLoggedIn
+            ? 'Gerencie foto, senha e preferências do site.'
+            : 'Ajuste a aparência do site. Entre na conta para mais opções.'}
+        </p>
+        <div className="mt-5">
+          <SettingsDivider />
         </div>
+      </header>
 
-        {/* Outer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          
-          {/* Left Panel: Profile Preview & Status */}
-          <div className="md:col-span-5 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6 flex flex-col items-center justify-between space-y-6 text-center">
-            
-            {/* Profile Avatar Live Preview */}
-            <div className="space-y-4">
-              <div className="relative group">
-                {/* Glowing Aura if Donor */}
-                {user.isDonor && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-300 blur-md opacity-75 animate-pulse" />
-                )}
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center mx-auto">
-                  {avatarUrl ? (
-                    <img 
-                      src={avatarUrl} 
-                      alt="Avatar Preview" 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        // Fallback on image error
-                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120";
-                      }}
-                    />
-                  ) : (
-                    <User className="w-12 h-12 text-zinc-600" />
-                  )}
-                </div>
-              </div>
-
-              {/* User Name with customization based on Donor Status */}
-              <div>
-                <h3 className={`text-lg font-black tracking-wide flex items-center justify-center gap-1.5 ${
-                  user.isDonor 
-                    ? "bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent font-black drop-shadow-[0_0_12px_rgba(245,158,11,0.3)] animate-pulse" 
-                    : "text-white"
-                }`}>
-                  {user.nome}
-                </h3>
-                <p className="text-zinc-500 text-[10px] font-mono">{user.email}</p>
-              </div>
-            </div>
-
-            {/* Badge / Donor Status Showcase */}
-            <div className="w-full pt-4 border-t border-zinc-800/60 space-y-3">
-              <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">Status da Conta</div>
-              
+      <div className="space-y-8 md:space-y-10">
+        {user.isLoggedIn && (
+          <>
+            <section className="space-y-3">
+              <SectionLabel>Conta</SectionLabel>
+              <p className="text-sm text-zinc-400 break-all">{user.email}</p>
+              <p className="text-xs text-zinc-600 leading-relaxed">
+                A biografia é editada diretamente na aba Perfil.
+              </p>
               {user.isDonor ? (
-                <div className="bg-gradient-to-r from-amber-950/40 via-yellow-950/30 to-amber-950/40 border border-amber-500/35 rounded-xl p-4 text-center space-y-2 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/10 blur-xl rounded-full" />
-                  
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-extrabold uppercase tracking-widest">
-                    <Sparkles className="w-3 h-3 text-amber-400 animate-spin-slow" />
-                    APOIADOR VIP
-                  </div>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
-                    Seu nome brilha com destaque! Você tem a tag exclusiva de doador além do seu nome estilizado em tons de amarelo e dourado. Obrigado por apoiar o CineReact!
-                  </p>
-                </div>
+                <DonorBadge size="sm" />
               ) : (
-                <div className="bg-zinc-900/10 border border-zinc-800 rounded-xl p-4 text-center space-y-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
-                    Membro Comum
-                  </div>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed">
-                    Você ainda não possui as decorações especiais. Apoie nosso projeto para obter benefícios visuais únicos!
-                  </p>
-                  <button
-                    onClick={onNavigateToDonations}
-                    className="w-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 text-[11px] font-bold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Heart className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" /> Seja um Apoiador
-                  </button>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Right Panel: Settings Form */}
-          <div className="md:col-span-7 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6">
-            <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-              <User className="text-amber-400 w-4 h-4" /> Editar Informações
-            </h2>
-
-            {errorMsg && (
-              <div className="bg-red-950/30 border border-red-500/35 text-red-400 p-3 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2 mb-5">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {errorMsg}
-              </div>
-            )}
-
-            {successMsg && (
-              <div className="bg-green-950/30 border border-green-500/35 text-green-400 p-3 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2 mb-5">
-                <Check className="w-4 h-4 flex-shrink-0" />
-                {successMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleUpdateProfile} className="space-y-5">
-              
-              {/* Field: Photo/Avatar Local Upload */}
-              <div className="space-y-2">
-                <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                  Foto de Perfil (Enviar Arquivo)
-                </label>
-                
-                <div 
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all relative ${
-                    dragActive 
-                      ? 'border-amber-500 bg-amber-500/5' 
-                      : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40'
-                  }`}
+                <button
+                  type="button"
+                  onClick={onNavigateToDonations}
+                  className="inline-flex items-center gap-1.5 text-sm text-cine-accent-light hover:text-cine-accent transition-colors cursor-pointer"
                 >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  
-                  <div className="flex flex-col items-center justify-center space-y-2.5">
-                    <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 text-zinc-400">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-zinc-300">
-                        Arraste sua foto aqui ou <span className="text-amber-400 hover:underline">escolha um arquivo</span>
-                      </p>
-                      <p className="text-[10px] text-zinc-500">
-                        Formatos suportados: PNG, JPG, JPEG ou WEBP (Max. 2.5MB)
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  <Heart className="w-3.5 h-3.5" />
+                  Seja um apoiador
+                </button>
+              )}
+            </section>
 
-                {avatarUrl && (
-                  <div className="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-lg border border-zinc-855">
-                    <img 
-                      src={avatarUrl} 
-                      alt="Thumbnail" 
-                      className="w-10 h-10 rounded-full object-cover border border-zinc-800"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120";
-                      }}
-                    />
-                    <div className="flex-grow min-w-0">
-                      <p className="text-[10px] font-bold text-zinc-300 truncate">Foto selecionada</p>
-                      <p className="text-[8px] text-zinc-500 font-mono">Pronta para salvar</p>
-                    </div>
+            <SettingsDivider />
+
+            <section className="space-y-4">
+              <SectionLabel>Foto de perfil</SectionLabel>
+              <div className="flex items-center gap-4">
+                <ProfileAvatar
+                  photoUrl={avatarDraft || user.avatar}
+                  alt={user.nome}
+                  size="lg"
+                  loadout={userLoadout}
+                  isDonor={!!user.isDonor}
+                  lite
+                  className="shrink-0"
+                />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <p className="text-sm text-zinc-500 leading-relaxed">
+                    PNG, JPG ou WEBP · máx. 2.5MB
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setAvatarUrl('')}
-                      className="text-[10px] font-bold text-red-400 hover:text-red-300 hover:underline px-2 py-1"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-800/80 text-sm text-zinc-300 hover:text-white hover:border-neutral-600 transition-colors cursor-pointer"
                     >
-                      Remover
+                      <Camera className="w-4 h-4" />
+                      Escolher foto
                     </button>
+                    {avatarDirty && (
+                      <ActionButton loading={avatarLoading} onClick={() => void saveAvatar()}>
+                        Salvar foto
+                      </ActionButton>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Field: Biografia / Descrição do Perfil */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                  Biografia / Descrição do Perfil
-                </label>
-                <textarea
-                  placeholder="Escreva uma breve biografia sobre você para exibir no seu perfil (máx. 180 caracteres)..."
-                  maxLength={180}
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  rows={3}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg p-3 text-xs text-white outline-none transition-colors resize-none leading-relaxed"
-                />
-                <div className="flex justify-end text-[9px] text-zinc-600 font-mono">
-                  {descricao.length}/180 caracteres
                 </div>
               </div>
+              {avatarMsg && <StatusMessage type={avatarMsg.type}>{avatarMsg.text}</StatusMessage>}
+            </section>
 
-              {/* Password Divider */}
-              <div className="relative py-2 flex items-center">
-                <div className="flex-grow border-t border-zinc-800/80"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-zinc-500 uppercase font-mono tracking-widest">Segurança</span>
-                <div className="flex-grow border-t border-zinc-800/80"></div>
-              </div>
+            <SettingsDivider />
 
-              {/* Field: New Password */}
-              <div>
-                <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                  Nova Senha (Deixe em branco para manter a atual)
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <input
-                    type="password"
-                    placeholder="Sua nova senha secreta"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
-                  />
+            <section className="space-y-4">
+              <SectionLabel>Segurança</SectionLabel>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Altere sua senha de acesso. Não compartilhe com ninguém.
+              </p>
+              <div className="space-y-3 max-w-md">
+                <div>
+                  <FieldLabel htmlFor="current-password">Senha atual</FieldLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                      id="current-password"
+                      type="password"
+                      autoComplete="current-password"
+                      placeholder="Sua senha atual"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel htmlFor="new-password">Nova senha</FieldLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                      id="new-password"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel htmlFor="confirm-password">Confirmar senha</FieldLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Repita a nova senha"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
                 </div>
               </div>
-
-              {/* Field: Confirm Password */}
-              <div>
-                <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1.5">
-                  Confirmar Nova Senha
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <input
-                    type="password"
-                    placeholder="Repita a nova senha"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-500 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-black font-black py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 mt-2 cursor-pointer shadow-lg shadow-amber-500/20"
+              <ActionButton
+                loading={passwordLoading}
+                disabled={!newPassword && !confirmPassword}
+                onClick={() => void savePassword()}
               >
-                {loading ? (
-                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                ) : (
-                  <>Salvar Alterações</>
-                )}
-              </button>
+                Alterar senha
+              </ActionButton>
+              {passwordMsg && <StatusMessage type={passwordMsg.type}>{passwordMsg.text}</StatusMessage>}
+            </section>
 
-            </form>
+            {isVerifiedCreator && (
+              <>
+                <SettingsDivider />
+                <section className="space-y-4">
+                  <div>
+                    <SectionLabel>Redes sociais</SectionLabel>
+                    <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                      Exibidas no seu perfil público de criador.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+                      <div key={key}>
+                        <FieldLabel htmlFor={`social-${key}`}>{label}</FieldLabel>
+                        <input
+                          id={`social-${key}`}
+                          type="text"
+                          autoComplete="off"
+                          value={socialLinks[key] || ''}
+                          onChange={(e) => setSocialLinks((prev) => ({ ...prev, [key]: e.target.value }))}
+                          placeholder={placeholder}
+                          className={inputClass}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <ActionButton
+                    loading={socialLoading}
+                    disabled={!socialDirty}
+                    onClick={() => void saveSocialLinks()}
+                  >
+                    Salvar links
+                  </ActionButton>
+                  {socialMsg && <StatusMessage type={socialMsg.type}>{socialMsg.text}</StatusMessage>}
+                </section>
+
+                <SettingsDivider />
+                <section className="space-y-4">
+                  <div>
+                    <SectionLabel>Conteúdo exclusivo</SectionLabel>
+                    <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                      Defina quais vídeos no CineClips são públicos ou exclusivos para assinantes.
+                    </p>
+                  </div>
+                  <CreatorClipAccessPanel email={user.email} />
+                </section>
+              </>
+            )}
+
+            <SettingsDivider />
+          </>
+        )}
+
+        <section className="space-y-4">
+          <SectionLabel>Experiência do site</SectionLabel>
+          <div className="flex items-start justify-between gap-6 py-1">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-zinc-200">Efeito blur (vidro fosco)</p>
+              <p className="text-sm text-zinc-500 mt-1 leading-relaxed">
+                Desligado por padrão para rolagem mais rápida no celular.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={blurEffectsEnabled}
+              onClick={() => {
+                const next = !blurEffectsEnabled;
+                setBlurEffectsEnabled(next);
+                persistBlurEffects(next);
+              }}
+              className={`relative shrink-0 w-11 h-6 rounded-full transition-colors cursor-pointer ${
+                blurEffectsEnabled ? 'bg-cine-accent' : 'bg-neutral-700'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                  blurEffectsEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
-
-        </div>
-      </motion.div>
+        </section>
+      </div>
     </div>
   );
 }
+
+export default memo(UserSettings);

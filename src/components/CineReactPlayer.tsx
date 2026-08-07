@@ -9,7 +9,6 @@ import {
   RotateCcw, 
   RotateCw, 
   Tv, 
-  Sparkles, 
   Settings, 
   Film, 
   Flame, 
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ReactVideo, Obra } from '../types.ts';
 import { motion, AnimatePresence } from 'motion/react';
+import CineReactLogo from './CineReactLogo.tsx';
 
 interface CineReactPlayerProps {
   video: ReactVideo;
@@ -306,7 +306,7 @@ export default function CineReactPlayer({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      className={`relative w-full bg-black rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.9)] border border-amber-500/25 group/player select-none transition-all duration-300 ${
+      className={`relative w-full bg-black rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.9)] border border-cine-accent/25 group/player select-none transition-all duration-300 ${
         isFullscreen ? 'rounded-none border-none h-screen w-screen' : 'aspect-video'
       }`}
     >
@@ -317,7 +317,7 @@ export default function CineReactPlayer({
         <div className={`relative w-full h-full flex transition-all duration-500 ${dualView ? 'flex-col md:flex-row' : ''}`}>
           
           {/* MAIN REACT VIDEO IFRAME (SCALED & CROPPED TO COMPLETELY REMOVE NATIVE YT BRANDING/OVERLAYS) */}
-          <div className={`relative h-full overflow-hidden transition-all duration-500 ${dualView ? 'w-full md:w-2/3 border-r border-amber-500/30' : 'w-full'}`}>
+          <div className={`relative h-full overflow-hidden transition-all duration-500 ${dualView ? 'w-full md:w-2/3 border-r border-cine-accent/30' : 'w-full'}`}>
             <iframe
               ref={iframeRef}
               src={`https://www.youtube.com/embed/${video.id}?enablejsapi=1&autoplay=1&controls=${showNativePlayer ? '1' : '0'}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0&disablekb=1&autohide=1&playsinline=1&origin=${encodeURIComponent(window.location.origin)}`}
@@ -343,11 +343,11 @@ export default function CineReactPlayer({
 
           {/* DUAL VIEW PANEL (OBRA CONTEXT & SYNCHRONIZED METADATA) */}
           {dualView && obra && (
-            <div className="w-full md:w-1/3 h-full bg-zinc-950/95 border-t md:border-t-0 md:border-l border-amber-500/30 p-4 sm:p-6 overflow-y-auto flex flex-col justify-between gap-4 backdrop-blur-2xl z-10">
+            <div className="w-full md:w-1/3 h-full bg-neutral-950/95 border-t md:border-t-0 md:border-l border-cine-accent/30 p-4 sm:p-6 overflow-y-auto flex flex-col justify-between gap-4 backdrop-blur-2xl z-10">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 shadow-md">
-                    <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cine-accent/20 text-cine-accent-light border border-cine-accent/30 flex items-center gap-1.5 shadow-md">
+                    <Film className="w-3 h-3 text-cine-accent-light animate-pulse" />
                     Obra Sincronizada
                   </span>
                   <button 
@@ -358,7 +358,7 @@ export default function CineReactPlayer({
                   </button>
                 </div>
 
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-800 shadow-xl group">
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-xl group">
                   <img src={obra.banner || obra.poster} alt={obra.titulo} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-3">
                     <div>
@@ -368,16 +368,16 @@ export default function CineReactPlayer({
                   </div>
                 </div>
 
-                <p className="text-xs text-zinc-300 leading-relaxed line-clamp-4 font-sans bg-zinc-900/60 p-3 rounded-xl border border-zinc-800/80 shadow-inner">
+                <p className="text-xs text-zinc-300 leading-relaxed line-clamp-4 font-sans bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80 shadow-inner">
                   {obra.sinopse || obra.synopsis || 'Sem sinopse disponível.'}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+              <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400">
                 <span className="flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5 text-amber-500" /> Modo Reação CineReact
+                  <Flame className="w-3.5 h-3.5 text-cine-accent" /> Modo Reação CineReact
                 </span>
-                <span className="text-amber-400 font-bold">100% Sincronizado</span>
+                <span className="text-cine-accent-light font-bold">100% Sincronizado</span>
               </div>
             </div>
           )}
@@ -391,7 +391,7 @@ export default function CineReactPlayer({
               animate={{ scale: 1.15, opacity: 1 }}
               exit={{ scale: 1.6, opacity: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-amber-500/90 backdrop-blur-md flex flex-col items-center justify-center text-black shadow-[0_0_40px_rgba(245,158,11,0.9)] border border-amber-300/40"
+              className="absolute pointer-events-none z-30 w-20 h-20 rounded-full bg-cine-accent/90 backdrop-blur-md flex flex-col items-center justify-center text-white shadow-[0_0_40px_rgba(255,255,255,0.9)] border border-cine-cream/40"
             >
               {centerAnimation === 'play' && (
                 <Play className="w-10 h-10 fill-black ml-1" />
@@ -422,14 +422,8 @@ export default function CineReactPlayer({
           }`}>
             {/* LEFT: CINE REACT BRAND BADGE & TITLE */}
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="flex items-center gap-2 bg-black/80 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-amber-500/40 shadow-xl shrink-0">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                </span>
-                <span className="text-xs font-black tracking-widest uppercase bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 bg-clip-text text-transparent font-mono">
-                  CINEREACT PLAYER
-                </span>
+              <div className="bg-black/80 backdrop-blur-xl px-2.5 py-1 rounded-xl border border-cine-accent/40 shadow-xl shrink-0">
+                <CineReactLogo size="xs" className="pointer-events-none" />
               </div>
 
               <div className="truncate">
@@ -439,7 +433,7 @@ export default function CineReactPlayer({
                 <p className="text-[11px] text-zinc-300 font-medium truncate flex items-center gap-2">
                   <span className="text-zinc-200 font-semibold">{video.canalNome}</span>
                   {obra && (
-                    <span className="text-amber-400 font-bold flex items-center gap-1">
+                    <span className="text-cine-accent-light font-bold flex items-center gap-1">
                       • Reagindo a: {obra.titulo}
                     </span>
                   )}
@@ -454,8 +448,8 @@ export default function CineReactPlayer({
                   onClick={() => setDualView(!dualView)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-xl cursor-pointer ${
                     dualView 
-                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black border-amber-300 shadow-amber-500/40 font-black' 
-                      : 'bg-black/70 hover:bg-zinc-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
+                      ? 'bg-cine-accent text-white border-cine-cream shadow-cine-accent/40 font-black' 
+                      : 'bg-black/70 hover:bg-neutral-900 text-zinc-200 border-zinc-700/80 backdrop-blur-md'
                   }`}
                   title="Modo Duplo (Vídeo + Obra)"
                 >
@@ -466,7 +460,7 @@ export default function CineReactPlayer({
 
               <button
                 onClick={() => setShowNativePlayer(!showNativePlayer)}
-                className="px-2.5 py-1.5 rounded-xl text-[10px] font-mono font-bold bg-black/70 hover:bg-black text-zinc-400 hover:text-white border border-zinc-800 transition-colors backdrop-blur-md cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl text-[10px] font-mono font-bold bg-black/70 hover:bg-black text-zinc-400 hover:text-white border border-neutral-800 transition-colors backdrop-blur-md cursor-pointer"
                 title="Alternar entre Player CineReact e Player Padrão"
               >
                 {showNativePlayer ? 'Player CineReact' : 'Player YouTube'}
@@ -487,7 +481,7 @@ export default function CineReactPlayer({
               {/* HOVER TIMESTAMP TOOLTIP */}
               {hoverTime !== null && (
                 <div 
-                  className="absolute -top-8 transform -translate-x-1/2 bg-zinc-950/95 text-amber-300 border border-amber-500/50 text-[11px] font-mono px-2.5 py-1 rounded-md shadow-2xl pointer-events-none backdrop-blur-md font-bold"
+                  className="absolute -top-8 transform -translate-x-1/2 bg-neutral-950/95 text-cine-cream border border-cine-accent/50 text-[11px] font-mono px-2.5 py-1 rounded-md shadow-2xl pointer-events-none backdrop-blur-md font-bold"
                   style={{ left: `${hoverX}px` }}
                 >
                   {formatTime(hoverTime)}
@@ -498,14 +492,14 @@ export default function CineReactPlayer({
               <div 
                 onMouseMove={handleTimelineMouseMove}
                 onMouseLeave={handleTimelineMouseLeave}
-                className="relative h-2 group-hover/timeline:h-3 bg-zinc-800/90 rounded-full overflow-hidden transition-all duration-200 shadow-inner border border-zinc-700/40"
+                className="relative h-2 group-hover/timeline:h-3 bg-neutral-800/90 rounded-full overflow-hidden transition-all duration-200 shadow-inner border border-zinc-700/40"
               >
                 {/* PROGRESS TRACK FILL WITH GLOW */}
                 <div 
-                  className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.9)] relative"
+                  className="h-full bg-cine-accent rounded-full relative"
                   style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
                 >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(245,158,11,1)] scale-0 group-hover/timeline:scale-100 transition-transform" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,1)] scale-0 group-hover/timeline:scale-100 transition-transform" />
                 </div>
               </div>
 
@@ -529,7 +523,7 @@ export default function CineReactPlayer({
                 {/* Play / Pause Toggle */}
                 <button
                   onClick={togglePlay}
-                  className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black shadow-lg shadow-amber-500/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-cine-accent-dark text-white shadow-lg shadow-cine-accent/30 transition-all hover:scale-105 cursor-pointer active:scale-95"
                   title={isPlaying ? 'Pausar (Espaço/K)' : 'Reproduzir (Espaço/K)'}
                 >
                   {isPlaying ? (
@@ -567,7 +561,7 @@ export default function CineReactPlayer({
                     {isMuted || volume === 0 ? (
                       <VolumeX className="w-5 h-5 text-red-400" />
                     ) : (
-                      <Volume2 className="w-5 h-5 text-amber-400" />
+                      <Volume2 className="w-5 h-5 text-cine-accent-light" />
                     )}
                   </button>
 
@@ -577,7 +571,7 @@ export default function CineReactPlayer({
                     max={100}
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="w-16 sm:w-20 h-1.5 bg-zinc-700 accent-amber-400 rounded-lg cursor-pointer hidden group-hover/volume:block sm:block transition-all"
+                    className="w-16 sm:w-20 h-1.5 bg-zinc-700 accent-cine-accent-light rounded-lg cursor-pointer hidden group-hover/volume:block sm:block transition-all"
                   />
                 </div>
 
@@ -596,22 +590,22 @@ export default function CineReactPlayer({
                 <div className="relative">
                   <button
                     onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                    className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-xs font-mono font-bold text-amber-400 border border-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1 shadow-md"
+                    className="px-2.5 py-1.5 rounded-xl bg-neutral-900/90 hover:bg-neutral-800 text-xs font-mono font-bold text-cine-accent-light border border-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1 shadow-md"
                     title="Velocidade de reprodução"
                   >
                     {playbackSpeed}x
                   </button>
 
                   {showSpeedMenu && (
-                    <div className="absolute bottom-11 right-0 bg-zinc-950/95 border border-amber-500/40 backdrop-blur-2xl rounded-xl p-1.5 shadow-2xl flex flex-col gap-1 z-30 min-w-[120px]">
+                    <div className="absolute bottom-11 right-0 bg-neutral-950/95 border border-cine-accent/40 backdrop-blur-2xl rounded-xl p-1.5 shadow-2xl flex flex-col gap-1 z-30 min-w-[120px]">
                       {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
                         <button
                           key={s}
                           onClick={() => changeSpeed(s)}
                           className={`text-xs font-mono px-3 py-1.5 rounded-lg text-left transition-colors cursor-pointer flex items-center justify-between ${
                             playbackSpeed === s
-                              ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold'
-                              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                              ? 'bg-cine-accent text-white font-bold'
+                              : 'text-zinc-300 hover:bg-neutral-800 hover:text-white'
                           }`}
                         >
                           <span>{s === 1.0 ? '1.0x (Normal)' : `${s}x`}</span>
@@ -628,7 +622,7 @@ export default function CineReactPlayer({
                     onClick={onToggleTheaterMode}
                     className={`p-2 rounded-xl transition-colors cursor-pointer ${
                       isTheaterMode 
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-lg' 
+                        ? 'bg-cine-accent/20 text-cine-accent-light border border-cine-accent/40 shadow-lg' 
                         : 'text-zinc-300 hover:text-white hover:bg-white/10'
                     }`}
                     title={isTheaterMode ? 'Sair do Modo Teatro' : 'Modo Teatro'}

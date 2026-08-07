@@ -11,6 +11,8 @@ export interface Obra {
   trailerUrl: string;
   destacado?: boolean;
   channelId?: string;
+  /** E-mail da conta verificada do criador oficial na plataforma */
+  officialCreatorEmail?: string;
 }
 
 export interface ReactVideo {
@@ -26,6 +28,26 @@ export interface ReactVideo {
   episodioNum?: number;
   isRecomendado?: boolean;
   likes?: number;
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'hidden';
+  isPinnedHome?: boolean;
+  scheduledAt?: string;
+  isLaunch?: boolean;
+}
+
+import type { PublicProfileDisplay } from './types/gamification.ts';
+import type { CreatorSocialLinks } from './utils/socialLinks.ts';
+
+export type { CreatorSocialLinks };
+
+export interface PublicUserProfile {
+  email: string;
+  nome: string;
+  avatar?: string;
+  descricao?: string;
+  socialLinks?: CreatorSocialLinks;
+  isVerifiedCreator: boolean;
+  isDonor?: boolean;
+  profileDisplay: PublicProfileDisplay;
 }
 
 export interface Comentario {
@@ -37,6 +59,11 @@ export interface Comentario {
   nota?: number; // 1 a 5 (legacy)
   likes?: number; // Contador de curtidas CineReact
   criadoEm: string;
+  avatar?: string;
+  isDonor?: boolean;
+  profileDisplay?: PublicProfileDisplay;
+  publicProfile?: PublicUserProfile;
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'hidden';
 }
 
 export interface ListaPersonalizada {
@@ -61,8 +88,14 @@ export interface UserState {
   avatar?: string;
   isAdmin?: boolean;
   isDonor?: boolean;
+  isBanned?: boolean;
+  isSuspended?: boolean;
+  suspendedUntil?: string;
+  accountBlocked?: boolean;
+  accountBlockMessage?: string;
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
+  socialLinks?: CreatorSocialLinks;
 }
 
 export interface Notificacao {
@@ -87,5 +120,29 @@ export interface UserAccount {
   isDonor?: boolean;
   continueWatching?: ContinueWatchingItem[];
   descricao?: string;
+  socialLinks?: CreatorSocialLinks;
+  role?: 'user' | 'moderator' | 'curator' | 'admin';
+  isSuspended?: boolean;
+  suspendedUntil?: string;
+  isBanned?: boolean;
+  bannedAt?: string;
+  lastActiveAt?: string;
+  lastUserAgent?: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecretEnc?: string;
+  /** E-mail confirmado via Supabase Auth */
+  emailVerified?: boolean;
+  /** ID do usuário em auth.users (Supabase) */
+  supabaseAuthId?: string;
+  /** Provedor OAuth usado no cadastro/login */
+  oauthProvider?: 'discord';
+  /** ID da conta Discord */
+  discordId?: string;
+  /** Nome de usuário no Discord */
+  discordUsername?: string;
+  /** E-mail retornado pelo Discord (quando disponível) */
+  providerEmail?: string;
+  /** Data/hora da aceitação dos Termos de Uso */
+  termsAcceptedAt?: string;
 }
 

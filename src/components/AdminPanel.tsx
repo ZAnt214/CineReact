@@ -1,19 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Sparkles, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight } from 'lucide-react';
-import { Obra, ReactVideo, Comentario, UserState } from '../types.ts';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Settings, Plus, Film, Trash2, Check, Edit3, Youtube, AlertCircle, RefreshCw, MessageSquare, Users, Star, Award, Database, Server, Copy, ChevronDown, ChevronUp, CheckCircle2, ArrowRight, X, Loader2, Inbox, LayoutGrid, Shield, Link2, Save, Eye, Info, BadgeCheck, Clock, ExternalLink } from 'lucide-react';
+import { Obra, ReactVideo, Comentario, UserState, Notificacao } from '../types.ts';
+import type { CreatorVerificationRequest } from '../types/creatorVerification.ts';
+import { motion, AnimatePresence } from 'motion/react';
+import { adminFetch } from '../utils/adminApi.ts';
+
+type AdminTab = 'catalogo' | 'conteudo' | 'criadores' | 'moderacao' | 'sistema';
 
 interface AdminPanelProps {
   user: UserState;
   onSelectObra: (id: string) => void;
+  forcedTab?: AdminTab;
+  embedded?: boolean;
 }
 
-export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
+export default function AdminPanel({ user, onSelectObra, forcedTab, embedded = false }: AdminPanelProps) {
   const [obras, setObras] = useState<Obra[]>([]);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [reacts, setReacts] = useState<ReactVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<AdminTab>(forcedTab || 'catalogo');
+  const [solicitacoes, setSolicitacoes] = useState<Notificacao[]>([]);
+  const [verificationRequests, setVerificationRequests] = useState<CreatorVerificationRequest[]>([]);
+  const [processingVerification, setProcessingVerification] = useState<string | null>(null);
+  const [editingObra, setEditingObra] = useState<Obra | null>(null);
+  const [savingObra, setSavingObra] = useState(false);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [processingSolicitacao, setProcessingSolicitacao] = useState<string | null>(null);
   
   // Supabase states
   const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
@@ -50,6 +64,22 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
   const [canalUrl, setCanalUrl] = useState('');
   const [importingCanal, setImportingCanal] = useState(false);
 
+  // Catálogo manual (link → preview → salvar)
+  const [catalogCanalUrl, setCatalogCanalUrl] = useState('');
+  const [catalogCanalPreview, setCatalogCanalPreview] = useState<any>(null);
+  const [loadingCatalogCanalPreview, setLoadingCatalogCanalPreview] = useState(false);
+  const [savingCatalogCanal, setSavingCatalogCanal] = useState(false);
+
+  const [catalogVideoUrl, setCatalogVideoUrl] = useState('');
+  const [catalogVideoObraId, setCatalogVideoObraId] = useState('');
+  const [catalogVideoPreview, setCatalogVideoPreview] = useState<any>(null);
+  const [loadingCatalogVideoPreview, setLoadingCatalogVideoPreview] = useState(false);
+  const [savingCatalogVideo, setSavingCatalogVideo] = useState(false);
+
+  useEffect(() => {
+    if (forcedTab) setActiveTab(forcedTab);
+  }, [forcedTab]);
+
   const fetchSupabaseStatus = async () => {
     try {
       setLoadingSupabaseStatus(true);
@@ -69,7 +99,7 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
     if (syncingSupabase) return;
     setSyncingSupabase(true);
     try {
-      const res = await fetch('/api/supabase/sync', { method: 'POST' });
+      const res = await adminFetch(user.email, '/api/supabase/sync', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         alert(data.message || 'Sincronização concluída com sucesso!');
@@ -93,7 +123,7 @@ export default function AdminPanel({ user, onSelectObra }: AdminPanelProps) {
     }
     setMigratingSupabase(true);
     try {
-      const res = await fetch('/api/supabase/migrate', { method: 'POST' });
+      const res = await adminFetch(user.email, '/api/supabase/migrate', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         alert(data.message || 'Migração concluída com sucesso!');
@@ -201,47 +231,76 @@ CREATE TABLE usuarios (
   "continueWatching" JSONB DEFAULT '[]'::jsonb
 );
 
-ALTER TABLE obras DISABLE ROW LEVEL SECURITY;
-ALTER TABLE reacts DISABLE ROW LEVEL SECURITY;
-ALTER TABLE comentarios DISABLE ROW LEVEL SECURITY;
-ALTER TABLE favoritos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE canais_seguidos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE listas DISABLE ROW LEVEL SECURITY;
-ALTER TABLE notificacoes DISABLE ROW LEVEL SECURITY;
-ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
+ALTER TABLE obras ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE favoritos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE canais_seguidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE listas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notificacoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;`;
 
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2000);
   };
 
-  const fetchAdminData = async () => {
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setActionMessage({ type, text });
+    window.setTimeout(() => setActionMessage(null), 5000);
+  };
+
+  const fetchSolicitacoes = useCallback(async () => {
+    try {
+      const res = await adminFetch(user.email, '/api/admin/notificacoes?tipo=solicitacoes');
+      if (res.ok) {
+        const data = await res.json();
+        setSolicitacoes(data.filter((n: Notificacao) => !n.lida));
+      }
+    } catch (e) {
+      console.error('Erro ao carregar solicitações:', e);
+    }
+  }, [user.email]);
+
+  const fetchVerificationRequests = useCallback(async () => {
+    try {
+      const res = await adminFetch(user.email, '/api/admin/creator-verification?status=pending');
+      if (res.ok) {
+        const data = await res.json();
+        setVerificationRequests(data.requests || []);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar verificações:', e);
+    }
+  }, [user.email]);
+
+  const fetchAdminData = useCallback(async () => {
     try {
       setLoading(true);
       const [obrasRes, commentsRes, usersRes, reactsRes] = await Promise.all([
-        fetch('/api/obras'),
-        fetch('/api/comentarios'),
-        fetch('/api/usuarios'),
-        fetch('/api/reacts')
+        fetch('/api/obras').catch(() => null),
+        fetch('/api/comentarios').catch(() => null),
+        adminFetch(user.email, '/api/usuarios').catch(() => null),
+        adminFetch(user.email, '/api/reacts').catch(() => null),
       ]);
 
-      if (obrasRes.ok) {
-        const data = await obrasRes.json();
+      if (obrasRes && obrasRes.ok) {
+        const data = await obrasRes.json().catch(() => []);
         setObras(data);
       }
 
-      if (commentsRes.ok) {
-        const data = await commentsRes.json();
+      if (commentsRes && commentsRes.ok) {
+        const data = await commentsRes.json().catch(() => []);
         setComentarios(data);
       }
 
-      if (usersRes.ok) {
-        const data = await usersRes.json();
+      if (usersRes && usersRes.ok) {
+        const data = await usersRes.json().catch(() => []);
         setUsuarios(data);
       }
 
-      if (reactsRes.ok) {
-        const data = await reactsRes.json();
+      if (reactsRes && reactsRes.ok) {
+        const data = await reactsRes.json().catch(() => []);
         setReacts(data);
       }
     } catch (e) {
@@ -249,14 +308,16 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
 
   useEffect(() => {
     if (user.isAdmin) {
       fetchAdminData();
       fetchSupabaseStatus();
+      fetchSolicitacoes();
+      fetchVerificationRequests();
     }
-  }, [user]);
+  }, [user.isAdmin, fetchAdminData, fetchSolicitacoes, fetchVerificationRequests]);
 
   const handleCreateObra = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,7 +328,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
     setSubmittingObra(true);
     try {
-      const res = await fetch('/api/obras', {
+      const res = await adminFetch(user.email, '/api/obras', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -292,10 +353,10 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         setTrailerUrl('');
         setDestacado(false);
         fetchAdminData();
-        alert('Obra cadastrada com sucesso!');
+        showMessage('success', 'Obra cadastrada com sucesso!');
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error}`);
+        showMessage('error', err.error || 'Erro ao cadastrar obra.');
       }
     } catch (e) {
       console.error(e);
@@ -304,12 +365,54 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     }
   };
 
+  const handleUpdateObra = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingObra) return;
+
+    setSavingObra(true);
+    try {
+      const res = await adminFetch(user.email, `/api/obras/${editingObra.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: editingObra.titulo,
+          tipo: editingObra.tipo,
+          sinopse: editingObra.sinopse,
+          ano: editingObra.ano,
+          generos: editingObra.generos,
+          banner: editingObra.banner,
+          poster: editingObra.poster,
+          trailerUrl: editingObra.trailerUrl,
+          destacado: editingObra.destacado,
+        }),
+      });
+
+      if (res.ok) {
+        setEditingObra(null);
+        fetchAdminData();
+        showMessage('success', 'Obra atualizada com sucesso!');
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao atualizar obra.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('error', 'Erro de conexão ao atualizar obra.');
+    } finally {
+      setSavingObra(false);
+    }
+  };
+
   const handleDeleteObra = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta obra? Todos os reacts e comentários associados serão deletados.')) return;
     try {
-      const res = await fetch(`/api/obras/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(user.email, `/api/obras/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchAdminData();
+        showMessage('success', 'Obra excluída.');
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao excluir obra.');
       }
     } catch (e) {
       console.error(e);
@@ -319,9 +422,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   const handleDeleteComment = async (id: string) => {
     if (!confirm('Deseja deletar este comentário?')) return;
     try {
-      const res = await fetch(`/api/comentarios/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(user.email, `/api/comentarios/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchAdminData();
+      } else {
+        const err = await res.json();
+        showMessage('error', err.error || 'Erro ao deletar comentário.');
       }
     } catch (e) {
       console.error(e);
@@ -332,16 +438,22 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     if (!importQuery.trim()) return;
     setImporting(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(importQuery)}`);
+      const res = await adminFetch(user.email, '/api/admin/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: importQuery.trim() }),
+      });
+      const data = await res.json();
       if (res.ok) {
         fetchAdminData();
         setImportQuery('');
-        alert('Obra e reacts descobertos inteligentemente pelo Gemini AI e adicionados ao catálogo!');
+        showMessage('success', data.message || 'Conteúdo descoberto e adicionado ao catálogo!');
       } else {
-        alert('Erro ao descobrir conteúdo.');
+        showMessage('error', data.error || 'Erro ao descobrir conteúdo.');
       }
     } catch (e) {
       console.error(e);
+      showMessage('error', 'Erro de conexão ao descobrir conteúdo.');
     } finally {
       setImporting(false);
     }
@@ -352,41 +464,144 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
     if (!canalUrl.trim()) return;
     setImportingCanal(true);
     try {
-      const res = await fetch('/api/canais/importar', {
+      const res = await adminFetch(user.email, '/api/canais/importar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: canalUrl, email: user.email })
+        body: JSON.stringify({ url: canalUrl, email: user.email }),
       });
       if (res.ok) {
         const data = await res.json();
         setCanalUrl('');
         fetchAdminData();
         if (data.mode === 'real') {
-          alert(`Canal "${data.obra.titulo}" importado e sincronizado com sucesso do YouTube!`);
+          showMessage('success', `Canal "${data.obra.titulo}" importado do YouTube com dados oficiais!`);
+        } else if (data.mode === 'scrape' || data.mode === 'oembed') {
+          showMessage('success', `Canal "${data.obra.titulo}" importado com nome e imagens reais do YouTube!`);
         } else if (data.mode === 'simulated') {
-          alert(`Canal "${data.obra.titulo}" criado com sucesso usando simulação inteligente do Gemini AI!`);
+          showMessage('success', `Canal "${data.obra.titulo}" criado com simulação Gemini.`);
         } else {
-          alert(`Canal "${data.obra.titulo}" criado com sucesso.`);
+          showMessage('success', `Canal "${data.obra.titulo}" criado.`);
         }
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error}`);
+        showMessage('error', err.error || 'Erro ao importar canal.');
       }
     } catch (err) {
       console.error(err);
-      alert('Erro de conexão ao tentar importar o canal.');
+      showMessage('error', 'Erro de conexão ao importar canal.');
     } finally {
       setImportingCanal(false);
+    }
+  };
+
+  const handleCatalogCanalPreview = async () => {
+    if (!catalogCanalUrl.trim()) return;
+    setLoadingCatalogCanalPreview(true);
+    setCatalogCanalPreview(null);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/canal/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogCanalUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCatalogCanalPreview(data.preview);
+      } else {
+        showMessage('error', data.error || 'Erro ao carregar preview do canal.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao carregar preview do canal.');
+    } finally {
+      setLoadingCatalogCanalPreview(false);
+    }
+  };
+
+  const handleCatalogCanalSave = async () => {
+    if (!catalogCanalUrl.trim()) return;
+    setSavingCatalogCanal(true);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/canal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogCanalUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchAdminData();
+        setCatalogCanalPreview(data.obra);
+        const supa = data.savedToSupabase ? ' Salvo no Supabase.' : ' Salvo localmente (configure o Supabase para nuvem).';
+        showMessage('success', (data.message || 'Canal salvo!') + supa);
+      } else {
+        showMessage('error', data.error || 'Erro ao salvar canal.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao salvar canal.');
+    } finally {
+      setSavingCatalogCanal(false);
+    }
+  };
+
+  const handleCatalogVideoPreview = async () => {
+    if (!catalogVideoUrl.trim()) return;
+    setLoadingCatalogVideoPreview(true);
+    setCatalogVideoPreview(null);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/video/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: catalogVideoUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCatalogVideoPreview(data.preview);
+        if (data.preview?.obraId) setCatalogVideoObraId(data.preview.obraId);
+      } else {
+        showMessage('error', data.error || 'Erro ao carregar preview do vídeo.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao carregar preview do vídeo.');
+    } finally {
+      setLoadingCatalogVideoPreview(false);
+    }
+  };
+
+  const handleCatalogVideoSave = async () => {
+    if (!catalogVideoUrl.trim()) return;
+    setSavingCatalogVideo(true);
+    try {
+      const res = await adminFetch(user.email, '/api/catalogo/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: catalogVideoUrl.trim(),
+          obraId: catalogVideoObraId || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchAdminData();
+        setCatalogVideoPreview(data.react);
+        const supa = data.savedToSupabase ? ' Salvo no Supabase.' : ' Salvo localmente (configure o Supabase para nuvem).';
+        showMessage('success', (data.message || 'Vídeo salvo!') + supa);
+        setCatalogVideoUrl('');
+      } else {
+        showMessage('error', data.error || 'Erro ao salvar vídeo.');
+      }
+    } catch {
+      showMessage('error', 'Erro de conexão ao salvar vídeo.');
+    } finally {
+      setSavingCatalogVideo(false);
     }
   };
 
   const handleToggleRecomendado = async (reactId: string, currentStatus: boolean) => {
     setTogglingId(reactId);
     try {
-      const res = await fetch(`/api/reacts/${reactId}/recomendar`, {
+      const res = await adminFetch(user.email, `/api/reacts/${reactId}/recomendar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recomendado: !currentStatus })
+        body: JSON.stringify({ recomendado: !currentStatus }),
       });
       if (res.ok) {
         fetchAdminData();
@@ -407,33 +622,142 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
     setSubmittingRecomendado(true);
     try {
-      const res = await fetch('/api/reacts/recomendar-link', {
+      const res = await adminFetch(user.email, '/api/reacts/recomendar-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: recomendadoLink })
+        body: JSON.stringify({ url: recomendadoLink }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setRecomendadoLink('');
         fetchAdminData();
-        alert(`Sucesso! O vídeo "${data.titulo}" foi adicionado com sucesso e destacado na categoria "CineReact Recomenda".`);
+        showMessage('success', `Vídeo "${data.titulo}" adicionado ao CineReact Recomendado!`);
       } else {
         const err = await res.json();
-        alert(`Erro: ${err.error || 'Não foi possível adicionar o vídeo recomendado.'}`);
+        showMessage('error', err.error || 'Não foi possível adicionar o vídeo.');
       }
     } catch (err) {
       console.error(err);
-      alert('Erro de rede ao tentar adicionar a recomendação.');
+      showMessage('error', 'Erro de rede ao adicionar recomendação.');
     } finally {
       setSubmittingRecomendado(false);
     }
   };
 
+  const extractCanalUrl = (mensagem: string) => {
+    const match = mensagem.match(/\((https?:\/\/[^)]+)\)/);
+    return match?.[1] || '';
+  };
+
+  const handleApproveSolicitacao = async (notif: Notificacao) => {
+    const canalUrl = extractCanalUrl(notif.mensagem);
+    if (!canalUrl) {
+      showMessage('error', 'URL do canal não encontrada nesta solicitação.');
+      return;
+    }
+
+    setProcessingSolicitacao(notif.id);
+    try {
+      const res = await adminFetch(user.email, '/api/canais/importar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: canalUrl, email: user.email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await adminFetch(user.email, `/api/notificacoes/${notif.id}`, { method: 'DELETE' });
+        fetchSolicitacoes();
+        fetchAdminData();
+        showMessage('success', `Canal "${data.obra?.titulo || notif.canalNome}" importado com sucesso!`);
+      } else {
+        showMessage('error', data.error || 'Erro ao importar canal da solicitação.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('error', 'Erro ao processar solicitação.');
+    } finally {
+      setProcessingSolicitacao(null);
+    }
+  };
+
+  const handleDismissSolicitacao = async (id: string) => {
+    setProcessingSolicitacao(id);
+    try {
+      const res = await adminFetch(user.email, `/api/notificacoes/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchSolicitacoes();
+        showMessage('success', 'Solicitação dispensada.');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setProcessingSolicitacao(null);
+    }
+  };
+
+  const handleApproveVerification = async (request: CreatorVerificationRequest) => {
+    if (processingVerification) return;
+    setProcessingVerification(request.id);
+    try {
+      const res = await adminFetch(user.email, `/api/admin/creator-verification/${request.id}/approve`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage({
+          type: 'success',
+          text: `Perfil de ${request.usuarioNome} verificado com sucesso.`,
+        });
+        fetchVerificationRequests();
+      } else {
+        setActionMessage({ type: 'error', text: data.error || 'Erro ao aprovar verificação.' });
+      }
+    } catch (e) {
+      console.error(e);
+      setActionMessage({ type: 'error', text: 'Erro de conexão ao aprovar verificação.' });
+    } finally {
+      setProcessingVerification(null);
+    }
+  };
+
+  const handleRejectVerification = async (request: CreatorVerificationRequest) => {
+    if (processingVerification) return;
+    const note = window.prompt('Motivo da rejeição (opcional):') || undefined;
+    setProcessingVerification(request.id);
+    try {
+      const res = await adminFetch(user.email, `/api/admin/creator-verification/${request.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage({ type: 'success', text: 'Solicitação de verificação rejeitada.' });
+        fetchVerificationRequests();
+      } else {
+        setActionMessage({ type: 'error', text: data.error || 'Erro ao rejeitar verificação.' });
+      }
+    } catch (e) {
+      console.error(e);
+      setActionMessage({ type: 'error', text: 'Erro de conexão ao rejeitar verificação.' });
+    } finally {
+      setProcessingVerification(null);
+    }
+  };
+
+  const tabs: { id: AdminTab; label: string; icon: React.ElementType; badge?: number }[] = [
+    { id: 'catalogo', label: 'Catálogo', icon: Link2 },
+    { id: 'conteudo', label: 'Conteúdo', icon: LayoutGrid },
+    { id: 'criadores', label: 'Criadores', icon: Inbox, badge: solicitacoes.length + verificationRequests.length },
+    { id: 'moderacao', label: 'Moderação', icon: MessageSquare },
+    { id: 'sistema', label: 'Sistema', icon: Database },
+  ];
+
   if (!user.isAdmin) {
     return (
-      <div className="min-h-screen pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center">
-        <AlertCircle className="w-16 h-16 text-amber-400 mb-4 animate-pulse" />
+      <div className="min-h-screen cine-container pt-24 pb-20 w-full text-center flex flex-col items-center justify-center">
+        <AlertCircle className="w-16 h-16 text-cine-accent-light mb-4 animate-pulse" />
         <h2 className="text-xl font-bold mb-2">Acesso Negado</h2>
         <p className="text-zinc-500 max-w-md text-xs leading-relaxed">
           Este painel administrativo é restrito para administradores credenciados do CineReact.
@@ -444,44 +768,243 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-12 text-white">
+    <motion.div className={embedded ? 'space-y-6 text-white' : 'min-h-screen bg-cine-bg cine-container pt-24 pb-20 w-full space-y-8 text-white'}>
       
+      {!embedded && (
+      <>
       {/* HEADER */}
-      <div className="border-b border-zinc-800 pb-4 flex items-center justify-between">
+      <div className="border-b border-neutral-800 pb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-            <Settings className="text-amber-400 w-8 h-8" />
+            <Settings className="text-cine-accent-light w-8 h-8" />
             Painel do Administrador
           </h1>
-          <p className="text-xs text-zinc-500 mt-1">Cadastre, edite e organize o acervo de reacts do CineReact</p>
+          <p className="text-xs text-zinc-500 mt-1">Gerencie catálogo, criadores, usuários e integrações</p>
         </div>
-        
-        <button 
-          onClick={fetchAdminData}
-          className="p-2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
+        <button
+          onClick={() => { fetchAdminData(); fetchSolicitacoes(); fetchVerificationRequests(); fetchSupabaseStatus(); }}
+          disabled={loading}
+          className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white disabled:opacity-50"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* SUPABASE STATUS & CONFIGURATION */}
-      <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 space-y-6">
+      <AnimatePresence>
+        {actionMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-3.5 rounded-xl border text-sm flex items-center gap-2 ${
+              actionMessage.type === 'success'
+                ? 'bg-green-950/40 border-green-500/30 text-green-300'
+                : 'bg-red-950/40 border-red-500/30 text-red-300'
+            }`}
+          >
+            {actionMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {actionMessage.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-wrap gap-2">
+        {tabs.map(({ id, label, icon: Icon, badge }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === id
+                ? 'bg-cine-accent text-white shadow-lg shadow-cine-accent/20'
+                : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+            {badge ? (
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
+                activeTab === id ? 'bg-black/20 text-black' : 'bg-cine-accent/20 text-cine-accent-light'
+              }`}>
+                {badge}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+      </>
+      )}
+
+      {embedded && actionMessage && (
+        <div className={`p-3 rounded-xl border text-sm ${
+          actionMessage.type === 'success' ? 'bg-green-950/40 border-green-500/30 text-green-300' : 'bg-red-950/40 border-red-500/30 text-red-300'
+        }`}>
+          {actionMessage.text}
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center justify-center gap-3 py-12 text-zinc-500">
+          <Loader2 className="w-5 h-5 animate-spin text-cine-accent-light" />
+          <span className="text-sm">Carregando dados do painel...</span>
+        </div>
+      )}
+
+      {!loading && activeTab === 'catalogo' && (
+        <motion.div className="space-y-8">
+          <motion.div className="bg-gradient-to-br from-cine-accent/10 via-neutral-900/40 to-neutral-950 p-6 rounded-2xl border border-cine-accent/20 space-y-3">
+            <h2 className="text-lg font-black text-white flex items-center gap-2">
+              <Link2 className="w-5 h-5 text-cine-accent-light" />
+              Catálogo por Link
+            </h2>
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
+              Cole o link do canal ou do vídeo do YouTube. O sistema carrega automaticamente nome, foto, descrição e thumbnail
+              <strong className="text-cine-cream"> sem depender da API do YouTube</strong>. Tudo é salvo no banco e sincronizado com o Supabase quando configurado.
+            </p>
+            {supabaseStatus?.active ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-950/40 border border-green-500/30 px-2.5 py-1 rounded-full">
+                <Database className="w-3 h-3" /> Supabase ativo
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-cine-accent-light bg-cine-surface/40 border border-cine-accent/30 px-2.5 py-1 rounded-full">
+                <AlertCircle className="w-3 h-3" /> Supabase não configurado — salvando localmente
+              </span>
+            )}
+          </motion.div>
+
+          {/* CANAL */}
+          <motion.div className="bg-neutral-900/30 backdrop-blur-md p-6 rounded-2xl border border-neutral-800 space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
+              <Youtube className="w-4 h-4" />
+              Adicionar Canal
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={catalogCanalUrl}
+                onChange={(e) => { setCatalogCanalUrl(e.target.value); setCatalogCanalPreview(null); }}
+                placeholder="https://youtube.com/@nome-do-canal"
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+              />
+              <button
+                onClick={handleCatalogCanalPreview}
+                disabled={loadingCatalogCanalPreview || !catalogCanalUrl.trim()}
+                className="px-4 py-3 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loadingCatalogCanalPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                Pré-visualizar
+              </button>
+              <button
+                onClick={handleCatalogCanalSave}
+                disabled={savingCatalogCanal || !catalogCanalUrl.trim()}
+                className="px-4 py-3 rounded-xl bg-cine-accent text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {savingCatalogCanal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Salvar Canal
+              </button>
+            </div>
+
+            {catalogCanalPreview && (
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                {catalogCanalPreview.poster && (
+                  <img src={catalogCanalPreview.poster} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-cine-accent/30 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold text-lg">{catalogCanalPreview.titulo}</p>
+                  <p className="text-xs text-zinc-500 mt-1 line-clamp-3">{catalogCanalPreview.sinopse || 'Sem descrição'}</p>
+                  <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
+                    <span>Fonte: {catalogCanalPreview.source}</span>
+                    {catalogCanalPreview.channelId && <span>ID: {catalogCanalPreview.channelId}</span>}
+                    {catalogCanalPreview.alreadyExists && <span className="text-cine-accent-light">Já existe — será atualizado</span>}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* VÍDEO */}
+          <motion.div className="bg-neutral-900/30 backdrop-blur-md p-6 rounded-2xl border border-neutral-800 space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
+              <Film className="w-4 h-4" />
+              Adicionar Vídeo
+            </h3>
+            <div className="flex flex-col gap-2">
+              <input
+                type="url"
+                value={catalogVideoUrl}
+                onChange={(e) => { setCatalogVideoUrl(e.target.value); setCatalogVideoPreview(null); }}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+              />
+              <select
+                value={catalogVideoObraId}
+                onChange={(e) => setCatalogVideoObraId(e.target.value)}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm outline-none focus:border-cine-accent"
+              >
+                <option value="">Detectar canal automaticamente</option>
+                {obras.filter(o => o.tipo === 'canal').map(canal => (
+                  <option key={canal.id} value={canal.id}>{canal.titulo}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={handleCatalogVideoPreview}
+                disabled={loadingCatalogVideoPreview || !catalogVideoUrl.trim()}
+                className="flex-1 px-4 py-3 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loadingCatalogVideoPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                Pré-visualizar
+              </button>
+              <button
+                onClick={handleCatalogVideoSave}
+                disabled={savingCatalogVideo || !catalogVideoUrl.trim()}
+                className="flex-1 px-4 py-3 rounded-xl bg-cine-accent text-white text-xs font-black disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {savingCatalogVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Adicionar ao Catálogo
+              </button>
+            </div>
+
+            {catalogVideoPreview && (
+              <motion.div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                {catalogVideoPreview.thumbnailUrl && (
+                  <img src={catalogVideoPreview.thumbnailUrl} alt="" className="w-full sm:w-48 aspect-video rounded-lg object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold line-clamp-2">{catalogVideoPreview.titulo}</p>
+                  <p className="text-xs text-cine-cream mt-1">{catalogVideoPreview.canalNome}</p>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    Categoria: <strong className="text-zinc-300">{catalogVideoPreview.obraTitulo || 'Será criada automaticamente'}</strong>
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-mono text-zinc-500">
+                    <span>ID: {catalogVideoPreview.id}</span>
+                    {catalogVideoPreview.alreadyExists && <span className="text-cine-accent-light">Já existe — será atualizado</span>}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+
+      {!loading && activeTab === 'sistema' && (
+      <div className="bg-neutral-900/40 backdrop-blur-md rounded-2xl border border-neutral-800 p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-amber-400">
+            <div className="w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center border border-neutral-800 text-cine-accent-light">
               <Database className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-black text-white uppercase tracking-wider">Integração Supabase</h2>
                 {loadingSupabaseStatus ? (
-                  <span className="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+                  <span className="w-3 h-3 border-2 border-cine-accent/30 border-t-cine-accent rounded-full animate-spin" />
                 ) : supabaseStatus?.active ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">
                     Conectado
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-neutral-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
                     Modo Local (JSON)
                   </span>
                 )}
@@ -498,7 +1021,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             <button
               onClick={fetchSupabaseStatus}
               disabled={loadingSupabaseStatus}
-              className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
               title="Atualizar Status"
             >
               <RefreshCw className={`w-4 h-4 ${loadingSupabaseStatus ? 'animate-spin' : ''}`} />
@@ -509,7 +1032,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleSyncSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-amber-500/30 text-amber-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-cine-accent/30 text-cine-accent-light text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   {syncingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Server className="w-3.5 h-3.5" />}
                   Importar do Supabase
@@ -518,7 +1041,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   onClick={handleMigrateSupabase}
                   disabled={syncingSupabase || migratingSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-amber-500/20"
+                  className="px-4 py-2.5 rounded-xl bg-cine-accent hover:bg-cine-accent-light disabled:opacity-50 text-white font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cine-accent/20"
                 >
                   {migratingSupabase ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
                   Exportar Local para Supabase
@@ -530,20 +1053,20 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
         {/* STATS COUNT */}
         {supabaseStatus && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-850">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-neutral-950/50 p-4 rounded-xl border border-neutral-800">
             <div className="space-y-1 text-center md:text-left">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Obras / Canais</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.obras}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Reacts / Vídeos</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.reacts}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Comentários</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.comentarios}</p>
             </div>
-            <div className="space-y-1 text-center md:text-left border-l border-zinc-850/60 pl-4">
+            <div className="space-y-1 text-center md:text-left border-l border-neutral-800/60 pl-4">
               <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Usuários Ativos</span>
               <p className="text-lg font-black text-white">{supabaseStatus.counts.usuarios}</p>
             </div>
@@ -551,13 +1074,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
         )}
 
         {/* HOW TO CONFIGURE EXPANDER */}
-        <div className="border-t border-zinc-800/60 pt-4">
+        <div className="border-t border-neutral-800/60 pt-4">
           <button
             onClick={() => setShowSqlInstructions(!showSqlInstructions)}
             className="flex items-center justify-between w-full text-zinc-400 hover:text-white transition-colors text-xs font-bold"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Info className="w-4 h-4 text-cine-accent-light" />
               Como configurar as tabelas e chaves no Supabase?
             </span>
             {showSqlInstructions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -569,26 +1092,26 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               animate={{ opacity: 1, height: 'auto' }}
               className="mt-4 space-y-4 text-xs text-zinc-400 leading-relaxed"
             >
-              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-850 space-y-2.5">
+              <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-2.5">
                 <p className="font-bold text-white">Passo 1: Adicione as variáveis de ambiente no AI Studio</p>
                 <p>
                   Abra as configurações do seu projeto no menu de engrenagem do AI Studio (Secrets / Env) e adicione os seguintes segredos:
                 </p>
-                <div className="bg-zinc-900 p-3 rounded-lg font-mono text-[10px] text-zinc-300 space-y-1 border border-zinc-800">
+                <div className="bg-neutral-900 p-3 rounded-lg font-mono text-[10px] text-zinc-300 space-y-1 border border-neutral-800">
                   <div>SUPABASE_URL = "https://seu-projeto.supabase.co"</div>
-                  <div>SUPABASE_ANON_KEY = "sua-anon-key-secreta"</div>
+                  <div>SUPABASE_SERVICE_ROLE_KEY = "sua-service-role-key"</div>
                 </div>
-                <p className="text-[10px] text-amber-400/80">
-                  * Após salvar as chaves, a reinicialização do servidor é automática e a integração com o Supabase ficará ativa imediatamente!
+                <p className="text-[10px] text-cine-accent-light/80">
+                  * Use a <strong>service_role</strong> (Settings → API), nunca a anon key no servidor. Após salvar, reinicie o deploy no Railway.
                 </p>
               </div>
 
-              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-850 space-y-3">
+              <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="font-bold text-white">Passo 2: Execute o script SQL no Supabase</p>
                   <button
                     onClick={copySqlToClipboard}
-                    className="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-750 text-zinc-300 transition-all flex items-center gap-1 font-mono text-[10px] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-zinc-750 text-zinc-300 transition-all flex items-center gap-1 font-mono text-[10px] cursor-pointer"
                   >
                     {copiedSql ? (
                       <>
@@ -609,21 +1132,172 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           )}
         </div>
       </div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* CADASTRO FORM (COL 1 & 2) */}
-        <div className="lg:col-span-2 space-y-8">
+      {!loading && activeTab === 'criadores' && (
+        <div className="space-y-6">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-400/25 space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-200 flex items-center gap-2">
+              <BadgeCheck className="w-4 h-4" />
+              Verificação de perfil ({verificationRequests.length})
+            </h2>
+            <p className="text-xs text-zinc-500">
+              Criadores que pediram o selo verificado. Confira se o código está na descrição do canal no YouTube antes de aprovar.
+            </p>
+            {verificationRequests.length === 0 ? (
+              <p className="text-xs text-zinc-500">Nenhuma solicitação de verificação pendente.</p>
+            ) : (
+              <motion.div className="space-y-3">
+                {verificationRequests.map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white">{req.usuarioNome}</p>
+                        <p className="text-xs text-zinc-500 truncate">{req.usuarioEmail}</p>
+                        {req.channelTitle && (
+                          <p className="text-xs text-zinc-400 mt-1">{req.channelTitle}</p>
+                        )}
+                      </div>
+                      {req.codeFoundInDescription ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold uppercase">
+                          <CheckCircle2 className="w-3 h-3" /> Código OK
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[10px] font-bold uppercase">
+                          <Clock className="w-3 h-3" /> Aguardando
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="rounded-lg border border-amber-400/20 bg-black/30 px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">
+                        Código na descrição
+                      </p>
+                      <p className="font-mono text-sm text-amber-200">{req.verificationCode}</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
+                      <span>Pedido em {new Date(req.requestedAt).toLocaleString('pt-BR')}</span>
+                      <span>·</span>
+                      <span>Expira em {new Date(req.expiresAt).toLocaleString('pt-BR')}</span>
+                      {req.descriptionCheckedAt && (
+                        <>
+                          <span>·</span>
+                          <span>Checado em {new Date(req.descriptionCheckedAt).toLocaleString('pt-BR')}</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={req.youtubeChannelUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-300 text-xs font-bold hover:text-white"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Ver canal
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleApproveVerification(req)}
+                        disabled={processingVerification === req.id}
+                        className="flex-1 min-w-[120px] px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                      >
+                        {processingVerification === req.id ? 'Aprovando...' : 'Aprovar verificação'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRejectVerification(req)}
+                        disabled={processingVerification === req.id}
+                        className="px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
+                      >
+                        Rejeitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
+              <Inbox className="w-4 h-4" />
+              Solicitações de Criadores ({solicitacoes.length})
+            </h2>
+            {solicitacoes.length === 0 ? (
+              <p className="text-xs text-zinc-500">Nenhuma solicitação pendente no momento.</p>
+            ) : (
+              <motion.div className="space-y-3">
+                {solicitacoes.map((notif) => (
+                  <div key={notif.id} className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3">
+                    <div>
+                      <p className="text-sm font-bold text-white">{notif.canalNome || 'Canal solicitado'}</p>
+                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{notif.mensagem}</p>
+                      <p className="text-[10px] text-zinc-600 mt-1">{new Date(notif.criadoEm).toLocaleString('pt-BR')}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApproveSolicitacao(notif)}
+                        disabled={processingSolicitacao === notif.id}
+                        className="flex-1 px-3 py-2 rounded-lg bg-cine-accent hover:bg-cine-accent-light text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                      >
+                        {processingSolicitacao === notif.id ? 'Importando...' : 'Aprovar e Importar'}
+                      </button>
+                      <button
+                        onClick={() => handleDismissSolicitacao(notif.id)}
+                        disabled={processingSolicitacao === notif.id}
+                        className="px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-zinc-400 text-xs font-bold hover:text-white cursor-pointer"
+                      >
+                        Dispensar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
+              <Youtube className="w-4 h-4 text-cine-accent-light" />
+              Importar Canal do YouTube
+            </h2>
+            <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
+              <input
+                type="text"
+                value={canalUrl}
+                onChange={(e) => setCanalUrl(e.target.value)}
+                placeholder="ex: @casimiro ou link do canal..."
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2.5 outline-none focus:border-cine-accent"
+              />
+              <button
+                type="submit"
+                disabled={importingCanal || !canalUrl.trim()}
+                className="bg-cine-accent text-white font-black px-4 py-2.5 rounded disabled:opacity-50 cursor-pointer"
+              >
+                {importingCanal ? 'Importando...' : 'Importar'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {!loading && activeTab === 'conteudo' && (
+      <div className="space-y-8">
           
           {/* GEMINI INTELLIGENT DISCOVERY (EASY CADASTRO!) */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <div className="bg-neutral-900/30 backdrop-blur-md p-5 rounded-xl border border-cine-accent/20 space-y-4 shadow-lg">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-cine-accent-light flex items-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin-slow" />
               Descoberta e Cadastro Inteligente (Gemini AI)
             </h2>
             <p className="text-xs text-zinc-400">
-              Digite o nome de qualquer filme, série, anime ou jogo do mundo (ex: "Matrix", "Attack on Titan", "Minecraft"). 
-              O Gemini AI irá buscar as informações reais, sinopse, trailer, gêneros, posters, e catalogará automaticamente o conteúdo com reacts simulados em segundos!
+              Digite o nome de qualquer filme, série, anime ou jogo. O sistema usa Gemini AI para catalogar a obra e busca reacts reais no YouTube automaticamente.
             </p>
 
             <div className="flex gap-2 text-xs">
@@ -632,50 +1306,22 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 value={importQuery}
                 onChange={(e) => setImportQuery(e.target.value)}
                 placeholder="ex: Inception, Deadpool 3, Elden Ring, Naruto..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
+                className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2.5 outline-none focus:border-cine-accent"
               />
               <button
                 onClick={handleIntelligentImport}
                 disabled={importing || !importQuery.trim()}
-                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-amber-500/20"
+                className="bg-white hover:bg-cine-accent-dark disabled:bg-neutral-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/20"
               >
                 {importing ? "Analisando..." : "Cadastrar com AI"}
               </button>
             </div>
           </div>
 
-          {/* IMPORTAR CANAL DO YOUTUBE */}
-          <div className="bg-zinc-900/30 backdrop-blur-md p-5 rounded-xl border border-amber-500/20 space-y-4 shadow-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-              <Youtube className="w-4 h-4 text-amber-400" />
-              Importar Canal do YouTube (Criar Categoria)
-            </h2>
-            <p className="text-xs text-zinc-400">
-              Cole o link de um canal do YouTube ou digite o handle (ex: <span className="text-amber-400 font-mono font-bold">@casimiro</span>). O sistema irá obter os dados do canal, cadastrá-lo como uma nova categoria e buscar todos os seus reacts automaticamente!
-            </p>
-
-            <form onSubmit={handleImportCanal} className="flex gap-2 text-xs">
-              <input
-                type="text"
-                value={canalUrl}
-                onChange={(e) => setCanalUrl(e.target.value)}
-                placeholder="ex: @casimiro, @alanzoka, ou link do canal..."
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2.5 outline-none focus:border-amber-500"
-              />
-              <button
-                type="submit"
-                disabled={importingCanal || !canalUrl.trim()}
-                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black px-4 py-2.5 rounded transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
-              >
-                {importingCanal ? "Importando..." : "Importar Canal"}
-              </button>
-            </form>
-          </div>
-
           {/* MANUAL CADASTRO */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4 shadow-md">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Plus className="text-amber-400 w-5 h-5" />
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4 shadow-md">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
+              <Plus className="text-cine-accent-light w-5 h-5" />
               Cadastrar Obra Manualmente
             </h2>
 
@@ -688,7 +1334,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={obraId}
                   onChange={(e) => setObraId(e.target.value)}
                   placeholder="interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -700,7 +1346,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Interestelar"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -709,7 +1355,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as any)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 >
                   <option value="filme">Filme</option>
                   <option value="serie">Série</option>
@@ -725,7 +1371,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   required
                   value={ano}
                   onChange={(e) => setAno(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -737,7 +1383,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={generos}
                   onChange={(e) => setGeneros(e.target.value)}
                   placeholder="Ficção, Ação, Aventura"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -749,7 +1395,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={sinopse}
                   onChange={(e) => setSinopse(e.target.value)}
                   placeholder="Escreva a sinopse oficial aqui..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -760,7 +1406,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={banner}
                   onChange={(e) => setBanner(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -771,7 +1417,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={poster}
                   onChange={(e) => setPoster(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -782,7 +1428,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={trailerUrl}
                   onChange={(e) => setTrailerUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white outline-none focus:border-amber-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent"
                 />
               </div>
 
@@ -792,7 +1438,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   id="destacado"
                   checked={destacado}
                   onChange={(e) => setDestacado(e.target.checked)}
-                  className="w-4 h-4 rounded text-amber-500 accent-amber-500"
+                  className="w-4 h-4 rounded text-cine-accent accent-cine-accent"
                 />
                 <label htmlFor="destacado" className="text-zinc-300 font-semibold cursor-pointer">Destacar obra no Banner principal da Home Page</label>
               </div>
@@ -801,7 +1447,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                 <button
                   type="submit"
                   disabled={submittingObra}
-                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:bg-zinc-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-amber-500/10"
+                  className="w-full bg-white hover:bg-cine-accent-dark disabled:bg-neutral-800 text-black font-black py-2.5 rounded transition-all cursor-pointer shadow-lg shadow-cine-accent/10"
                 >
                   {submittingObra ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -811,13 +1457,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* OBRAS CATALOG LIST */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Film className="text-amber-400 w-5 h-5" />
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
+              <Film className="text-cine-accent-light w-5 h-5" />
               Obras Cadastradas ({obras.length})
             </h2>
 
-            <div className="divide-y divide-zinc-800 max-h-96 overflow-y-auto">
+            <div className="divide-y divide-neutral-800 max-h-96 overflow-y-auto">
               {obras.map(o => (
                 <div key={o.id} className="py-3 flex items-center justify-between text-xs gap-4">
                   <div className="flex items-center gap-3">
@@ -825,7 +1471,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     <div>
                       <h4 className="font-bold text-white">{o.titulo}</h4>
                       <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-500 font-mono">
-                        <span className="uppercase text-amber-400 font-bold">{o.tipo}</span>
+                        <span className="uppercase text-cine-accent-light font-bold">{o.tipo}</span>
                         <span>{o.ano}</span>
                       </div>
                     </div>
@@ -833,11 +1479,18 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => onSelectObra(o.id)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
-                      title="Ver Página"
+                      onClick={() => setEditingObra({ ...o })}
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white"
+                      title="Editar Obra"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onSelectObra(o.id)}
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-cine-accent-light"
+                      title="Ver Página"
+                    >
+                      <Film className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeleteObra(o.id)}
@@ -853,19 +1506,19 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* GERENCIAR CINEREACT RECOMENDA */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Sparkles className="text-amber-400 w-5 h-5 animate-pulse" />
-              CineReact Recomenda (Escolha dos Editores)
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
+              <Star className="text-cine-accent-light w-5 h-5 animate-pulse" />
+              CineReact Recomendado (Escolha dos Editores)
             </h2>
             <p className="text-xs text-zinc-400">
               Gerencie os vídeos recomendados pelos editores do CineReact. Você pode colar o link do vídeo diretamente ou pesquisar no catálogo.
             </p>
 
             {/* ADD RECOMMENDED VIDEO BY LINK */}
-            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-amber-500/5 rounded-lg border border-amber-500/20">
-              <label className="block text-amber-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
+            <form onSubmit={handleRecommendByLink} className="space-y-2 p-3.5 bg-cine-accent/5 rounded-lg border border-cine-accent/20">
+              <label className="block text-cine-accent-light font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+                <Film className="w-3.5 h-3.5" />
                 Adicionar Destaque por Link do YouTube
               </label>
               <div className="flex gap-2">
@@ -874,12 +1527,12 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={recomendadoLink}
                   onChange={(e) => setRecomendadoLink(e.target.value)}
                   placeholder="Cole o link do vídeo (ex: https://www.youtube.com/watch?v=...)"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-amber-500 text-white"
+                  className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
                 <button
                   type="submit"
                   disabled={submittingRecomendado || !recomendadoLink.trim()}
-                  className="px-4 rounded bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-4 rounded bg-white hover:bg-cine-accent-dark text-white font-bold text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                 >
                   {submittingRecomendado ? (
                     <>
@@ -905,18 +1558,18 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   value={reactSearch}
                   onChange={(e) => setReactSearch(e.target.value)}
                   placeholder="Digite o título do vídeo..."
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded p-2 text-xs outline-none focus:border-amber-500 text-white"
+                  className="flex-1 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs outline-none focus:border-cine-accent text-white"
                 />
               </div>
 
               {/* SEARCH RESULTS */}
               {reactSearch.trim() !== '' && (
-                <div className="bg-zinc-950 border border-zinc-850 rounded-lg divide-y divide-zinc-900 overflow-hidden max-h-60 overflow-y-auto shadow-xl">
+                <div className="bg-neutral-950 border border-neutral-800 rounded-lg divide-y divide-neutral-900 overflow-hidden max-h-60 overflow-y-auto shadow-xl">
                   {reacts.filter(r => 
                     r.titulo.toLowerCase().includes(reactSearch.toLowerCase()) || 
                     r.canalNome.toLowerCase().includes(reactSearch.toLowerCase())
                   ).slice(0, 5).map(r => (
-                    <div key={r.id} className="p-2.5 flex items-center justify-between gap-3 text-xs hover:bg-zinc-900/30">
+                    <div key={r.id} className="p-2.5 flex items-center justify-between gap-3 text-xs hover:bg-neutral-900/30">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0" />
                         <div className="min-w-0">
@@ -929,8 +1582,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                         disabled={togglingId === r.id}
                         className={`flex-shrink-0 px-2.5 py-1 rounded text-[10px] font-bold transition-colors ${
                           r.isRecomendado 
-                            ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30 hover:bg-amber-600/40' 
-                            : 'bg-amber-500 text-black hover:bg-amber-400'
+                            ? 'bg-cine-accent-dark/20 text-cine-accent-light border border-cine-accent/30 hover:bg-cine-accent-dark/40' 
+                            : 'bg-cine-accent text-white hover:bg-cine-accent-light'
                         }`}
                       >
                         {r.isRecomendado ? 'Remover Destaque' : 'Adicionar Destaque'}
@@ -944,11 +1597,11 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
             {/* CURRENT RECOMMENDED LIST */}
             <div className="space-y-2 pt-2">
               <label className="block text-zinc-400 font-bold text-[11px] uppercase tracking-wider">Recomendações Ativas</label>
-              <div className="bg-zinc-950/60 rounded-xl border border-zinc-850 divide-y divide-zinc-900 max-h-60 overflow-y-auto">
+              <div className="bg-neutral-950/60 rounded-xl border border-neutral-800 divide-y divide-neutral-900 max-h-60 overflow-y-auto">
                 {reacts.filter(r => r.isRecomendado).map(r => (
                   <div key={r.id} className="p-3 flex items-center justify-between gap-4 text-xs">
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0 border border-zinc-800" />
+                      <img src={r.thumbnailUrl} alt={r.titulo} className="w-12 h-8 object-cover rounded flex-shrink-0 border border-neutral-800" />
                       <div className="min-w-0">
                         <h4 className="font-bold text-white truncate text-xs">{r.titulo}</h4>
                         <p className="text-[10px] text-zinc-500 truncate">{r.canalNome}</p>
@@ -956,7 +1609,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                     </div>
                     <button
                       onClick={() => handleToggleRecomendado(r.id, true)}
-                      className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-red-400 hover:text-red-300 hover:bg-zinc-850 cursor-pointer"
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-red-400 hover:text-red-300 hover:bg-neutral-800 cursor-pointer"
                       title="Remover Recomendação"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -973,14 +1626,17 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
         </div>
+      )}
 
+      {!loading && activeTab === 'moderacao' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* SIDEBAR LOGS & LISTS (COL 3) */}
         <div className="space-y-8">
           
           {/* USER MANAGEMENT (VIP STATUS ACTIVATOR) */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Users className="text-amber-400 w-5 h-5" />
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
+              <Users className="text-cine-accent-light w-5 h-5" />
               Usuários Registrados ({usuarios.length})
             </h2>
 
@@ -988,17 +1644,21 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
               Ative ou desative o status de Apoiador VIP de qualquer usuário cadastrado para que seu nome brilhe e exiba a insígnia na plataforma!
             </p>
 
-            <div className="divide-y divide-zinc-800 max-h-[280px] overflow-y-auto pr-1">
+            <div className="divide-y divide-neutral-800 max-h-[280px] overflow-y-auto pr-1">
               {usuarios.map(u => {
                 const handleToggleVIP = async () => {
                   try {
-                    const res = await fetch(`/api/usuarios/${u.email}/vip`, {
+                    const res = await adminFetch(user.email, `/api/usuarios/${encodeURIComponent(u.email)}/vip`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ isDonor: !u.isDonor })
+                      body: JSON.stringify({ isDonor: !u.isDonor }),
                     });
                     if (res.ok) {
                       fetchAdminData();
+                      showMessage('success', u.isDonor ? 'VIP removido.' : 'VIP concedido!');
+                    } else {
+                      const err = await res.json();
+                      showMessage('error', err.error || 'Erro ao atualizar VIP.');
                     }
                   } catch (e) {
                     console.error(e);
@@ -1009,7 +1669,7 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                   <div key={u.email} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`font-bold ${u.isDonor ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent font-extrabold' : 'text-zinc-300'}`}>
+                        <span className={`font-bold ${u.isDonor ? 'text-cine-accent font-extrabold' : 'text-zinc-300'}`}>
                           {u.username}
                         </span>
                         {u.isAdmin && (
@@ -1023,8 +1683,8 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       onClick={handleToggleVIP}
                       className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                         u.isDonor 
-                          ? 'bg-amber-500/15 border border-amber-500/20 text-amber-400 hover:bg-amber-500/30' 
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+                          ? 'bg-cine-accent/15 border border-cine-accent/20 text-cine-accent-light hover:bg-cine-accent/30' 
+                          : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
                       }`}
                     >
                       {u.isDonor ? 'Remover VIP' : 'Dar VIP'}
@@ -1036,13 +1696,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
           {/* LATEST COMMENTS */}
-          <div className="bg-zinc-900/30 p-5 rounded-xl border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <MessageSquare className="text-amber-400 w-5 h-5" />
+          <div className="bg-neutral-900/30 p-5 rounded-xl border border-neutral-800 space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
+              <MessageSquare className="text-cine-accent-light w-5 h-5" />
               Últimos Comentários ({comentarios.length})
             </h2>
 
-            <div className="divide-y divide-zinc-800 max-h-[400px] overflow-y-auto pr-1 space-y-3">
+            <div className="divide-y divide-neutral-800 max-h-[400px] overflow-y-auto pr-1 space-y-3">
               {comentarios.map(c => (
                 <div key={c.id} className="pt-2 text-xs space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
@@ -1055,13 +1715,13 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <p className="text-zinc-400 text-[11px] leading-relaxed italic bg-zinc-950/40 p-2 rounded border border-zinc-850/60">
+                  <p className="text-zinc-400 text-[11px] leading-relaxed italic bg-neutral-950/40 p-2 rounded border border-neutral-800/60">
                     "{c.texto}"
                   </p>
                   <div className="flex items-center justify-between text-[9px] text-zinc-500 font-mono">
                     <span className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map(st => (
-                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-amber-400 text-amber-400' : 'text-zinc-800'}`} />
+                        <Star key={st} className={`w-2.5 h-2.5 ${st <= (c.nota || 5) ? 'fill-cine-accent-light text-cine-accent-light' : 'text-neutral-800'}`} />
                       ))}
                     </span>
                     <span>{new Date(c.criadoEm).toLocaleDateString('pt-BR')}</span>
@@ -1072,8 +1732,76 @@ ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;`;
           </div>
 
         </div>
-
       </div>
-    </div>
+      )}
+
+      <AnimatePresence>
+        {editingObra && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-white">Editar Obra</h3>
+                <button onClick={() => setEditingObra(null)} className="p-2 rounded-lg hover:bg-neutral-900 text-zinc-400 hover:text-white cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateObra} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-500 mb-1">ID (não editável)</label>
+                  <input value={editingObra.id} disabled className="w-full bg-neutral-900/50 border border-neutral-800 rounded p-2 text-zinc-500" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Título</label>
+                  <input value={editingObra.titulo} onChange={(e) => setEditingObra({ ...editingObra, titulo: e.target.value })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Tipo</label>
+                  <select value={editingObra.tipo} onChange={(e) => setEditingObra({ ...editingObra, tipo: e.target.value as Obra['tipo'] })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent">
+                    <option value="filme">Filme</option>
+                    <option value="serie">Série</option>
+                    <option value="anime">Anime</option>
+                    <option value="jogo">Jogo</option>
+                    <option value="canal">Canal</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-400 mb-1">Sinopse</label>
+                  <textarea rows={3} value={editingObra.sinopse} onChange={(e) => setEditingObra({ ...editingObra, sinopse: e.target.value })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Ano</label>
+                  <input type="number" value={editingObra.ano} onChange={(e) => setEditingObra({ ...editingObra, ano: Number(e.target.value) })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Gêneros (vírgula)</label>
+                  <input value={editingObra.generos?.join(', ') || ''} onChange={(e) => setEditingObra({ ...editingObra, generos: e.target.value.split(',').map(s => s.trim()) })} className="w-full bg-neutral-900 border border-neutral-800 rounded p-2 text-white outline-none focus:border-cine-accent" />
+                </div>
+                <div className="md:col-span-2 flex items-center gap-2">
+                  <input type="checkbox" id="edit-destacado" checked={!!editingObra.destacado} onChange={(e) => setEditingObra({ ...editingObra, destacado: e.target.checked })} className="accent-cine-accent" />
+                  <label htmlFor="edit-destacado" className="text-zinc-300">Destacar na Home</label>
+                </div>
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="button" onClick={() => setEditingObra(null)} className="flex-1 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-zinc-400 font-bold cursor-pointer">Cancelar</button>
+                  <button type="submit" disabled={savingObra} className="flex-1 py-2.5 rounded-xl bg-cine-accent text-white font-black disabled:opacity-50 cursor-pointer">
+                    {savingObra ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

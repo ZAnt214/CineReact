@@ -1,357 +1,428 @@
-import { useEffect, useState } from 'react';
-import { ArrowRight, Check, FileText, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import CineReactLogo from './CineReactLogo.tsx';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Compass, 
+  Users, 
+  Tv, 
+  BookmarkCheck, 
+  ArrowRight, 
+  ShieldCheck, 
+  CheckCircle2, 
+  Lock, 
+  FileText, 
+  Mail, 
+  X,
+  PlayCircle,
+  Eye,
+  ExternalLink,
+  Loader2
+} from 'lucide-react';
 
-const benefits = [
-  'Descubra novos criadores.',
-  'Encontre reações aos seus filmes, séries, animes e games favoritos.',
-  'Organize seus conteúdos favoritos.',
-  'Navegue em uma experiência simples e intuitiva.',
-];
-
-type BrandLogoProps = {
-  size?: 'footer' | 'header';
-};
-
-function BrandLogo({ size = 'header' }: BrandLogoProps) {
-  const textSize = {
-    footer: 'text-xl',
-    header: 'text-2xl sm:text-3xl',
-  }[size];
-
-  const punctuationSize = {
-    footer: 'text-xl',
-    header: 'text-2xl sm:text-3xl',
-  }[size];
-
-  return (
-    <span className="group flex items-center select-none font-['Fredoka',sans-serif]" aria-label="CineReact">
-      <span
-        className={`${textSize} inline-block font-extrabold tracking-wide text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)] transition-transform duration-300 group-hover:-translate-y-0.5`}
-      >
-        Cine
-      </span>
-      <span
-        className={`${textSize} ml-0.5 inline-block bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text font-black tracking-wide text-transparent drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] transition-transform duration-300 group-hover:scale-105`}
-      >
-        React
-      </span>
-      <span
-        className={`${punctuationSize} ml-0.5 inline-block animate-bounce font-black text-amber-400 drop-shadow-[0_2px_8px_rgba(245,158,11,0.6)]`}
-        aria-hidden="true"
-      >
-        !
-      </span>
-    </span>
-  );
+interface LandingPageProps {
+  onExplore: () => void;
+  isNavigating?: boolean;
 }
 
-export default function LandingPage() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const previousTitle = document.title;
-    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    const previousDescription = description?.content;
-
-    document.title = 'CineReact | Bem-vindo';
-    if (description) {
-      description.content = 'Conheça o CineReact, uma plataforma para descobrir vídeos públicos de reação do YouTube.';
-    }
-
-    return () => {
-      document.title = previousTitle;
-      if (description && previousDescription) {
-        description.content = previousDescription;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+export default function LandingPage({ onExplore, isNavigating = false }: LandingPageProps) {
+  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-400 selection:text-black">
-      <header
-        className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'border-b border-zinc-900/80 bg-zinc-950/90 shadow-lg shadow-black/30 backdrop-blur-md'
-            : 'border-b border-transparent bg-zinc-950/40 backdrop-blur-sm'
-        }`}
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <a href="/landing" aria-label="CineReact - página de boas-vindas">
-              <BrandLogo />
-            </a>
+    <div className="cine-site-bg min-h-screen text-white font-sans selection:bg-cine-accent/30 selection:text-cine-cream relative overflow-x-hidden flex flex-col justify-between">
+      {/* Leve profundidade monocromática */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-gradient-to-b from-white/[0.03] to-transparent rounded-full blur-3xl" />
+      </div>
 
-            <a
-              href="/"
-              className="inline-flex items-center gap-2 rounded-lg border border-amber-400/30 px-4 py-2 text-xs font-bold text-amber-300 transition-colors hover:bg-amber-400 hover:text-black"
-            >
-              Explorar
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-          </div>
+      {/* HEADER / BRAND BAR */}
+      <header className="relative z-10 border-b border-cine-border/60 bg-cine-bg/92 max-md:backdrop-blur-none md:bg-cine-bg/80 md:backdrop-blur-md sticky top-0">
+        <div className="cine-container w-full h-20 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <button 
+            onClick={onExplore}
+            className="group focus:outline-none cursor-pointer py-1"
+          >
+            <CineReactLogo size="md" className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+          </button>
+
+          {/* Top CTA */}
+          <button
+            onClick={onExplore}
+            disabled={isNavigating}
+            className="group relative inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-cine-accent text-white font-extrabold text-xs sm:text-sm hover:bg-cine-accent-dark transition-all shadow-md shadow-cine-accent/20 hover:shadow-cine-accent/40 cursor-pointer active:scale-95 shrink-0 disabled:opacity-80 disabled:cursor-wait"
+          >
+            <span>{isNavigating ? 'Abrindo...' : 'Acessar Plataforma'}</span>
+            {isNavigating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            )}
+          </button>
         </div>
       </header>
 
-      <main>
-        <section className="px-5 pt-32 pb-20 sm:px-8 sm:pt-40 sm:pb-28">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-400">
-              Boas-vindas ao CineReact
-            </p>
+      {/* HERO SECTION */}
+      <section className="relative z-10 cine-container w-full pt-12 pb-16 sm:pt-20 sm:pb-24 text-center">
+        {/* Badge */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cine-accent/10 border border-cine-accent/30 text-cine-accent-light text-xs font-semibold mb-6 shadow-inner"
+        >
+          <span>O Maior Portal de Reações do Brasil</span>
+        </motion.div>
 
-            <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              A plataforma para quem ama vídeos de reação a filmes, séries, animes e games.
-            </h1>
+        {/* Main Headline */}
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto font-sans"
+        >
+          A plataforma para quem ama vídeos de reação a{' '}
+          <span className="text-cine-accent">
+            filmes, séries, animes e games.
+          </span>
+        </motion.h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-              O CineReact reúne e organiza vídeos públicos de reação do YouTube, facilitando a descoberta
-              de novos criadores e conteúdos.
-            </p>
+        {/* Explanatory Subtitle */}
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-6 text-base sm:text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed font-normal"
+        >
+          O <strong className="text-white font-semibold">CineReact</strong> reúne e organiza vídeos públicos de reação do YouTube, facilitando a descoberta de novos criadores e conteúdos em uma experiência moderna, centralizada e intuitiva.
+        </motion.p>
 
-            <a
-              href="/"
-              className="mt-9 inline-flex min-h-13 w-full items-center justify-center gap-3 rounded-xl bg-amber-400 px-7 text-sm font-black text-black transition-colors hover:bg-yellow-300 sm:w-auto"
-            >
-              Explorar o CineReact
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
-            </a>
+        {/* Primary CTA Button */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <button
+            onClick={onExplore}
+            disabled={isNavigating}
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-cine-accent text-white font-black text-base sm:text-lg hover:brightness-105 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-cine-accent/25 hover:shadow-cine-accent/40 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:transform-none"
+          >
+            <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
+            {isNavigating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+            )}
+          </button>
+        </motion.div>
 
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-500">
-              <ShieldCheck className="h-4 w-4 text-amber-400" aria-hidden="true" />
-              Uma forma simples de descobrir e organizar conteúdos.
-            </div>
-          </div>
-        </section>
+        {/* Fast Trust Indicators */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-8 flex items-center justify-center gap-6 text-xs text-zinc-400 flex-wrap"
+        >
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-cine-accent-light" />
+            100% Gratuito
+          </span>
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-cine-accent-light" />
+            Integrado ao YouTube
+          </span>
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-cine-accent-light" />
+            Apoio Oficial aos Criadores
+          </span>
+        </motion.div>
+      </section>
 
-        <section className="border-y border-white/[0.07] bg-zinc-950 px-5 py-16 sm:px-8 sm:py-20">
-          <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-400">
-                O que você encontra
-              </p>
-              <h2 className="mt-3 text-2xl font-black sm:text-3xl">
-                Tudo o que você gosta, mais fácil de encontrar.
-              </h2>
-
-              <ul className="mt-7 space-y-4">
-                {benefits.map((benefit) => (
-                  <li key={benefit} className="flex items-start gap-3 text-sm leading-6 text-zinc-400">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/10">
-                      <Check className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
-                    </span>
-                    {benefit}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.08] bg-zinc-900/50 p-7 sm:p-8">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-400">
-                Como funciona
-              </p>
-              <h2 className="mt-3 text-2xl font-black">Conteúdo público em uma interface organizada.</h2>
-              <p className="mt-5 text-sm leading-7 text-zinc-400">
-                O CineReact organiza vídeos públicos do YouTube em uma interface moderna e fácil de navegar.
-                Você escolhe o tema, encontra criadores e acessa as reações disponíveis no catálogo.
-              </p>
-              <p className="mt-5 border-t border-white/[0.07] pt-5 text-xs leading-6 text-zinc-500">
-                O CineReact não produz nem reivindica a propriedade dos vídeos publicados pelos criadores.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-5 py-16 text-center sm:px-8 sm:py-20">
-          <div className="mx-auto max-w-2xl">
-            <h2 className="text-2xl font-black sm:text-3xl">Pronto para conhecer o CineReact?</h2>
-            <p className="mt-4 text-sm leading-6 text-zinc-400">
-              Acesse o catálogo e descubra vídeos de reação organizados por obras, temas e criadores.
-            </p>
-            <a
-              href="/"
-              className="mt-7 inline-flex items-center justify-center gap-3 rounded-xl bg-amber-400 px-6 py-3.5 text-sm font-black text-black transition-colors hover:bg-yellow-300"
-            >
-              Explorar o CineReact
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-          </div>
-        </section>
-
-        <section className="border-t border-white/[0.07] bg-[#0b0b0d] px-5 py-16 sm:px-8 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-400">
-                Transparência
-              </p>
-              <h2 className="mt-3 text-2xl font-black sm:text-3xl">Privacidade e termos em linguagem clara.</h2>
-              <p className="mt-4 text-sm leading-6 text-zinc-400">
-                Entenda quais informações podem ser utilizadas e as condições para navegar pelo CineReact.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 lg:grid-cols-2">
-              <article
-                id="privacidade"
-                className="scroll-mt-24 rounded-2xl border border-white/[0.08] bg-zinc-950/70 p-6 sm:p-8"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10">
-                    <LockKeyhole className="h-5 w-5 text-amber-400" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-400">
-                      Seus dados
-                    </p>
-                    <h3 className="mt-1 text-xl font-black">Política de Privacidade</h3>
-                  </div>
-                </div>
-
-                <p className="mt-6 text-sm leading-7 text-zinc-400">
-                  Esta página de apresentação não solicita cadastro nem dados pessoais. Ao acessar e utilizar os
-                  recursos do catálogo, algumas informações podem ser necessárias para oferecer as funcionalidades
-                  escolhidas por você.
-                </p>
-
-                <ul className="mt-6 space-y-4 text-sm leading-6 text-zinc-400">
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Conta e perfil:</strong> nome, e-mail, avatar e descrição
-                      informados pelo usuário podem ser utilizados para identificação e personalização.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Preferências:</strong> favoritos, listas, canais seguidos,
-                      comentários e progresso de reprodução podem ser associados à conta.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Armazenamento no navegador:</strong> sessão, curtidas e
-                      preferências podem ser salvas localmente para manter a experiência entre acessos.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Serviços externos:</strong> ao reproduzir conteúdo incorporado,
-                      o YouTube pode tratar dados conforme as próprias políticas de privacidade.
-                    </span>
-                  </li>
-                </ul>
-              </article>
-
-              <article
-                id="termos"
-                className="scroll-mt-24 rounded-2xl border border-white/[0.08] bg-zinc-950/70 p-6 sm:p-8"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10">
-                    <FileText className="h-5 w-5 text-amber-400" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-400">
-                      Uso da plataforma
-                    </p>
-                    <h3 className="mt-1 text-xl font-black">Termos de Uso</h3>
-                  </div>
-                </div>
-
-                <p className="mt-6 text-sm leading-7 text-zinc-400">
-                  O CineReact é uma plataforma independente de descoberta e organização. Ao utilizar o serviço,
-                  você concorda em navegar de forma responsável e respeitar os direitos dos criadores e das
-                  plataformas de origem.
-                </p>
-
-                <ul className="mt-6 space-y-4 text-sm leading-6 text-zinc-400">
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Finalidade:</strong> organizamos referências a vídeos públicos
-                      para facilitar a descoberta de obras, reações e criadores.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Direitos autorais:</strong> os vídeos pertencem aos respectivos
-                      criadores e são exibidos por meio das ferramentas das plataformas de origem.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Disponibilidade:</strong> links, vídeos e informações podem ser
-                      alterados ou removidos pelos proprietários sem controle do CineReact.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="mt-1 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-                    <span>
-                      <strong className="text-zinc-200">Uso responsável:</strong> não é permitido tentar comprometer a
-                      segurança, acessar áreas sem autorização ou utilizar o serviço para fins ilícitos.
-                    </span>
-                  </li>
-                </ul>
-              </article>
-            </div>
-
-            <div className="mt-5 flex flex-col items-start justify-between gap-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.06] p-5 sm:flex-row sm:items-center sm:px-6">
-              <div className="flex items-start gap-3">
-                <Mail className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" aria-hidden="true" />
-                <div>
-                  <p className="text-sm font-bold text-white">Dúvidas ou solicitações sobre seus dados?</p>
-                  <p className="mt-1 text-xs leading-5 text-zinc-500">
-                    Entre em contato para solicitar informações, correções ou exclusão de dados relacionados à sua conta.
-                  </p>
-                </div>
-              </div>
-              <a
-                href="mailto:atendimentocinereact@gmail.com"
-                className="shrink-0 text-sm font-bold text-amber-300 transition-colors hover:text-amber-200"
-              >
-                atendimentocinereact@gmail.com
-              </a>
-            </div>
-
-            <p className="mt-5 text-center text-[11px] text-zinc-600">
-              Última atualização: julho de 2026.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-white/[0.07] bg-[#070708] px-5 py-10 sm:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-            <BrandLogo size="footer" />
-            <nav className="flex flex-wrap gap-5 text-xs font-semibold text-zinc-400" aria-label="Links institucionais">
-              <a className="hover:text-amber-300" href="#privacidade">Política de Privacidade</a>
-              <a className="hover:text-amber-300" href="#termos">Termos de Uso</a>
-              <a className="hover:text-amber-300" href="mailto:atendimentocinereact@gmail.com">Contato</a>
-            </nav>
-          </div>
-
-          <p className="mt-8 max-w-4xl border-t border-white/[0.06] pt-6 text-xs leading-6 text-zinc-600">
-            O CineReact não hospeda vídeos. Todo o conteúdo exibido é incorporado de plataformas públicas, como o
-            YouTube, respeitando os direitos e políticas de seus respectivos proprietários.
-          </p>
-          <p className="mt-4 text-[11px] text-zinc-700">
-            © {new Date().getFullYear()} CineReact. Todos os direitos reservados.
+      {/* KEY BENEFITS SECTION */}
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-800/80">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Por que usar o CineReact?
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-zinc-400">
+            Sua experiência assistindo a reações foi completamente reformulada para ser mais rápida, organizada e divertida.
           </p>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <motion.div>
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Descubra novos criadores</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                Encontre novos canais de reação com facilidade e apoie criadores independentes da comunidade.
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
+                <Tv className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Encontre seus favoritos</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                Encontre reações aos seus filmes, séries, animes e games favoritos organizados em coleções completas.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
+                <BookmarkCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Organize seus conteúdos</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                Crie suas próprias listas de reprodução e salve tudo aquilo que você pretende assistir mais tarde.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl cine-cozy-panel hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-zinc-300 mb-5 group-hover:scale-110 transition-transform">
+                <Compass className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Navegação simples e intuitiva</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                Desfrute de uma interface fluida no estilo dos principais serviços de streaming do mercado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS SECTION */}
+      <section className="relative z-10 cine-container w-full py-16 border-t border-neutral-800/80">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Como Funciona
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-zinc-400">
+            Transparência, facilidade e valorização dos criadores em 3 passos simples.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Step 1 */}
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-recomenda/40 mb-3 block">01</span>
+            <h3 className="text-lg font-bold text-white mb-2">Organização em Catálogo</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              O CineReact identifica e categoriza vídeos públicos de reação do YouTube, agrupando-os por obras, temporadas e episódios.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-lilac/40 mb-3 block">02</span>
+            <h3 className="text-lg font-bold text-white mb-2">Player Oficial do YouTube</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Os vídeos são exibidos por meio do player incorporado oficial. 100% das visualizações e métricas vão para o canal do YouTube do criador.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="p-6 rounded-2xl cine-cozy-panel relative">
+            <span className="text-4xl font-black text-cine-accent-light/45 mb-3 block">03</span>
+            <h3 className="text-lg font-bold text-white mb-2">Comunidade e Interação</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Acompanhe novidades, descubra novos canais e interaja com outros fãs apaixonados por reagir aos melhores momentos do entretenimento.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SECONDARY CTA BANNER */}
+      <section className="relative z-10 cine-container w-full py-12 my-8">
+        <div className="p-8 sm:p-12 rounded-3xl cine-cozy-panel border-cine-border/30 text-center relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cine-accent-light/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight relative z-10">
+            Pronto para encontrar suas reações favoritas?
+          </h2>
+          <p className="mt-4 text-sm sm:text-base text-zinc-300 max-w-xl mx-auto relative z-10">
+            Acesse o catálogo completo do CineReact agora mesmo e explore centenas de vídeos organizados.
+          </p>
+          <div className="mt-8 relative z-10">
+            <button
+              onClick={onExplore}
+              disabled={isNavigating}
+              className="px-8 py-4 rounded-2xl bg-cine-accent text-cine-bg font-black text-base hover:bg-cine-accent-light transition-all shadow-xl shadow-cine-accent/25 cursor-pointer inline-flex items-center gap-3 disabled:opacity-80 disabled:cursor-wait"
+            >
+              <span>{isNavigating ? 'Abrindo catálogo...' : 'Explorar o CineReact'}</span>
+              {isNavigating ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="relative z-10 border-t border-cine-border/60 bg-cine-bg/85 py-12 mt-12 text-cine-muted">
+        <div className="cine-container w-full space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            {/* Logo */}
+            <CineReactLogo size="xs" />
+
+            {/* Links */}
+            <div className="flex items-center gap-6 text-xs sm:text-sm font-medium flex-wrap justify-center">
+              <button 
+                onClick={() => setActiveModal('privacy')}
+                className="hover:text-cine-accent-light transition-colors cursor-pointer"
+              >
+                Política de Privacidade
+              </button>
+              <button 
+                onClick={() => setActiveModal('terms')}
+                className="hover:text-cine-accent-light transition-colors cursor-pointer"
+              >
+                Termos de Uso
+              </button>
+              <button 
+                onClick={() => setActiveModal('contact')}
+                className="hover:text-cine-accent-light transition-colors cursor-pointer"
+              >
+                Contato
+              </button>
+            </div>
+          </div>
+
+          {/* Legal Disclaimer / Notice */}
+          <div className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/60 text-center w-full max-w-5xl mx-auto">
+            <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+              <strong>Aviso Legal:</strong> O CineReact não hospeda vídeos. Todo o conteúdo exibido é incorporado de plataformas públicas, como o YouTube, respeitando os direitos e políticas de seus respectivos proprietários.
+            </p>
+          </div>
+
+          <div className="text-center text-xs text-zinc-500 pt-4 border-t border-neutral-900">
+            © {new Date().getFullYear()} CineReact. Todos os direitos reservados.
+          </div>
+        </div>
       </footer>
+
+      {/* INSTITUTIONAL MODALS (Privacy, Terms, Contact) */}
+      <AnimatePresence>
+        {activeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveModal(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-cine-surface border border-cine-border rounded-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl text-zinc-300 z-10"
+            >
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="absolute top-5 right-5 p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-800/60 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {activeModal === 'privacy' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Lock className="w-6 h-6 text-cine-accent-light" />
+                    <h2 className="text-xl font-bold text-white">Política de Privacidade</h2>
+                  </div>
+                  <p className="text-sm text-zinc-300 leading-relaxed">
+                    O CineReact valoriza e respeita a privacidade de seus visitantes. Esta política descreve como tratamos as informações no nosso portal.
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">1. Coleta de Dados</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Não solicitamos informações pessoais para navegação básica no site. Dados fornecidos opcionalmente no login são utilizados exclusivamente para personalização de conta e sincronização de listas favoritas.
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">2. Cookies e Analytics</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Podemos utilizar cookies e tecnologias de medição anônimas para entender o tráfego do site e aprimorar a usabilidade do usuário.
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">3. Conteúdo Incorporado</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Vídeos e reprodutores exibidos utilizam as APIs públicas do YouTube, sujeitando-se também à Política de Privacidade e aos Termos de Serviço do Google / YouTube.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'terms' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-6">
+                    <FileText className="w-6 h-6 text-cine-accent-light" />
+                    <h2 className="text-xl font-bold text-white">Termos de Uso</h2>
+                  </div>
+                  <p className="text-sm text-zinc-300 leading-relaxed">
+                    Ao acessar e navegar no CineReact, você concorda com os termos dispostos a seguir:
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">1. Natureza do Serviço</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    O CineReact é uma plataforma indexadora e agregadora de conteúdo público. Não hospedamos, armazenamos ou distribuímos arquivos de vídeo protegidos por direitos autorais em nossos servidores.
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">2. Direitos Autorais e API do YouTube</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Todos os vídeos exibidos são carregados diretamente através do player incorporado oficial do YouTube. As visualizações, inscrições e retenção pertencem integralmente aos canais dos criadores de conteúdo originais.
+                  </p>
+                  <h3 className="text-sm font-bold text-white pt-2">3. Uso Aceitável</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    É proibida qualquer tentativa de violação de segurança, scraping abusivo ou utilização indevida da plataforma.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'contact' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Mail className="w-6 h-6 text-cine-accent-light" />
+                    <h2 className="text-xl font-bold text-white">Contato e Suporte</h2>
+                  </div>
+                  <p className="text-sm text-zinc-300 leading-relaxed">
+                    Tem alguma dúvida, sugestão ou solicitação de parceria? Entre em contato conosco através dos nossos canais oficiais:
+                  </p>
+                  <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 space-y-2 my-4">
+                    <div className="text-xs text-zinc-400 font-mono">E-mail de Atendimento:</div>
+                    <a 
+                      href="mailto:atendimentocinereact@gmail.com" 
+                      className="text-cine-accent-light hover:text-cine-cream font-bold text-sm sm:text-base underline flex items-center gap-2"
+                    >
+                      <Mail className="w-4 h-4" />
+                      atendimentocinereact@gmail.com
+                    </a>
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Respondemos todas as mensagens recebidas dentro do prazo de 24 a 48 horas úteis.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="px-6 py-2.5 rounded-xl bg-neutral-800 hover:bg-zinc-700 text-white font-medium text-xs transition-colors cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

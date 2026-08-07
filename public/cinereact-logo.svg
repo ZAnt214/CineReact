@@ -1,47 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="1000" height="240">
-  <defs>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F59E0B" />
-      <stop offset="50%" stop-color="#FBBF24" />
-      <stop offset="100%" stop-color="#D97706" />
-    </linearGradient>
-    <linearGradient id="badgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#18181B" />
-      <stop offset="100%" stop-color="#09090B" />
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-  </defs>
-
-  <!-- Background Canvas -->
-  <rect width="500" height="120" rx="16" fill="#09090B"/>
-
-  <!-- Logo Emblem Badge -->
-  <g transform="translate(20, 20)">
-    <!-- Outer Glow Ring -->
-    <rect x="0" y="0" width="80" height="80" rx="20" fill="url(#goldGrad)" filter="url(#glow)" opacity="0.6" />
-    <rect x="2" y="2" width="76" height="76" rx="18" fill="url(#badgeBg)" stroke="url(#goldGrad)" stroke-width="2" />
-    
-    <!-- Film Reel & Play Overlay -->
-    <g transform="translate(20, 20)">
-      <!-- Film Clapper / Strip Icon -->
-      <path d="M5 8 C5 5, 8 3, 12 3 L28 3 C32 3, 35 5, 35 8 L35 32 C35 35, 32 37, 28 37 L12 37 C8 37, 5 35, 5 32 Z" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="5" y1="13" x2="35" y2="13" stroke="url(#goldGrad)" stroke-width="2"/>
-      <line x1="12" y1="3" x2="15" y2="13" stroke="url(#goldGrad)" stroke-width="2"/>
-      <line x1="22" y1="3" x2="25" y2="13" stroke="url(#goldGrad)" stroke-width="2"/>
-      <!-- Glowing Play Arrow inside -->
-      <polygon points="17,19 27,25 17,31" fill="#FBBF24" />
-    </g>
-  </g>
-
-  <!-- Typography -->
-  <text x="120" y="70" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="42" fill="#FFFFFF" letter-spacing="-1">
-    Cine<tspan fill="url(#goldGrad)">React</tspan>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 88" width="720" height="176">
+  <rect width="360" height="88" rx="10" fill="#111113"/>
+  <text x="180" y="44" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-size="34" letter-spacing="0.05em">
+    <tspan fill="#fafafa" font-weight="600">CINE</tspan><tspan fill="#38bdf8" font-weight="700">REACT</tspan>
   </text>
-  
-  <!-- HUB Badge -->
-  <rect x="360" y="44" width="54" height="24" rx="6" fill="#F59E0B" fill-opacity="0.15" stroke="#F59E0B" stroke-opacity="0.4" stroke-width="1.5" />
-  <text x="387" y="60" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="12" fill="#FBBF24" text-anchor="middle" letter-spacing="2">HUB</text>
+  <text x="180" y="74" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="11" fill="#a1a1aa" letter-spacing="0.04em">Sua plataforma de reacts</text>
 </svg>

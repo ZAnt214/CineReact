@@ -1,7 +1,22 @@
-import React, { useState } from 'react';
-import { Heart, Sparkles, Copy, Check, Mail, Gift } from 'lucide-react';
-import { UserState } from '../types.ts';
-import { motion } from 'motion/react';
+import React, { useMemo, memo } from 'react';
+import {
+  Heart,
+  Crown,
+  Clock,
+  CheckCircle2,
+  ExternalLink,
+  Loader2,
+  LogIn,
+  Star,
+  Award,
+  Palette,
+} from 'lucide-react';
+import type { UserState } from '../types.ts';
+import { DONATION_AMOUNT_BRL } from '../types/donations.ts';
+import { useDonationStatus } from '../hooks/useDonations.ts';
+import { CATEGORY_LABELS, DONOR_VIP_ITEMS, RARITY_STYLES } from '../data/rewardsCatalog.ts';
+import DonorBadge from './profile/DonorBadge.tsx';
+import type { RewardItemDefinition } from '../types/gamification.ts';
 
 interface DonationsPageProps {
   user: UserState;
@@ -9,136 +24,316 @@ interface DonationsPageProps {
   onOpenAuth: () => void;
 }
 
-export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: DonationsPageProps) {
-  const [copied, setCopied] = useState(false);
+const DEMO_AVATAR =
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=96&q=60';
 
-  const pixEmail = 'atendimentocinereact@gmail.com';
+const DEMO_ITEMS: (RewardItemDefinition & { owned: true })[] = DONOR_VIP_ITEMS.map((item) => ({
+  ...item,
+  owned: true as const,
+}));
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(pixEmail);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+const TITLE_ITEM = DEMO_ITEMS.find((i) => i.id === 'title-apoiador-cinereact');
+const FRAME_ITEM = DEMO_ITEMS.find((i) => i.id === 'frame-apoiador-cinereact');
+
+function CosmeticThumb({ item }: { item: (typeof DEMO_ITEMS)[number] }) {
+  const base = 'w-14 h-14 rounded-xl shrink-0 flex items-center justify-center border border-white/10';
+
+  if (item.category === 'theme') {
+    return (
+      <div className={`${base} bg-gradient-to-br from-cyan-950 to-neutral-900`}>
+        <Palette className="w-6 h-6 text-cyan-300/90" strokeWidth={1.75} />
+      </div>
+    );
+  }
+  if (item.category === 'frame') {
+    return (
+      <div className="w-14 h-14 shrink-0 flex items-center justify-center">
+        <div className="rounded-full p-[3px] border border-amber-400/50">
+          <div className="w-10 h-10 rounded-full bg-neutral-800" />
+        </div>
+      </div>
+    );
+  }
+  if (item.category === 'title') {
+    return (
+      <div className={`${base} bg-neutral-950/80`}>
+        <Award className="w-6 h-6 text-amber-200/90" strokeWidth={1.75} />
+      </div>
+    );
+  }
+  return (
+    <div className={`${base} bg-neutral-900`}>
+      <Heart className="w-6 h-6 text-amber-300 fill-amber-300/40" strokeWidth={1.75} />
+    </div>
+  );
+}
+
+const DonorProfileDemo = memo(function DonorProfileDemo({ displayName }: { displayName: string }) {
+  return (
+    <div className="rounded-2xl border border-cyan-400/20 bg-neutral-950/90 p-6 sm:p-8">
+      <div className="flex flex-col items-center text-center">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest text-cyan-200/80 mb-5">
+          <Star className="w-3 h-3 text-amber-300" />
+          Prévia do seu perfil
+        </span>
+
+        <div className="rounded-full p-[3px] border border-amber-400/45">
+          <img
+            src={DEMO_AVATAR}
+            alt=""
+            width={80}
+            height={80}
+            loading="lazy"
+            decoding="async"
+            className="w-20 h-20 rounded-full object-cover bg-neutral-800"
+          />
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <p className="text-xl sm:text-2xl font-black text-white tracking-tight">{displayName}</p>
+          <DonorBadge size="md" />
+        </div>
+
+        {TITLE_ITEM && (
+          <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-100/90">
+            {TITLE_ITEM.name}
+          </p>
+        )}
+
+        <p className="mt-4 text-[11px] text-zinc-500">Emblema exclusivo + tema e moldura no perfil</p>
+
+        {FRAME_ITEM && (
+          <p className="mt-2 text-[10px] text-zinc-600 max-w-xs leading-relaxed">
+            Inclui {FRAME_ITEM.name.toLowerCase()} e pacote visual completo
+          </p>
+        )}
+      </div>
+    </div>
+  );
+});
+
+const CosmeticShowcaseCard = memo(function CosmeticShowcaseCard({
+  item,
+}: {
+  item: (typeof DEMO_ITEMS)[number];
+}) {
+  const rarity = RARITY_STYLES[item.rarity];
 
   return (
-    <div className="pt-24 pb-20 px-4 md:px-8 max-w-5xl mx-auto min-h-screen text-zinc-300">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-10"
-      >
-        {/* Hero Title */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] font-bold tracking-wider uppercase">
-            <Heart className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
-            Seja um Apoiador
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider font-sans">
-            Contribua e Ganhe Destaque
-          </h1>
-          <p className="text-zinc-500 text-xs max-w-2xl mx-auto leading-relaxed">
-            O CineReact nasceu da paixão por reunir fãs e criadores em um só lugar. Ao fazer uma doação, você ajuda a manter a plataforma viva, melhorar nossos recursos, fortalecer a comunidade e trazer novas experiências para todos que amam acompanhar reacts. Cada contribuição faz parte da construção do futuro do CineReact.
+    <div className={`rounded-2xl border ${rarity.border} ${rarity.bg} p-4`}>
+      <div className="flex items-start gap-3">
+        <CosmeticThumb item={item} />
+        <div className="min-w-0 flex-1 pt-0.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-300/70">
+            {CATEGORY_LABELS[item.category]}
           </p>
+          <p className="text-sm font-bold text-white mt-0.5 truncate">{item.name}</p>
+          <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed line-clamp-2">{item.description}</p>
         </div>
+      </div>
+    </div>
+  );
+});
 
-        {/* Benefits Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-          
-          {/* Card 1 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
-                <Sparkles className="w-5 h-5" />
+export default function DonationsPage({ user, onUpdateUser, onOpenAuth }: DonationsPageProps) {
+  const { data, loading, submitting, error, startDonation, refresh } = useDonationStatus(
+    user.email,
+    user.isLoggedIn
+  );
+
+  const isDonor = user.isDonor || data?.isDonor;
+  const request = data?.request;
+  const isPending = request?.status === 'pending' && !isDonor;
+  const wasRejected = request?.status === 'rejected' && !isDonor;
+
+  const displayName = useMemo(
+    () => (user.isLoggedIn && user.nome ? user.nome.split(' ')[0] : 'Seu Perfil'),
+    [user.isLoggedIn, user.nome]
+  );
+
+  const handleDonate = async () => {
+    if (!user.isLoggedIn) {
+      onOpenAuth();
+      return;
+    }
+    const result = await startDonation();
+    if (result && user.isLoggedIn) {
+      refresh();
+    }
+  };
+
+  React.useEffect(() => {
+    if (data?.isDonor && !user.isDonor) {
+      onUpdateUser({ ...user, isDonor: true });
+    }
+  }, [data?.isDonor, onUpdateUser, user]);
+
+  return (
+    <div className="min-h-screen w-full bg-[#07090f]">
+      <div className="cine-container pt-20 pb-28">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <section className="text-center space-y-5">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-neutral-900/80 text-cyan-100 text-[11px] font-bold uppercase tracking-wider">
+              <Crown className="w-3.5 h-3.5 text-amber-300" />
+              Apoiador VIP
+            </span>
+
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+              Apoie o CineReact e{' '}
+              <span className="text-cyan-300">brilhe na comunidade</span>
+            </h1>
+
+            <p className="text-sm sm:text-base text-zinc-400 max-w-lg mx-auto leading-relaxed">
+              Contribuição única de{' '}
+              <span className="text-white font-semibold">
+                R$ {DONATION_AMOUNT_BRL.toFixed(2).replace('.', ',')}
+              </span>
+              . Você recebe cosméticos exclusivos e o selo Apoiador na sua conta.
+            </p>
+          </section>
+
+          {!user.isLoggedIn && (
+            <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-300 shrink-0">
+                <LogIn className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Nome Personalizado</h3>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                Seu nome de usuário receberá uma estilização única com gradiente brilhante (<span className="text-amber-400 font-bold">Dourado</span> e <span className="text-yellow-300 font-bold">Amarelo</span>) em todos os comentários, chat ao vivo e painéis.
-              </p>
-            </div>
-            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
-              <Check className="w-3 h-3" /> Efeito visual exclusivo
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
-                <Gift className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Tag Exclusiva</h3>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                Exiba orgulhosamente a tag <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-[9px] uppercase font-black text-black tracking-wider">APOIADOR VIP</span> ao lado do seu nome, diferenciando você nas avaliações e chats.
-              </p>
-            </div>
-            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
-              <Check className="w-3 h-3" /> Selo dourado de prestígio
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 border border-amber-500/20">
-                <Heart className="w-5 h-5 fill-amber-400/10" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">Qualquer Valor</h3>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                Não exigimos quantias exorbitantes. Doando 1 real ou mais através de nossa chave de e-mail, seu status VIP é ativado de forma permanente!
-              </p>
-            </div>
-            <div className="text-[10px] text-amber-400/80 font-mono mt-4 flex items-center gap-1.5">
-              <Check className="w-3 h-3" /> Apoio vitalício
-            </div>
-          </div>
-
-        </div>
-
-        {/* Action Panel */}
-        <div className="max-w-2xl mx-auto pt-4">
-          <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 text-center flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 mb-1">
-              <Mail className="w-6 h-6" />
-            </div>
-            
-            <div className="space-y-2">
-              <h2 className="text-lg font-bold text-white uppercase tracking-wider">
-                Dados para Doação
-              </h2>
-              <p className="text-xs text-zinc-500 leading-relaxed max-w-md mx-auto">
-                Você pode apoiar o projeto copiando nossa chave PIX oficial abaixo. Realize a transferência de qualquer valor no aplicativo de seu banco.
-              </p>
-            </div>
-
-            {/* Email Box */}
-            <div className="w-full bg-zinc-950 border border-zinc-850 rounded-xl p-4 flex items-center justify-between gap-4 max-w-md">
-              <div className="overflow-hidden text-left">
-                <span className="text-[9px] uppercase font-mono text-zinc-600 block">Chave PIX (E-mail)</span>
-                <span className="text-xs md:text-sm font-bold text-white select-all block truncate mt-0.5">{pixEmail}</span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-white">Entre para apoiar</p>
+                <p className="text-xs text-zinc-500 mt-1">Vinculamos os benefícios ao seu perfil CineReact.</p>
               </div>
               <button
-                onClick={handleCopyEmail}
-                className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white p-2.5 rounded-lg transition-colors cursor-pointer flex-shrink-0"
-                title="Copiar Chave PIX"
+                type="button"
+                onClick={onOpenAuth}
+                className="px-5 py-2.5 rounded-full bg-cyan-400 text-black text-sm font-extrabold"
               >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                Fazer login
               </button>
             </div>
+          )}
 
-            {/* Instruction Advice */}
-            <div className="flex gap-3 bg-amber-950/20 border border-amber-500/20 rounded-xl p-4 text-xs text-amber-300 max-w-lg text-left">
-              <Gift className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-bounce" />
-              <p className="leading-relaxed">
-                <strong>Ativação do Apoiador VIP:</strong> Após realizar sua contribuição, envie-nos o comprovante para o nosso e-mail <span className="font-semibold text-white">{pixEmail}</span> informando seu e-mail cadastrado na plataforma para ativarmos o seu selo exclusivo permanentemente!
-              </p>
+          {isDonor && (
+            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-950/25 p-5 flex items-start gap-4">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
+              <div>
+                <p className="text-base font-bold text-white">Você já é Apoiador VIP</p>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Obrigado pelo apoio! Seu selo e cosméticos já estão no perfil.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
 
-      </motion.div>
+          {isPending && (
+            <div className="rounded-2xl border border-amber-400/25 bg-neutral-900/60 p-5">
+              <div className="flex items-start gap-4">
+                <Clock className="w-5 h-5 text-amber-300 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-bold text-white">Apoio registrado!</p>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Você receberá os benefícios na sua conta em até{' '}
+                    <span className="text-amber-200 font-semibold">24 horas</span>.
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-3">
+                    Não concluiu o pagamento?{' '}
+                    <a
+                      href={request!.paymentLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-300 underline inline-flex items-center gap-1"
+                    >
+                      Abrir Mercado Pago <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {wasRejected && (
+            <div className="rounded-2xl border border-rose-500/25 bg-rose-950/15 p-5 text-sm">
+              <p className="font-bold text-white mb-1">Não encontramos seu pagamento</p>
+              <p className="text-zinc-400">
+                {request?.adminNote || 'Se você já pagou, tente novamente ou fale com o suporte.'}
+              </p>
+              <button
+                type="button"
+                onClick={handleDonate}
+                disabled={submitting}
+                className="mt-4 px-4 py-2 rounded-full bg-white/10 text-xs font-bold"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
+          {error && <p className="text-center text-sm text-rose-400 font-medium">{error}</p>}
+
+          <section className="space-y-4">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
+              <Star className="w-4 h-4 text-amber-300" />
+              Veja como ficará
+            </h2>
+            <DonorProfileDemo displayName={displayName} />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wide">
+              Tudo que você ganha
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {DEMO_ITEMS.map((item) => (
+                <CosmeticShowcaseCard key={item.id} item={item} />
+              ))}
+            </div>
+          </section>
+
+          {!isDonor && (
+            <section className="rounded-3xl border border-cyan-400/20 bg-neutral-900/40 p-8 text-center space-y-5">
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold">
+                  Pagamento único · Mercado Pago
+                </p>
+                <p className="text-4xl sm:text-5xl font-black mt-1 text-white">
+                  R$ {DONATION_AMOUNT_BRL.toFixed(2).replace('.', ',')}
+                </p>
+              </div>
+
+              <p className="text-sm text-zinc-400 max-w-sm mx-auto">
+                Após o pagamento, seus benefícios chegam na conta em até{' '}
+                <span className="text-white font-medium">24 horas</span>.
+              </p>
+
+              <button
+                type="button"
+                onClick={handleDonate}
+                disabled={submitting || loading || isPending}
+                className="w-full max-w-sm mx-auto py-3.5 px-6 rounded-full bg-cyan-400 text-black text-sm font-extrabold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {submitting || loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : isPending ? (
+                  <>
+                    <Clock className="w-4 h-4" />
+                    Benefícios a caminho
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-4 h-4 fill-current" />
+                    Apoiar por R$ {DONATION_AMOUNT_BRL.toFixed(2).replace('.', ',')}
+                  </>
+                )}
+              </button>
+
+              <p className="text-[10px] text-zinc-600 max-w-xs mx-auto">
+                Você será redirecionado ao Mercado Pago para concluir o pagamento com segurança.
+              </p>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
