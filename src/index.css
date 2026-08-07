@@ -3141,11 +3141,11 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   left: 0;
   right: 0;
   z-index: 25;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
   min-height: 26px;
-  padding: 5px 36px 8px;
+  padding: 5px 8px 8px;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), 50% 100%, 0 calc(100% - 6px));
   border-bottom: 2px solid rgba(255, 255, 255, 0.45);
   pointer-events: none;
@@ -3168,6 +3168,7 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 .minutagem-tipo-strip__label {
   position: relative;
   z-index: 1;
+  grid-column: 2;
   font-size: 9px;
   line-height: 1;
   font-weight: 900;
@@ -3178,6 +3179,27 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   text-shadow:
     0 1px 0 rgba(0, 0, 0, 0.35),
     0 0 12px rgba(255, 255, 255, 0.35);
+}
+
+.minutagem-tipo-strip__count {
+  grid-column: 3;
+  justify-self: end;
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(9, 9, 11, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f4f4f5;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .minutagem-tipo-strip--filme {
@@ -3209,11 +3231,17 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
 @media (min-width: 640px) {
   .minutagem-tipo-strip {
     min-height: 28px;
-    padding: 6px 40px 9px;
+    padding: 6px 8px 9px;
   }
 
   .minutagem-tipo-strip__label {
     font-size: 10px;
+  }
+
+  .minutagem-tipo-strip__count {
+    min-height: 20px;
+    padding: 3px 8px;
+    font-size: 9px;
   }
 }
 
