@@ -242,13 +242,13 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
     <div className="w-full flex-1 minutagem-page">
       <div className="cine-container pt-24 pb-20 space-y-8">
         <header className="relative pt-2 pb-2 md:pb-4">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-zinc-500 font-mono font-medium">
-            minutagem
+          <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
+            Minutagem
           </p>
-          <h1 className="text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-semibold leading-snug tracking-tight text-zinc-100 mt-1 font-mono">
+          <h1 className="font-display text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold leading-snug tracking-tight text-zinc-100 mt-1">
             Índice de timestamps — conteúdo sensível
           </h1>
-          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg font-mono text-[13px]">
+          <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg">
             Marcadores por obra (filme/série). Intervalos em min:seg e classificação de cena.
           </p>
           <div
