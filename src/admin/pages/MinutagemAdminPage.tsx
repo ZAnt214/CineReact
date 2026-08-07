@@ -154,7 +154,7 @@ export default function MinutagemAdminPage({ email }: MinutagemAdminPageProps) {
       <div>
         <h1 className="text-2xl md:text-3xl font-black text-white">Minutagem sensível</h1>
         <p className="text-sm text-zinc-500 mt-1">
-          Aprove contribuições de fãs, atenda pedidos de catalogação e gerencie avisos para streamers.
+          Aprove contribuições de fãs, atenda pedidos de catalogação e gerencie marcações para streamers.
         </p>
       </div>
 
