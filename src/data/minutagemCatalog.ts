@@ -1,17 +1,24 @@
 import type { Obra } from '../types.ts';
 import type { MinutagemMarker } from '../types/minutagem.ts';
 
-const FILM_BANNER =
-  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1600&auto=format&fit=crop';
-const FILM_POSTER =
-  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop';
-const SERIE_BANNER =
-  'https://images.unsplash.com/photo-1522869635100-9bad963bde66?q=80&w=1600&auto=format&fit=crop';
-const SERIE_POSTER =
-  'https://images.unsplash.com/photo-1522869635100-9bad963bde66?q=80&w=600&auto=format&fit=crop';
+/** Artes oficiais via TMDB (poster + backdrop). */
+const tmdbPoster = (path: string) => `https://image.tmdb.org/t/p/w500${path}`;
+const tmdbBackdrop = (path: string) => `https://image.tmdb.org/t/p/w1280${path}`;
 
 /** IDs de obras com dados fictícios de exemplo — removidos na sincronização. */
 export const LEGACY_FAKE_MINUTAGEM_OBRA_IDS = ['harry-potter', 'the-last-of-us', 'one-piece'];
+
+export const MINUTAGEM_CATALOG_OBRA_IDS = [
+  'lobo-wall-street-2013',
+  'psicopata-americano-2000',
+  'eu-eu-mesmo-e-irene-2000',
+  'mad-max-fury-road-2015',
+  'deadpool-2016',
+  'the-boys',
+  'pacificador',
+  'la-casa-de-papel',
+  'peaky-blinders',
+] as const;
 
 type RawEntry = {
   inicio: string;
@@ -26,6 +33,8 @@ type RawObra = {
   titulo: string;
   tipo: 'filme' | 'serie';
   ano: number;
+  poster: string;
+  banner: string;
   entries: RawEntry[];
 };
 
@@ -67,6 +76,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'O Lobo de Wall Street (2013)',
     tipo: 'filme',
     ano: 2013,
+    poster: tmdbPoster('/34mXrPGJUEwlIboSwLDxtHvZTCA.jpg'),
+    banner: tmdbBackdrop('/p2RyD15OcEOWBG3QvgOYMLKxiT.jpg'),
     entries: [
       { inicio: '00:03:01', fim: '00:03:28', duracao: '27s', descricao: 'Natalie vira o copo enquanto Leo cheira cocaína em suas nádegas.' },
       { inicio: '00:48:16', fim: '00:48:35', duracao: '19s', descricao: 'Cena no escritório: Jaclyn dança de lingerie enquanto Krista mostra os seios durante cena de sexo com funcionários.' },
@@ -81,6 +92,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Psicopata Americano (2000)',
     tipo: 'filme',
     ano: 2000,
+    poster: tmdbPoster('/1Rx39rH8YJdOO1mxhBvgyN2ob4.jpg'),
+    banner: tmdbBackdrop('/67S99FpFWfECMcofhnkuYBfvoOS.jpg'),
     entries: [
       { inicio: '00:01:00', fim: '00:01:54', duracao: '54s', descricao: 'Samantha desliza muito rápido mostrando parte do mamilo direito ao pular da cama.' },
       { inicio: '00:42:38', fim: '00:44:11', duracao: '1m33s', descricao: 'Cara passa a perna por cima do ombro de forma sensual e se ajoelha, enquanto Krista dança de roupa íntima ao som de Phil Collins.' },
@@ -94,6 +107,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Eu, Eu Mesmo e Irene (2000)',
     tipo: 'filme',
     ano: 2000,
+    poster: tmdbPoster('/hxDCGMDKuT2gzL8aTseqVvGuxl.jpg'),
+    banner: tmdbBackdrop('/3nRGIBy4FYAR9N4080cpm0RFrK.jpg'),
     entries: [
       { inicio: '00:21:09', fim: '00:21:29', duracao: '20s', descricao: 'Jim Carrey segue o exemplo do bebê amamentando no seio de Shannon Whirry, exibindo brevemente parte da aréola.' },
     ],
@@ -103,6 +118,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Mad Max: Estrada da Fúria (2015)',
     tipo: 'filme',
     ano: 2015,
+    poster: tmdbPoster('/hA2ple9q4qnwxp3hKVNhroipsir.jpg'),
+    banner: tmdbBackdrop('/tbhdm8UJAb4ViCTsLPdg2uRXwH.jpg'),
     entries: [
       { inicio: '01:18:00', fim: '01:19:13', duracao: '1m13s', descricao: 'Megan Gale (A Valquíria) aparece sem roupas em uma torre e exibe as nádegas enquanto desce até o chão.' },
     ],
@@ -112,6 +129,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Deadpool (2016)',
     tipo: 'filme',
     ano: 2016,
+    poster: tmdbPoster('/8s8Djy7Rm48Ge8kjazJTiitNGI5.jpg'),
+    banner: tmdbBackdrop('/inAqp3eWs9r9jQpUKIKoH18WG6.jpg'),
     entries: [
       { inicio: '00:24:00', fim: '00:25:14', duracao: '1m14s', descricao: 'Flash rápido dos seios e da região pubiana de Morena Baccarin no início da sequência íntima com Ryan Reynolds.' },
     ],
@@ -121,6 +140,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'The Boys',
     tipo: 'serie',
     ano: 2019,
+    poster: tmdbPoster('/stTEycfG9928HYGEISBFaG1ngzM.jpg'),
+    banner: tmdbBackdrop('/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg'),
     entries: [
       { episodio: 'S01E02', inicio: '00:41:14', fim: '00:41:42', duracao: '28s', descricao: 'Breve aparição do seio esquerdo de Aniko durante cena de sexo, antes de se transformar em outra pessoa.' },
       { episodio: 'S02E05', inicio: '00:57:06', fim: '00:58:52', duracao: '1m46s', descricao: 'Cena de sexo com Aya Cash (Stormfront), exibindo decote acentuado e nudez parcial (nádegas).' },
@@ -138,6 +159,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Pacificador (Peacemaker)',
     tipo: 'serie',
     ano: 2022,
+    poster: tmdbPoster('/6LISnd63OYJb2aQWSr6msy8wvqR.jpg'),
+    banner: tmdbBackdrop('/xHrp2bh73FjwBRScLl9w0ZHNTeH.jpg'),
     entries: [
       { episodio: 'S01E01', inicio: '00:36:44', fim: '00:36:52', duracao: '08s', descricao: 'Os seios de Crystal roubam a cena durante sexo com John Cena.' },
       { episodio: 'S01E02', inicio: '00:36:21', fim: '00:36:51', duracao: '30s', descricao: 'Alison aproveita um momento de topless dividindo um baseado com John Cena e o Vigilante.' },
@@ -153,6 +176,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'La Casa de Papel',
     tipo: 'serie',
     ano: 2017,
+    poster: tmdbPoster('/g0GFAA123V5A89GnCIQUVLmZtah.jpg'),
+    banner: tmdbBackdrop('/56v2K8BlMEbTuIsmH2myT8+2Aer.jpg'),
     entries: [
       { episodio: 'S01E01', inicio: '00:25:30', fim: '00:26:07', duracao: '37s', descricao: 'Um cara puxa o decote de Alison Parker expondo seu seio esquerdo antes dela se afastar.' },
       { episodio: 'S01E10', inicio: '00:41:00', fim: '00:41:40', duracao: '40s', descricao: 'Ariadna tira a blusa no escritório expondo os seios para um homem.' },
@@ -167,6 +192,8 @@ const RAW_CATALOG: RawObra[] = [
     titulo: 'Peaky Blinders',
     tipo: 'serie',
     ano: 2013,
+    poster: tmdbPoster('/vJjopYJorgeJYWFwGROkpcbzIYc.jpg'),
+    banner: tmdbBackdrop('/6PX0r5TRRU5p0edZRNd0sCPMEgd.jpg'),
     entries: [
       { episodio: 'S01E05', inicio: '00:46:00', fim: '00:47:42', duracao: '1m42s', descricao: 'Annabelle Wallis mostra parte dos mamilos durante cena íntima com Cillian Murphy.' },
       { episodio: 'S02E04', inicio: '00:52:15', fim: '00:53:23', duracao: '1m08s', descricao: 'Vislumbre rápido do seio esquerdo de May Carleton ao tirar a camisola.' },
@@ -187,8 +214,8 @@ export const MINUTAGEM_CATALOG_OBRAS: Obra[] = RAW_CATALOG.map((raw) => ({
   ano: raw.ano,
   generos: raw.tipo === 'filme' ? ['Filme'] : ['Série'],
   sinopse: 'Catálogo de minutagem para streamers — conteúdo sensível catalogado pela equipe.',
-  banner: raw.tipo === 'filme' ? FILM_BANNER : SERIE_BANNER,
-  poster: raw.tipo === 'filme' ? FILM_POSTER : SERIE_POSTER,
+  banner: raw.banner,
+  poster: raw.poster,
   trailerUrl: '',
 }));
 

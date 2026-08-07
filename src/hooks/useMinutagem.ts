@@ -12,6 +12,8 @@ export interface MinutagemCatalogEntry {
   obraTitulo: string;
   tipo: string;
   markerCount: number;
+  poster?: string;
+  banner?: string;
 }
 
 export interface MinutagemMeStatus {

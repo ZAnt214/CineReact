@@ -23,6 +23,7 @@ export const CINE_REACT_CSP_DIRECTIVES = {
     "https://yt3.googleusercontent.com",
     "https://*.googleusercontent.com",
     "https://images.unsplash.com",
+    "https://image.tmdb.org",
   ],
   mediaSrc: ["'self'", "blob:", "https:"],
   objectSrc: ["'none'"],
