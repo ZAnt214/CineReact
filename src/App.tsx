@@ -14,6 +14,7 @@ import RowMoviesSkeleton from './components/RowMoviesSkeleton.tsx';
 import PlaybackSkeleton from './components/PlaybackSkeleton.tsx';
 import UserSettings from './components/UserSettings.tsx';
 import DonationsPage from './components/DonationsPage.tsx';
+import MinutagemPage from './components/MinutagemPage.tsx';
 import CreatorVerificationPage from './components/CreatorVerificationPage.tsx';
 import SubscriptionsPage from './components/SubscriptionsPage.tsx';
 import CreatorPartnerBanner from './components/CreatorPartnerBanner.tsx';
@@ -814,7 +815,7 @@ export default function App() {
   const isMaintenanceForVisitor = Boolean(platformSettings?.maintenanceMode && !user.isAdmin);
   const showCreatorBanner =
     isCreatorBannerVisible &&
-    !['landing', 'admin', 'doacoes', 'verificar-perfil', 'assinaturas', 'criadores-parceiros', 'download-logo', 'cineclips'].includes(currentTab) &&
+    !['landing', 'admin', 'doacoes', 'minutagem', 'verificar-perfil', 'assinaturas', 'criadores-parceiros', 'download-logo', 'cineclips'].includes(currentTab) &&
     !currentTab.startsWith('cineclips-hashtag-');
 
   if (!platformSettingsLoading && isMaintenanceForVisitor && platformSettings) {
@@ -1061,6 +1062,7 @@ export default function App() {
                       reacts={reacts.filter(r => r.obraId === selectedObraId)}
                       onPlayVideo={handlePlayVideo}
                       onBack={() => setCurrentTab('inicio')}
+                      onOpenMinutagem={() => setCurrentTab('minutagem')}
                     />
                   );
                 })()}
@@ -1460,6 +1462,26 @@ export default function App() {
                   user={user} 
                   onUpdateUser={setUser} 
                   onOpenAuth={openAuthModal} 
+                />
+              </motion.div>
+            )}
+
+            {currentTab === 'minutagem' && (
+              <motion.div
+                key="minutagem-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full flex-1"
+              >
+                <MinutagemPage
+                  user={user}
+                  onOpenAuth={() => openAuthModal('login')}
+                  onSelectObra={(id) => {
+                    setSelectedObraId(id);
+                    setSelectedReactId(null);
+                    setCurrentTab('obra');
+                  }}
                 />
               </motion.div>
             )}
