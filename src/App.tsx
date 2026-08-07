@@ -213,7 +213,12 @@ export default function App() {
     let cancelled = false;
     apiFetch('/api/auth/me')
       .then(async (res) => {
-        if (!res.ok) return null;
+        if (!res.ok) {
+          if (typeof window !== 'undefined' && localStorage.getItem('cine_react_user')) {
+            setUser({ isLoggedIn: false, nome: '', email: '', isAdmin: false });
+          }
+          return null;
+        }
         return res.json();
       })
       .then((data) => {
@@ -225,6 +230,34 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (currentTab !== 'admin') return;
+    let cancelled = false;
+    apiFetch('/api/auth/me')
+      .then(async (res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          setAuthNotice('Sessão expirada. Entre novamente com Discord para acessar o painel admin.');
+          setShowAuthModal(true);
+          setCurrentTab('home');
+          setUser({ isLoggedIn: false, nome: '', email: '', isAdmin: false });
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        if (!data?.success || !data.user?.isAdmin) {
+          setAuthNotice('Acesso restrito. Entre com a conta administradora (Discord) para gerenciar o site.');
+          setShowAuthModal(true);
+          setCurrentTab('home');
+        } else {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [currentTab]);
 
   useEffect(() => {
     if (!user.isLoggedIn || !user.email || user.isAdmin) {

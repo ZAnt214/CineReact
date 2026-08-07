@@ -31,6 +31,7 @@ import {
   findBlockedWord,
 } from "./src/utils/platformEnforcement.ts";
 import { autoLiftExpiredSuspensions, processScheduledPublications } from "./src/utils/adminJobs.ts";
+import { MASTER_EMAIL, isMasterAdminUser } from "./src/utils/platformEnforcement.ts";
 import { installSecurity, setSessionCookie } from "./src/security/installSecurity.ts";
 import {
   registerSecurityRoutes,
@@ -2958,6 +2959,22 @@ async function ensureBootstrapAdmin() {
   console.log("[Security] Conta administrativa inicial criada via variáveis de ambiente.");
 }
 
+/** Garante que a conta master do site mantém privilégios de admin após sync Supabase. */
+function findMasterAdminUserSync() {
+  const users = localDb.getUsuarios() || [];
+  const byProvider = users.find((u) => isMasterAdminUser(u));
+  if (byProvider) return byProvider;
+  return localDb.findUsuarioByEmailSync(MASTER_EMAIL.toLowerCase());
+}
+
+async function ensureMasterAdminAccount() {
+  const existing = findMasterAdminUserSync();
+  if (!existing) return;
+  if (existing.isAdmin && existing.role === 'admin') return;
+  await localDb.updateUsuario(existing.email, { isAdmin: true, role: 'admin' });
+  console.log('[Security] Privilégios de admin restaurados para conta master.');
+}
+
 async function installFrontendMiddleware(): Promise<void> {
   const distPath = path.join(process.cwd(), 'dist');
   const distIndex = path.join(distPath, 'index.html');
@@ -3050,6 +3067,9 @@ async function startServer() {
   ensureBootstrapAdmin().catch((err) => {
     console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);
   });
+  ensureMasterAdminAccount().catch((err) => {
+    console.warn('[Security] Falha ao garantir admin master:', err?.message || err);
+  });
 
   try {
     const count = localDb.applyMinutagemCatalog();
@@ -3071,6 +3091,7 @@ async function startServer() {
         ensureDemoCreatorProfile();
         if (success) {
           console.log('[Supabase] Sincronização inicial na inicialização concluída!');
+          await ensureMasterAdminAccount();
         } else {
           console.warn('[Supabase] Falha ao sincronizar dados iniciais do Supabase ou tabelas não criadas ainda.');
         }

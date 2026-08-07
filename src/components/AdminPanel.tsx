@@ -83,7 +83,7 @@ export default function AdminPanel({ user, onSelectObra, forcedTab, embedded = f
   const fetchSupabaseStatus = async () => {
     try {
       setLoadingSupabaseStatus(true);
-      const res = await fetch('/api/supabase/status');
+      const res = await adminFetch(user.email, '/api/supabase/status');
       if (res.ok) {
         const data = await res.json();
         setSupabaseStatus(data);
@@ -278,8 +278,8 @@ ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;`;
     try {
       setLoading(true);
       const [obrasRes, commentsRes, usersRes, reactsRes] = await Promise.all([
-        fetch('/api/obras').catch(() => null),
-        fetch('/api/comentarios').catch(() => null),
+        adminFetch(user.email, '/api/obras').catch(() => null),
+        adminFetch(user.email, '/api/comentarios').catch(() => null),
         adminFetch(user.email, '/api/usuarios').catch(() => null),
         adminFetch(user.email, '/api/reacts').catch(() => null),
       ]);
