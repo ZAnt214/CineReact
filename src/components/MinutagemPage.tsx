@@ -84,6 +84,18 @@ function marcacaoBadgeLabel(count: number): string {
   return count === 1 ? '1 marcação' : `${count} marcações`;
 }
 
+function TipoHeraldicBanner({ tipo }: { tipo: string }) {
+  const variant = tipo === 'filme' || tipo === 'serie' || tipo === 'anime' ? tipo : 'serie';
+  return (
+    <span className={`minutagem-heraldic-banner minutagem-heraldic-banner--${variant}`}>
+      <span className="minutagem-heraldic-banner__pole" aria-hidden />
+      <span className="minutagem-heraldic-banner__cloth">
+        <span className="minutagem-heraldic-banner__label">{tipoLabel(tipo)}</span>
+      </span>
+    </span>
+  );
+}
+
 function ObraCatalogCard({
   entry,
   onClick,
@@ -115,6 +127,8 @@ function ObraCatalogCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
+        <TipoHeraldicBanner tipo={entry.tipo} />
+
         {entry.markerCount > 0 && (
           <span
             className="absolute top-2 right-2 z-20 inline-flex items-center min-h-[24px] px-2.5 py-1 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-500/45 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] text-zinc-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)]"
@@ -124,10 +138,7 @@ function ObraCatalogCard({
         )}
 
         <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5">
-          <span className="text-[8px] sm:text-[9px] uppercase font-semibold tracking-wider text-zinc-200 bg-black/55 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/10">
-            {tipoLabel(entry.tipo)}
-          </span>
-          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug mt-1.5 group-hover/card:text-cine-accent-light transition-colors">
+          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
             {entry.obraTitulo}
           </h3>
         </div>
