@@ -3051,6 +3051,13 @@ async function startServer() {
     console.warn('[Security] Falha ao criar admin inicial:', err?.message || err);
   });
 
+  try {
+    const count = localDb.applyMinutagemCatalog();
+    console.log(`[Minutagem] Catálogo oficial aplicado (${count} marcadores).`);
+  } catch (err: any) {
+    console.warn('[Minutagem] Falha ao aplicar catálogo:', err?.message || err);
+  }
+
   syncChannelAvatars().catch(err => {
     console.warn('Aviso ao sincronizar avatares dos canais:', err?.message || err);
   });

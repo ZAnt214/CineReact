@@ -17,7 +17,7 @@ import type {
   MinutagemMarkerSubmission,
 } from '../../types/minutagem.ts';
 import { MINUTAGEM_CONTENT_LABELS } from '../../types/minutagem.ts';
-import { formatMinutagem, contentTypeLabel } from '../../minutagem/utils.ts';
+import { formatMinutagemRange, formatDuracaoSegundos, contentTypeLabel } from '../../minutagem/utils.ts';
 
 interface MinutagemAdminPageProps {
   email: string;
@@ -200,7 +200,7 @@ export default function MinutagemAdminPage({ email }: MinutagemAdminPageProps) {
                     <p className="text-xs text-zinc-500">
                       {contentTypeLabel(s.tipoConteudo)} ·{' '}
                       <span className="font-mono text-cyan-300">
-                        {formatMinutagem(s.minutos, s.segundos)}
+                        {formatMinutagemRange(s.minutos, s.segundos)}
                       </span>
                       {s.episodioNum ? ` · Ep. ${s.episodioNum}` : ''}
                     </p>
@@ -380,8 +380,10 @@ export default function MinutagemAdminPage({ email }: MinutagemAdminPageProps) {
                       <p className="text-xs text-zinc-500">
                         {contentTypeLabel(m.tipoConteudo)} ·{' '}
                         <span className="font-mono text-cyan-300">
-                          {formatMinutagem(m.minutos, m.segundos)}
+                          {formatMinutagemRange(m.minutos, m.segundos, m.fimMinutos, m.fimSegundos)}
                         </span>
+                        {m.duracaoSegundos ? ` · ${formatDuracaoSegundos(m.duracaoSegundos)}` : ''}
+                        {m.episodioLabel ? ` · ${m.episodioLabel}` : ''}
                         · {m.source}
                       </p>
                     </div>

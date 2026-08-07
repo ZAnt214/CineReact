@@ -24,7 +24,8 @@ import {
 import {
   contentTypeBadgeClass,
   contentTypeLabel,
-  formatMinutagem,
+  formatMinutagemRange,
+  formatDuracaoSegundos,
 } from '../minutagem/utils.ts';
 
 interface MinutagemPageProps {
@@ -255,7 +256,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                               className="flex items-start gap-3 p-3 rounded-xl bg-black/40 border border-neutral-800/80"
                             >
                               <span className="font-mono text-sm font-bold text-cyan-300 shrink-0 tabular-nums">
-                                {formatMinutagem(m.minutos, m.segundos)}
+                                {formatMinutagemRange(m.minutos, m.segundos, m.fimMinutos, m.fimSegundos)}
                               </span>
                               <div className="min-w-0 flex-1">
                                 <span
@@ -264,9 +265,16 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                                   {contentTypeLabel(m.tipoConteudo)}
                                 </span>
                                 <p className="text-sm text-zinc-200">{m.label}</p>
-                                {m.episodioNum && (
-                                  <p className="text-xs text-zinc-500 mt-0.5">Ep. {m.episodioNum}</p>
-                                )}
+                                <div className="flex flex-wrap gap-2 mt-0.5">
+                                  {m.episodioLabel && (
+                                    <p className="text-xs text-zinc-500">{m.episodioLabel}</p>
+                                  )}
+                                  {m.duracaoSegundos && (
+                                    <p className="text-xs text-zinc-600">
+                                      {formatDuracaoSegundos(m.duracaoSegundos)}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </li>
                           ))}

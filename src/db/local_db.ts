@@ -42,7 +42,11 @@ import { createDefaultProfile } from '../gamification/engine.ts';
 import { migrateProfile } from '../gamification/rewardsEngine.ts';
 import { hasSocialLinks } from '../utils/socialLinks.ts';
 import { OBRAS_INICIAIS, VIDEOS_INICIAIS } from '../data.ts';
-import { MINUTAGEM_SEED_MARKERS } from '../data/minutagemSeed.ts';
+import {
+  LEGACY_FAKE_MINUTAGEM_OBRA_IDS,
+  MINUTAGEM_CATALOG_MARKERS,
+  MINUTAGEM_CATALOG_OBRAS,
+} from '../data/minutagemCatalog.ts';
 import { getDataDir, isValidJsonFile, migrateLegacyFile } from './dataPaths.ts';
 import {
   persistCineClipsToSupabase,
@@ -79,24 +83,42 @@ function mergeUsuarioFromRemote(local: UserAccount | undefined, remote: UserAcco
   return merged;
 }
 
-function seedMinutagemIfEmpty(parsed: DbSchema) {
+function syncMinutagemCatalog(parsed: DbSchema): void {
   if (!parsed.minutagemMarkers) parsed.minutagemMarkers = [];
-  if (parsed.minutagemMarkers.length > 0) return;
+  if (!parsed.obras) parsed.obras = [];
 
-  const obras = parsed.obras || [];
-  const now = new Date().toISOString();
-  for (const seed of MINUTAGEM_SEED_MARKERS) {
-    const obraExists = obras.some((o) => o.id === seed.obraId);
-    if (!obraExists) continue;
-    parsed.minutagemMarkers.push({
-      ...seed,
-      id: `mm-${seed.obraId}-${seed.minutos}-${Math.random().toString(36).slice(2, 6)}`,
-      createdAt: now,
-    });
+  parsed.minutagemMarkers = parsed.minutagemMarkers.filter(
+    (m) =>
+      !LEGACY_FAKE_MINUTAGEM_OBRA_IDS.includes(m.obraId) &&
+      !m.label.toLowerCase().includes('(exemplo)')
+  );
+
+  for (const obra of MINUTAGEM_CATALOG_OBRAS) {
+    if (!parsed.obras.some((o) => o.id === obra.id)) {
+      parsed.obras.push(obra);
+    }
   }
-  if (parsed.minutagemMarkers.length > 0) {
-    saveDb(parsed);
-    console.log(`[Minutagem] ${parsed.minutagemMarkers.length} marcadores iniciais carregados.`);
+
+  const catalogIds = new Set(MINUTAGEM_CATALOG_MARKERS.map((m) => m.id));
+  parsed.minutagemMarkers = parsed.minutagemMarkers.filter(
+    (m) => !m.id.startsWith('mm-catalog-') || catalogIds.has(m.id)
+  );
+
+  const existingIds = new Set(parsed.minutagemMarkers.map((m) => m.id));
+  let added = 0;
+  for (const marker of MINUTAGEM_CATALOG_MARKERS) {
+    if (existingIds.has(marker.id)) {
+      const idx = parsed.minutagemMarkers.findIndex((m) => m.id === marker.id);
+      if (idx >= 0) parsed.minutagemMarkers[idx] = { ...marker };
+      continue;
+    }
+    parsed.minutagemMarkers.push({ ...marker });
+    added += 1;
+  }
+
+  saveDb(parsed);
+  if (added > 0) {
+    console.log(`[Minutagem] ${added} marcadores oficiais adicionados (${MINUTAGEM_CATALOG_MARKERS.length} no catálogo).`);
   }
 }
 
@@ -261,7 +283,7 @@ function initDb(): DbSchema {
         saveDb(parsed);
       }
 
-      seedMinutagemIfEmpty(parsed);
+      syncMinutagemCatalog(parsed);
 
       if (!parsed.financeTransactions) parsed.financeTransactions = [];
       if (!parsed.platformSubscriptions) parsed.platformSubscriptions = [];
@@ -340,7 +362,7 @@ function initDb(): DbSchema {
     financialAuditLog: [],
   };
 
-  seedMinutagemIfEmpty(initialDb);
+  syncMinutagemCatalog(initialDb);
   saveDb(initialDb);
   return initialDb;
 }
@@ -2005,6 +2027,11 @@ export const localDb = {
         markerCount: counts[o.id] || 0,
       }))
       .sort((a, b) => b.markerCount - a.markerCount || a.obraTitulo.localeCompare(b.obraTitulo));
+  },
+
+  applyMinutagemCatalog: () => {
+    syncMinutagemCatalog(dbCache);
+    return dbCache.minutagemMarkers?.length || 0;
   },
 
   saveBackupRecord: (record: import('../types/admin.ts').BackupRecord & { fileName?: string }): void => {

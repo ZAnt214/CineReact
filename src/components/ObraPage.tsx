@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import OptimizedImage from './OptimizedImage.tsx';
 import CineReactLogo from './CineReactLogo.tsx';
 import { useMinutagemMarkers } from '../hooks/useMinutagem.ts';
-import { formatMinutagem, contentTypeLabel, contentTypeBadgeClass } from '../minutagem/utils.ts';
+import { formatMinutagemRange, contentTypeLabel, contentTypeBadgeClass } from '../minutagem/utils.ts';
 
 interface ObraPageProps {
   obra: Obra;
@@ -107,12 +107,15 @@ export default function ObraPage({ obra, reacts, onPlayVideo, onBack, onOpenMinu
               {markers.slice(0, 5).map((m) => (
                 <li key={m.id} className="flex items-center gap-3 text-sm">
                   <span className="font-mono text-cyan-300 font-bold shrink-0">
-                    {formatMinutagem(m.minutos, m.segundos)}
+                    {formatMinutagemRange(m.minutos, m.segundos, m.fimMinutos, m.fimSegundos)}
                   </span>
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${contentTypeBadgeClass(m.tipoConteudo)}`}>
                     {contentTypeLabel(m.tipoConteudo)}
                   </span>
                   <span className="text-zinc-300 truncate">{m.label}</span>
+                  {m.episodioLabel && (
+                    <span className="text-xs text-zinc-500 shrink-0">{m.episodioLabel}</span>
+                  )}
                 </li>
               ))}
               {markers.length > 5 && onOpenMinutagem && (

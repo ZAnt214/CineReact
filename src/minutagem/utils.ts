@@ -41,14 +41,43 @@ export function parseMinutagemInput(raw: string): { minutos: number; segundos: n
   return { minutos, segundos: 0 };
 }
 
-export function formatMinutagem(minutos: number, segundos = 0): string {
+export function formatMinutagemClock(minutos: number, segundos = 0): string {
   const total = minutos * 60 + segundos;
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}min`;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+export function formatMinutagem(minutos: number, segundos = 0): string {
+  const total = minutos * 60 + segundos;
+  const h = Math.floor(total / 3600);
+  if (h > 0) return formatMinutagemClock(minutos, segundos);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
   if (s > 0) return `${m}:${String(s).padStart(2, '0')}`;
   return `${m} min`;
+}
+
+export function formatMinutagemRange(
+  minutos: number,
+  segundos = 0,
+  fimMinutos?: number,
+  fimSegundos?: number
+): string {
+  const inicio = formatMinutagemClock(minutos, segundos);
+  if (fimMinutos !== undefined) {
+    return `${inicio} → ${formatMinutagemClock(fimMinutos, fimSegundos || 0)}`;
+  }
+  return inicio;
+}
+
+export function formatDuracaoSegundos(segundos?: number): string | null {
+  if (!segundos || segundos <= 0) return null;
+  if (segundos < 60) return `${segundos}s`;
+  const m = Math.floor(segundos / 60);
+  const s = segundos % 60;
+  return s > 0 ? `${m}m${String(s).padStart(2, '0')}s` : `${m}min`;
 }
 
 export function contentTypeLabel(tipo: MinutagemContentType): string {

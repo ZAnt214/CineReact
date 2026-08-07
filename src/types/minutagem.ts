@@ -11,10 +11,17 @@ export interface MinutagemMarker {
   tipoConteudo: MinutagemContentType;
   /** Nome ou descrição curta do momento */
   label: string;
-  /** Minuto do filme/série (1 = primeiro minuto) */
+  /** Minuto do filme/série (desde o início) */
   minutos: number;
   segundos?: number;
+  /** Fim do momento (opcional) */
+  fimMinutos?: number;
+  fimSegundos?: number;
+  /** Duração em segundos (opcional) */
+  duracaoSegundos?: number;
   episodioNum?: number;
+  /** Ex: S01E02 */
+  episodioLabel?: string;
   submittedByEmail?: string;
   approvedByEmail?: string;
   source: 'admin' | 'fan' | 'analysis';
