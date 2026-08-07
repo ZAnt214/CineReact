@@ -94,44 +94,49 @@ function ObraCatalogCard({
   return (
     <motion.button
       type="button"
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut', delay: Math.min(index * 0.04, 0.24) }}
+      transition={{ duration: 0.3, ease: 'easeOut', delay: Math.min(index * 0.03, 0.18) }}
       onClick={onClick}
-      className="catalog-card-standard catalog-card rounded-2xl overflow-hidden cursor-pointer group/card flex flex-col h-full md:select-none text-left w-full"
+      className="catalog-card-standard catalog-card rounded-xl overflow-hidden cursor-pointer group/card md:select-none text-left w-full"
     >
-      <div className="relative aspect-3/4 w-full overflow-hidden shrink-0 catalog-card-thumb catalog-card-standard-thumb bg-neutral-950">
+      <div className="relative w-full h-[148px] sm:h-[176px] md:h-[200px] lg:h-[220px] overflow-hidden catalog-card-thumb catalog-card-standard-thumb bg-neutral-950">
         {entry.poster ? (
           <OptimizedImage
             src={entry.poster}
             alt={entry.obraTitulo}
             lite
             loading={index < 6 ? 'eager' : 'lazy'}
-            className="w-full h-full object-cover md:group-hover/card:scale-[1.03] md:transition-transform md:duration-300"
+            className="w-full h-full object-cover md:group-hover/card:scale-[1.04] md:transition-transform md:duration-300"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-cine-accent-light/50">
-            <Icon className="w-10 h-10" />
+          <div className="absolute inset-0 flex items-center justify-center text-cine-accent-light/40">
+            <Icon className="w-8 h-8" />
           </div>
         )}
 
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent opacity-90" />
+
         {entry.markerCount > 0 && (
-          <span className="absolute top-2.5 right-2.5 z-20 catalog-card-duration shadow-md text-[10px] font-bold uppercase tracking-wide">
+          <span className="absolute top-2 right-2 z-20 catalog-card-duration shadow-md text-[9px] font-bold uppercase tracking-wide px-2 py-0.5">
             {entry.markerCount} aviso{entry.markerCount !== 1 ? 's' : ''}
           </span>
         )}
-      </div>
 
-      <div className="p-3.5 sm:p-4 flex flex-col gap-2 catalog-card-standard-body">
-        <span className="text-[9px] uppercase font-mono bg-neutral-800/50 backdrop-blur-xs px-1.5 py-0.5 rounded text-zinc-400 self-start">
-          {tipoLabel(entry.tipo)}
-        </span>
-        <h3 className="text-sm sm:text-base font-bold text-white line-clamp-2 leading-snug min-h-[2.5rem] md:group-hover/card:text-cine-accent-light transition-colors">
-          {entry.obraTitulo}
-        </h3>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 pt-1 border-t border-cine-border/25">
-          Ver minutagem
-        </p>
+        <div className="absolute inset-x-0 bottom-0 z-10 p-2.5 sm:p-3">
+          <span className="text-[8px] sm:text-[9px] uppercase font-mono font-bold tracking-wider text-cine-accent-light/90 bg-black/45 backdrop-blur-sm px-1.5 py-0.5 rounded">
+            {tipoLabel(entry.tipo)}
+          </span>
+          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug mt-1.5 group-hover/card:text-cine-accent-light transition-colors">
+            {entry.obraTitulo}
+          </h3>
+        </div>
+
+        <div className="absolute inset-0 z-10 bg-black/35 opacity-0 md:group-hover/card:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cine-accent text-white flex items-center justify-center shadow-lg">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+        </div>
       </div>
     </motion.button>
   );
@@ -419,15 +424,23 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                         Nenhum título com minutagem encontrado.
                       </div>
                     ) : (
-                      <div className="grid grid-cols-3 gap-3 sm:gap-5 md:gap-6">
-                        {catalogWithMarkers.map((entry, index) => (
-                          <ObraCatalogCard
-                            key={entry.obraId}
-                            entry={entry}
-                            index={index}
-                            onClick={() => openObra(entry.obraId)}
-                          />
-                        ))}
+                      <div className="space-y-4">
+                        <div className="flex items-end justify-between gap-3 px-0.5">
+                          <p className="text-xs sm:text-sm text-zinc-500">
+                            <span className="font-bold text-zinc-300">{catalogWithMarkers.length}</span>
+                            título{catalogWithMarkers.length !== 1 ? 's' : ''} com minutagem
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2.5 sm:gap-4 md:gap-5">
+                          {catalogWithMarkers.map((entry, index) => (
+                            <ObraCatalogCard
+                              key={entry.obraId}
+                              entry={entry}
+                              index={index}
+                              onClick={() => openObra(entry.obraId)}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
 
