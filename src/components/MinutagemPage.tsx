@@ -80,6 +80,10 @@ function MinutagemMarkerCard({ marker }: { marker: MinutagemMarker }) {
   );
 }
 
+function avisoBadgeLabel(count: number): string {
+  return count === 1 ? '1 aviso' : `${count} avisos`;
+}
+
 function ObraCatalogCard({
   entry,
   onClick,
@@ -111,22 +115,19 @@ function ObraCatalogCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
+        {entry.markerCount > 0 && (
+          <span
+            className="absolute top-2 right-2 z-20 inline-flex items-center min-h-[24px] px-2.5 py-1 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-500/45 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] text-zinc-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)]"
+          >
+            {avisoBadgeLabel(entry.markerCount)}
+          </span>
+        )}
+
         <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-[8px] sm:text-[9px] uppercase font-mono font-bold tracking-wider text-zinc-200 bg-black/55 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/10">
-              {tipoLabel(entry.tipo)}
-            </span>
-            {entry.markerCount > 0 && (
-              <span
-                className="inline-flex items-center gap-1 min-h-[22px] px-1.5 sm:px-2 rounded-md bg-black/60 backdrop-blur-md border border-cine-accent/35 text-[9px] sm:text-[10px] font-bold text-cine-accent-light tabular-nums leading-none shrink-0"
-                aria-label={`${entry.markerCount} aviso${entry.markerCount !== 1 ? 's' : ''}`}
-              >
-                <Clock className="w-3 h-3 shrink-0 opacity-90" aria-hidden />
-                <span>{entry.markerCount}</span>
-              </span>
-            )}
-          </div>
-          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
+          <span className="text-[8px] sm:text-[9px] uppercase font-semibold tracking-wider text-zinc-200 bg-black/55 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/10">
+            {tipoLabel(entry.tipo)}
+          </span>
+          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug mt-1.5 group-hover/card:text-cine-accent-light transition-colors">
             {entry.obraTitulo}
           </h3>
         </div>
@@ -249,7 +250,8 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
             Índice de timestamps — conteúdo sensível
           </h1>
           <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg">
-            Marcadores por obra (filme/série). Intervalos em min:seg e classificação de cena.
+            Consulta quando cada cena sensível começa e termina em filmes e séries. Clique no poster
+            para ver todos os avisos do título.
           </p>
           <div
             className="mt-4 h-px bg-gradient-to-r from-zinc-700/40 via-neutral-800/80 to-transparent"
