@@ -84,22 +84,16 @@ function marcacaoBadgeLabel(count: number): string {
   return count === 1 ? '1 marcação' : `${count} marcações`;
 }
 
-function TipoHeraldicBanner({ tipo }: { tipo: string }) {
+function TipoMedievalStrip({ tipo }: { tipo: string }) {
   const variant = tipo === 'filme' || tipo === 'serie' || tipo === 'anime' ? tipo : 'serie';
   const label = tipoLabel(tipo);
   return (
     <span
-      className={`minutagem-heraldic-banner minutagem-heraldic-banner--${variant}`}
+      className={`minutagem-tipo-strip minutagem-tipo-strip--${variant}`}
       aria-label={label}
     >
-      <span className="minutagem-heraldic-banner__mast" aria-hidden>
-        <span className="minutagem-heraldic-banner__finial" />
-        <span className="minutagem-heraldic-banner__pole" />
-      </span>
-      <span className="minutagem-heraldic-banner__cloth">
-        <span className="minutagem-heraldic-banner__shine" aria-hidden />
-        <span className="minutagem-heraldic-banner__label">{label}</span>
-      </span>
+      <span className="minutagem-tipo-strip__shine" aria-hidden />
+      <span className="minutagem-tipo-strip__label">{label}</span>
     </span>
   );
 }
@@ -135,11 +129,11 @@ function ObraCatalogCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
-        <TipoHeraldicBanner tipo={entry.tipo} />
+        <TipoMedievalStrip tipo={entry.tipo} />
 
         {entry.markerCount > 0 && (
           <span
-            className="absolute top-2 right-2 z-20 inline-flex items-center min-h-[24px] px-2.5 py-1 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-500/45 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] text-zinc-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)]"
+            className="absolute top-2 right-2 z-30 inline-flex items-center min-h-[24px] px-2.5 py-1 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-500/45 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] text-zinc-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)]"
           >
             {marcacaoBadgeLabel(entry.markerCount)}
           </span>
