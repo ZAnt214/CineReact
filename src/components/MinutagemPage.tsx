@@ -80,8 +80,8 @@ function MinutagemMarkerCard({ marker }: { marker: MinutagemMarker }) {
   );
 }
 
-function avisoBadgeLabel(count: number): string {
-  return count === 1 ? '1 aviso' : `${count} avisos`;
+function marcacaoBadgeLabel(count: number): string {
+  return count === 1 ? '1 marcação' : `${count} marcações`;
 }
 
 function ObraCatalogCard({
@@ -119,7 +119,7 @@ function ObraCatalogCard({
           <span
             className="absolute top-2 right-2 z-20 inline-flex items-center min-h-[24px] px-2.5 py-1 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-500/45 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] text-zinc-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)]"
           >
-            {avisoBadgeLabel(entry.markerCount)}
+            {marcacaoBadgeLabel(entry.markerCount)}
           </span>
         )}
 
@@ -251,7 +251,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
           </h1>
           <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed max-w-lg">
             Consulta quando cada cena sensível começa e termina em filmes e séries. Clique no poster
-            para ver todos os avisos do título.
+            para ver todas as marcações do título.
           </p>
           <div
             className="mt-4 h-px bg-gradient-to-r from-zinc-700/40 via-neutral-800/80 to-transparent"
