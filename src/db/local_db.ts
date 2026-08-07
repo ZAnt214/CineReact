@@ -94,8 +94,12 @@ function syncMinutagemCatalog(parsed: DbSchema): void {
   );
 
   for (const obra of MINUTAGEM_CATALOG_OBRAS) {
-    if (!parsed.obras.some((o) => o.id === obra.id)) {
+    const existing = parsed.obras.find((o) => o.id === obra.id);
+    if (!existing) {
       parsed.obras.push(obra);
+    } else {
+      existing.poster = obra.poster;
+      existing.banner = obra.banner;
     }
   }
 
@@ -2011,6 +2015,8 @@ export const localDb = {
     obraTitulo: string;
     tipo: string;
     markerCount: number;
+    poster?: string;
+    banner?: string;
   }> => {
     const obras = dbCache.obras || [];
     const markers = dbCache.minutagemMarkers || [];
@@ -2025,6 +2031,8 @@ export const localDb = {
         obraTitulo: o.titulo,
         tipo: o.tipo,
         markerCount: counts[o.id] || 0,
+        poster: o.poster,
+        banner: o.banner,
       }))
       .sort((a, b) => b.markerCount - a.markerCount || a.obraTitulo.localeCompare(b.obraTitulo));
   },

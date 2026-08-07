@@ -34,6 +34,7 @@ import {
   formatMinutagemRange,
   formatDuracaoSegundos,
 } from '../minutagem/utils.ts';
+import OptimizedImage from './OptimizedImage.tsx';
 
 interface MinutagemPageProps {
   user: UserState;
@@ -93,31 +94,39 @@ function ObraCatalogCard({
     <button
       type="button"
       onClick={onClick}
-      className="group text-left rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 transition-all hover:border-cyan-500/35 hover:bg-cyan-500/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40"
+      className="group text-left rounded-2xl border border-neutral-800 bg-neutral-950/60 overflow-hidden transition-all hover:border-cyan-500/35 hover:bg-cyan-500/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-cyan-400 group-hover:border-cyan-500/30">
-            <Icon className="w-4 h-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="font-bold text-white leading-snug line-clamp-2 group-hover:text-cyan-100 transition-colors">
-              {entry.obraTitulo}
-            </p>
-            <p className="text-xs text-zinc-500 mt-1 capitalize">{tipoLabel(entry.tipo)}</p>
+      <div className="relative aspect-[2/3] bg-neutral-900 overflow-hidden">
+        {entry.poster ? (
+          <OptimizedImage
+            src={entry.poster}
+            alt={entry.obraTitulo}
+            lite
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-cyan-400/60">
+            <Icon className="w-10 h-10" />
           </div>
-        </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 mt-1 group-hover:text-cyan-400 transition-colors" />
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-2 pt-3 border-t border-neutral-800/60">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-          {entry.markerCount > 0 ? 'Ver minutagem' : 'Sem avisos'}
-        </span>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
         {entry.markerCount > 0 && (
-          <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/25">
+          <span className="absolute top-2 right-2 text-[10px] font-black uppercase px-2 py-1 rounded-full bg-cyan-500/90 text-black shadow-lg">
             {entry.markerCount} aviso{entry.markerCount !== 1 ? 's' : ''}
           </span>
         )}
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <p className="font-bold text-white text-sm leading-snug line-clamp-2 drop-shadow-md">
+            {entry.obraTitulo}
+          </p>
+          <p className="text-[10px] text-zinc-300 mt-0.5 capitalize">{tipoLabel(entry.tipo)}</p>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-t border-neutral-800/60">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 group-hover:text-cyan-400/80 transition-colors">
+          Ver minutagem
+        </span>
+        <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 group-hover:text-cyan-400 transition-colors" />
       </div>
     </button>
   );
@@ -290,41 +299,66 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                       Voltar ao catálogo
                     </button>
 
-                    <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-cyan-500/8 to-neutral-950/80 p-5 md:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/80 mb-1">
-                            {tipoLabel(selectedEntry?.tipo || '')}
-                          </p>
-                          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-                            {selectedEntry?.obraTitulo}
-                          </h2>
-                          <p className="text-sm text-zinc-500 mt-2">
-                            {markersLoading
-                              ? 'Carregando...'
-                              : `${markers.length} momento(s) catalogado(s)`}
-                          </p>
+                    <div className="relative rounded-2xl border border-cyan-500/20 overflow-hidden">
+                      {(selectedEntry?.banner || selectedEntry?.poster) && (
+                        <div className="absolute inset-0">
+                          <OptimizedImage
+                            src={selectedEntry.banner || selectedEntry.poster}
+                            alt=""
+                            lite
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#07090f] via-[#07090f]/85 to-black/50" />
                         </div>
-                        <div className="flex flex-wrap gap-2 shrink-0">
-                          {onSelectObra && (
-                            <button
-                              type="button"
-                              onClick={() => onSelectObra(selectedObraId)}
-                              className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
-                            >
-                              Ver reacts
-                            </button>
+                      )}
+                      <div className="relative p-5 md:p-6 bg-gradient-to-b from-cyan-500/8 to-neutral-950/80">
+                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                          {selectedEntry?.poster && (
+                            <div className="hidden sm:block w-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg aspect-[2/3]">
+                              <OptimizedImage
+                                src={selectedEntry.poster}
+                                alt={selectedEntry.obraTitulo}
+                                lite
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSubmitObraId(selectedObraId);
-                              setPanel('submit');
-                            }}
-                            className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
-                          >
-                            Contribuir
-                          </button>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 flex-1 min-w-0">
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/80 mb-1">
+                                {tipoLabel(selectedEntry?.tipo || '')}
+                              </p>
+                              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                                {selectedEntry?.obraTitulo}
+                              </h2>
+                              <p className="text-sm text-zinc-400 mt-2">
+                                {markersLoading
+                                  ? 'Carregando...'
+                                  : `${markers.length} momento(s) catalogado(s)`}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 shrink-0">
+                              {onSelectObra && (
+                                <button
+                                  type="button"
+                                  onClick={() => onSelectObra(selectedObraId)}
+                                  className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
+                                >
+                                  Ver reacts
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSubmitObraId(selectedObraId);
+                                  setPanel('submit');
+                                }}
+                                className="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-700 text-zinc-300 hover:border-cyan-500/40 hover:text-white"
+                              >
+                                Contribuir
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -393,7 +427,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                             <h2 className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 px-1">
                               {tipoLabel(tipo)}
                             </h2>
-                            <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                               {entries.map((entry) => (
                                 <ObraCatalogCard
                                   key={entry.obraId}
