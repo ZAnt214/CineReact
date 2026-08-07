@@ -13,7 +13,7 @@ import {
   BadgeCheck,
   Radio,
   Download,
-  Shield,
+  Clock,
 } from 'lucide-react';
 import { useSideNavStore, sideNavStore } from '../hooks/useSideNavStore.ts';
 import { DEMO_CREATOR_EMAIL } from '../constants/demoCreator.ts';
@@ -37,7 +37,7 @@ const CATALOG_NAV_ITEMS = [
 ] as const;
 
 const ACCOUNT_NAV_ITEMS = [
-  { id: 'minutagem', label: 'Minutagem', icon: Shield },
+  { id: 'minutagem', label: 'Minutagem', icon: Clock },
   { id: 'club', label: 'CineReact Club', icon: Trophy },
   { id: 'download-logo', label: 'Baixar Logo', icon: Download },
 ] as const;
