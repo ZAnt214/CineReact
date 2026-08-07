@@ -2839,6 +2839,57 @@ video {
   -webkit-user-drag: none !important;
 }
 
+/* Keep horizontal carousels responsive without trapping vertical touch gestures. */
+.catalog-carousel {
+  touch-action: pan-x pan-y pinch-zoom;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .catalog-card:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+  }
+
+  .catalog-card:hover .catalog-card-thumbnail {
+    transform: scale(1.05);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .catalog-carousel {
+    scroll-snap-type: none !important;
+  }
+
+  .catalog-card,
+  .catalog-card-thumbnail {
+    transform: none !important;
+  }
+
+  .catalog-card {
+    contain: layout paint style;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+
+  .catalog-card-thumbnail {
+    transition: none;
+  }
+
+  .catalog-card-badge {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .catalog-carousel-arrow {
+    display: none !important;
+  }
+}
+
 html, body, #root {
   background-color: var(--color-cine-bg);
   color: var(--color-cine-cream);
