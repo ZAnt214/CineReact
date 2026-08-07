@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Tv,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import type { UserState } from '../types.ts';
 import type { MinutagemMarker } from '../types/minutagem.ts';
 import {
@@ -83,22 +83,17 @@ function MinutagemMarkerCard({ marker }: { marker: MinutagemMarker }) {
 function ObraCatalogCard({
   entry,
   onClick,
-  index = 0,
 }: {
   entry: MinutagemCatalogEntry;
   onClick: () => void;
-  index?: number;
 }) {
   const Icon = entry.tipo === 'filme' ? Film : Tv;
 
   return (
-    <motion.button
+    <button
       type="button"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut', delay: Math.min(index * 0.03, 0.18) }}
       onClick={onClick}
-      className="catalog-card-standard catalog-card rounded-xl overflow-hidden cursor-pointer group/card md:select-none text-left w-full"
+      className="catalog-card-standard catalog-card minutagem-catalog-card rounded-xl overflow-hidden cursor-pointer group/card md:select-none text-left w-full"
     >
       <div className="relative w-full h-[148px] sm:h-[176px] md:h-[200px] lg:h-[220px] overflow-hidden catalog-card-thumb catalog-card-standard-thumb bg-neutral-950">
         {entry.poster ? (
@@ -106,7 +101,6 @@ function ObraCatalogCard({
             src={entry.poster}
             alt={entry.obraTitulo}
             lite
-            loading={index < 6 ? 'eager' : 'lazy'}
             className="w-full h-full object-cover md:group-hover/card:scale-[1.04] md:transition-transform md:duration-300"
           />
         ) : (
@@ -115,30 +109,35 @@ function ObraCatalogCard({
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
-        {entry.markerCount > 0 && (
-          <span className="absolute top-2 right-2 z-20 catalog-card-duration shadow-md text-[9px] font-bold uppercase tracking-wide px-2 py-0.5">
-            {entry.markerCount} aviso{entry.markerCount !== 1 ? 's' : ''}
-          </span>
-        )}
-
-        <div className="absolute inset-x-0 bottom-0 z-10 p-2.5 sm:p-3">
-          <span className="text-[8px] sm:text-[9px] uppercase font-mono font-bold tracking-wider text-cine-accent-light/90 bg-black/45 backdrop-blur-sm px-1.5 py-0.5 rounded">
-            {tipoLabel(entry.tipo)}
-          </span>
-          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug mt-1.5 group-hover/card:text-cine-accent-light transition-colors">
+        <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="text-[8px] sm:text-[9px] uppercase font-mono font-bold tracking-wider text-zinc-200 bg-black/55 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/10">
+              {tipoLabel(entry.tipo)}
+            </span>
+            {entry.markerCount > 0 && (
+              <span
+                className="inline-flex items-center gap-1 min-h-[22px] px-1.5 sm:px-2 rounded-md bg-black/60 backdrop-blur-md border border-cine-accent/35 text-[9px] sm:text-[10px] font-bold text-cine-accent-light tabular-nums leading-none shrink-0"
+                aria-label={`${entry.markerCount} aviso${entry.markerCount !== 1 ? 's' : ''}`}
+              >
+                <Clock className="w-3 h-3 shrink-0 opacity-90" aria-hidden />
+                <span>{entry.markerCount}</span>
+              </span>
+            )}
+          </div>
+          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
             {entry.obraTitulo}
           </h3>
         </div>
 
-        <div className="absolute inset-0 z-10 bg-black/35 opacity-0 md:group-hover/card:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-[5] bg-black/35 opacity-0 md:group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cine-accent text-white flex items-center justify-center shadow-lg">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
 
@@ -184,7 +183,6 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
 
   const openObra = (obraId: string) => {
     setSelectedObraId(obraId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const closeObra = () => setSelectedObraId(null);
@@ -241,7 +239,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
   };
 
   return (
-    <div className="w-full flex-1">
+    <div className="w-full flex-1 minutagem-page">
       <div className="cine-container pt-24 pb-20 space-y-8">
         <header className="relative pt-2 pb-2 md:pb-4">
           <p className="text-[11px] uppercase tracking-[0.32em] text-zinc-500 font-semibold">
@@ -283,14 +281,12 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
 
           {panel === 'browse' && (
             <div className="space-y-6">
-              <AnimatePresence mode="wait">
                 {selectedObraId ? (
                   <motion.div
                     key={`detail-${selectedObraId}`}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="space-y-6"
                   >
                     <button
@@ -395,14 +391,7 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                     )}
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="catalog"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
-                    className="space-y-8"
-                  >
+                  <div className="space-y-8 minutagem-catalog-panel">
                     <div className="relative">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                       <input
@@ -431,12 +420,11 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                             título{catalogWithMarkers.length !== 1 ? 's' : ''} com minutagem
                           </p>
                         </div>
-                        <div className="grid grid-cols-3 gap-2.5 sm:gap-4 md:gap-5">
-                          {catalogWithMarkers.map((entry, index) => (
+                        <div className="grid grid-cols-3 gap-2.5 sm:gap-4 md:gap-5 minutagem-catalog-grid">
+                          {catalogWithMarkers.map((entry) => (
                             <ObraCatalogCard
                               key={entry.obraId}
                               entry={entry}
-                              index={index}
                               onClick={() => openObra(entry.obraId)}
                             />
                           ))}
@@ -483,9 +471,8 @@ export default function MinutagemPage({ user, onOpenAuth, onSelectObra }: Minuta
                         )}
                       </section>
                     )}
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
             </div>
           )}
 

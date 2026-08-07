@@ -3057,6 +3057,32 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   border-top: 1px solid color-mix(in srgb, var(--color-cine-border) 55%, transparent);
 }
 
+/* Minutagem — rolagem fluida e cards que não capturam o gesto vertical */
+.minutagem-page {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.minutagem-catalog-grid,
+.minutagem-catalog-panel {
+  touch-action: pan-y;
+}
+
+.minutagem-catalog-card {
+  touch-action: pan-y;
+}
+
+@media (pointer: coarse) {
+  .minutagem-catalog-card.catalog-card-standard {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transform: none !important;
+  }
+
+  .minutagem-catalog-card.catalog-card-standard:active {
+    transform: none !important;
+  }
+}
+
 /* Painéis neutros */
 .cine-cozy-panel {
   background: color-mix(in srgb, var(--color-cine-surface) 88%, transparent);
