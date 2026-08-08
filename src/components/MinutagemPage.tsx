@@ -84,22 +84,16 @@ function marcacaoBadgeLabel(count: number): string {
   return count === 1 ? '1 marcação' : `${count} marcações`;
 }
 
-function TipoMedievalStrip({ tipo, markerCount = 0 }: { tipo: string; markerCount?: number }) {
+function TipoMedievalStrip({ tipo }: { tipo: string }) {
   const variant = tipo === 'filme' || tipo === 'serie' || tipo === 'anime' ? tipo : 'serie';
   const label = tipoLabel(tipo);
-  const countLabel = markerCount > 0 ? marcacaoBadgeLabel(markerCount) : '';
   return (
     <span
-      className="minutagem-tipo-strip"
-      aria-label={countLabel ? `${label} — ${countLabel}` : label}
+      className={`minutagem-tipo-strip minutagem-tipo-strip--${variant}`}
+      aria-label={label}
     >
-      <span className={`minutagem-tipo-strip__main minutagem-tipo-strip__main--${variant}`}>
-        <span className="minutagem-tipo-strip__shine" aria-hidden />
-        <span className="minutagem-tipo-strip__label">{label}</span>
-      </span>
-      {markerCount > 0 && (
-        <span className="minutagem-tipo-strip__count">{countLabel}</span>
-      )}
+      <span className="minutagem-tipo-strip__shine" aria-hidden />
+      <span className="minutagem-tipo-strip__label">{label}</span>
     </span>
   );
 }
@@ -135,9 +129,12 @@ function ObraCatalogCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
-        <TipoMedievalStrip tipo={entry.tipo} markerCount={entry.markerCount} />
+        <TipoMedievalStrip tipo={entry.tipo} />
 
         <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5">
+          {entry.markerCount > 0 && (
+            <span className="minutagem-marcacao-chip mb-1">{marcacaoBadgeLabel(entry.markerCount)}</span>
+          )}
           <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
             {entry.obraTitulo}
           </h3>
