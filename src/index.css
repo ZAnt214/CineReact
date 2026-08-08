@@ -1649,6 +1649,10 @@
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
 }
 
 .cineclips-device {
@@ -1660,6 +1664,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  isolation: isolate;
 }
 
 .cineclips-play-flash {
@@ -1805,6 +1811,8 @@
 }
 
 .cineclips-feed {
+  flex: 1 1 auto;
+  min-height: 0;
   height: 100%;
   max-height: 100%;
   overflow-y: scroll;
@@ -1845,7 +1853,7 @@
   scroll-snap-stop: always;
   overflow: hidden;
   content-visibility: auto;
-  contain-intrinsic-size: 100dvh;
+  contain-intrinsic-size: auto 100%;
 }
 
 .cineclips-slide-media {
@@ -1946,6 +1954,11 @@
   padding: 1.25rem;
 }
 
+.cineclips-device .cineclips-welcome-overlay,
+.cineclips-device .cineclips-sheet-overlay {
+  position: absolute;
+}
+
 .cineclips-welcome-backdrop {
   position: absolute;
   inset: 0;
@@ -2035,6 +2048,10 @@
   font-weight: 600;
   text-align: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.cineclips-device .cineclips-toast-minimal {
+  position: absolute;
 }
 
 .cineclips-state-message {
@@ -2196,126 +2213,6 @@
   }
   100% {
     transform: scale(1);
-  }
-}
-
-.cineclips-fist-bump-center {
-  position: absolute;
-  inset: 0;
-  z-index: 38;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.cineclips-fist-bump {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cineclips-fist-bump--compact .cineclips-fist-bump-glass {
-  width: 4.25rem;
-  height: 2.65rem;
-}
-
-.cineclips-fist-bump--compact .cineclips-fist-bump-svg {
-  width: 3.25rem;
-  height: auto;
-}
-
-.cineclips-fist-bump-glass {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 5.5rem;
-  height: 3.25rem;
-  border-radius: 9999px;
-  overflow: hidden;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    color-mix(in srgb, var(--color-cine-accent) 22%, transparent) 55%,
-    rgba(0, 0, 0, 0.15) 100%
-  );
-  border: 1px solid color-mix(in srgb, var(--color-cine-accent-light) 45%, transparent);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 0 32px color-mix(in srgb, var(--color-cine-accent) 50%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.cineclips-fist-bump-shine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    118deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.08) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-}
-
-.cineclips-fist-bump-svg {
-  position: relative;
-  z-index: 1;
-  width: 4.25rem;
-  height: auto;
-  color: var(--color-cine-accent-light);
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--color-cine-accent) 65%, transparent));
-}
-
-.cineclips-fist-bump-left {
-  transform-origin: 100% 50%;
-  animation: cineclips-fist-meet-left 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.cineclips-fist-bump-right {
-  transform-origin: 0% 50%;
-  animation: cineclips-fist-meet-right 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes cineclips-fist-meet-left {
-  0% {
-    transform: translateX(-18px) rotate(-10deg);
-    opacity: 0;
-  }
-  38% {
-    opacity: 1;
-  }
-  52% {
-    transform: translateX(3px) rotate(3deg);
-  }
-  62% {
-    transform: translateX(0) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(0) rotate(0deg);
-  }
-}
-
-@keyframes cineclips-fist-meet-right {
-  0% {
-    transform: translate(80px, 0) scale(-1, 1) translateX(18px) rotate(10deg);
-    opacity: 0;
-  }
-  38% {
-    opacity: 1;
-  }
-  52% {
-    transform: translate(80px, 0) scale(-1, 1) translateX(-3px) rotate(-3deg);
-  }
-  62% {
-    transform: translate(80px, 0) scale(-1, 1) translateX(0) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(80px, 0) scale(-1, 1) translateX(0) rotate(0deg);
   }
 }
 
@@ -2865,8 +2762,10 @@
 
 @media (min-width: 768px) {
   .cineclips-device {
+    width: min(400px, 92vw);
     max-width: min(400px, 92vw);
     height: min(92dvh, 900px);
+    max-height: min(92dvh, 900px);
     border-radius: 1.25rem;
     border: 1px solid color-mix(in srgb, var(--color-cine-border) 55%, transparent);
     box-shadow: 0 24px 56px rgba(0, 0, 0, 0.5);
@@ -3752,16 +3651,6 @@
 .cineclips-report-submit:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-@media (min-width: 768px) {
-  .cineclips-shell {
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: min(430px, 96vw);
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-  }
 }
 
 /* Evita arrastar imagens; não definir touch-action aqui — bloqueia scroll nos carrosséis */

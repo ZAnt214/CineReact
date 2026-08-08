@@ -35,54 +35,6 @@ interface CineClipsPageProps {
   initialClipId?: string;
 }
 
-interface FloatingFistBump {
-  id: number;
-  x: number;
-  y: number;
-}
-
-/** Punhos fechados em linha — toque de respeito ao curtir */
-function LikeFistBumpBurst({ compact = false }: { compact?: boolean }) {
-  const fistPath =
-    'M8 30V22c0-3 2.5-5 5.5-5h1c1.8 0 3 1.2 3 3v5c0 1.8-1.2 3-3 3h-3.5c-2.2 0-3.5-1.5-3.5-3.5';
-  const fingers = 'M17 22v-5M19.5 22v-6M22 22v-5';
-  const thumb = 'M6 28c-2-.5-3-2-3-4';
-
-  return (
-    <div className={`cineclips-fist-bump${compact ? ' cineclips-fist-bump--compact' : ''}`}>
-      <div className="cineclips-fist-bump-glass">
-        <span className="cineclips-fist-bump-shine" aria-hidden />
-        <svg viewBox="0 0 80 44" className="cineclips-fist-bump-svg" aria-hidden>
-          <g className="cineclips-fist-bump-left">
-            <path
-              d={fistPath}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d={fingers} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-            <path d={thumb} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-          </g>
-          <g className="cineclips-fist-bump-right" transform="translate(80,0) scale(-1,1)">
-            <path
-              d={fistPath}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d={fingers} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-            <path d={thumb} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
 const BETA_DISMISS_KEY = 'cineclips-beta-dismissed';
 const SLIDE_WINDOW = 1;
 
@@ -189,7 +141,7 @@ const ClipPlayer = memo(function ClipPlayer({
   isActive: boolean;
   shouldLoad: boolean;
   muted: boolean;
-  onDoubleTapHeart: (x: number, y: number) => void;
+  onDoubleTapHeart: () => void;
   onSubscribe?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -235,17 +187,13 @@ const ClipPlayer = memo(function ClipPlayer({
     setTimeout(() => setShowPlayOverlay(false), 800);
   };
 
-  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleContainerClick = () => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
 
     if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
-      // Double tap ativado!
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
-      onDoubleTapHeart(x, y);
+      onDoubleTapHeart();
       lastTapTimeRef.current = 0;
     } else {
       // Single tap
@@ -573,9 +521,7 @@ export default function CineClipsPage({
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'info' | 'error' } | null>(
     null
   );
-  const [floatingFistBumps, setFloatingFistBumps] = useState<FloatingFistBump[]>([]);
   const [pulsingLikeId, setPulsingLikeId] = useState<string | null>(null);
-  const [centerLikeClipId, setCenterLikeClipId] = useState<string | null>(null);
   const [showBetaNotice, setShowBetaNotice] = useState(() => !readBetaDismissed());
 
   const feedRef = useRef<HTMLDivElement>(null);
@@ -707,9 +653,7 @@ export default function CineClipsPage({
 
   const playLikeFeedback = useCallback((clipId: string) => {
     setPulsingLikeId(clipId);
-    setCenterLikeClipId(clipId);
     window.setTimeout(() => setPulsingLikeId(null), 650);
-    window.setTimeout(() => setCenterLikeClipId(null), 720);
   }, []);
 
   const handleLike = async (clip: CineClip) => {
@@ -734,16 +678,11 @@ export default function CineClipsPage({
     }
   };
 
-  const handleDoubleTapHeart = (clip: CineClip, x: number, y: number) => {
-    playLikeFeedback(clip.id);
-    const id = Date.now() + Math.random();
-    setFloatingFistBumps((prev) => [...prev, { id, x, y }]);
-    setTimeout(() => {
-      setFloatingFistBumps((prev) => prev.filter((h) => h.id !== id));
-    }, 900);
-
+  const handleDoubleTapHeart = (clip: CineClip) => {
     if (!likedIds.has(clip.id)) {
       handleLike(clip);
+    } else {
+      playLikeFeedback(clip.id);
     }
   };
 
@@ -763,14 +702,11 @@ export default function CineClipsPage({
   };
 
   return (
-    <div className="cineclips-shell fixed inset-0 z-[60] bg-zinc-950 text-white flex items-center justify-center overflow-hidden">
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {toast && <ToastNotification message={toast.message} type={toast.type} />}
-      </AnimatePresence>
-
-      {/* Desktop shell — sem blur ambiente para visual mais limpo */}
+    <div className="cineclips-shell fixed inset-0 z-[60] bg-zinc-950 text-white overflow-hidden">
       <div className="cineclips-device">
+        <AnimatePresence>
+          {toast && <ToastNotification message={toast.message} />}
+        </AnimatePresence>
         {/* Floating Top Header */}
         <header className="cineclips-header-minimal">
           <button
@@ -830,40 +766,12 @@ export default function CineClipsPage({
                     isActive={isActive}
                     shouldLoad={shouldLoad}
                     muted={muted}
-                    onDoubleTapHeart={(x, y) => handleDoubleTapHeart(clip, x, y)}
+                    onDoubleTapHeart={() => handleDoubleTapHeart(clip)}
                     onSubscribe={() => onSubscribe?.(clip.criadorEmail)}
                   />
                 </div>
 
                 <div className="cineclips-slide-scrim cineclips-slide-scrim--light" aria-hidden />
-
-                <AnimatePresence>
-                  {centerLikeClipId === clip.id && (
-                    <motion.div
-                      key={`center-like-${clip.id}`}
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: [0, 1, 0], scale: [0.7, 1.05, 1.12] }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.72, ease: 'easeOut' }}
-                      className="cineclips-fist-bump-center"
-                    >
-                      <LikeFistBumpBurst />
-                    </motion.div>
-                  )}
-                  {floatingFistBumps.map((h) => (
-                    <motion.div
-                      key={h.id}
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: [0, 1, 0], scale: [0.5, 1.05, 1.15] }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.72, ease: 'easeOut' }}
-                      style={{ left: h.x - 40, top: h.y - 22 }}
-                      className="absolute z-40 pointer-events-none"
-                    >
-                      <LikeFistBumpBurst compact />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
 
                 <div className="cineclips-slide-ui cineclips-slide-ui--minimal">
                   <div className="cineclips-meta cineclips-meta-copy cineclips-meta--minimal">
@@ -899,23 +807,20 @@ export default function CineClipsPage({
           </div>
         )}
 
+        <AnimatePresence>
+          {commentsClipId && (
+            <CommentsSheet
+              clipId={commentsClipId}
+              user={user}
+              onClose={() => setCommentsClipId(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showBetaNotice && <CineClipsBetaNotice onDismiss={dismissBetaNotice} />}
+        </AnimatePresence>
       </div>
-
-      {/* Slide-Up Comments Drawer */}
-      <AnimatePresence>
-        {commentsClipId && (
-          <CommentsSheet
-            clipId={commentsClipId}
-            user={user}
-            onClose={() => setCommentsClipId(null)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Beta Notice */}
-      <AnimatePresence>
-        {showBetaNotice && <CineClipsBetaNotice onDismiss={dismissBetaNotice} />}
-      </AnimatePresence>
     </div>
   );
 }
