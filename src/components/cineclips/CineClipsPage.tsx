@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from '
 import {
   ArrowLeft,
   Heart,
+  MessageCircle,
+  Share2,
   X,
   Send,
   Loader2,
@@ -790,19 +792,19 @@ export default function CineClipsPage({
                     <h2 className="cineclips-title cineclips-title--minimal">{clip.titulo}</h2>
                   </div>
 
-                  <div className="cineclips-rail cineclips-rail--text">
-                    <ClipActionChip
+                  <div className="cineclips-rail cineclips-rail--glass">
+                    <ClipGlassAction
                       variant="like"
                       count={clip.likes}
                       active={likedIds.has(clip.id)}
                       onClick={() => handleLike(clip)}
                     />
-                    <ClipActionChip
+                    <ClipGlassAction
                       variant="comment"
                       count={clip.commentsCount}
                       onClick={() => setCommentsClipId(clip.id)}
                     />
-                    <ClipActionChip variant="share" onClick={() => handleShare(clip)} />
+                    <ClipGlassAction variant="share" onClick={() => handleShare(clip)} />
                   </div>
                 </div>
               </article>
