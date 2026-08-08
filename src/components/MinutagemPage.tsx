@@ -87,15 +87,18 @@ function marcacaoBadgeLabel(count: number): string {
 function TipoMedievalStrip({ tipo, markerCount = 0 }: { tipo: string; markerCount?: number }) {
   const variant = tipo === 'filme' || tipo === 'serie' || tipo === 'anime' ? tipo : 'serie';
   const label = tipoLabel(tipo);
+  const countLabel = markerCount > 0 ? marcacaoBadgeLabel(markerCount) : '';
   return (
     <span
-      className={`minutagem-tipo-strip minutagem-tipo-strip--${variant}`}
-      aria-label={label}
+      className="minutagem-tipo-strip"
+      aria-label={countLabel ? `${label} — ${countLabel}` : label}
     >
-      <span className="minutagem-tipo-strip__shine" aria-hidden />
-      <span className="minutagem-tipo-strip__label">{label}</span>
+      <span className={`minutagem-tipo-strip__main minutagem-tipo-strip__main--${variant}`}>
+        <span className="minutagem-tipo-strip__shine" aria-hidden />
+        <span className="minutagem-tipo-strip__label">{label}</span>
+      </span>
       {markerCount > 0 && (
-        <span className="minutagem-tipo-strip__count">{marcacaoBadgeLabel(markerCount)}</span>
+        <span className="minutagem-tipo-strip__count">{countLabel}</span>
       )}
     </span>
   );
