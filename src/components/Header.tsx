@@ -178,26 +178,28 @@ export default function Header({
         }`}
       >
         <div className="cine-container w-full">
-          <div className="flex min-h-16 items-center justify-between gap-4 py-1.5">
-            <div className="flex items-center gap-3 lg:gap-6 flex-1 min-w-0">
+          <div className="site-header__bar flex min-h-14 lg:min-h-[3.75rem] items-center justify-between gap-3 py-1.5 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-6">
+            <div className="site-header__brand shrink-0">
               <button 
                 id="logo-button"
                 onClick={() => setCurrentTab('inicio')}
-                className="group focus:outline-none cursor-pointer py-1 shrink-0"
+                className="group focus:outline-none cursor-pointer py-0.5"
               >
                 <CineReactLogo
                   size="sm"
+                  showTagline={false}
                   className="transition-transform duration-300 group-hover:-translate-y-0.5"
                 />
               </button>
+            </div>
 
-              {/* DESKTOP NAV */}
-              <nav className="hidden md:flex items-center gap-1.5 text-xs lg:text-[13px] font-semibold text-zinc-400 min-w-0">
+            {/* Desktop nav — só em telas largas; tablet/mobile usa menu lateral */}
+            <nav className="site-header__nav hidden lg:flex items-center justify-center gap-0.5 flex-nowrap text-[12px] xl:text-[13px] font-semibold text-zinc-400 min-w-0">
                 <HeaderClipsButton active={isCineClipsActive} onClick={openCineClips} />
                 <button 
                   id="nav-inicio"
                   onClick={() => setCurrentTab('inicio')} 
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                  className={`px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     currentTab === 'inicio' 
                       ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
                       : 'hover:text-zinc-200 hover:bg-neutral-900/30'
@@ -208,7 +210,7 @@ export default function Header({
                 <button 
                   id="nav-canais"
                   onClick={() => setCurrentTab('canais')} 
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                  className={`hidden xl:inline-flex px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     currentTab === 'canais' 
                       ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
                       : 'hover:text-zinc-200 hover:bg-neutral-900/30'
@@ -219,7 +221,7 @@ export default function Header({
                 <button 
                   id="nav-minha-lista"
                   onClick={() => setCurrentTab('minha-lista')} 
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                  className={`px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     currentTab === 'minha-lista' 
                       ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
                       : 'hover:text-zinc-200 hover:bg-neutral-900/30'
@@ -231,7 +233,7 @@ export default function Header({
                 <button 
                   id="nav-minutagem"
                   onClick={() => setCurrentTab('minutagem')} 
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                  className={`px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     currentTab === 'minutagem' 
                       ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
                       : 'hover:text-zinc-200 hover:bg-neutral-900/30'
@@ -241,52 +243,36 @@ export default function Header({
                 </button>
 
                 <button 
-                  id="nav-download-logo"
-                  onClick={() => setCurrentTab('download-logo')} 
-                  className={`px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-                    currentTab === 'download-logo' 
-                      ? 'text-white bg-neutral-900 shadow-sm border border-neutral-800/60' 
-                      : 'hover:text-zinc-200 hover:bg-neutral-900/30'
-                  }`}
-                >
-                  Baixar Logo
-                </button>
-
-                {/* APOIADOR HIGHLIGHT */}
-                <button 
                   id="nav-doacoes"
                   onClick={() => setCurrentTab('doacoes')} 
-                  className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
+                  className={`ml-0.5 px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 text-[12px] xl:text-[13px] font-bold border cursor-pointer ${
                     currentTab === 'doacoes' 
                       ? 'bg-cine-accent/15 text-cine-accent-light border-cine-accent/30 shadow-lg shadow-cine-surface/10' 
                       : 'border-neutral-800 bg-neutral-900/40 text-cine-accent-light hover:bg-cine-accent hover:text-white hover:border-cine-accent-light'
                   }`}
                 >
-                  <Heart className="w-3 h-3 fill-current" />
+                  <Heart className="w-3 h-3 fill-current shrink-0" />
                   Seja Apoiador
                 </button>
 
-                {/* ADMIN TAB */}
                 {user.isAdmin && (
                   <button 
                     id="nav-admin"
                     onClick={() => setCurrentTab('admin')} 
-                    className={`ml-1 px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold border border-cine-accent/30 text-cine-accent-light bg-cine-accent/10 hover:bg-cine-accent hover:text-white hover:border-cine-accent-light cursor-pointer`}
+                    className="ml-0.5 px-2.5 xl:px-3 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 text-[12px] xl:text-[13px] font-bold border border-cine-accent/30 text-cine-accent-light bg-cine-accent/10 hover:bg-cine-accent hover:text-white hover:border-cine-accent-light cursor-pointer"
                   >
                     Painel Admin
                   </button>
                 )}
-              </nav>
-            </div>
+            </nav>
 
-            {/* RIGHT SECTION: Controls */}
-            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+            <div className="site-header__actions flex items-center gap-2 sm:gap-2.5 shrink-0 justify-self-end">
               <HeaderClipsButton
                 id="nav-cineclips-mobile"
                 variant="icon"
                 active={isCineClipsActive}
                 onClick={openCineClips}
-                className="md:hidden"
+                className="lg:hidden"
               />
 
               <div className="relative">
@@ -355,7 +341,6 @@ export default function Header({
             </div>
           </div>
         </div>
-
 
       </header>
 
