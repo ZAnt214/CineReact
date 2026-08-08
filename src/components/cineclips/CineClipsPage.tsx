@@ -11,11 +11,6 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  CheckCircle2,
-  AlertCircle,
-  Info,
-  Film,
-  BadgeCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CineClip, CineClipComment } from '../types/cineclips.ts';
@@ -75,34 +70,28 @@ function formatCount(value: number): string {
 
 function CineClipsBetaNotice({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+    <div className="cineclips-welcome-overlay">
       <button
         type="button"
-        className="absolute inset-0"
+        className="cineclips-welcome-backdrop"
         onClick={onDismiss}
-        aria-label="Fechar aviso"
+        aria-label="Fechar"
       />
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94, y: 12 }}
-        className="relative w-full max-w-sm rounded-2xl border border-cyan-400/30 bg-zinc-900/95 p-6 text-center shadow-2xl"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="cineclips-welcome-card"
       >
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold uppercase tracking-wider mb-4">
-          <BadgeCheck className="w-3.5 h-3.5" />
-          Beta
-        </span>
-        <h2 className="text-lg font-black text-white mb-2">CineClips em desenvolvimento</h2>
-        <p className="text-sm text-zinc-400 leading-relaxed mb-5">
-          Esta é uma função <span className="text-cyan-300 font-semibold">beta</span> que ainda está em
-          desenvolvimento. Novos vídeos e funcionalidades chegarão em breve.
+        <p className="cineclips-welcome-eyebrow">CineClips</p>
+        <h2 className="cineclips-welcome-title">Clips curtos dos reacts</h2>
+        <p className="cineclips-welcome-text">
+          Vídeos rápidos da comunidade para assistir entre um react e outro. O catálogo
+          cresce aos poucos — aproveite o que já está disponível.
         </p>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="w-full py-2.5 rounded-full bg-cyan-400 text-black text-sm font-extrabold"
-        >
-          Entendi, continuar
+        <button type="button" onClick={onDismiss} className="cineclips-welcome-btn">
+          Começar
         </button>
       </motion.div>
     </div>
@@ -130,26 +119,17 @@ function useBodyScrollLock(active: boolean) {
   }, [active]);
 }
 
-/** Componente de Notificação Flutuante Toast */
-function ToastNotification({
-  message,
-  type = 'success',
-}: {
-  message: string;
-  type?: 'success' | 'info' | 'error';
-}) {
+/** Toast discreto — sem ícones decorativos */
+function ToastNotification({ message }: { message: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-zinc-900/90 border border-white/15 text-white shadow-2xl backdrop-blur-xl text-xs font-semibold"
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="cineclips-toast-minimal"
     >
-      {type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-      {type === 'info' && <Info className="w-4 h-4 text-cyan-400" />}
-      {type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
-      <span>{message}</span>
+      {message}
     </motion.div>
   );
 }
@@ -247,11 +227,8 @@ const ClipPlayer = memo(function ClipPlayer({
           />
         )}
         <div className="relative z-10 space-y-4 max-w-xs">
-          <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center">
-            <BadgeCheck className="w-7 h-7 text-amber-300" />
-          </div>
-          <p className="text-lg font-black text-white">Conteúdo exclusivo</p>
-          <p className="text-sm text-zinc-400">
+          <p className="text-base font-bold text-white">Conteúdo para assinantes</p>
+          <p className="text-sm text-zinc-400 leading-relaxed">
             Assine para desbloquear este vídeo
             {clip.requiresSubscription === 'global' ? ' (assinatura global)' : ''}.
           </p>
@@ -262,7 +239,7 @@ const ClipPlayer = memo(function ClipPlayer({
                 e.stopPropagation();
                 onSubscribe();
               }}
-              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-cyan-400 text-black text-sm font-extrabold"
+              className="cineclips-welcome-btn cineclips-welcome-btn--inline"
             >
               Ver planos
             </button>
@@ -370,10 +347,10 @@ const ActionBtn = memo(function ActionBtn({
         e.stopPropagation();
         onClick();
       }}
-      className={`cineclips-action cineclips-action--${variant}${active ? ' is-active' : ''}`}
+      className={`cineclips-action cineclips-action--clean cineclips-action--${variant}${active ? ' is-active' : ''}`}
       aria-label={label || (variant === 'share' ? 'Enviar' : variant)}
     >
-      <span className="cineclips-action-orb">
+      <span className="cineclips-action-face">
         <Icon
           className="cineclips-action-svg"
           strokeWidth={2}
@@ -400,8 +377,6 @@ function CommentsSheet({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
-  const EMOJIS = ['🔥', '❤️', '👏', '🍿', '🎬', '😍', '😂'];
-
   useEffect(() => {
     fetchClipComments(clipId)
       .then((data) => setComments(data.comments || []))
@@ -420,57 +395,44 @@ function CommentsSheet({
     }
   };
 
-  const addEmoji = (emoji: string) => {
-    setText((prev) => prev + emoji);
-  };
-
   return (
-    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="absolute inset-0" onClick={onClose} />
+    <div className="cineclips-sheet-overlay">
+      <div className="cineclips-sheet-backdrop" onClick={onClose} />
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-        className="relative z-10 w-full sm:max-w-md max-h-[80vh] sm:rounded-2xl rounded-t-2xl bg-zinc-950/95 border border-white/10 shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl"
+        transition={{ type: 'spring', damping: 30, stiffness: 340 }}
+        className="cineclips-sheet-panel"
       >
-        {/* Top Drag Handle */}
-        <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mt-3 mb-1" />
+        <div className="cineclips-sheet-handle" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold text-white">
-              Comentários ({comments.length})
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-          >
+        <div className="cineclips-sheet-header">
+          <h3 className="cineclips-sheet-title">
+            Comentários
+            <span className="cineclips-sheet-count">{comments.length}</span>
+          </h3>
+          <button type="button" onClick={onClose} className="cineclips-sheet-close" aria-label="Fechar">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[220px]">
+        <div className="cineclips-sheet-body">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-2 text-zinc-400">
-              <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
-              <span className="text-xs">Carregando respostas...</span>
+            <div className="cineclips-sheet-empty">
+              <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+              <span>Carregando...</span>
             </div>
           ) : comments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center text-zinc-500 gap-2">
-              <MessageCircle className="w-8 h-8 stroke-1 text-zinc-600" />
-              <p className="text-xs font-medium">Seja o primeiro a comentar neste clip!</p>
+            <div className="cineclips-sheet-empty">
+              <p className="text-sm font-medium text-zinc-300">Nenhum comentário ainda</p>
+              <p className="text-xs text-zinc-500">Deixe a primeira reação neste clip.</p>
             </div>
           ) : (
             comments.map((c) => {
               const author = resolveAuthorProfileProps(c);
               return (
-              <div key={c.id} className="flex gap-3 text-left">
+              <div key={c.id} className="cineclips-comment-row">
                 <ProfileAvatar
                   photoUrl={author.avatar}
                   alt={c.usuarioNome}
@@ -480,16 +442,14 @@ function CommentsSheet({
                   lite
                   className="flex-shrink-0"
                 />
-                <div className="flex-1 min-w-0 bg-white/5 border border-white/5 rounded-xl p-3">
+                <div className="cineclips-comment-bubble">
                   <ProfileNameRow
                     name={c.usuarioNome}
                     isDonor={author.isDonor}
                     profileDisplay={author.profileDisplay}
                     nameSize="sm"
                   />
-                  <p className="text-xs text-zinc-200 mt-1 leading-relaxed break-words">
-                    {c.texto}
-                  </p>
+                  <p className="cineclips-comment-text">{c.texto}</p>
                 </div>
               </div>
             );
@@ -497,54 +457,40 @@ function CommentsSheet({
           )}
         </div>
 
-        {/* Quick Emoji Bar & Input */}
         {user.isLoggedIn ? (
-          <div className="p-3 border-t border-white/10 bg-black/40 space-y-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-              {EMOJIS.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => addEmoji(e)}
-                  className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-xs transition-colors"
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <ProfileAvatar
-                photoUrl={user.avatar}
-                alt={user.nome}
-                size="sm"
-                isDonor={!!user.isDonor}
-                lite
-                className="flex-shrink-0"
-              />
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Escreva um comentário carinhoso..."
-                className="flex-1 bg-white/10 border border-white/15 rounded-full px-4 py-2 text-xs text-white placeholder-zinc-400 outline-none focus:border-cyan-400/80 transition-colors"
-              />
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={sending || !text.trim()}
-                className="w-9 h-9 rounded-full bg-cyan-400 hover:bg-cyan-300 disabled:opacity-40 text-black flex items-center justify-center transition-all shadow-lg font-bold"
-              >
-                {sending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4 ml-0.5" />
-                )}
-              </button>
-            </div>
+          <div className="cineclips-sheet-compose">
+            <ProfileAvatar
+              photoUrl={user.avatar}
+              alt={user.nome}
+              size="sm"
+              isDonor={!!user.isDonor}
+              lite
+              className="flex-shrink-0"
+            />
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Escreva um comentário..."
+              className="cineclips-sheet-input"
+            />
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={sending || !text.trim()}
+              className="cineclips-sheet-send"
+              aria-label="Enviar comentário"
+            >
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </button>
           </div>
         ) : (
-          <div className="p-4 border-t border-white/10 bg-black/40 text-center">
-            <p className="text-xs text-zinc-400">Faça login para participar da conversa</p>
+          <div className="cineclips-sheet-login">
+            <p>Faça login para comentar neste clip.</p>
           </div>
         )}
       </motion.div>
@@ -766,6 +712,8 @@ export default function CineClipsPage({
             <ArrowLeft className="w-5 h-5" />
           </button>
 
+          <span className="cineclips-header-label">Clips</span>
+
           <button
             type="button"
             onClick={() => setMuted((m) => !m)}
@@ -776,39 +724,26 @@ export default function CineClipsPage({
           </button>
         </header>
 
-        {/* Feed Content Area */}
         {loading && clips.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-zinc-400">
-            <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
-            <p className="text-xs font-medium">Carregando clips...</p>
+          <div className="cineclips-state">
+            <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+            <p>Carregando clips...</p>
           </div>
         ) : error ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
-            <AlertCircle className="w-10 h-10 text-rose-400" />
-            <p className="text-xs text-zinc-300">{error}</p>
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold border border-white/15"
-            >
-              Voltar ao Início
+          <div className="cineclips-state">
+            <p className="cineclips-state-message">{error}</p>
+            <button type="button" onClick={onBack} className="cineclips-secondary-btn">
+              Voltar ao início
             </button>
           </div>
         ) : clips.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
-              <Film className="w-8 h-8" />
-            </div>
-            <h3 className="text-base font-bold text-white">Nenhum clip por aqui</h3>
-            <p className="text-xs text-zinc-400 max-w-xs">
-              Novos reacts e vídeos virais chegarão em breve!
+          <div className="cineclips-state">
+            <h3 className="cineclips-state-title">Sem clips por aqui</h3>
+            <p className="cineclips-state-message">
+              Novos vídeos curtos entram no feed regularmente. Volte em breve ou explore o catálogo.
             </p>
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-6 py-2.5 rounded-full bg-cyan-400 text-black text-xs font-extrabold shadow-lg shadow-cyan-400/20"
-            >
-              Explorar Plataforma
+            <button type="button" onClick={onBack} className="cineclips-primary-btn">
+              Explorar catálogo
             </button>
           </div>
         ) : (
@@ -860,7 +795,7 @@ export default function CineClipsPage({
                     <h2 className="cineclips-title cineclips-title--minimal">{clip.titulo}</h2>
                   </div>
 
-                  <div className="cineclips-rail cineclips-rail--minimal">
+                  <div className="cineclips-rail cineclips-rail--clean">
                     <ActionBtn
                       icon={Heart}
                       label={formatCount(clip.likes)}
