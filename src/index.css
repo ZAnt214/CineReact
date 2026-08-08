@@ -3123,6 +3123,59 @@ html:not([data-blur-effects="on"]) [class*="backdrop-blur"] {
   touch-action: pan-y;
 }
 
+.minutagem-catalog-card__poster {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 10px;
+  width: 100%;
+  height: calc(100% + 16px);
+  object-fit: cover;
+  object-position: top center;
+  transform-origin: 50% 28%;
+  transition: transform 0.3s ease;
+}
+
+.md:group-hover\/card .minutagem-catalog-card__poster {
+  transform: scale(1.04);
+}
+
+.minutagem-catalog-card__footer {
+  display: grid;
+  grid-template-rows: 14px minmax(2.5rem, auto);
+  gap: 4px;
+}
+
+.minutagem-catalog-card__marcacao-row {
+  display: flex;
+  align-items: flex-end;
+  min-height: 14px;
+}
+
+.minutagem-catalog-card__title {
+  min-height: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .minutagem-catalog-card__poster {
+    top: 12px;
+    height: calc(100% + 18px);
+  }
+
+  .minutagem-catalog-card__footer {
+    grid-template-rows: 16px minmax(2.75rem, auto);
+    gap: 5px;
+  }
+
+  .minutagem-catalog-card__marcacao-row {
+    min-height: 16px;
+  }
+
+  .minutagem-catalog-card__title {
+    min-height: 2.75rem;
+  }
+}
+
 @media (pointer: coarse) {
   .minutagem-catalog-card.catalog-card-standard {
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;

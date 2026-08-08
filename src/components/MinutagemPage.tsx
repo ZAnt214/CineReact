@@ -115,12 +115,14 @@ function ObraCatalogCard({
     >
       <div className="relative w-full h-[148px] sm:h-[176px] md:h-[200px] lg:h-[220px] overflow-hidden catalog-card-thumb catalog-card-standard-thumb bg-neutral-950">
         {entry.poster ? (
-          <OptimizedImage
-            src={entry.poster}
-            alt={entry.obraTitulo}
-            lite
-            className="w-full h-full object-cover md:group-hover/card:scale-[1.04] md:transition-transform md:duration-300"
-          />
+          <div className="absolute inset-0 overflow-hidden">
+            <OptimizedImage
+              src={entry.poster}
+              alt={entry.obraTitulo}
+              lite
+              className="minutagem-catalog-card__poster"
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-cine-accent-light/40">
             <Icon className="w-8 h-8" />
@@ -131,11 +133,13 @@ function ObraCatalogCard({
 
         <TipoMedievalStrip tipo={entry.tipo} />
 
-        <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5">
-          {entry.markerCount > 0 && (
-            <span className="minutagem-marcacao-chip mb-1">{marcacaoBadgeLabel(entry.markerCount)}</span>
-          )}
-          <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
+        <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5 minutagem-catalog-card__footer">
+          <div className="minutagem-catalog-card__marcacao-row">
+            {entry.markerCount > 0 && (
+              <span className="minutagem-marcacao-chip">{marcacaoBadgeLabel(entry.markerCount)}</span>
+            )}
+          </div>
+          <h3 className="minutagem-catalog-card__title text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
             {entry.obraTitulo}
           </h3>
         </div>
