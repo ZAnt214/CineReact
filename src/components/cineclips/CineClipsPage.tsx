@@ -326,8 +326,17 @@ const ClipPlayer = memo(function ClipPlayer({
   );
 });
 
-/** Ações do clip — texto, sem ícones de rede social */
-const ClipActionChip = memo(function ClipActionChip({
+/** Ações do clip — ícones em linha com efeito vidro */
+const GLASS_ACTION_META: Record<
+  'like' | 'comment' | 'share',
+  { Icon: typeof Heart; label: string }
+> = {
+  like: { Icon: Heart, label: 'Curtir' },
+  comment: { Icon: MessageCircle, label: 'Comentar' },
+  share: { Icon: Share2, label: 'Enviar' },
+};
+
+const ClipGlassAction = memo(function ClipGlassAction({
   variant,
   count,
   active,
@@ -338,8 +347,7 @@ const ClipActionChip = memo(function ClipActionChip({
   active?: boolean;
   onClick: () => void;
 }) {
-  const word =
-    variant === 'like' ? 'Curtir' : variant === 'comment' ? 'Comentar' : 'Enviar';
+  const { Icon, label } = GLASS_ACTION_META[variant];
   const countLabel =
     variant !== 'share' && count !== undefined ? formatCount(count) : null;
 
@@ -350,11 +358,18 @@ const ClipActionChip = memo(function ClipActionChip({
         e.stopPropagation();
         onClick();
       }}
-      className={`cineclips-action-chip cineclips-action-chip--${variant}${active ? ' is-active' : ''}`}
-      aria-label={countLabel ? `${word} — ${countLabel}` : word}
+      className={`cineclips-glass-action cineclips-glass-action--${variant}${active ? ' is-active' : ''}`}
+      aria-label={countLabel ? `${label} — ${countLabel}` : label}
     >
-      <span className="cineclips-action-chip-word">{word}</span>
-      {countLabel && <span className="cineclips-action-chip-count">{countLabel}</span>}
+      <span className="cineclips-glass-action-lens">
+        <span className="cineclips-glass-action-shine" aria-hidden />
+        <Icon
+          className="cineclips-glass-action-icon"
+          strokeWidth={1.75}
+          fill={active && variant === 'like' ? 'currentColor' : 'none'}
+        />
+      </span>
+      {countLabel && <span className="cineclips-glass-action-count">{countLabel}</span>}
     </button>
   );
 });
