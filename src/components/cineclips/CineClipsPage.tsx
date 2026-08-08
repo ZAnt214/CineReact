@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from '
 import {
   ArrowLeft,
   Heart,
-  MessageCircle,
-  Share2,
   X,
   Send,
   Loader2,
@@ -326,20 +324,23 @@ const ClipPlayer = memo(function ClipPlayer({
   );
 });
 
-/** Botão de ação — skill identidade (orb rail, modo limpo) */
-const ActionBtn = memo(function ActionBtn({
-  icon: Icon,
-  label,
-  onClick,
+/** Ações do clip — texto, sem ícones de rede social */
+const ClipActionChip = memo(function ClipActionChip({
   variant,
+  count,
   active,
+  onClick,
 }: {
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
   variant: 'like' | 'comment' | 'share';
+  count?: number;
   active?: boolean;
+  onClick: () => void;
 }) {
+  const word =
+    variant === 'like' ? 'Curtir' : variant === 'comment' ? 'Comentar' : 'Enviar';
+  const countLabel =
+    variant !== 'share' && count !== undefined ? formatCount(count) : null;
+
   return (
     <button
       type="button"
@@ -347,17 +348,11 @@ const ActionBtn = memo(function ActionBtn({
         e.stopPropagation();
         onClick();
       }}
-      className={`cineclips-action cineclips-action--clean cineclips-action--${variant}${active ? ' is-active' : ''}`}
-      aria-label={label || (variant === 'share' ? 'Enviar' : variant)}
+      className={`cineclips-action-chip cineclips-action-chip--${variant}${active ? ' is-active' : ''}`}
+      aria-label={countLabel ? `${word} — ${countLabel}` : word}
     >
-      <span className="cineclips-action-face">
-        <Icon
-          className="cineclips-action-svg"
-          strokeWidth={2}
-          fill={active && variant === 'like' ? 'currentColor' : 'none'}
-        />
-      </span>
-      {label !== '' && <span className="cineclips-action-label">{label}</span>}
+      <span className="cineclips-action-chip-word">{word}</span>
+      {countLabel && <span className="cineclips-action-chip-count">{countLabel}</span>}
     </button>
   );
 });
@@ -795,26 +790,19 @@ export default function CineClipsPage({
                     <h2 className="cineclips-title cineclips-title--minimal">{clip.titulo}</h2>
                   </div>
 
-                  <div className="cineclips-rail cineclips-rail--clean">
-                    <ActionBtn
-                      icon={Heart}
-                      label={formatCount(clip.likes)}
+                  <div className="cineclips-rail cineclips-rail--text">
+                    <ClipActionChip
                       variant="like"
+                      count={clip.likes}
                       active={likedIds.has(clip.id)}
                       onClick={() => handleLike(clip)}
                     />
-                    <ActionBtn
-                      icon={MessageCircle}
-                      label={formatCount(clip.commentsCount)}
+                    <ClipActionChip
                       variant="comment"
+                      count={clip.commentsCount}
                       onClick={() => setCommentsClipId(clip.id)}
                     />
-                    <ActionBtn
-                      icon={Share2}
-                      label=""
-                      variant="share"
-                      onClick={() => handleShare(clip)}
-                    />
+                    <ClipActionChip variant="share" onClick={() => handleShare(clip)} />
                   </div>
                 </div>
               </article>
