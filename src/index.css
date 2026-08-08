@@ -2079,6 +2079,107 @@
   border-color: rgba(255, 255, 255, 0.22);
 }
 
+.cineclips-rail--glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 0.15rem;
+}
+
+.cineclips-glass-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cineclips-glass-action:active .cineclips-glass-action-lens {
+  transform: scale(0.94);
+}
+
+.cineclips-glass-action-lens {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.05) 42%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 10px 22px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.cineclips-glass-action-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.12) 24%,
+    transparent 48%
+  );
+  pointer-events: none;
+}
+
+.cineclips-glass-action-icon {
+  position: relative;
+  z-index: 1;
+  width: 1.32rem;
+  height: 1.32rem;
+  color: rgba(255, 255, 255, 0.94);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+.cineclips-glass-action-count {
+  font-size: 0.64rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
+  line-height: 1;
+}
+
+.cineclips-glass-action--like.is-active .cineclips-glass-action-lens {
+  background: linear-gradient(
+    145deg,
+    rgba(251, 113, 133, 0.28) 0%,
+    rgba(244, 63, 94, 0.12) 45%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  border-color: rgba(251, 113, 133, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(251, 113, 133, 0.15) inset,
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 22px rgba(0, 0, 0, 0.38),
+    0 0 16px rgba(244, 63, 94, 0.22);
+}
+
+.cineclips-glass-action--like.is-active .cineclips-glass-action-icon {
+  color: #fecdd3;
+}
+
 .cineclips-rail--text {
   display: flex;
   flex-direction: column;
