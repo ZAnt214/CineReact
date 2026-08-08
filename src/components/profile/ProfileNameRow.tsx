@@ -20,6 +20,8 @@ export interface ProfileNameRowProps {
   className?: string;
   /** seal: selo completo (padrão). icon: apenas ícone ao lado do nome (comentários). */
   verifiedDisplay?: 'seal' | 'icon';
+  /** Comentários / listas: só nome + selo ícone, sem título ou tags. */
+  compact?: boolean;
 }
 
 export default function ProfileNameRow({
@@ -33,6 +35,7 @@ export default function ProfileNameRow({
   align = 'center',
   className = '',
   verifiedDisplay = 'seal',
+  compact = false,
 }: ProfileNameRowProps) {
   const display = useMemo(
     () => profileDisplay || resolveUserProfileDisplay(loadout, isDonor),
@@ -67,8 +70,8 @@ export default function ProfileNameRow({
   const sealSize = nameSize === 'lg' ? 'md' : 'sm';
 
   return (
-    <div className={`flex flex-col w-full min-w-0 gap-3 ${alignClass} ${className}`}>
-      {display.verifiedBadge && verifiedDisplay === 'seal' && (
+    <div className={`flex flex-col w-full min-w-0 ${compact ? 'gap-0' : 'gap-3'} ${alignClass} ${className}`}>
+      {!compact && display.verifiedBadge && verifiedDisplay === 'seal' && (
         <ProfileVerifiedSeal
           name={display.verifiedBadge.name}
           description={display.verifiedBadge.description}
@@ -91,7 +94,7 @@ export default function ProfileNameRow({
         )}
       </div>
 
-      {display.title && (
+      {display.title && !compact && (
         <div className={`flex flex-col gap-1 w-full ${alignClass}`}>
           <TitleRewardVisual
             name={display.title.name}
@@ -107,7 +110,7 @@ export default function ProfileNameRow({
         </div>
       )}
 
-      {visibleTags.length > 0 && (
+      {visibleTags.length > 0 && !compact && (
         <div className={`flex flex-wrap gap-1.5 w-full ${rowJustify}`}>
           {visibleTags.map((tag) => (
             <CreatorTagVisual

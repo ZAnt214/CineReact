@@ -340,11 +340,13 @@ const ClipGlassAction = memo(function ClipGlassAction({
   variant,
   count,
   active,
+  pulse,
   onClick,
 }: {
   variant: 'like' | 'comment' | 'share';
   count?: number;
   active?: boolean;
+  pulse?: boolean;
   onClick: () => void;
 }) {
   const { Icon, label } = GLASS_ACTION_META[variant];
@@ -358,7 +360,7 @@ const ClipGlassAction = memo(function ClipGlassAction({
         e.stopPropagation();
         onClick();
       }}
-      className={`cineclips-glass-action cineclips-glass-action--${variant}${active ? ' is-active' : ''}`}
+      className={`cineclips-glass-action cineclips-glass-action--${variant}${active ? ' is-active' : ''}${pulse ? ' is-pulse' : ''}`}
       aria-label={countLabel ? `${label} — ${countLabel}` : label}
     >
       <span className="cineclips-glass-action-lens">
@@ -460,6 +462,10 @@ function CommentsSheet({
                     isDonor={author.isDonor}
                     profileDisplay={author.profileDisplay}
                     nameSize="sm"
+                    align="start"
+                    verifiedDisplay="icon"
+                    compact
+                    className="cineclips-comment-name-row"
                   />
                   <p className="cineclips-comment-text">{c.texto}</p>
                 </div>
@@ -526,6 +532,8 @@ export default function CineClipsPage({
     null
   );
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([]);
+  const [pulsingLikeId, setPulsingLikeId] = useState<string | null>(null);
+  const [centerLikeClipId, setCenterLikeClipId] = useState<string | null>(null);
   const [showBetaNotice, setShowBetaNotice] = useState(() => !readBetaDismissed());
 
   const feedRef = useRef<HTMLDivElement>(null);
@@ -655,6 +663,13 @@ export default function CineClipsPage({
     };
   }, [activeIndex, clips, user.email, user.isLoggedIn]);
 
+  const playLikeFeedback = useCallback((clipId: string) => {
+    setPulsingLikeId(clipId);
+    setCenterLikeClipId(clipId);
+    window.setTimeout(() => setPulsingLikeId(null), 650);
+    window.setTimeout(() => setCenterLikeClipId(null), 720);
+  }, []);
+
   const handleLike = async (clip: CineClip) => {
     if (!user.isLoggedIn) {
       showToast('Faça login para curtir clips', 'info');
@@ -670,7 +685,7 @@ export default function CineClipsPage({
         return next;
       });
       if (!isLiked) {
-        showToast('Adicionado aos favoritos de curtidas', 'success');
+        playLikeFeedback(clip.id);
       }
     } catch {
       /* ignore */
@@ -678,6 +693,7 @@ export default function CineClipsPage({
   };
 
   const handleDoubleTapHeart = (clip: CineClip, x: number, y: number) => {
+    playLikeFeedback(clip.id);
     const id = Date.now() + Math.random();
     setFloatingHearts((prev) => [...prev, { id, x, y }]);
     setTimeout(() => {
@@ -780,6 +796,20 @@ export default function CineClipsPage({
                 <div className="cineclips-slide-scrim cineclips-slide-scrim--light" aria-hidden />
 
                 <AnimatePresence>
+                  {centerLikeClipId === clip.id && (
+                    <motion.div
+                      key={`center-like-${clip.id}`}
+                      initial={{ opacity: 0, scale: 0.55 }}
+                      animate={{ opacity: [0, 1, 0], scale: [0.55, 1.06, 1.18] }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.68, ease: 'easeOut' }}
+                      className="cineclips-like-center-burst"
+                    >
+                      <span className="cineclips-like-center-burst-glass">
+                        <Heart className="cineclips-like-center-burst-icon" strokeWidth={1.75} fill="currentColor" />
+                      </span>
+                    </motion.div>
+                  )}
                   {floatingHearts.map((h) => (
                     <motion.div
                       key={h.id}
@@ -790,7 +820,7 @@ export default function CineClipsPage({
                       style={{ left: h.x - 24, top: h.y - 24 }}
                       className="absolute z-40 pointer-events-none"
                     >
-                      <Heart className="w-12 h-12 text-rose-500 fill-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
+                      <Heart className="cineclips-like-float-icon" strokeWidth={1.75} fill="currentColor" />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -812,6 +842,7 @@ export default function CineClipsPage({
                       variant="like"
                       count={clip.likes}
                       active={likedIds.has(clip.id)}
+                      pulse={pulsingLikeId === clip.id}
                       onClick={() => handleLike(clip)}
                     />
                     <ClipGlassAction
