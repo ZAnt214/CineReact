@@ -649,6 +649,24 @@
 }
 
 /* Header — botões aconchegantes (notificações + clips) */
+.site-header__bar {
+  width: 100%;
+}
+
+.site-header__nav {
+  max-width: 52rem;
+}
+
+@media (min-width: 1024px) {
+  .site-header__brand {
+    justify-self: start;
+  }
+
+  .site-header__actions {
+    justify-self: end;
+  }
+}
+
 .header-notify-btn {
   position: relative;
   display: inline-flex;
