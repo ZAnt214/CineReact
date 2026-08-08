@@ -134,14 +134,15 @@ function ObraCatalogCard({
         <TipoMedievalStrip tipo={entry.tipo} />
 
         <div className="absolute inset-x-0 bottom-0 z-10 p-2 sm:p-2.5 minutagem-catalog-card__footer">
-          <div className="minutagem-catalog-card__marcacao-row">
-            {entry.markerCount > 0 && (
-              <span className="minutagem-marcacao-chip">{marcacaoBadgeLabel(entry.markerCount)}</span>
-            )}
-          </div>
-          <h3 className="minutagem-catalog-card__title text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover/card:text-cine-accent-light transition-colors">
+          <h3
+            className="minutagem-catalog-card__title"
+            title={entry.obraTitulo}
+          >
             {entry.obraTitulo}
           </h3>
+          {entry.markerCount > 0 && (
+            <span className="minutagem-marcacao-chip">{marcacaoBadgeLabel(entry.markerCount)}</span>
+          )}
         </div>
 
         <div className="absolute inset-0 z-[5] bg-black/35 opacity-0 md:group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
