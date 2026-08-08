@@ -35,10 +35,52 @@ interface CineClipsPageProps {
   initialClipId?: string;
 }
 
-interface FloatingHeart {
+interface FloatingFistBump {
   id: number;
   x: number;
   y: number;
+}
+
+/** Punhos fechados em linha — toque de respeito ao curtir */
+function LikeFistBumpBurst({ compact = false }: { compact?: boolean }) {
+  const fistPath =
+    'M8 30V22c0-3 2.5-5 5.5-5h1c1.8 0 3 1.2 3 3v5c0 1.8-1.2 3-3 3h-3.5c-2.2 0-3.5-1.5-3.5-3.5';
+  const fingers = 'M17 22v-5M19.5 22v-6M22 22v-5';
+  const thumb = 'M6 28c-2-.5-3-2-3-4';
+
+  return (
+    <div className={`cineclips-fist-bump${compact ? ' cineclips-fist-bump--compact' : ''}`}>
+      <div className="cineclips-fist-bump-glass">
+        <span className="cineclips-fist-bump-shine" aria-hidden />
+        <svg viewBox="0 0 80 44" className="cineclips-fist-bump-svg" aria-hidden>
+          <g className="cineclips-fist-bump-left">
+            <path
+              d={fistPath}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d={fingers} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            <path d={thumb} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          </g>
+          <g className="cineclips-fist-bump-right" transform="translate(80,0) scale(-1,1)">
+            <path
+              d={fistPath}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d={fingers} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            <path d={thumb} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
 }
 
 const BETA_DISMISS_KEY = 'cineclips-beta-dismissed';
@@ -531,7 +573,7 @@ export default function CineClipsPage({
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'info' | 'error' } | null>(
     null
   );
-  const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([]);
+  const [floatingFistBumps, setFloatingFistBumps] = useState<FloatingFistBump[]>([]);
   const [pulsingLikeId, setPulsingLikeId] = useState<string | null>(null);
   const [centerLikeClipId, setCenterLikeClipId] = useState<string | null>(null);
   const [showBetaNotice, setShowBetaNotice] = useState(() => !readBetaDismissed());
@@ -695,10 +737,10 @@ export default function CineClipsPage({
   const handleDoubleTapHeart = (clip: CineClip, x: number, y: number) => {
     playLikeFeedback(clip.id);
     const id = Date.now() + Math.random();
-    setFloatingHearts((prev) => [...prev, { id, x, y }]);
+    setFloatingFistBumps((prev) => [...prev, { id, x, y }]);
     setTimeout(() => {
-      setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
-    }, 1000);
+      setFloatingFistBumps((prev) => prev.filter((h) => h.id !== id));
+    }, 900);
 
     if (!likedIds.has(clip.id)) {
       handleLike(clip);
@@ -799,28 +841,26 @@ export default function CineClipsPage({
                   {centerLikeClipId === clip.id && (
                     <motion.div
                       key={`center-like-${clip.id}`}
-                      initial={{ opacity: 0, scale: 0.55 }}
-                      animate={{ opacity: [0, 1, 0], scale: [0.55, 1.06, 1.18] }}
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: [0, 1, 0], scale: [0.7, 1.05, 1.12] }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.68, ease: 'easeOut' }}
-                      className="cineclips-like-center-burst"
+                      transition={{ duration: 0.72, ease: 'easeOut' }}
+                      className="cineclips-fist-bump-center"
                     >
-                      <span className="cineclips-like-center-burst-glass">
-                        <Heart className="cineclips-like-center-burst-icon" strokeWidth={1.75} fill="currentColor" />
-                      </span>
+                      <LikeFistBumpBurst />
                     </motion.div>
                   )}
-                  {floatingHearts.map((h) => (
+                  {floatingFistBumps.map((h) => (
                     <motion.div
                       key={h.id}
-                      initial={{ opacity: 1, scale: 0.4, y: 0 }}
-                      animate={{ opacity: 0, scale: 1.8, y: -80 }}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: [0, 1, 0], scale: [0.5, 1.05, 1.15] }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                      style={{ left: h.x - 24, top: h.y - 24 }}
+                      transition={{ duration: 0.72, ease: 'easeOut' }}
+                      style={{ left: h.x - 40, top: h.y - 22 }}
                       className="absolute z-40 pointer-events-none"
                     >
-                      <Heart className="cineclips-like-float-icon" strokeWidth={1.75} fill="currentColor" />
+                      <LikeFistBumpBurst compact />
                     </motion.div>
                   ))}
                 </AnimatePresence>
